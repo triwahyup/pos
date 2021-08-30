@@ -20,28 +20,3 @@ $this->params['breadcrumbs'][] = "Error Page";
         Please contact us if you think this is a server error. Thank you.
     </p>
 </div>
-<script>
-function typeEffect(element, speed) {
-	var text = $(element).text();
-	$(element).html("");
-	var i = 0;
-	var timer = setInterval(function() {
-		if (i < text.length) {
-			$(element).append(text.charAt(i));
-			i++;
-		} else {
-			clearInterval(timer);
-		}
-	}, speed);
-}
-
-$( document ).ready(function() {
-	var speed = 75;
-	var delay = $('p').text().length * speed + speed;
-	typeEffect($('p'), speed);
-	setTimeout(function(){
-		$('p').css('display', 'inline-block');
-		typeEffect($('p'), speed);
-	}, delay);
-});
-</script>
