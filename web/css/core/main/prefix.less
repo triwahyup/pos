@@ -1,0 +1,92 @@
+/*
+	* Prefix function for cross browser
+	* 1). Animation [name, duration, iteration-count, direction, delay]
+	* 2). Background Clip
+	* 3). Border Radius
+	* 4). Box Sizing
+	* 5). Box Shadow
+	* 6). Placeholder
+	* 7). Transition
+	* 8). Transform (rotate, scale, translate)
+*/
+
+.animation(@params) {
+	animation: @params;
+	-o-animation: @params;
+	-ms-animation: @params;
+	-webkit-animation: @params;
+	-moz-animation: @params;
+}
+.animationName(@params) {
+	animation-name: @params;
+	-o-animation-name: @params;
+	-ms-animation-name: @params;
+	-webkit-animation-name: @params;
+	-moz-animation-name: @params;
+}
+.animationDuration(@params) {
+	animation-duration: @params;
+	-o-animation-duration: @params;
+	-ms-animation-duration: @params;
+	-webkit-animation-duration: @params;
+	-moz-animation-duration: @params;
+}
+.animationIterationCount(@params) {
+	animation-iteration-count: @params;
+	-o-animation-iteration-count: @params;
+	-ms-animation-iteration-count: @params;
+	-webkit-animation-iteration-count: @params;
+	-moz-animation-iteration-count: @params;
+}
+.animationDirection(@params) {
+	animation-direction: @params;
+	-o-animation-direction: @params;
+	-ms-animation-direction: @params;
+	-webkit-animation-direction: @params;
+	-moz-animation-direction: @params;
+}
+.animationDelay(@params) {
+	animation-delay: @params;
+	-o-animation-delay: @params;
+	-ms-animation-delay: @params;
+	-webkit-animation-delay: @params;
+	-moz-animation-delay: @params;
+}
+.backgroundClip(@params) {
+	background-clip: @params;
+	-webkit-background-clip: @params;
+}
+.borderRadius(@params) {
+  -webkit-border-radius: @params;
+	-moz-border-radius: @params;
+	border-radius: @params;
+}
+.boxSizing(@params) {
+  -moz-box-sizing: @params;
+	-webkit-box-sizing: @params;
+	box-sizing: @params;
+}
+.boxShadow(@params) {
+  -webkit-box-shadow: @params;
+	box-shadow: @params;
+}
+.placeholder(@color) {
+	::-webkit-input-placeholder { color:@color; }
+	::-moz-placeholder { color:@color; }
+	:-ms-input-placeholder { color:@color; }
+	:-moz-placeholder { color:@color; }
+}
+.transition(@params) {
+  -webkit-transition: @params;
+	-moz-transition: @params;
+	-ms-transition: @params;
+	-o-transition: @params;
+	transition: @params;
+}
+.transform(@params) {
+  -moz-transform: @params;
+	-webkit-transform: @params;
+	-o-transform: @params;
+	-ms-transform: @params;
+	transform: @params;
+}

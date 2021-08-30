@@ -1,0 +1,38 @@
+/* Tooltip class */
+.show-tooltip {
+	background-color: @color_main;
+	color: @color_default;
+	display: inline-block;
+	font-size: 14px;
+	height: 30px;
+	line-height: 30px;
+	padding: 0 10px;
+	position: absolute;
+	text-align: center;
+	z-index: 9999;
+	.borderRadius(5px);
+	.boxSizing(border-box);
+	&:before {
+		content: "";
+		left: 20px;
+		position: absolute;
+		.transform(translate(-50%, -50%));
+	}
+	&.arrow-bottom {
+		&:before {
+			border-bottom: 10px solid @color_main;
+			border-left: 10px solid transparent;
+			border-right: 10px solid transparent;
+			top: -5px;
+		}
+	}
+	&.arrow-top {
+		&:before {
+			border-left: 10px solid transparent;
+			border-right: 10px solid transparent;
+			border-top: 10px solid @color_main;
+			bottom: -15px;
+		}
+	}
+}
+/* End tooltip class */

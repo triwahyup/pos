@@ -1,0 +1,86 @@
+/* radio style */
+.radiobox-container {
+	display: inline-block;
+	min-width: 35px;
+	position: relative;
+	&.data-horizontal {
+		display: inline-block;
+	}
+	&.data-vertical {
+		display: block;
+		margin-bottom: 5px;
+	}
+}
+.radiobox-wrapper {
+	display: inline-block;
+	height: 35px;
+	min-width: 200px;
+	position: relative;
+	width: auto;
+	.borderRadius(5px);
+}
+.radiobox-list {
+	background-color: @color_default;
+	border: 1px solid @color_border;
+	cursor: pointer;
+	display: inline-block;
+	height: 20px;
+	position: absolute;
+	top: 50%;
+	width: 20px;
+	.borderRadius(50%);
+	.transform(translate(-50%, -50%));
+	+ label {
+		cursor: pointer;
+		display: block;
+		line-height: 35px;
+		margin-bottom: 0;
+	}
+	&.active {
+		&:before {
+			background-color: @color_border;
+			content: "";
+			height: 12px;
+			left: 50%;
+			position: absolute;
+			top: 50%;
+			width: 12px;
+			.borderRadius(50%);
+			.transform(translate(-50%, -50%));
+		}
+	}
+}
+[data-type="seblak"] {
+	+ .radiobox-wrapper {
+		border: 1px solid @color_border;
+		.radiobox-list {
+			&.data-left {
+				left: 20px;
+			}
+			&.data-right {
+				right: 0;
+			}
+			+ label {
+				&.data-left {
+					margin-left: 40px;
+				}
+				&.data-right {
+					margin-left: 20px;
+				}
+			}
+		}
+	}
+}
+[data-type="batagor"] {
+	+ .radiobox-wrapper {
+		background-color: transparent;
+		min-width: 0;
+		.radiobox-list {
+			border: 1px solid @color_border;
+		}
+		label {
+			margin-left: 15px;
+		}
+	}
+}
+/* End radio style */

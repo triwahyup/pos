@@ -1,0 +1,174 @@
+/* Checkbox style */
+.checkbox-container {
+	display: inline-block;
+	position: relative;
+	&.data-horizontal {
+		display: inline-block;
+	}
+	&.data-vertical {
+		display: block;
+		margin-bottom: 5px;
+	}
+}
+.checkbox-wrapper {
+	display: inline-block;
+	height: 35px;
+	min-width: 200px;
+	position: relative;
+	width: auto;
+	.borderRadius(5px);
+}
+.checklist-container {
+	border: 1px solid @color_border;
+	cursor: pointer;
+	display: inline-block;
+	height: 20px;
+	position: absolute;
+	top: 50%;
+	.transform(translate(-50%, -50%));
+	+ label {
+		cursor: pointer;
+		display: block;
+		line-height: 35px;
+		margin-bottom: 0;
+		&.disabled {
+			cursor: not-allowed;
+		}
+	}
+	.icon-ok {
+		left: 50%;
+		top: 50%;
+	}
+	.switch {
+		cursor: pointer;
+		display: block;
+		height: 23px;
+		position: absolute;
+		top: 50%;
+		width: 23px;
+		.borderRadius(50%);
+		.transform(translateY(-50%));
+		&.switch-off {
+			background-color: @color_default;
+			background: -webkit-linear-gradient(top, rgba(243,243,243,0), rgba(229,229,229,0.6));
+			background: -o-linear-gradient(bottom, rgba(243,243,243,0), rgba(229,229,229,0.6));
+			background: -moz-linear-gradient(bottom, rgba(243,243,243,0), rgba(229,229,229,0.6));
+			background: linear-gradient(to bottom, rgba(243,243,243,0), rgba(229,229,229,0.6));
+			left: 1px;
+			.boxShadow(inset 0 1px 1px 0 @color_default);
+		}
+		&.switch-on {
+			background-color: @color_main;
+			background: -webkit-linear-gradient(top, rgba(243,243,243,0), rgba(229,229,229,0.6));
+			background: -o-linear-gradient(bottom, rgba(243,243,243,0), rgba(229,229,229,0.6));
+			background: -moz-linear-gradient(bottom, rgba(243,243,243,0), rgba(229,229,229,0.6));
+			background: linear-gradient(to bottom, rgba(243,243,243,0), rgba(229,229,229,0.6));
+			right: 0;
+			.boxShadow(inset 0px 0 5px 2px #e6e9ea);
+		}
+	}
+	&.disabled {
+		cursor: not-allowed;
+	}
+}
+[data-type="burger"] {
+	+ .checkbox-wrapper {
+		border: 1px solid @color_border;
+		.checklist-container {
+			width: 30px;
+			.borderRadius(5px);
+			&.data-left {
+				left: 30px;
+			}
+			&.data-right {
+				right: 0;
+			}
+			+ label {
+				&.data-left {
+					margin-left: 60px;
+				}
+				&.data-right {
+					margin-left: 20px;
+				}
+			}
+		}
+	}
+}
+[data-type="pizza"] {
+	+ .checkbox-wrapper {
+		min-width: 0;
+		position: relative;
+		.checklist-container {
+			border: 1px solid @color_border;
+			height: 16px;
+			left: 10px;
+			position: absolute;
+			width: 16px;
+			.borderRadius(3px);
+			.icon-ok {
+				left: 50%;
+				top: 5px;
+			}
+			~ label {
+				color: @color_dark;
+				display: block;
+				margin-left: 24px;
+				margin-top: 2px;
+			}
+		}
+	}
+}
+[data-type="kebab"] {
+	+ .checkbox-wrapper {
+		background-color: transparent;
+		min-width: 60px;
+		.checklist-container {
+			background-color: @color_main;
+			border: none;
+			height: 30px;
+			left: 30px;
+			width: 60px;
+			.borderRadius(50px);
+			label {
+				color: @color_main;
+				font-size: 12px;
+				right: 5px;
+				top: 8px;
+				position: absolute;
+			}
+			.switch {
+				height: 30px;
+				width: 30px;
+			}
+			&.checklist-off {
+				background-color: @color_default;
+				background: -webkit-linear-gradient(top, @color_default, rgba(210,210,210,0.6));
+				background: -o-linear-gradient(bottom, @color_default, rgba(210,210,210,0.6));
+				background: -moz-linear-gradient(bottom, @color_default, rgba(210,210,210,0.6));
+				background: linear-gradient(to bottom, @color_default, rgba(210,210,210,0.6));
+				.boxShadow(inset 0px 0px 10px 0px #c7e2e2);
+				.switch-off {
+					background: -webkit-linear-gradient(top, rgb(246, 249, 248), rgba(218, 218, 218, 0.99));
+					background: -o-linear-gradient(bottom, rgb(246, 249, 248), rgba(218, 218, 218, 0.99));
+					background: -moz-linear-gradient(bottom, rgb(246, 249, 248), rgba(218, 218, 218, 0.99));
+					background: linear-gradient(to bottom, rgb(246, 249, 248), rgba(218, 218, 218, 0.99));
+				}
+			}
+			&.checklist-on {
+				label {
+					color: @color_default;
+					left: 10px;
+				}
+				.switch-on {
+					background-color: @color_default;
+					background: -webkit-linear-gradient(top, rgb(243, 243, 243), rgb(229, 229, 229));
+					background: -o-linear-gradient(bottom, rgb(243, 243, 243), rgb(229, 229, 229));
+					background: -moz-linear-gradient(bottom, rgb(243, 243, 243), rgb(229, 229, 229));
+					background: linear-gradient(to bottom, rgb(243, 243, 243), rgb(229, 229, 229));
+					.boxShadow(inset 0 1px 1px 0 @color_default);
+				}
+			}
+		}
+	}
+}
+/* End checkbox style */

@@ -1,0 +1,72 @@
+/* notification class */
+.notification {
+	background-color: @color_default;
+	min-width: 80px;
+	left: 50%;
+	padding: 5px 50px 5px 30px;
+	position: fixed;
+	text-align: center;
+	top: 5px;
+	width: auto;
+	z-index: 9999;
+	.borderRadius(50px);
+	.transform(translateX(-50%));
+	.fontello { height: 20px; left: 18px; width: 20px; }
+	span { margin-left: 15px; }
+	a {
+		display: inline-block;
+		opacity: 1;
+		position: absolute;
+		right: 0;
+		top: 0;
+		width: 30px;
+		.borderRadius(0 50px 50px 0);
+		.fontello {
+			font-size: 10px;
+			left: 11px;
+			height: 11px;
+			width: 11px;
+		}
+		&:hover {
+			opacity: 1;
+		}
+	}
+	&.success {
+		.fontello { color: #12ab00; }
+		span { color: #12ab00; }
+		a { .fontello { color: #12ab00; }}
+	}
+	&.danger {
+		.fontello { color: #a70b00; }
+		span { color: #a70b00; }
+		a { .fontello { color: #a70b00; }}
+	}
+	&.info {
+		.fontello { color: @color_main; }
+		span { color: @color_main; }
+		a { .fontello { color: @color_main; }}
+	}
+	&.warning {
+		.fontello { color: #daa100; }
+		span { color: #daa100; }
+		a { .fontello { color: #daa100; }}
+	}
+}
+/* End notification class */
+
+/* Notification Inbox */
+.notification-inbox {
+	background-color: red;
+	color: @color_default;
+	display: block;
+	font-size: 8px;
+	height: 15px;
+	left: 0;
+	line-height: 15px;
+	position: absolute;
+	text-align: center;
+	top: 20px;
+	width: 15px;
+	.borderRadius(50%);
+}
+/* End Notification Inbox */

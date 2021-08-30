@@ -1,0 +1,162 @@
+/* popup class */
+.popup {
+	display: inline-block;
+	height: 100%;
+	left: 0;
+	position: fixed;
+	top: 0;
+	width: 100%;
+	z-index: 9999;
+}
+.popup-wrapper {
+	background-color: #000;
+	height: 100%;
+	opacity: 0.5;
+	width: 100%;
+}
+.popup-mini {
+	cursor: move;
+	display: inline-block;
+	background-color: @color_default;
+	height: auto;
+	left: 50%;
+	min-height: 160px;
+	position: absolute;
+	top: 50%;
+	width: 230px;
+	.backgroundClip(padding-box);
+	.borderRadius(5px);
+	.boxShadow(0 6px 12px rgba(0, 0, 0, .175));
+	.transform(translate(-50%, -50%));
+}
+.popup-header {
+	background-color: @color_default;
+	border-bottom: 1px solid @color_border;
+	display: inline-block;
+	height: 40px;
+	padding: 0 20px;
+	position: relative;
+	width: 100%;
+	.borderRadius(5px 5px 0 0);
+	h5 {
+		color: @color_gray;
+		line-height: 40px;
+		margin: 0;
+	}
+}
+.popup-body {
+	max-height: 500px;
+	overflow: hidden;
+	overflow-y: scroll;
+	padding: 20px;
+	&::-webkit-scrollbar {
+		width: 10px;
+	}
+	&::-webkit-scrollbar-thumb {
+		background-color: darkgrey;
+		outline: 1px solid slategrey;
+	}
+	&:before {
+		background-color: @color_default;
+		bottom: -5px;
+		content: "";
+		display: inline-block;
+		height: 20px;
+		left: 0;
+		position: absolute;
+		width: 100%;
+		z-index: 1;
+		.borderRadius(0 0 8px 8px);
+	}
+}
+.popup-remove {
+	background-color: @color_default;
+	height: 16px;
+	right: 15px;
+	top: 50%;
+	position: absolute;
+	width: 16px;
+	.borderRadius(50%);
+	.transform(translateY(-50%));
+	.fontello {
+		font-size: 9px;
+		left: 50%;
+		position: absolute;
+		top: 50%;
+		.transform(translate(-50%, -50%));
+	}
+}
+.popup-btn {
+	background-color: @color_default;
+	border: 1px solid @color_gray;
+	display: block;
+	float: right;
+	font-size: 16px;
+	margin-bottom: 20px;
+	margin-right: 20px;
+	padding: 3px 10px;
+	text-align: center;
+	text-decoration: none;
+	.borderRadius(3px);
+	&:hover {
+		text-decoration: none;
+	}
+	span {
+		color: @color_gray;
+		font-size: 12px;
+	}
+	&.ml {
+		margin-right: 5px;
+	}
+	&:hover {
+		background-color: @color_main;
+		border-color: @color_main;
+		span {
+			color: @color_default;
+		}
+	}
+}
+[data-popup] {
+		display: none;
+}
+.popup-form {
+	background-color: @color_default;
+	display: inline-block;
+	height: auto;
+	left: 50%;
+	min-height: 100px;
+	min-width: 500px;
+	position: absolute;
+	top: 40px;
+	width: 500px;
+	.borderRadius(5px);
+	.transform(translateX(-50%));
+	.popup-header {
+		.popup-remove {
+			border: 1px solid @color_border;
+			height: 20px;
+			right: -5px;
+			top: 0;
+			width: 20px;
+		}
+	}
+	.popup-body {
+		background-color: @color_default;
+		.borderRadius(5px);
+	}
+	fieldset {
+		border: 1px solid @color_border;
+		padding: 15px 20px;
+	}
+	legend {
+		border-bottom: 0;
+		font-size: 14px;
+		margin-bottom: 0;
+		padding: 0 10px 0 10px;
+		width: auto;
+	}
+	&.drag {
+		cursor: move;
+	}
+}
+/* End popup class */

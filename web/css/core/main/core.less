@@ -1,0 +1,34 @@
+@import url('../widget/animation.less');
+@import url('../widget/backtotop.less');
+@import url('../widget/checkbox.less');
+@import url('../widget/datepicker.less');
+@import url('../widget/dropdown.less');
+@import url('../widget/input.less');
+@import url('../widget/notification.less');
+@import url('../widget/radiobox.less');
+@import url('../widget/selecbox.less');
+@import url('../widget/popup.less');
+@import url('../widget/table.less');
+@import url('../widget/tooltip.less');
+@import url('prefix.less');
+
+@color_border: #a9a9a9;
+@color_dark: #000;
+@color_darkblue: #3278b5;
+@color_default: #fff;
+@color_gray: #656565;
+@color_main: #108ead;
+
+/* fontello */
+.fontello {
+	position: absolute;
+	top: 50%;
+	.transform(translate(-50%, -50%));
+	/* set color */
+	&.white { color: @color_default; }
+	&.gray { color: @color_gray; }
+	&.dark-blue { color: @color_darkblue; }
+	&.main-color { color: @color_main; }
+	/* set font size */
+}
+/* End fontello class */

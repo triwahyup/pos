@@ -1,0 +1,63 @@
+/* Input class */
+.input-container {
+	display: inline-block;
+	position: relative;
+}
+[data-name="iconbox"] {
+	&[data-align="left"] {
+		padding-left: 45px;
+		padding-right: 20px;
+	}
+	&[data-align="right"] {
+		padding-left: 10px;
+		padding-right: 45px;
+	}
+	+ .box {
+		background-color: #b3b3b3;
+		display: inline-block;
+		position: absolute;
+		top: 0;
+		.fontello {
+			color: @color_default;
+			left: 50%;
+		}
+		&.data-left {
+			left: 0;
+		}
+		&.data-right{
+			right: 0;
+		}
+	}
+}
+[data-name="number"] {
+	padding-left: 10px;
+	padding-right: 25px;
+	text-align: right;
+	+ .arrow-btn {
+		background-color: #b3b3b3;
+		display: inline-block;
+		position: absolute;
+		right: 0;
+		top: 0;
+		.arrow {
+			background-color: transparent;
+			cursor: pointer;
+			display: inline-block;
+			position: absolute;
+			.fontello {
+				color: @color_default;
+				left: 50%;
+			}
+			&.arrow-up {
+				top: 0;
+			}
+			&.arrow-down {
+				bottom: 0;
+			}
+			&:nth-last-child(1) {
+				border-top: 1px solid @color_default;
+			}
+		}
+	}
+}
+/* End input class */

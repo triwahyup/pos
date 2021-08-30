@@ -1,0 +1,42 @@
+/* Table Grid */
+.table-fixed {
+	table-layout: fixed;
+	width: auto;
+	thead, tbody {
+		.boxShadow(0 1px 6px rgba(0, 0, 0, .175));
+		tr {
+			th, td {
+				border-bottom-width: 0;
+			}
+		}
+	}
+	thead {
+		tr {
+			display: block;
+			position: relative;
+		}
+	}
+	tbody {
+		display: block;
+		height: auto;
+		min-height: 40px;
+		max-height: 390px;
+		overflow: hidden;
+		width: 100%;
+		tr {
+			font-size: 12px;
+			td {
+				input[type="text"], .drop-toggle, .dropdown-reset {
+					height: 28px;
+				}
+				.dropdown-value {
+					min-height: 28px;
+				}
+			}
+		}
+	}
+	td, th {
+		min-width: 40px;
+	}
+}
+/* End table grid */

@@ -1,0 +1,105 @@
+/* Datepicker function */
+.datepicker {
+	padding: 10px 20px;
+	.datepicker-days, .datepicker-months, .datepicker-years {
+		.table-condensed {
+			thead {
+				th {
+					&:not(.dow) {
+						cursor: pointer;
+						text-align: center;
+					}
+				}
+			}
+		}
+	}
+	.datepicker-days {
+		.table-condensed {
+			thead {
+				th {
+					&:not(.dow) {
+						cursor: pointer;
+						text-align: center;
+					}
+				}
+			}
+			tbody {
+				td {
+					&.day:not(.old):not(.new) {
+						cursor: pointer;
+						text-align: center;
+						&:hover {
+							background-color: @color_gray;
+							color: @color_default;
+							.borderRadius(5px);
+						}
+					}
+					&.active {
+						background-color: @color_main;
+						color: @color_default;
+						.borderRadius(5px);
+					}
+					&.old, &.new {
+						color: #f1f1f1;
+					}
+					&.today {
+						background-color: #5aa8d4;
+						color: @color_default;
+					}
+				}
+			}
+		}
+	}
+	.datepicker-months {
+		text-align: center;
+		width: 210px;
+		tbody {
+			td {
+				span {
+					&.month {
+						cursor: pointer;
+						display: inline-block;
+						/*margin: 2px;
+						padding: 10px 15px;*/
+						&:hover {
+							background-color: @color_gray;
+							color: @color_default;
+							.borderRadius(5px);
+						}
+						&.active {
+							background-color: @color_main;
+							color: @color_default;
+							.borderRadius(5px);
+						}
+					}
+				}
+			}
+		}
+	}
+	.datepicker-years {
+		text-align: center;
+		width: 210px;
+		tbody {
+			td {
+				span {
+					&.year {
+						cursor: pointer;
+						display: inline-block;
+						/*margin: 2px;
+						padding: 10px 15px;*/
+						&:hover {
+							background-color: @color_gray;
+							color: @color_default;
+							.borderRadius(5px);
+						}
+						&.active {
+							background-color: @color_main;
+							color: @color_default;
+							.borderRadius(5px);
+						}
+					}
+				}
+			}
+		}
+	}
+}
