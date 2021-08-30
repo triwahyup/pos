@@ -31,6 +31,9 @@ $config = [
             'cookieValidationKey' => 'N3dHi6Jkcp3Xsk71ZM20hcp-vTKLIMwL',
             'enableCsrfValidation' => false,
         ],
+        'authManager' => [
+            'class' => 'yii\rbac\DbManager',
+        ],
         'cache' => [
             'class' => 'yii\caching\FileCache',
         ],

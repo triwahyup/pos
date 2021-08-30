@@ -2,10 +2,16 @@
 
 namespace app\modules\pengaturan\controllers;
 
+use app\models\AuthItem;
+use app\models\AuthItemChild;
+use app\models\Logs;
+use app\models\User;
+use app\modules\master\models\MasterCode;
 use app\modules\pengaturan\models\PengaturanMenu;
 use app\modules\pengaturan\models\PengaturanMenuSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
+use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 
 /**
@@ -21,6 +27,31 @@ class MenuController extends Controller
         return array_merge(
             parent::behaviors(),
             [
+                'access' => [
+                    'class' => AccessControl::className(),
+				    'rules' => [
+                        [
+                            'actions' => ['create'],
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('menu')),
+                            'roles' => ['@'],
+                        ],
+                        [
+                            'actions' => ['index', 'view', 'list'],
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('menu')),
+                            'roles' => ['@'],
+                        ], 
+                        [
+                            'actions' => ['update'],
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('menu')),
+                            'roles' => ['@'],
+                        ], 
+                        [
+                            'actions' => ['delete'],
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('menu')),
+                            'roles' => ['@'],
+                        ],
+                    ],
+                ],
                 'verbs' => [
                     'class' => VerbFilter::className(),
                     'actions' => [
@@ -66,13 +97,19 @@ class MenuController extends Controller
      */
     public function actionCreate()
     {
+        $typeMenu = MasterCode::find()
+            ->select(['name'])
+            ->where(['type'=>'MENU', 'status'=>1])
+            ->indexBy('code')
+            ->column();
+       
+        $message = '';
         $model = new PengaturanMenu();
         if ($this->request->isPost) {
             if ($model->load($this->request->post())) {
                 $connection = \Yii::$app->db;
 			    $transaction = $connection->beginTransaction();
                 try {
-                    $model->attributes = $model->getAttributes();
                     $model->id = $model->newcode();
                     $model->slug = strtolower(str_replace(' ','-', $model->name));
                     $model->level = 1;
@@ -88,23 +125,40 @@ class MenuController extends Controller
                     if(empty($model->link)){
                         $model->link = '#';
                     }
+
                     if($model->save()){
+                        $auth = \Yii::$app->authManager;
+                        $author = $auth->createRole($model->slug);
+					    $auth->add($author);
+
                         $transaction->commit();
-                        \Yii::$app->session->setFlash('success', 'SUCCESS CREATE MENU '.$model->name);
+                        $message = 'CREATE MENU: '.$model->name.', SLUG: '.$model->slug;
+                        $logs=	[
+                            'type' => Logs::TYPE_USER,
+                            'description' => $message,
+                        ];
+                        Logs::addLog($logs);
+                        
+                        \Yii::$app->session->setFlash('success', $message);
                         return $this->redirect(['view', 'id' => $model->id]);
                     }else{
-                        $message = (count($model->errors) > 0) ? 'ERROR CREATE MENU' : '';
-                        foreach($model->errors as $error=>$value){
-                            $message .= strtoupper($error).": ".$value[0].', ';
+                        $message = (count($model->errors) > 0) ? 'ERROR CREATE MENU : ' : '';
+                        foreach($model->errors as $error => $value){
+                            $message .= $value[0].', ';
                         }
-                        $message = substr($message,0,-2);
-                        \Yii::$app->session->setFlash('error', $message);
+                        $message = substr($message, 0, -2);
+                        $transaction->rollBack();
                     }
-                }catch (\Exception $e) {
+                }catch(\Exception $e) {
                     $message = $e->getMessage();
-                    \Yii::$app->session->setFlash('error', $message);
 				    $transaction->rollBack();
                 }
+                $logs=	[
+                    'type' => Logs::TYPE_USER,
+                    'description' => $message,
+                ];
+                Logs::addLog($logs);
+                \Yii::$app->session->setFlash('error', $message);
             }
         } else {
             $model->loadDefaultValues();
@@ -112,6 +166,7 @@ class MenuController extends Controller
 
         return $this->render('create', [
             'model' => $model,
+            'typeMenu' => $typeMenu,
         ]);
     }
 
@@ -124,47 +179,76 @@ class MenuController extends Controller
      */
     public function actionUpdate($id)
     {
+        $typeMenu = MasterCode::find()
+            ->select(['name'])
+            ->where(['type'=>'MENU', 'status'=>1])
+            ->indexBy('code')
+            ->column();
+
+        $message = '';
         $model = $this->findModel($id);
         if ($this->request->isPost && $model->load($this->request->post())) {
             $connection = \Yii::$app->db;
             $transaction = $connection->beginTransaction();
             try {
-                $model->attributes = $model->getAttributes();
-                $model->slug = strtolower(str_replace(' ','-', $model->name));
-                $model->level = 1;
-                $model->parent_id = NULL;
-                if(!empty($model->parent_1)){
-                    $model->level = 2;
-                    $model->parent_id = $model->parent_1;
-                    if(!empty($model->parent_2)){
-                        $model->level = 3;
-                        $model->parent_id = $model->parent_2;
+                $authItem = AuthItem::findOne(['name'=>$model->slug]);
+                if(isset($authItem)){
+                    if($authItem->delete()){
+                        $model->slug = strtolower(str_replace(' ','-', $model->name));
+                        $model->level = 1;
+                        $model->parent_id = NULL;
+                        if(!empty($model->parent_1)){
+                            $model->level = 2;
+                            $model->parent_id = $model->parent_1;
+                            if(!empty($model->parent_2)){
+                                $model->level = 3;
+                                $model->parent_id = $model->parent_2;
+                            }
+                        }
+                        if(empty($model->link)){
+                            $model->link = '#';
+                        }
+
+                        if($model->save()){
+                            $auth = \Yii::$app->authManager;
+                            $author = $auth->createRole($model->slug);
+                            $auth->add($author);
+                            
+                            $transaction->commit();
+                            $message = 'UPDATE MENU: '.$model->name.', SLUG: '.$model->slug;
+                            $logs=	[
+                                'type' => Logs::TYPE_USER,
+                                'description' => $message,
+                            ];
+                            Logs::addLog($logs);
+                            
+                            \Yii::$app->session->setFlash('success', $message);
+                            return $this->redirect(['view', 'id' => $model->id]);
+                        }else{
+                            $message = (count($model->errors) > 0) ? 'ERROR UPDATE MENU : ' : '';
+                            foreach($model->errors as $error => $value){
+                                $message .= $value[0].', ';
+                            }
+                            $message = substr($message, 0, -2);
+                            $transaction->rollBack();
+                        }
                     }
                 }
-                if(empty($model->link)){
-                    $model->link = '#';
-                }
-                if($model->save()){
-                    $transaction->commit();
-                    \Yii::$app->session->setFlash('success', 'SUCCESS UPDATE MENU '.$model->name);
-                    return $this->redirect(['view', 'id' => $model->id]);
-                }else{
-                    $message = (count($model->errors) > 0) ? 'ERROR UPDATE MENU' : '';
-                    foreach($model->errors as $error=>$value){
-                        $message .= strtoupper($error).": ".$value[0].', ';
-                    }
-                    $message = substr($message,0,-2);
-                    \Yii::$app->session->setFlash('error', $message);
-                }
-            }catch (\Exception $e) {
+            }catch(\Exception $e) {
                 $message = $e->getMessage();
-                \Yii::$app->session->setFlash('error', $message);
                 $transaction->rollBack();
             }
+            $logs=	[
+                'type' => Logs::TYPE_USER,
+                'description' => $message,
+            ];
+            Logs::addLog($logs);
+            \Yii::$app->session->setFlash('error', $message);
         }
 
         return $this->render('update', [
             'model' => $model,
+            'typeMenu' => $typeMenu,
         ]);
     }
 
@@ -177,13 +261,17 @@ class MenuController extends Controller
      */
     public function actionDelete($id)
     {
+        $message = '';
         $model = $this->findModel($id);
         $connection = \Yii::$app->db;
         $transaction = $connection->beginTransaction();
         try {
+            AuthItemChild::deleteAll('parent=:parent OR child=:child', [':parent'=>$model->slug, ':child'=>$model->slug]);
+			AuthItem::deleteAll('name=:name', [':name'=>$model->slug]);
             if($model->delete()){
+                $message = 'DELETE MENU: '.$model->name.', slug: '.$model->slug;
                 $transaction->commit();
-                \Yii::$app->session->setFlash('success', 'SUCCESS DELETE MENU '.$model->name);
+                \Yii::$app->session->setFlash('success', $message);
             }else{
                 $message = (count($model->errors) > 0) ? 'ERROR DELETE MENU' : '';
                 foreach($model->errors as $error=>$value){
@@ -197,6 +285,11 @@ class MenuController extends Controller
             \Yii::$app->session->setFlash('error', $message);
             $transaction->rollBack();
         }
+        $logs = [
+			'type' => Logs::TYPE_USER,
+			'description' => $message,
+		];
+		Logs::addLog($logs);
         return $this->redirect(['index']);
     }
 
@@ -216,7 +309,7 @@ class MenuController extends Controller
         throw new NotFoundHttpException('The requested page does not exist.');
     }
 
-    public function actionParentMenu()
+    public function actionList()
     {
         if(!empty($_POST['parent'])){
             $model = PengaturanMenu::find()

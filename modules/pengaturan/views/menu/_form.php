@@ -14,17 +14,14 @@ use kartik\widgets\Select2;
     <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
         <div class="col-lg-4 col-md-8 col-sm-12 col-xs-12 padding-left-0">
             <div class="col-lg-9 col-md-9 col-xs-12 padding-left-0">
-                <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
+                <?= $form->field($model, 'name')->textInput(['maxlength' => true, 'not-uppercase' => true]) ?>
             </div>
             <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
-                <?= $form->field($model, 'link')->textInput(['maxlength' => true]) ?>
+                <?= $form->field($model, 'link')->textInput(['maxlength' => true, 'not-uppercase' => true]) ?>
             </div>
             <div class="col-lg-9 col-md-9 col-xs-12 padding-left-0">
                 <?= $form->field($model, 'position')->widget(Select2::classname(), [
-                    'data' => [
-                        1 => 'Menu Navbar Top',
-                        2 => 'Menu Navbar Left',
-                    ],
+                    'data' => $typeMenu,
                     'options' => ['placeholder' => 'Position'],
                     'pluginEvents' => [
                         'change' => 'function() {
@@ -58,7 +55,7 @@ use kartik\widgets\Select2;
     function listParentMenu(position, level=1, parent=null)
     {
         $.ajax({
-            url: "<?=Url::to(['menu/parent-menu']) ?>",
+            url: "<?=Url::to(['menu/list']) ?>",
             type: "POST",
             data: {
                 position: position,

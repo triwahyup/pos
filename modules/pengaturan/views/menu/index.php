@@ -23,13 +23,18 @@ $this->params['breadcrumbs'][] = $this->title;
             'name',
             'link',
             [
-                'attribute' => 'type',
+                'attribute' => 'position',
                 'label' => 'Position',
                 'value' => function ($model, $key, $index) {
                     return $model->position();
                 }
             ],
-            'parent_id',
+            [
+                'attribute' => 'parent_id',
+                'value' => function ($model, $key, $index) {
+                    return (isset($model->parent)) ? $model->parent->name : '-';
+                }
+            ],
             [
                 'attribute' => 'level',
                 'contentOptions' => [

@@ -13,5 +13,6 @@ $this->params['breadcrumbs'][] = 'Update';
 <div class="menu-update">
     <?= $this->render('_form', [
         'model' => $model,
+        'typeMenu' => $typeMenu,
     ]) ?>
 </div>
