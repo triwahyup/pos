@@ -8,7 +8,7 @@ AppAsset::register($this);
 ?>
 <?php $this->beginPage() ?>
     <!DOCTYPE html>
-    <html lang="<?= Yii::$app->language ?>" class="h-100">
+    <html lang="<?= Yii::$app->language ?>">
         <head>
             <meta charset="<?= Yii::$app->charset ?>">
             <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -18,35 +18,33 @@ AppAsset::register($this);
             <link rel="shortcut icon" href="<?= \Yii::$app->request->baseUrl ?>/favicon.ico" type="image/x-icon" />
             <?php $this->head() ?>
         </head>
-        <body class="d-flex flex-column h-100">
+        <body>
             <?php $this->beginBody() ?>
                 <div class="wrap">
                     <div class="navbar">
                         <div id="navbar_top" class="navbar-top"></div>
-                        <div id="navbar_left_dekstop" class="navbar-left navbar-collapse"  data-slide="close"></div>
+                        <div id="navbar_left_dekstop" class="navbar-left navbar-collapse"></div>
                         <div id="navbar_left_mobile" class="navbar-left navbar-mobile"></div>
                     </div>
-                    <main role="main" class="flex-shrink-0">
-                        <div class="container">
-                            <?= Breadcrumbs::widget([
-                                'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
-                            ]) ?>
-                            <?= Alert::widget() ?>
-                        
-                            <div class="formbox-container">
-                                <div class="formbox-header">
-                                    <h5><?= $this->title ?></h5>
-                                </div>
-                                <div class="formbox-body">
-                                    <div id="render_content"><?= $content ?></div>
-                                </div>
+                    <div class="container">
+                        <?= Breadcrumbs::widget([
+                            'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
+                        ]) ?>
+                        <?= Alert::widget() ?>
+                    
+                        <div class="formbox-container">
+                            <div class="formbox-header">
+                                <h5><?= $this->title ?></h5>
                             </div>
-                            <div class="content-cannot-access">
-                                <p class="text-danger">Can not access application under 320px. Please update your screen.</p>
+                            <div class="formbox-body">
+                                <div id="render_content"><?= $content ?></div>
                             </div>
                         </div>
-                    </main>
+                    </div>
                 </div>
+                <!-- can't access under 320px -->
+                <div class="content-cannot-access"></div>
+                <!-- /can't access under 320px -->
             <?php $this->endBody() ?>
         </body>
     </html>
@@ -55,13 +53,26 @@ AppAsset::register($this);
 <script>
 function loadNavbarTop()
 {
-    var urlScript = "<?= Url::to('js/site.js') ?>";
     $.ajax({
         url: '<?= Url::to(['/site/navbar-top']) ?>',
         type: "POST",
         success: function(data) {
             var o = $.parseJSON(data);
             $("#navbar_top").html(o.data);
+        },
+    });
+}
+
+function loadNavbarLeft()
+{
+    var urlScript = "<?= Url::to('js/site.js') ?>";
+    $.ajax({
+        url: '<?= Url::to(['/site/navbar-left']) ?>',
+        type: "POST",
+        success: function(data) {
+            var o = $.parseJSON(data);
+            $("#navbar_left_dekstop").html(o.data);
+            $("#navbar_left_mobile").html(o.data);
         },
         complete: function(){
             $.getScript( urlScript )
@@ -71,19 +82,6 @@ function loadNavbarTop()
             .fail(function(xhr, message, exception){
                 console.log("Error load site.min.js: "+ exception);
             });
-        }
-    });
-}
-
-function loadNavbarLeft()
-{
-    $.ajax({
-        url: '<?= Url::to(['/site/navbar-left']) ?>',
-        type: "POST",
-        success: function(data) {
-            var o = $.parseJSON(data);
-            $("#navbar_left_dekstop").html(o.data);
-            $("#navbar_left_mobile").html(o.data);
         }
     });
 }

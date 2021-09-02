@@ -14,10 +14,10 @@ use kartik\widgets\Select2;
     <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
         <div class="col-lg-4 col-md-8 col-sm-12 col-xs-12 padding-left-0">
             <div class="col-lg-9 col-md-9 col-xs-12 padding-left-0">
-                <?= $form->field($model, 'name')->textInput(['maxlength' => true, 'not-uppercase' => true]) ?>
+                <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
             </div>
             <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
-                <?= $form->field($model, 'link')->textInput(['maxlength' => true, 'not-uppercase' => true]) ?>
+                <?= $form->field($model, 'link')->textInput(['maxlength' => true]) ?>
             </div>
             <div class="col-lg-9 col-md-9 col-xs-12 padding-left-0">
                 <?= $form->field($model, 'position')->widget(Select2::classname(), [
@@ -43,8 +43,6 @@ use kartik\widgets\Select2;
         <div class="hidden">
             <?= $form->field($model, 'id')->textInput(['maxlength' => true]) ?>
         </div>
-    </div>
-    <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
     </div>
     <div class="text-right">
         <?= Html::submitButton('<i class="fontello icon-floppy"></i><span>Save</span>', ['class' => 'btn btn-success']) ?>

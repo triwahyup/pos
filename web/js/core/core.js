@@ -485,7 +485,7 @@ var checker = {
 		/* init number only field */
 		checker.numberOnly();
 		/* force input text with uppercase */
-		checker.upperText();
+		// checker.upperText();
 	},
 	// validasi email format
 	email: function(e) {

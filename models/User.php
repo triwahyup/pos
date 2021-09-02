@@ -25,6 +25,7 @@ use Yii;
 class User extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
 {
     public $password;
+    
     /**
      * {@inheritdoc}
      */
@@ -75,6 +76,7 @@ class User extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
             'updated_at' => 'Updated At',
             'last_login_at' => 'Last Login At',
             'status' => 'Status',
+            'password' => 'Password',
         ];
     }
 
@@ -138,7 +140,6 @@ class User extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
      */
     public function validatePassword($password)
     {
-        // return $this->password === $password;
         return \Yii::$app->security->validatePassword($password, $this->password_hash);
     }
 
@@ -153,6 +154,20 @@ class User extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
 
     public function validateBlocked(){
         return ($this->blocked_at) ? true : false;
+    }
+
+    public function beforeSave($insert){
+        if ($insert) {
+            $this->setAttribute('auth_key', \Yii::$app->security->generateRandomString());
+            if (\Yii::$app instanceof WebApplication) {
+                $this->setAttribute('registration_ip', \Yii::$app->request->userIP);
+            }
+        }
+        if(!empty($this->password)){
+            $this->setAttribute('password_hash', Yii::$app->security->generatePasswordHash($this->password));
+        }
+        $this->setAttribute('updated_at', time());
+        return parent::beforeSave($insert);
     }
 
     public function getProfile(){

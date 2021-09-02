@@ -1,12 +1,12 @@
 <?php
-
 namespace app\modules\pengaturan\controllers;
 
+use app\commands\Helper;
 use app\models\AuthItem;
 use app\models\AuthItemChild;
 use app\models\Logs;
 use app\models\User;
-use app\modules\master\models\MasterCode;
+use app\modules\master\models\MasterKode;
 use app\modules\pengaturan\models\PengaturanMenu;
 use app\modules\pengaturan\models\PengaturanMenuSearch;
 use yii\web\Controller;
@@ -97,9 +97,9 @@ class MenuController extends Controller
      */
     public function actionCreate()
     {
-        $typeMenu = MasterCode::find()
+        $typeMenu = MasterKode::find()
             ->select(['name'])
-            ->where(['type'=>'MENU', 'status'=>1])
+            ->where(['type'=>Helper::TYPE_MENU, 'status'=>1])
             ->indexBy('code')
             ->column();
        
@@ -133,7 +133,7 @@ class MenuController extends Controller
 
                         $transaction->commit();
                         $message = 'CREATE MENU: '.$model->name.', SLUG: '.$model->slug;
-                        $logs=	[
+                        $logs =	[
                             'type' => Logs::TYPE_USER,
                             'description' => $message,
                         ];
@@ -153,7 +153,7 @@ class MenuController extends Controller
                     $message = $e->getMessage();
 				    $transaction->rollBack();
                 }
-                $logs=	[
+                $logs = [
                     'type' => Logs::TYPE_USER,
                     'description' => $message,
                 ];
@@ -179,9 +179,9 @@ class MenuController extends Controller
      */
     public function actionUpdate($id)
     {
-        $typeMenu = MasterCode::find()
+        $typeMenu = MasterKode::find()
             ->select(['name'])
-            ->where(['type'=>'MENU', 'status'=>1])
+            ->where(['type'=>Helper::TYPE_MENU, 'status'=>1])
             ->indexBy('code')
             ->column();
 
@@ -216,7 +216,7 @@ class MenuController extends Controller
                             
                             $transaction->commit();
                             $message = 'UPDATE MENU: '.$model->name.', SLUG: '.$model->slug;
-                            $logs=	[
+                            $logs =	[
                                 'type' => Logs::TYPE_USER,
                                 'description' => $message,
                             ];
@@ -238,7 +238,7 @@ class MenuController extends Controller
                 $message = $e->getMessage();
                 $transaction->rollBack();
             }
-            $logs=	[
+            $logs =	[
                 'type' => Logs::TYPE_USER,
                 'description' => $message,
             ];

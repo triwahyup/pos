@@ -8,9 +8,8 @@ use yii\helpers\Url;
     <input type="text" class="form-control" data-search="menu" placeholder="Search ...">
 </div>
 <!-- /MENU SEARCH -->
-<!--  DEKSTOP VERSION -->
 <!-- container collapse (open close menu) -->
-<div class="navbar-slide">
+<div id="navbar_slide" class="navbar-slide">
     <i class="fontello icon-angle-double-left"></i>
 </div>
 <!-- /container collapse (open close menu) -->
@@ -75,54 +74,3 @@ use yii\helpers\Url;
     </ul>
 </div>
 <!-- /MENU CONTAINER -->
-<!-- FAVORITE -->
-<div class="navbar-favorite-container">
-    <div class="navbar-favorite-header">
-        <i class="fontello icon-star-4"></i><p>Favorite</p>
-    </div>
-    <div class="navbar-favorite-body">
-        <ul>
-            <?php foreach($favorites as $favorite) : ?>
-            <li class="navbar-menu" data-id="<?= $favorite['favorite_id'] ?>">
-                <a href="<?= Url::to(['/'.$favorite['link']]) ?>" data-menu="<?= $favorite['menu_id'] ?>" data-type="favorite">
-                    <i class="fontello icon-doc-text-inv"></i>
-                    <span><?= $favorite['name'] ?></span>
-                </a>
-            </li>
-            <?php endforeach; ?>
-        </ul>
-    </div>
-</div>
-<!-- /FAVORITE -->
-<!-- PROPERTIES -->
-<div class="navbar-properties">
-    <ul>
-        <li>
-            <a id="open_newtab" href="javascript:void(0)" target="_blank">
-                <i class="fontello icon-link"></i><span>Open link in new tab</span>
-            </a>
-        </li>
-        <li>
-            <a id="copylink_address" href="javascript:void(0)">
-                <i class="fontello icon-clone"></i><span>Copy link address</span>
-            </a>
-        </li>
-        <li>
-            <a id="addto_favorite" href="javascript:void(0)" data-href="favorite/create">
-                <i class="fontello icon-star-4"></i><span>Add to Favorite</span>
-            </a>
-        </li>
-        <li>
-            <a id="delete_favorite" href="javascript:void(0)" data-href="favorite/delete">
-                <i class="fontello icon-minus-circle"></i><span>Delete from Favorite</span>
-            </a>
-        </li>
-        <li>
-            <a id="close_properties" href="javascript:void(0)">
-                <i class="fontello icon-window-restore"></i><span>Close Properties</span>
-            </a>
-        </li>
-    </ul>
-</div>
-<!-- /PROPERTIES -->
-<!--  /DEKSTOP VERSION -->

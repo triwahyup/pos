@@ -25,55 +25,46 @@ $this->params['breadcrumbs'][] = $this->title;
     </p>
 
     <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 pading-right-0">
-        <div class="col-lg-6 col-md-6 col-xs-12 padding-left-0 ">
-            <?= DetailView::widget([
-                'model' => $model,
-                'attributes' => [
-                    'id',
-                    'name',
-                    'slug',
-                    'level',
-                    'link',
+        <?= DetailView::widget([
+            'model' => $model,
+            'attributes' => [
+                'id',
+                'name',
+                'slug',
+                'level',
+                'link',
+                [
+                    'attribute'=>'parent_id',
+                    'value'=> function ($model, $index) { 
+                        return (isset($model->parent)) ? $model->parent->name : '-';
+                    }
                 ],
-            ]) ?>
-        </div>
-        <div class="col-lg-6 col-md-6 col-xs-12 padding-right-0 ">
-            <?= DetailView::widget([
-                'model' => $model,
-                'attributes' => [
-                    [
-                        'attribute'=>'parent_id',
-                        'value'=> function ($model, $index) { 
-                            return (isset($model->parent)) ? $model->parent->name : '-';
-                        }
-                    ],
-                    'urutan',
-                    [
-                        'attribute'=>'type',
-                        'value'=> function ($model, $index) { 
-                            return $model->position();
-                        }
-                    ],
-                    [
-                        'attribute'=>'created_at',
-                        'value'=> function ($model, $index) { 
-                            if(!empty($model->created_at))
-                            {
-                                return date('d-m-Y H:i:s',$model->created_at);
-                            }
-                        }
-                    ],
-                    [
-                        'attribute'=>'updated_at',
-                        'value'=> function ($model, $index) { 
-                            if(!empty($model->updated_at))
-                            {
-                                return date('d-m-Y H:i:s',$model->updated_at);
-                            }
-                        }
-                    ],
+                [
+                    'attribute'=>'type',
+                    'value'=> function ($model, $index) { 
+                        return $model->position();
+                    }
                 ],
-            ]) ?>
-        </div>
+                'urutan',
+                [
+                    'attribute'=>'created_at',
+                    'value'=> function ($model, $index) { 
+                        if(!empty($model->created_at))
+                        {
+                            return date('d-m-Y H:i:s',$model->created_at);
+                        }
+                    }
+                ],
+                [
+                    'attribute'=>'updated_at',
+                    'value'=> function ($model, $index) { 
+                        if(!empty($model->updated_at))
+                        {
+                            return date('d-m-Y H:i:s',$model->updated_at);
+                        }
+                    }
+                ],
+            ],
+        ]) ?>
     </div>
 </div>

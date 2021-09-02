@@ -18,7 +18,7 @@ $this->params['breadcrumbs'][] = $this->title;
 				<h6 class="text-center">Point of Sales percetakan</h6>
 				<?php $form = ActiveForm::begin(['id' => 'login-form']); ?>
 					<div class="form-group">
-						<?= $form->field($model, 'username')->textInput(['autofocus' => true, 'not-uppercase' => true]) ?>
+						<?= $form->field($model, 'username')->textInput(['autofocus' => true]) ?>
 					</div>
 					<div class="form-group">
 						<?= $form->field($model, 'password')->passwordInput() ?>

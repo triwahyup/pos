@@ -4,13 +4,13 @@
 ?>
 <!-- Button show menu on mobile [default hidden] -->
 <div class="toggle-mobile">
-    <a class="btn">
+    <a id="toggle_mobile_menu" class="btn">
         <i class="fontello icon-menu"></i>
     </a>
 </div>
 <!-- /Button show menu on mobile [default hidden] -->
 <div class="appname">
-    <?= Html::a('POS <i>Point of Sales</i>', ''); ?>
+    <?= Html::a('Point of Sales System', ['/site']); ?>
 </div>
 <!-- Right Container -->
 <ul class="navbar-top-right">
