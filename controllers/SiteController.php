@@ -221,21 +221,6 @@ class SiteController extends Controller
 
     public function actionNavbarLeft()
     {
-        // ".((\Yii::$app->user->identity->getIsDeveloper()) ? '' : "AND (
-        //     slug IN (
-        //         SELECT REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(child, '[C]', ''), '[R]', ''), '[U]', ''), '[D]', ''), '[A]', '') as child
-        //         FROM auth_item_child
-        //         WHERE parent IN(
-        //             SELECT item_name FROM auth_assignment
-        //             WHERE user_id='".\Yii::$app->user->id."' AND item_name LIKE 'GROUPMENU-%'
-        //         )
-        //     ) OR 
-        //     slug IN (
-        //         SELECT REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(item_name, '[C]', ''), '[R]', ''), '[U]', ''), '[D]', ''), '[A]', '') as child
-        //         FROM auth_assignment
-        //         WHERE user_id='".\Yii::$app->user->id."' AND item_name NOT LIKE 'GROUPMENU-%'
-        //     )
-        // )")."
         $menuItems = [];
         $querys = \Yii::$app->db->createCommand("
             SELECT * FROM pengaturan_menu
@@ -282,18 +267,7 @@ class SiteController extends Controller
                 }
             }
         }
-
-        $favorites = \Yii::$app->db->createCommand("
-                SELECT a.id as favorite_id, a.*, b.*
-                FROM pengaturan_menu_favorite a
-                LEFT JOIN pengaturan_menu b ON b.id = a.menu_id
-                WHERE user_id='".\Yii::$app->user->id."' AND a.type='bookmark'")
-            ->queryAll();
-        
-        $data = $this->renderPartial('navbar-left', [
-            'menuItems' => $menuItems,
-            'favorites' => $favorites
-        ]);
+        $data = $this->renderPartial('navbar-left', ['menuItems' => $menuItems]);
         return json_encode(['data'=>$data]);
     }
 }

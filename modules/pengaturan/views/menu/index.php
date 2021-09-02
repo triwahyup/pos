@@ -26,7 +26,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'position',
                 'label' => 'Position',
                 'value' => function ($model, $key, $index) {
-                    return $model->position();
+                    return (isset($model->kode)) ? $model->kode->name : '-';
                 }
             ],
             [

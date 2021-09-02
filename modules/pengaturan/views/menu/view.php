@@ -42,7 +42,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 [
                     'attribute'=>'type',
                     'value'=> function ($model, $index) { 
-                        return $model->position();
+                        return (isset($model->kode)) ? $model->kode->name : '-';
                     }
                 ],
                 'urutan',

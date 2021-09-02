@@ -1,4 +1,5 @@
 <?php
+use kartik\widgets\Select2;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
@@ -16,7 +17,10 @@ use yii\widgets\ActiveForm;
     </div>
     <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
         <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0">
-            <?= $form->field($model, 'type')->textInput(['maxlength' => true]) ?>
+            <?= $form->field($model, 'type')->widget(Select2::classname(), [
+                    'data' => $type,
+                    'options' => ['placeholder' => 'Type Kode'],
+                ]) ?>
         </div>
     </div>
     <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">

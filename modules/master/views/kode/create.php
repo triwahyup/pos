@@ -12,5 +12,6 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="master-kode-create">
     <?= $this->render('_form', [
         'model' => $model,
+        'type' => $type,
     ]) ?>
 </div>

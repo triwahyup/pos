@@ -5,8 +5,9 @@ use Yii;
 
 class Helper
 {
-    const TYPE_USER = 'User';
-    const TYPE_MENU = 'Menu';
+    /** See in Master Kode Table  **/
+    const TYPE_MENU = '001';
+    const TYPE_USER = '002';
 
     public static function buttonIcons()
     {

@@ -3,6 +3,7 @@ namespace app\modules\master\models;
 
 use Yii;
 use app\models\AuthItemChild;
+use app\modules\master\models\MasterKodeType;
 use app\modules\pengaturan\models\PengaturanMenu;
 use yii\behaviors\TimestampBehavior;
 
@@ -42,9 +43,9 @@ class MasterKode extends \yii\db\ActiveRecord
         return [
             [['code', 'name', 'type'], 'required'],
             [['status', 'created_at', 'updated_at'], 'integer'],
+            [['type'], 'string', 'max' => 3],
             [['code'], 'string', 'max' => 8],
             [['name'], 'string', 'max' => 64],
-            [['type'], 'string', 'max' => 16],
             [['description'], 'string', 'max' => 128],
             [['code'], 'unique'],
             [['status'], 'default', 'value' => 1],
@@ -76,6 +77,11 @@ class MasterKode extends \yii\db\ActiveRecord
             $total = (int)substr($model->code, 1);
         }
         return (string)sprintf('%03s', ($total+1));
+    }
+
+    public function getTypeKode()
+    {
+        return $this->hasOne(MasterKodeType::className(), ['code' => 'type']);
     }
 
     public function getMenu()

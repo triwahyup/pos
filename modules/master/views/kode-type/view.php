@@ -4,14 +4,14 @@ use yii\helpers\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model app\modules\master\models\MasterKode */
+/* @var $model app\modules\master\models\MasterKodeType */
 
 $this->title = $model->name;
-$this->params['breadcrumbs'][] = ['label' => 'Master Kode', 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => 'Master Kode Type', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
 ?>
-<div class="master-kode-view">
+<div class="master-kode-type-view">
     <p class="text-right">
         <?= Html::a('<i class="fontello icon-plus"></i><span>Create</span>', ['create'], ['class' => 'btn btn-success btn-flat btn-sm']) ?>
         <?= Html::a('<i class="fontello icon-pencil"></i><span>Update</span>', ['update', 'code' => $model->code], ['class' => 'btn btn-warning btn-flat btn-sm']) ?>
@@ -23,20 +23,13 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
         ]) ?>
     </p>
-    
+
     <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 pading-right-0">
         <?= DetailView::widget([
             'model' => $model,
             'attributes' => [
                 'code',
                 'name',
-                [
-                    'attribute' => 'type',
-                    'value'=> function ($model, $index) { 
-                        return (!empty($model->typeKode)) ? $model->typeKode->name : NULL;
-                    }
-                ],
-                'description',
                 [
                     'attribute' => 'status',
                     'value'=> function ($model, $index) { 

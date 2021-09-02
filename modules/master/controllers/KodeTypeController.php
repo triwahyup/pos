@@ -2,24 +2,19 @@
 
 namespace app\modules\master\controllers;
 
-use app\commands\Helper;
-use app\models\AuthItem;
-use app\models\AuthItemChild;
-use app\models\AuthAssignment;
 use app\models\Logs;
 use app\models\User;
-use app\modules\master\models\MasterKode;
-use app\modules\master\models\MasterKodeSearch;
 use app\modules\master\models\MasterKodeType;
+use app\modules\master\models\MasterKodeTypeSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 
 /**
- * KodeController implements the CRUD actions for MasterKode model.
+ * KodeTypeController implements the CRUD actions for MasterKodeType model.
  */
-class KodeController extends Controller
+class KodeTypeController extends Controller
 {
     /**
      * @inheritDoc
@@ -34,22 +29,22 @@ class KodeController extends Controller
 				    'rules' => [
                         [
                             'actions' => ['create'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-kode')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-kode-type')),
                             'roles' => ['@'],
                         ],
                         [
                             'actions' => ['index', 'view'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-kode')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-kode-type')),
                             'roles' => ['@'],
                         ], 
                         [
                             'actions' => ['update'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-kode')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-kode-type')),
                             'roles' => ['@'],
                         ], 
                         [
                             'actions' => ['delete'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-kode')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-kode-type')),
                             'roles' => ['@'],
                         ],
                     ],
@@ -65,12 +60,12 @@ class KodeController extends Controller
     }
 
     /**
-     * Lists all MasterKode models.
+     * Lists all MasterKodeType models.
      * @return mixed
      */
     public function actionIndex()
     {
-        $searchModel = new MasterKodeSearch();
+        $searchModel = new MasterKodeTypeSearch();
         $dataProvider = $searchModel->search($this->request->queryParams);
 
         return $this->render('index', [
@@ -80,7 +75,7 @@ class KodeController extends Controller
     }
 
     /**
-     * Displays a single MasterKode model.
+     * Displays a single MasterKodeType model.
      * @param string $code Code
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
@@ -93,49 +88,23 @@ class KodeController extends Controller
     }
 
     /**
-     * Creates a new MasterKode model.
+     * Creates a new MasterKodeType model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
     public function actionCreate()
     {
-        $type = MasterKodeType::find()
-            ->select(['name'])
-            ->where(['status'=>1])
-            ->orderBy(['name'=>SORT_ASC])
-            ->indexBy('code')
-            ->column();
-        
-        $success = true;
         $message = '';
-        $model = new MasterKode();
+        $model = new MasterKodeType();
         if ($this->request->isPost) {
             if ($model->load($this->request->post())) {
                 $connection = \Yii::$app->db;
-			    $transaction = $connection->beginTransaction();
+                $transaction = $connection->beginTransaction();
                 try {
                     $model->code = $model->newcode();
                     if($model->save()){
-                        $auth = \Yii::$app->authManager;
-                        $author = $auth->createRole(strtolower($model->type).'#'.$model->code);
-                        if($model->type == Helper::TYPE_USER){
-                            if(!$auth->add($author)){
-                                $success = false;
-                                $message = 'ERROR CREATE AUTH (MASTER KODE)';
-                            }
-                        }
-                    }else{
-                        $success = false;
-                        $message = (count($model->errors) > 0) ? 'ERROR CREATE KODE: ' : '';
-                        foreach($model->errors as $error => $value){
-                            $message .= $value[0].', ';
-                        }
-                        $message = substr($message, 0, -2);
-                    }
-
-                    if($success){
                         $transaction->commit();
-                        $message = 'CREATE KODE: '.$model->code.':'.$model->name;
+                        $message = 'CREATE KODE TYPE: '.$model->code.':'.$model->name;
                         $logs =	[
                             'type' => Logs::TYPE_USER,
                             'description' => $message,
@@ -144,12 +113,16 @@ class KodeController extends Controller
                         \Yii::$app->session->setFlash('success', $message);
                         return $this->redirect(['view', 'code' => $model->code]);
                     }else{
+                        $message = (count($model->errors) > 0) ? 'ERROR CREATE KODE TYPE: ' : '';
+                        foreach($model->errors as $error => $value){
+                            $message .= $value[0].', ';
+                        }
+                        $message = substr($message, 0, -2);
                         $transaction->rollBack();
                     }
                 }catch(\Exception $e) {
-                    $success = false;
                     $message = $e->getMessage();
-				    $transaction->rollBack();
+                    $transaction->rollBack();
                 }
                 $logs =	[
                     'type' => Logs::TYPE_USER,
@@ -164,12 +137,11 @@ class KodeController extends Controller
 
         return $this->render('create', [
             'model' => $model,
-            'type' => $type,
         ]);
     }
 
     /**
-     * Updates an existing MasterKode model.
+     * Updates an existing MasterKodeType model.
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param string $code Code
      * @return mixed
@@ -177,32 +149,15 @@ class KodeController extends Controller
      */
     public function actionUpdate($code)
     {
-        $type = MasterKodeType::find()
-            ->select(['name'])
-            ->where(['status'=>1])
-            ->orderBy(['name'=>SORT_ASC])
-            ->indexBy('code')
-            ->column();
-
-        $success = true;
         $message = '';
         $model = $this->findModel($code);
         if ($this->request->isPost && $model->load($this->request->post())) {
             $connection = \Yii::$app->db;
             $transaction = $connection->beginTransaction();
             try {
-                if(!$model->save()){
-                    $success = false;
-                    $message = (count($model->errors) > 0) ? 'ERROR UPDATE KODE: ' : '';
-                    foreach($model->errors as $error => $value){
-                        $message .= $value[0].', ';
-                    }
-                    $message = substr($message, 0, -2);
-                }
-
-                if($success){
+                if($model->save()){
                     $transaction->commit();
-                    $message = 'UPDATE KODE: '.$model->code.':'.$model->name;
+                    $message = 'UPDATE KODE TYPE: '.$model->code.':'.$model->name;
                     $logs =	[
                         'type' => Logs::TYPE_USER,
                         'description' => $message,
@@ -212,10 +167,14 @@ class KodeController extends Controller
                     \Yii::$app->session->setFlash('success', $message);
                     return $this->redirect(['view', 'code' => $model->code]);
                 }else{
+                    $message = (count($model->errors) > 0) ? 'ERROR UPDATE KODE TYPE: ' : '';
+                    foreach($model->errors as $error => $value){
+                        $message .= $value[0].', ';
+                    }
+                    $message = substr($message, 0, -2);
                     $transaction->rollBack();
                 }
             }catch(\Exception $e) {
-                $success = false;
                 $message = $e->getMessage();
                 $transaction->rollBack();
             }
@@ -229,12 +188,11 @@ class KodeController extends Controller
 
         return $this->render('update', [
             'model' => $model,
-            'type' => $type,
         ]);
     }
 
     /**
-     * Deletes an existing MasterKode model.
+     * Deletes an existing MasterKodeType model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param string $code Code
      * @return mixed
@@ -248,15 +206,11 @@ class KodeController extends Controller
         $transaction = $connection->beginTransaction();
         try {
             if($model->delete()){
-                AuthItemChild::deleteAll("parent='".$model->type."#".$model->code."' OR child='".$model->type."#".$model->code."'");
-                AuthAssignment::deleteAll(['item_name' => $model->type."#".$model->code]);
-                AuthItem::deleteAll(['name' => $model->type."#".$model->code]);
-
-                $message = 'DELETE KODE: '.$model->name;
+                $message = 'DELETE KODE TYPE: '.$model->name;
                 $transaction->commit();
                 \Yii::$app->session->setFlash('success', $message);
             }else{
-                $message = (count($model->errors) > 0) ? 'ERROR DELETE KODE' : '';
+                $message = (count($model->errors) > 0) ? 'ERROR DELETE KODE TYPE' : '';
                 foreach($model->errors as $error=>$value){
                     $message .= strtoupper($error).": ".$value[0].', ';
                 }
@@ -277,15 +231,15 @@ class KodeController extends Controller
     }
 
     /**
-     * Finds the MasterKode model based on its primary key value.
+     * Finds the MasterKodeType model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param string $code Code
-     * @return MasterKode the loaded model
+     * @return MasterKodeType the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($code)
     {
-        if (($model = MasterKode::findOne($code)) !== null) {
+        if (($model = MasterKodeType::findOne($code)) !== null) {
             return $model;
         }
 

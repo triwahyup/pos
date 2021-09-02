@@ -5,15 +5,15 @@ use yii\grid\GridView;
 use app\commands\Helper;
 
 /* @var $this yii\web\View */
-/* @var $searchModel app\modules\master\models\MasterKodeSearch */
+/* @var $searchModel app\modules\master\models\MasterKodeTypeSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Master Kode';
+$this->title = 'Master Kode Type';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="master-kode-index">
+<div class="master-kode-type-index">
     <p class="text-right">
-        <?= Html::a('<i class="fontello icon-plus"></i><span>Create Master Kode</span>', ['create'], ['class' => 'btn btn-success btn-flat btn-sm']) ?>
+        <?= Html::a('<i class="fontello icon-plus"></i><span>Create Master Kode Type</span>', ['create'], ['class' => 'btn btn-success btn-flat btn-sm']) ?>
     </p>
 
     <?= GridView::widget([
@@ -28,13 +28,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
             ],
             'name',
-            [
-                'attribute' => 'type',
-                'value' => function($model, $index, $key) {
-                    return (!empty($model->typeKode)) ? $model->typeKode->name : NULL;
-                }
-            ],
-            'description',
             [
                 'attribute' => 'created_at',
                 'contentOptions' => [

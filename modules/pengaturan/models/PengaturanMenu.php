@@ -3,6 +3,7 @@
 namespace app\modules\pengaturan\models;
 
 use Yii;
+use app\modules\master\models\MasterKode;
 use yii\behaviors\TimestampBehavior;
 
 /**
@@ -47,8 +48,8 @@ class PengaturanMenu extends \yii\db\ActiveRecord
     {
         return [
             [['name', 'urutan', 'position'], 'required'],
-            [['level', 'parent_1', 'parent_2', 'urutan', 'position', 'created_at', 'updated_at'], 'integer'],
-            [['id', 'parent_id'], 'string', 'max' => 3],
+            [['level', 'parent_1', 'parent_2', 'urutan', 'created_at', 'updated_at'], 'integer'],
+            [['id', 'parent_id', 'position'], 'string', 'max' => 3],
             [['name', 'slug', 'link'], 'string', 'max' => 128],
             [['icon'], 'string', 'max' => 64],
             [['id'], 'unique'],
@@ -88,9 +89,9 @@ class PengaturanMenu extends \yii\db\ActiveRecord
         return (string)sprintf('%03s', ($total+1));
     }
 
-    public function position()
+    public function getKode()
     {
-        return ($this->position == 1) ?  'Menu Navbar Top' : 'Menu Navbar Left';
+        return $this->hasOne(MasterKode::className(), ['code' => 'position']);
     }
 
     public function getParent()
