@@ -32,7 +32,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'buttons' => [
                     'update' => function ($url, $model) {
                         return Html::a(Helper::buttonIcons()['pencil'],
-                            ['update', 'type'=>$model->type, 'code'=>$model->code],
+                            ['update', 'code'=>$model->code],
                             ['title'=>'Update', 'aria-label'=>'Update', 'data-pjax'=>true]);
                     },
                 ],

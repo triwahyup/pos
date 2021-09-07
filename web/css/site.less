@@ -1,19 +1,19 @@
 @import url('core/main/prefix.less');
 
 @color_border: #a9a9a9;
-@color_black: #000;
 @color_navbar_header: #023f4e;
 @color_danger: #c10501;
 @color_danger_hover: #a94442;
 @color_default: #fff;
 @color_header: #d2d2d2;
+@color_header_form: #504e4e;
 @color_header_table: #ecebe9;
 @color_text: #656565;
 @color_text_menu: #2e3838;
 @color_main: #186679;
 @color_main_hover: #01323e;
-@color_warning: #ea6100;
-@color_warning_hover: #b55614;
+@color_warning: #ff5302;
+@color_warning_hover: #ec4e04;
 
 /** SET GENERAL */
 .padding-left-0 {
@@ -25,8 +25,14 @@
 .margin-bottom-20 {
     margin-bottom: 20px;
 }
+.margin-left-5 {
+    margin-left: 5px;
+}
 .margin-top-20 {
     margin-top: 20px;
+}
+.margin-top-30 {
+    margin-top: 30px;
 }
 .margin-top-40 {
     margin-top: 40px;
@@ -111,10 +117,11 @@ a {
             margin-left: 20px;
         }
         &.btn-warning {
-            background-color: #ff8e02 !important;
+            background-color: @color_warning;
+            border-color: @color_warning;
             color: @color_default !important;
             &:hover {
-                background-color: @color_warning_hover !important;
+                background-color: @color_warning_hover;
             }
         }
         &:focus, &:active {
@@ -144,6 +151,22 @@ button {
         &:focus-visible {
             outline: none !important;
         }
+        &.btn-sm {
+            .borderRadius(5px);
+            height: 25px;
+            width: 25px;
+            i {
+                left: 50%;
+            }
+            &.btn-warning {
+                background-color: @color_warning;
+                border-color: @color_warning;
+                color: @color_default !important;
+                &:hover {
+                    background-color: @color_warning_hover;
+                }
+            }
+        }
     }
 }
 /** END SET GENERAL */
@@ -157,7 +180,7 @@ button {
         background-repeat: no-repeat;
         background-size: cover;
         .form-wrap {
-            background-color: @color_black;
+            background-color: #000;
             opacity: .8;
             padding: 20px;
             position: absolute;
@@ -378,6 +401,7 @@ button {
 .navbar-menu-body {
     display: inline-block;
     padding: 10px;
+    padding-bottom: 50px;
     height: 100%;
     overflow-x: hidden;
     overflow-y: auto;
@@ -401,11 +425,12 @@ button {
     a {
 		color: @color_text_menu;
         display: inline-block;
+        height: 25px;
 		line-height: 25px;
 		padding: 0 20px 0 45px;
 		span {
 			display: inline-block;
-            line-height: 20px;
+            line-height: 25px;
 		}
 	}
     .fontello {
@@ -421,7 +446,6 @@ button {
     &.active {
 		background-color: @color_main;
 		left: -10px;
-		height: auto;
 		width: 110%;
 		z-index: 1;
 		.borderRadius(0 20px 20px 0);
@@ -585,7 +609,7 @@ button {
             height: 30px;
             padding: 0 20px;
             h5 {
-                color: @color_black;
+                color: @color_header_form;
                 font-size: 14px;
                 line-height: 30px;
             }
@@ -654,6 +678,12 @@ form {
             }
         }
     }
+}
+.form-group-layer {
+    background-color: @color_header;
+    display: inline-block;
+    padding: 20px;
+    width: 100%;
 }
 .select2-container--krajee {
     .select2-selection--single {
@@ -794,6 +824,13 @@ form {
                 &:nth-of-type(odd) {
                     background-color: transparent;
                 }
+            }
+        }
+    }
+    &.table-custom {
+        tbody {
+            td {
+                vertical-align: middle;
             }
         }
     }

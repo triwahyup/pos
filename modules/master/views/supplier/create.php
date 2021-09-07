@@ -5,8 +5,8 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 /* @var $model app\modules\master\models\MasterPerson */
 
-$this->title = 'Create Master Supplier';
-$this->params['breadcrumbs'][] = ['label' => 'Master Supplier', 'url' => ['index']];
+$this->title = 'Create Data Supplier';
+$this->params['breadcrumbs'][] = ['label' => 'Data Supplier', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="master-person-create">

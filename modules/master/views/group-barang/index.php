@@ -1,20 +1,19 @@
 <?php
-
+use kartik\date\DatePicker;
 use yii\helpers\Html;
 use yii\grid\GridView;
-use kartik\date\DatePicker;
 use app\commands\Helper;
 
 /* @var $this yii\web\View */
-/* @var $searchModel app\modules\master\models\MasterKaryawanSearch */
+/* @var $searchModel app\modules\master\models\MasterGroupBarangSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Master Karyawan';
+$this->title = 'Group Barang';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="master-person-index">
+<div class="master-group-barang-index">
     <p class="text-right">
-        <?= Html::a('<i class="fontello icon-plus"></i><span>Create Master Karyawan</span>', ['create'], ['class' => 'btn btn-success btn-flat btn-sm']) ?>
+        <?= Html::a('<i class="fontello icon-plus"></i><span>Create Group Barang</span>', ['create'], ['class' => 'btn btn-success btn-flat btn-sm']) ?>
     </p>
 
     <?= GridView::widget([
@@ -22,36 +21,51 @@ $this->params['breadcrumbs'][] = $this->title;
         'filterModel' => $searchModel,
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
-            [
-                'attribute' => 'code',
-                'contentOptions' => [
-                    'class' => 'text-center',
-                ],
-            ],
             'name',
-            'address',
+            'acc_persedian_urutan',
+            'acc_penjualan_urutan',
+            'acc_hpp_urutan',
             [
-                'attribute' => 'phone_1',
-                'contentOptions' => [
-                    'class' => 'text-center',
-                ],
-            ],
-            [
-                'attribute' => 'masuk',
+                'attribute' => 'created_at',
                 'contentOptions' => [
                     'class' => 'text-center',
                 ],
                 'filter' => DatePicker::widget([
                     'model' => $searchModel, 
-                    'name' => 'masuk', 
+                    'name' => 'created_at', 
                     'type' => DatePicker::TYPE_COMPONENT_APPEND,
                     'pickerButton' => false,
-                    'attribute' => 'masuk',
+                    'attribute' => 'created_at',
                     'pluginOptions' => [
                         'format' => 'yyyy-mm-dd',
                         'autoclose' => true,
                     ],
                 ]),
+                'value' => function($model, $index, $key)
+                {
+                    return date('Y-m-d', $model->created_at);
+                }
+            ],
+            [
+                'attribute' => 'updated_at',
+                'contentOptions' => [
+                    'class' => 'text-center',
+                ],
+                'filter' => DatePicker::widget([
+                    'model' => $searchModel, 
+                    'name' => 'updated_at', 
+                    'type' => DatePicker::TYPE_COMPONENT_APPEND,
+                    'pickerButton' => false,
+                    'attribute' => 'updated_at',
+                    'pluginOptions' => [
+                        'format' => 'yyyy-mm-dd',
+                        'autoclose' => true,
+                    ],
+                ]),
+                'value' => function($model, $index, $key)
+                {
+                    return date('Y-m-d', $model->updated_at);
+                }
             ],
             [
                 'buttons' => [

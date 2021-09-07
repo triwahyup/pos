@@ -1,7 +1,7 @@
 <?php
 namespace app\modules\pengaturan\controllers;
 
-use app\commands\Helper;
+use app\commands\Konstanta;
 use app\models\AuthItem;
 use app\models\AuthItemChild;
 use app\models\Logs;
@@ -99,7 +99,7 @@ class MenuController extends Controller
     {
         $typeMenu = MasterKode::find()
             ->select(['name'])
-            ->where(['type'=>Helper::TYPE_MENU, 'status'=>1])
+            ->where(['type'=>Konstanta::TYPE_MENU, 'status'=>1])
             ->indexBy('code')
             ->column();
        
@@ -181,7 +181,7 @@ class MenuController extends Controller
     {
         $typeMenu = MasterKode::find()
             ->select(['name'])
-            ->where(['type'=>Helper::TYPE_MENU, 'status'=>1])
+            ->where(['type'=>Konstanta::TYPE_MENU, 'status'=>1])
             ->indexBy('code')
             ->column();
 
@@ -191,48 +191,38 @@ class MenuController extends Controller
             $connection = \Yii::$app->db;
             $transaction = $connection->beginTransaction();
             try {
-                $authItem = AuthItem::findOne(['name'=>$model->slug]);
-                if(isset($authItem)){
-                    if($authItem->delete()){
-                        $model->slug = strtolower(str_replace(' ','-', $model->name));
-                        $model->level = 1;
-                        $model->parent_id = NULL;
-                        if(!empty($model->parent_1)){
-                            $model->level = 2;
-                            $model->parent_id = $model->parent_1;
-                            if(!empty($model->parent_2)){
-                                $model->level = 3;
-                                $model->parent_id = $model->parent_2;
-                            }
-                        }
-                        if(empty($model->link)){
-                            $model->link = '#';
-                        }
-
-                        if($model->save()){
-                            $auth = \Yii::$app->authManager;
-                            $author = $auth->createRole($model->slug);
-                            $auth->add($author);
-                            
-                            $transaction->commit();
-                            $message = 'UPDATE MENU: '.$model->name.', SLUG: '.$model->slug;
-                            $logs =	[
-                                'type' => Logs::TYPE_USER,
-                                'description' => $message,
-                            ];
-                            Logs::addLog($logs);
-                            
-                            \Yii::$app->session->setFlash('success', $message);
-                            return $this->redirect(['view', 'id' => $model->id]);
-                        }else{
-                            $message = (count($model->errors) > 0) ? 'ERROR UPDATE MENU : ' : '';
-                            foreach($model->errors as $error => $value){
-                                $message .= $value[0].', ';
-                            }
-                            $message = substr($message, 0, -2);
-                            $transaction->rollBack();
-                        }
+                $model->level = 1;
+                $model->parent_id = NULL;
+                if(!empty($model->parent_1)){
+                    $model->level = 2;
+                    $model->parent_id = $model->parent_1;
+                    if(!empty($model->parent_2)){
+                        $model->level = 3;
+                        $model->parent_id = $model->parent_2;
                     }
+                }
+                if(empty($model->link)){
+                    $model->link = '#';
+                }
+
+                if($model->save()){
+                    $transaction->commit();
+                    $message = 'UPDATE MENU: '.$model->name.', SLUG: '.$model->slug;
+                    $logs =	[
+                        'type' => Logs::TYPE_USER,
+                        'description' => $message,
+                    ];
+                    Logs::addLog($logs);
+                    
+                    \Yii::$app->session->setFlash('success', $message);
+                    return $this->redirect(['view', 'id' => $model->id]);
+                }else{
+                    $message = (count($model->errors) > 0) ? 'ERROR UPDATE MENU : ' : '';
+                    foreach($model->errors as $error => $value){
+                        $message .= $value[0].', ';
+                    }
+                    $message = substr($message, 0, -2);
+                    $transaction->rollBack();
                 }
             }catch(\Exception $e) {
                 $message = $e->getMessage();

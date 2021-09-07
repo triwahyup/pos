@@ -7,7 +7,7 @@ use yii\widgets\DetailView;
 /* @var $model app\modules\master\models\MasterKodeType */
 
 $this->title = $model->name;
-$this->params['breadcrumbs'][] = ['label' => 'Master Kode Type', 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => 'Data Kode Type', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
 ?>

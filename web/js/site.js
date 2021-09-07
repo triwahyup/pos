@@ -126,3 +126,44 @@ $(document).ready(function(){
 		}
 	});
 });
+
+var temp = {
+	init: function() {
+		var $button = $([
+			'<button class="btn btn-success margin-bottom-20" data-button="change_temp">',
+				'<i class="fontello icon-plus"></i>',
+				'<span>Update Data Detail</span>',
+			'</button>',
+			'<button class="btn btn-danger margin-bottom-20 margin-left-5" data-button="cancel">',
+				'<i class="fontello icon-cancel"></i>',
+				'<span>Cancel</span>',
+			'</button>'].join(''));
+		
+		var $temp = $("[data-button=\"create_temp\"]");
+		$temp.removeClass("hidden").addClass("hidden");
+		// hapus dulu biar gak numpuk
+		$("[data-button=\"change_temp\"]").remove();
+		$("[data-button=\"cancel\"]").remove();
+		// kemudian render
+		$button.insertAfter($temp);
+		// disable button update dan delete
+		$("[data-button=\"update_temp\"]").prop("disabled", true);
+		$("[data-button=\"delete_temp\"]").prop("disabled", true);
+
+		temp.event();
+	},
+	destroy: function() {
+		$("[data-button=\"create_temp\"]").removeClass("hidden");
+		$("[data-button=\"change_temp\"]").remove();
+		$("[data-button=\"cancel\"]").remove();
+		// enable button update dan delete
+		$("[data-button=\"update_temp\"]").prop("disabled", false);
+		$("[data-button=\"delete_temp\"]").prop("disabled", false);
+	},
+	event: function() {
+		$("body").off("[data-button=\"cancel\"]").on("[data-button=\"cancel\"]", function(e){
+			e.preventDefault();
+			temp.destroy();
+		});
+	}
+}

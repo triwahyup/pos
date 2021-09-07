@@ -43,8 +43,7 @@ class MasterKode extends \yii\db\ActiveRecord
         return [
             [['code', 'name', 'type'], 'required'],
             [['status', 'created_at', 'updated_at'], 'integer'],
-            [['type'], 'string', 'max' => 3],
-            [['code'], 'string', 'max' => 8],
+            [['code', 'type'], 'string', 'max' => 8],
             [['name'], 'string', 'max' => 64],
             [['description'], 'string', 'max' => 128],
             [['code'], 'unique'],
@@ -74,9 +73,9 @@ class MasterKode extends \yii\db\ActiveRecord
         $total=0;
         if($model > 0){
             $model = MasterKode::find()->orderBy(['code'=>SORT_DESC])->one();
-            $total = (int)substr($model->code, 1);
+            $total = (int)substr($model->code, -3);
         }
-        return (string)sprintf('%03s', ($total+1));
+        return (string)'KODE-'.sprintf('%03s', ($total+1));
     }
 
     public function getTypeKode()
@@ -86,12 +85,12 @@ class MasterKode extends \yii\db\ActiveRecord
 
     public function getMenu()
     {
-		return AuthItemChild::findAll(['parent'=>$this->type.'#'.$this->code]);
+		return AuthItemChild::findAll(['parent'=>$this->code]);
     }
 
     public function getAuthItem()
     {
-        $model = AuthItemChild::findAll(['parent'=>$this->type.'#'.$this->code]);
+        $model = AuthItemChild::findAll(['parent'=>$this->code]);
         $data = [];
         foreach($model as $val){
 			$menu = PengaturanMenu::findOne(['slug'=>$val->child]);

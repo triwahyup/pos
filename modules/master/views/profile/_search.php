@@ -4,26 +4,34 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model app\modules\master\models\MasterKaryawanSearch */
+/* @var $model app\modules\master\models\ProfileSearch */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 
-<div class="master-person-search">
+<div class="profile-search">
 
     <?php $form = ActiveForm::begin([
         'action' => ['index'],
         'method' => 'get',
     ]); ?>
 
-    <?= $form->field($model, 'code') ?>
+    <?= $form->field($model, 'user_id') ?>
 
     <?= $form->field($model, 'name') ?>
 
-    <?= $form->field($model, 'address') ?>
+    <?= $form->field($model, 'nik') ?>
 
-    <?= $form->field($model, 'provinsi_id') ?>
+    <?= $form->field($model, 'nip') ?>
 
-    <?= $form->field($model, 'kabupaten_id') ?>
+    <?= $form->field($model, 'tgl_lahir') ?>
+
+    <?php // echo $form->field($model, 'tempat_lahir') ?>
+
+    <?php // echo $form->field($model, 'alamat') ?>
+
+    <?php // echo $form->field($model, 'provinsi_id') ?>
+
+    <?php // echo $form->field($model, 'kabupaten_id') ?>
 
     <?php // echo $form->field($model, 'kecamatan_id') ?>
 
@@ -31,29 +39,23 @@ use yii\widgets\ActiveForm;
 
     <?php // echo $form->field($model, 'kode_pos') ?>
 
-    <?php // echo $form->field($model, 'contact') ?>
+    <?php // echo $form->field($model, 'phone_1') ?>
 
-    <?php // echo $form->field($model, 'telp_1') ?>
-
-    <?php // echo $form->field($model, 'telp_2') ?>
-
-    <?php // echo $form->field($model, 'handphone') ?>
+    <?php // echo $form->field($model, 'phone_2') ?>
 
     <?php // echo $form->field($model, 'email') ?>
 
-    <?php // echo $form->field($model, 'fax') ?>
-
     <?php // echo $form->field($model, 'keterangan') ?>
 
-    <?php // echo $form->field($model, 'type_user') ?>
+    <?php // echo $form->field($model, 'tgl_masuk') ?>
 
-    <?php // echo $form->field($model, 'masuk') ?>
+    <?php // echo $form->field($model, 'tgl_keluar') ?>
 
-    <?php // echo $form->field($model, 'keluar') ?>
+    <?php // echo $form->field($model, 'golongan') ?>
 
-    <?php // echo $form->field($model, 'tgl_jatuh_tempo') ?>
+    <?php // echo $form->field($model, 'foto') ?>
 
-    <?php // echo $form->field($model, 'group_supplier_code') ?>
+    <?php // echo $form->field($model, 'typeuser_code') ?>
 
     <?php // echo $form->field($model, 'status') ?>
 

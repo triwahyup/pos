@@ -33,6 +33,7 @@ class AuthAssignment extends \yii\db\ActiveRecord
             [['user_id', 'created_at'], 'integer'],
             [['item_name'], 'string', 'max' => 64],
             [['item_name', 'user_id'], 'unique', 'targetAttribute' => ['item_name', 'user_id']],
+            [['item_name'], 'exist', 'skipOnError' => true, 'targetClass' => AuthItem::className(), 'targetAttribute' => ['item_name' => 'name']],
         ];
     }
 

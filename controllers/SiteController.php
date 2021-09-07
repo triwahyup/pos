@@ -224,7 +224,17 @@ class SiteController extends Controller
         $menuItems = [];
         $querys = \Yii::$app->db->createCommand("
             SELECT * FROM pengaturan_menu
-            WHERE position=2
+            WHERE position='KODE-002' 
+            ".(( \Yii::$app->user->identity->getIsDeveloper()) ? '' : " AND (
+                slug IN (
+                    SELECT child
+                    FROM auth_item_child
+                    WHERE parent IN (
+                        SELECT item_name FROM auth_assignment
+                        WHERE user_id = '".\Yii::$app->user->id."'
+                    )
+                )
+            )")."
             ORDER BY level, urutan")->queryAll();
         
         $data = [];

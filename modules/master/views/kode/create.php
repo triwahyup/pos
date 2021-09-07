@@ -5,8 +5,8 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 /* @var $model app\modules\master\models\MasterKode */
 
-$this->title = 'Create Master Kode';
-$this->params['breadcrumbs'][] = ['label' => 'Master Kode', 'url' => ['index']];
+$this->title = 'Create Data Kode';
+$this->params['breadcrumbs'][] = ['label' => 'Data Kode', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="master-kode-create">

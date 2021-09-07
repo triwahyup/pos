@@ -39,7 +39,7 @@ class MasterKodeType extends \yii\db\ActiveRecord
         return [
             [['code'], 'required'],
             [['status', 'created_at', 'updated_at'], 'integer'],
-            [['code'], 'string', 'max' => 3],
+            [['code'], 'string', 'max' => 8],
             [['name'], 'string', 'max' => 64],
             [['code'], 'unique'],
             [['status'], 'default', 'value' => 1],
@@ -66,8 +66,8 @@ class MasterKodeType extends \yii\db\ActiveRecord
         $total=0;
         if($model > 0){
             $model = MasterKodeType::find()->orderBy(['code'=>SORT_DESC])->one();
-            $total = (int)substr($model->code, 1);
+            $total = (int)substr($model->code, -3);
         }
-        return (string)sprintf('%03s', ($total+1));
+        return (string)'KODE-'.sprintf('%03s', ($total+1));
     }
 }

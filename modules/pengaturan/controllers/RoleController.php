@@ -2,10 +2,12 @@
 
 namespace app\modules\pengaturan\controllers;
 
-use app\commands\Helper;
+use app\commands\Konstanta;
+use app\models\AuthAssignment;
 use app\models\AuthItemChild;
 use app\models\User;
 use app\modules\master\models\MasterKode;
+use app\modules\master\models\Profile;
 use app\modules\pengaturan\models\PengaturanMenu;
 use app\modules\pengaturan\models\RoleForm;
 use app\modules\pengaturan\models\RoleSearch;
@@ -60,13 +62,12 @@ class RoleController extends Controller
         ]);
     }
 
-    public function actionUpdate($type, $code)
+    public function actionUpdate($code)
     {
-        $typeCode = MasterKode::findOne(['type'=>$type, 'code'=>$code]);
+        $typeCode = MasterKode::findOne(['code'=>$code]);
         if($typeCode !== NULL){
             $menus = PengaturanMenu::find()
-                ->where(['level'=>1])
-                ->andWhere('position <> 3')
+                ->where(['level'=>1, 'position'=>'KODE-002'])
                 ->orderBy(['position'=>SORT_DESC, 'urutan'=>SORT_ASC])
                 ->all();
 
@@ -78,26 +79,26 @@ class RoleController extends Controller
 				$transaction = $connection->beginTransaction();
                 try{
                     if(count($model->menu) > 0){
-                        AuthItemChild::deleteAll('parent =:parent OR child=:child', [
-                            ':parent'=>$type."#".$typeCode->code, ':child'=>$type."#".$typeCode->code]);
+                        AuthItemChild::deleteAll('parent =:parent', [':parent'=>$code]);
                         $auth = \Yii::$app->authManager;
-                        $getParent = $auth->getRole($type."#".$typeCode->code);
-                        
+                        $getParent = $auth->getRole($code);
                         $role = '';
                         foreach($model->menu as $menu){
                             $role .= $menu.', ';
 							$getChild = $auth->getRole($menu);
                             if(!$auth->addChild($getParent, $getChild)){
-								$success = false;
-								$message = '{type: '.$type.', code: '.$typeCode->code.'}. Insert Auth Item Child not validate';
+                                $success = false;
+								$message = '{code: '.$code.'}. Insert Auth Item Child not validate';
 							}
                         }
                         if($success){
-							$message = '('.substr($role,0,-1).')';
+							$message = '('.substr($role,0,-2).')';
 							\Yii::$app->session->setFlash('success', 'Update Rule SUKSES: '.$message);
 							$transaction->commit();
 							return $this->redirect(['index']);
-						}
+						}else{
+                            $transaction->rollBack();
+                        }
                     }else{
 						$success = false;
 						$message = "Update Role not validate. Menu is empty !";

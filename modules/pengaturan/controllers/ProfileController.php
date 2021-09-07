@@ -2,7 +2,7 @@
 
 namespace app\modules\pengaturan\controllers;
 
-use app\commands\Helper;
+use app\commands\Konstanta;
 use app\models\Logs;
 use app\models\User;
 use app\models\Profile;
@@ -48,7 +48,7 @@ class ProfileController extends Controller
         $profile = Profile::findOne(['user_id'=>\Yii::$app->user->id]);
         $typeCode = MasterKode::find()
             ->select(['name'])
-            ->where(['type'=>Helper::TYPE_USER, 'status'=>1])
+            ->where(['type'=>Konstanta::TYPE_USER, 'status'=>1])
             ->indexBy('code')
             ->column();
         

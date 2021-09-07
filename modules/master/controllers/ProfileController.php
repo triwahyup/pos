@@ -2,23 +2,25 @@
 
 namespace app\modules\master\controllers;
 
+use app\commands\Konstanta;
 use app\models\Logs;
 use app\models\User;
-use app\modules\master\models\MasterProvinsi;
+use app\modules\master\models\MasterKode;
 use app\modules\master\models\MasterKabupaten;
 use app\modules\master\models\MasterKecamatan;
 use app\modules\master\models\MasterKelurahan;
-use app\modules\master\models\MasterPerson;
-use app\modules\master\models\MasterKaryawanSearch;
+use app\modules\master\models\MasterProvinsi;
+use app\modules\master\models\Profile;
+use app\modules\master\models\ProfileSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 
 /**
- * KaryawanController implements the CRUD actions for MasterPerson model.
+ * ProfileController implements the CRUD actions for Profile model.
  */
-class KaryawanController extends Controller
+class ProfileController extends Controller
 {
     /**
      * @inheritDoc
@@ -64,12 +66,12 @@ class KaryawanController extends Controller
     }
 
     /**
-     * Lists all MasterPerson models.
+     * Lists all Profile models.
      * @return mixed
      */
     public function actionIndex()
     {
-        $searchModel = new MasterKaryawanSearch();
+        $searchModel = new ProfileSearch();
         $dataProvider = $searchModel->search($this->request->queryParams);
 
         return $this->render('index', [
@@ -79,20 +81,20 @@ class KaryawanController extends Controller
     }
 
     /**
-     * Displays a single MasterPerson model.
-     * @param string $code Code
+     * Displays a single Profile model.
+     * @param int $user_id User ID
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionView($code)
+    public function actionView($user_id)
     {
         return $this->render('view', [
-            'model' => $this->findModel($code),
+            'model' => $this->findModel($user_id),
         ]);
     }
 
     /**
-     * Creates a new MasterPerson model.
+     * Creates a new Profile model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
@@ -103,34 +105,65 @@ class KaryawanController extends Controller
             ->where(['status' => 1])
             ->indexBy('id')
             ->column();
+        $typeUser = MasterKode::find()
+            ->select(['name'])
+            ->where(['type'=>Konstanta::TYPE_USER, 'status' => 1])
+            ->indexBy('code')
+            ->column();
         
         $message = '';
-        $model = new MasterPerson();
-        $model->code = $model->newcode();
+        $model = new Profile();
         if ($this->request->isPost) {
             if ($model->load($this->request->post())) {
                 $connection = \Yii::$app->db;
 			    $transaction = $connection->beginTransaction();
                 try {
-                    $model->type_user = 3; // TYPE KARYAWAN
-                    $model->phone_1 = str_replace('-', '', $model->phone_1);
-                    if(!empty($model->phone_2)){
-                        $model->phone_2 = str_replace('-', '', $model->phone_2);
-                    }
-                    if($model->save()){
-                        $transaction->commit();
-                        $message = 'CREATE KARYAWAN: '.$model->name;
-                        $logs =	[
-                            'type' => Logs::TYPE_USER,
-                            'description' => $message,
-                        ];
-                        Logs::addLog($logs);
-
-                        \Yii::$app->session->setFlash('success', $message);
-                        return $this->redirect(['view', 'code' => $model->code]);
+                    $user = new User();
+                    $user->attributes = $model->attributes;
+                    if(empty($model->username)){
+                        $user->username = 'user_'.date('is');
                     }else{
-                        $message = (count($model->errors) > 0) ? 'ERROR CREATE KARYAWAN: ' : '';
-                        foreach($model->errors as $error => $value){
+                        $user->username = $model->username;
+                    }
+                    if(empty($model->password)){
+                        $user->password_hash = \Yii::$app->security->generatePasswordHash('*#');
+                    }else{
+                        $user->password_hash = \Yii::$app->security->generatePasswordHash($model->password);
+                    }
+                    $user->auth_key = \Yii::$app->security->generateRandomString();
+                    $user->registration_ip = \Yii::$app->request->userIP;
+                    $user->confirmed_at = time();
+                    $user->created_at = time();
+                    $user->updated_at = time();
+
+                    if($user->save()){
+                        $model->user_id = $user->id;
+                        $model->phone_1 = str_replace('-', '', $model->phone_1);
+                        if(!empty($model->phone_2)){
+                            $model->phone_2 = str_replace('-', '', $model->phone_2);
+                        }
+                        if($model->save()){
+                            $transaction->commit();
+                            $message = 'CREATE KARYAWAN: '.$model->name;
+                            $logs =	[
+                                'type' => Logs::TYPE_USER,
+                                'description' => $message,
+                            ];
+                            Logs::addLog($logs);
+
+                            \Yii::$app->session->setFlash('success', $message);
+                            return $this->redirect(['view', 'user_id' => $model->user_id]);
+                        }else{
+                            $message = (count($model->errors) > 0) ? 'ERROR CREATE KARYAWAN: ' : '';
+                            foreach($model->errors as $error => $value){
+                                $message .= $value[0].', ';
+                            }
+                            $message = substr($message, 0, -2);
+                            $transaction->rollBack();
+                        }
+                    }else{
+                        $message = (count($user->errors) > 0) ? 'ERROR CREATE USER: ' : '';
+                        foreach($user->errors as $error => $value){
                             $message .= $value[0].', ';
                         }
                         $message = substr($message, 0, -2);
@@ -154,48 +187,66 @@ class KaryawanController extends Controller
         return $this->render('create', [
             'model' => $model,
             'dataProvinsi' => $dataProvinsi,
+            'typeUser' => $typeUser,
         ]);
     }
 
     /**
-     * Updates an existing MasterPerson model.
+     * Updates an existing Profile model.
      * If update is successful, the browser will be redirected to the 'view' page.
-     * @param string $code Code
+     * @param int $user_id User ID
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionUpdate($code)
+    public function actionUpdate($user_id)
     {
         $dataProvinsi = MasterProvinsi::find()
             ->select(['name'])
             ->where(['status' => 1])
             ->indexBy('id')
             ->column();
+        $typeUser = MasterKode::find()
+            ->select(['name'])
+            ->where(['type'=>Konstanta::TYPE_USER, 'status' => 1])
+            ->indexBy('code')
+            ->column();
         
         $message = '';
-        $model = $this->findModel($code);
+        $model = $this->findModel($user_id);
         if ($this->request->isPost && $model->load($this->request->post())) {
             $connection = \Yii::$app->db;
             $transaction = $connection->beginTransaction();
             try {
-                $model->phone_1 = str_replace('-', '', $model->phone_1);
-                if(!empty($model->phone_2)){
-                    $model->phone_2 = str_replace('-', '', $model->phone_2);
-                }
-                if($model->save()){
-                    $transaction->commit();
-                    $message = 'UPDATE KARYAWAN: '.$model->name;
-                    $logs =	[
-                        'type' => Logs::TYPE_USER,
-                        'description' => $message,
-                    ];
-                    Logs::addLog($logs);
+                $user = User::findOne(['id'=>$user_id]);
+                $user->email = $model->email;
+                $user->updated_at = time();
+                if($user->save()){
+                    $model->phone_1 = str_replace('-', '', $model->phone_1);
+                    if(!empty($model->phone_2)){
+                        $model->phone_2 = str_replace('-', '', $model->phone_2);
+                    }
+                    if($model->save()){
+                        $transaction->commit();
+                        $message = 'UPDATE KARYAWAN: '.$model->name;
+                        $logs =	[
+                            'type' => Logs::TYPE_USER,
+                            'description' => $message,
+                        ];
+                        Logs::addLog($logs);
 
-                    \Yii::$app->session->setFlash('success', $message);
-                    return $this->redirect(['view', 'code' => $model->code]);
+                        \Yii::$app->session->setFlash('success', $message);
+                        return $this->redirect(['view', 'user_id' => $model->user_id]);
+                    }else{
+                        $message = (count($model->errors) > 0) ? 'ERROR UPDATE KARYAWAN: ' : '';
+                        foreach($model->errors as $error => $value){
+                            $message .= $value[0].', ';
+                        }
+                        $message = substr($message, 0, -2);
+                        $transaction->rollBack();
+                    }
                 }else{
-                    $message = (count($model->errors) > 0) ? 'ERROR UPDATE KARYAWAN: ' : '';
-                    foreach($model->errors as $error => $value){
+                    $message = (count($user->errors) > 0) ? 'ERROR CREATE USER: ' : '';
+                    foreach($user->errors as $error => $value){
                         $message .= $value[0].', ';
                     }
                     $message = substr($message, 0, -2);
@@ -216,24 +267,26 @@ class KaryawanController extends Controller
         return $this->render('update', [
             'model' => $model,
             'dataProvinsi' => $dataProvinsi,
+            'typeUser' => $typeUser,
         ]);
     }
 
     /**
-     * Deletes an existing MasterPerson model.
+     * Deletes an existing Profile model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param string $code Code
+     * @param int $user_id User ID
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionDelete($code)
+    public function actionDelete($user_id)
     {
         $message = '';
-        $model = $this->findModel($code);
+        $model = $this->findModel($user_id);
+        $user = User::findOne(['id'=>$user_id]);
         $connection = \Yii::$app->db;
         $transaction = $connection->beginTransaction();
         try {
-            if($model->delete()){
+            if($model->delete() && $user->delete()){
                 $message = 'DELETE KARYAWAN: '.$model->name;
                 $transaction->commit();
                 \Yii::$app->session->setFlash('success', $message);
@@ -259,15 +312,15 @@ class KaryawanController extends Controller
     }
 
     /**
-     * Finds the MasterPerson model based on its primary key value.
+     * Finds the Profile model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param string $code Code
-     * @return MasterPerson the loaded model
+     * @param int $user_id User ID
+     * @return Profile the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findModel($code)
+    protected function findModel($user_id)
     {
-        if (($model = MasterPerson::findOne($code)) !== null) {
+        if (($model = Profile::findOne($user_id)) !== null) {
             return $model;
         }
 

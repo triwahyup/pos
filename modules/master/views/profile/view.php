@@ -4,18 +4,18 @@ use yii\helpers\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model app\modules\master\models\MasterPerson */
+/* @var $model app\modules\master\models\Profile */
 
 $this->title = $model->name;
-$this->params['breadcrumbs'][] = ['label' => 'Master Karyawan', 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => 'Data Karyawan', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
 ?>
-<div class="master-person-view">
+<div class="profile-view">
     <p class="text-right">
         <?= Html::a('<i class="fontello icon-plus"></i><span>Create</span>', ['create'], ['class' => 'btn btn-success btn-flat btn-sm']) ?>
-        <?= Html::a('<i class="fontello icon-pencil"></i><span>Update</span>', ['update', 'code' => $model->code], ['class' => 'btn btn-warning btn-flat btn-sm']) ?>
-        <?= Html::a('<i class="fontello icon-trash"></i><span>Delete</span>', ['delete', 'code' => $model->code], [
+        <?= Html::a('<i class="fontello icon-pencil"></i><span>Update</span>', ['update', 'user_id' => $model->user_id], ['class' => 'btn btn-warning btn-flat btn-sm']) ?>
+        <?= Html::a('<i class="fontello icon-trash"></i><span>Delete</span>', ['delete', 'user_id' => $model->user_id], [
             'class' => 'btn btn-danger btn-flat btn-sm',
             'data' => [
                 'confirm' => 'Are you sure you want to delete this item?',
@@ -28,9 +28,12 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= DetailView::widget([
             'model' => $model,
             'attributes' => [
-                'code',
                 'name',
-                'address',
+                'nik',
+                'nip',
+                'tgl_lahir',
+                'tempat_lahir',
+                'alamat',
                 [
                     'attribute' => 'provinsi_id',
                     'value'=> function ($model, $index) { 
@@ -59,10 +62,16 @@ $this->params['breadcrumbs'][] = $this->title;
                 'phone_1',
                 'phone_2',
                 'email:email',
-                'fax',
                 'keterangan',
-                'masuk',
-                'keluar',
+                'tgl_masuk',
+                'tgl_keluar',
+                'golongan',
+                [
+                    'attribute' => 'typeuser_code',
+                    'value'=> function ($model, $index) { 
+                        return ($model->typeUser) ? $model->typeUser->name : '';
+                    }
+                ],
                 [
                     'attribute' => 'status',
                     'value'=> function ($model, $index) { 

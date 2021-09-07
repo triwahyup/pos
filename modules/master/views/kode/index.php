@@ -1,5 +1,5 @@
 <?php
-
+use kartik\date\DatePicker;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use app\commands\Helper;
@@ -8,12 +8,12 @@ use app\commands\Helper;
 /* @var $searchModel app\modules\master\models\MasterKodeSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Master Kode';
+$this->title = 'Data Kode';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="master-kode-index">
     <p class="text-right">
-        <?= Html::a('<i class="fontello icon-plus"></i><span>Create Master Kode</span>', ['create'], ['class' => 'btn btn-success btn-flat btn-sm']) ?>
+        <?= Html::a('<i class="fontello icon-plus"></i><span>Create Data Kode</span>', ['create'], ['class' => 'btn btn-success btn-flat btn-sm']) ?>
     </p>
 
     <?= GridView::widget([
@@ -21,12 +21,6 @@ $this->params['breadcrumbs'][] = $this->title;
         'filterModel' => $searchModel,
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
-            [
-                'attribute' => 'code',
-                'contentOptions' => [
-                    'class' => 'text-center',
-                ],
-            ],
             'name',
             [
                 'attribute' => 'type',
@@ -40,6 +34,17 @@ $this->params['breadcrumbs'][] = $this->title;
                 'contentOptions' => [
                     'class' => 'text-center',
                 ],
+                'filter' => DatePicker::widget([
+                    'model' => $searchModel, 
+                    'name' => 'created_at', 
+                    'type' => DatePicker::TYPE_COMPONENT_APPEND,
+                    'pickerButton' => false,
+                    'attribute' => 'created_at',
+                    'pluginOptions' => [
+                        'format' => 'yyyy-mm-dd',
+                        'autoclose' => true,
+                    ],
+                ]),
                 'value' => function($model, $index, $key)
                 {
                     return date('Y-m-d', $model->created_at);
@@ -50,6 +55,17 @@ $this->params['breadcrumbs'][] = $this->title;
                 'contentOptions' => [
                     'class' => 'text-center',
                 ],
+                'filter' => DatePicker::widget([
+                    'model' => $searchModel, 
+                    'name' => 'updated_at', 
+                    'type' => DatePicker::TYPE_COMPONENT_APPEND,
+                    'pickerButton' => false,
+                    'attribute' => 'updated_at',
+                    'pluginOptions' => [
+                        'format' => 'yyyy-mm-dd',
+                        'autoclose' => true,
+                    ],
+                ]),
                 'value' => function($model, $index, $key)
                 {
                     return date('Y-m-d', $model->updated_at);

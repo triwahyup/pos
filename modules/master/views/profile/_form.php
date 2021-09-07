@@ -7,24 +7,52 @@ use yii\widgets\ActiveForm;
 use yii\widgets\MaskedInput;
 
 /* @var $this yii\web\View */
-/* @var $model app\modules\master\models\MasterPerson */
+/* @var $model app\modules\master\models\Profile */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 
-<div class="master-person-form">
+<div class="profile-form">
     <?php $form = ActiveForm::begin(); ?>
-    <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
-        <div class="col-lg-5 col-md-5 col-sm-12 col-xs-12 padding-left-0">
-            <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
+    <fieldset class="fieldset-box">
+        <legend>Detail Personal</legend>
+        <div class="col-lg-12 col-md-12 col-xs-12">
+            <div class="margin-top-20"></div>
+            <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
+                <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
+                <?= $form->field($model, 'nik')->textInput(['maxlength' => true]) ?>
+                <?= $form->field($model, 'nip')->textInput(['maxlength' => true]) ?>
+            </div>
+            <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
+                <?= $form->field($model, 'tgl_lahir')->widget(DatePicker::classname(), [
+                    'type' => DatePicker::TYPE_INPUT,
+                    'options' => [
+                        'placeholder' => 'yyyy-mm-dd',
+                    ],
+                    'pluginOptions' => [
+                        'autoclose' => true,
+                        'format' => 'yyyy-mm-dd',
+                    ]]) ?>
+                <?= $form->field($model, 'tempat_lahir')->textInput(['maxlength' => true]) ?>
+            </div>
+            <div class="col-lg-1 col-md-1 col-sm-12 col-xs-12">
+            </div>
+            <?php if($model->isNewRecord): ?>
+                <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
+                    <div class="form-group-layer">
+                        <?= $form->field($model, 'username')->textInput(['maxlength' => true]) ?>
+                        <?= $form->field($model, 'password')->passwordInput(['maxlength' => true]) ?>
+                    </div>
+                </div>
+            <?php endif; ?>
         </div>
-    </div>
+    </fieldset>
     <div class="margin-bottom-20 full-width"></div>
     <fieldset class="fieldset-box">
         <legend>Detail Alamat</legend>
         <div class="col-lg-12 col-md-12 col-xs-12">
             <div class="margin-top-20"></div>
             <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
-                <?= $form->field($model, 'address')->textarea(['rows' => 4]) ?>
+                <?= $form->field($model, 'alamat')->textarea(['rows' => 4]) ?>
                 <?= $form->field($model, 'kode_pos')->textInput(['maxlength' => true]) ?>
             </div>
             <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
@@ -56,8 +84,8 @@ use yii\widgets\MaskedInput;
         <div class="col-lg-12 col-md-12 col-xs-12">
             <div class="margin-top-20"></div>
             <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
-                <?= $form->field($model, 'tempat_lahir')->textInput(['maxlength' => true]) ?>
-                <?= $form->field($model, 'tgl_lahir')->widget(DatePicker::classname(), [
+                <?= $form->field($model, 'golongan')->textInput(['maxlength' => true]) ?>
+                <?= $form->field($model, 'tgl_masuk')->widget(DatePicker::classname(), [
                     'type' => DatePicker::TYPE_INPUT,
                     'options' => [
                         'placeholder' => 'yyyy-mm-dd',
@@ -66,37 +94,26 @@ use yii\widgets\MaskedInput;
                         'autoclose' => true,
                         'format' => 'yyyy-mm-dd',
                     ]]) ?>
-                <?= $form->field($model, 'nik')->textInput(['maxlength' => true]) ?>
+                <?= $form->field($model, 'tgl_keluar')->widget(DatePicker::classname(), [
+                    'type' => DatePicker::TYPE_INPUT,
+                    'options' => [
+                        'placeholder' => 'yyyy-mm-dd',
+                    ],
+                    'pluginOptions' => [
+                        'autoclose' => true,
+                        'format' => 'yyyy-mm-dd',
+                    ]]) ?>
             </div>
             <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
-                <?= $form->field($model, 'nip')->textInput(['maxlength' => true]) ?>
                 <?= $form->field($model, 'phone_1')->widget(MaskedInput::classname(), ['mask'=>'9999-99999-999']) ?>
                 <?= $form->field($model, 'phone_2')->widget(MaskedInput::classname(), ['mask'=>'9999-99999-999']) ?>
+                <?= $form->field($model, 'email')->textInput(['maxlength' => true]) ?>
             </div>
             <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
-                <?= $form->field($model, 'email')->textInput(['maxlength' => true]) ?>
-                <?= $form->field($model, 'fax')->textInput(['maxlength' => true]) ?>
-                <?= $form->field($model, 'golongan')->textInput(['maxlength' => true]) ?>
-            </div>
-            <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0">
-                <?= $form->field($model, 'masuk')->widget(DatePicker::classname(), [
-                    'type' => DatePicker::TYPE_INPUT,
-                    'options' => [
-                        'placeholder' => 'yyyy-mm-dd',
-                    ],
-                    'pluginOptions' => [
-                        'autoclose' => true,
-                        'format' => 'yyyy-mm-dd',
-                    ]]) ?>
-                <?= $form->field($model, 'keluar')->widget(DatePicker::classname(), [
-                    'type' => DatePicker::TYPE_INPUT,
-                    'options' => [
-                        'placeholder' => 'yyyy-mm-dd',
-                    ],
-                    'pluginOptions' => [
-                        'autoclose' => true,
-                        'format' => 'yyyy-mm-dd',
-                    ]]) ?>
+                <?= $form->field($model, 'typeuser_code')->widget(Select2::classname(), [
+                        'data' => $typeUser,
+                        'options' => ['placeholder' => 'Kabupaten'],
+                    ]) ?>
                 <?= $form->field($model, 'keterangan')->textarea(['rows' => 4]) ?>
             </div>
             <div class="margin-bottom-20 full-width"></div>
@@ -114,7 +131,7 @@ use yii\widgets\MaskedInput;
     function listKabupaten(provinsiId)
     {
         $.ajax({
-            url: "<?=Url::to(['karyawan/list-kabupaten']) ?>",
+            url: "<?=Url::to(['profile/list-kabupaten']) ?>",
             type: "GET",
             data: {
                 provinsiId: provinsiId
@@ -124,12 +141,12 @@ use yii\widgets\MaskedInput;
             beforeSend: function(){},
             success: function(data){
                 var o = $.parseJSON(data);
-                $("#masterperson-kabupaten_id").empty();
+                $("#profile-kabupaten_id").empty();
 				$.each(o, function(index, value){
 					var opt = new Option(value.name, value.id, false, false);
-					$("#masterperson-kabupaten_id").append(opt);
+					$("#profile-kabupaten_id").append(opt);
 				});
-				$("#masterperson-kabupaten_id").val(null);
+				$("#profile-kabupaten_id").val(null);
             },
             error: function(XMLHttpRequest, textStatus, errorThrown){},
             complete: function(){}
@@ -139,7 +156,7 @@ use yii\widgets\MaskedInput;
     function listKecamatan(kecamatanId)
     {
         $.ajax({
-            url: "<?=Url::to(['karyawan/list-kecamatan']) ?>",
+            url: "<?=Url::to(['profile/list-kecamatan']) ?>",
             type: "GET",
             data: {
                 kecamatanId: kecamatanId
@@ -149,12 +166,12 @@ use yii\widgets\MaskedInput;
             beforeSend: function(){},
             success: function(data){
                 var o = $.parseJSON(data);
-                $("#masterperson-kecamatan_id").empty();
+                $("#profile-kecamatan_id").empty();
 				$.each(o, function(index, value){
 					var opt = new Option(value.name, value.id, false, false);
-					$("#masterperson-kecamatan_id").append(opt);
+					$("#profile-kecamatan_id").append(opt);
 				});
-				$("#masterperson-kecamatan_id").val(null);
+				$("#profile-kecamatan_id").val(null);
             },
             error: function(XMLHttpRequest, textStatus, errorThrown){},
             complete: function(){}
@@ -164,7 +181,7 @@ use yii\widgets\MaskedInput;
     function listKelurahan(kelurahanId)
     {
         $.ajax({
-            url: "<?=Url::to(['karyawan/list-kelurahan']) ?>",
+            url: "<?=Url::to(['profile/list-kelurahan']) ?>",
             type: "GET",
             data: {
                 kelurahanId: kelurahanId
@@ -174,12 +191,12 @@ use yii\widgets\MaskedInput;
             beforeSend: function(){},
             success: function(data){
                 var o = $.parseJSON(data);
-                $("#masterperson-kelurahan_id").empty();
+                $("#profile-kelurahan_id").empty();
 				$.each(o, function(index, value){
 					var opt = new Option(value.name, value.id, false, false);
-					$("#masterperson-kelurahan_id").append(opt);
+					$("#profile-kelurahan_id").append(opt);
 				});
-				$("#masterperson-kelurahan_id").val(null);
+				$("#profile-kelurahan_id").val(null);
             },
             error: function(XMLHttpRequest, textStatus, errorThrown){},
             complete: function(){}
@@ -188,17 +205,17 @@ use yii\widgets\MaskedInput;
 
     $(document).ready(function(){
         // load list kabupaten
-        $("body").off("change","#masterperson-provinsi_id").on("change","#masterperson-provinsi_id", function(e){
+        $("body").off("change","#profile-provinsi_id").on("change","#profile-provinsi_id", function(e){
             e.preventDefault();
             listKabupaten($(this).val());
         });
         // load list kecamatan
-        $("body").off("change","#masterperson-kabupaten_id").on("change","#masterperson-kabupaten_id", function(e){
+        $("body").off("change","#profile-kabupaten_id").on("change","#profile-kabupaten_id", function(e){
             e.preventDefault();
             listKecamatan($(this).val());
         });
         // load list kelurahan
-        $("body").off("change","#masterperson-kecamatan_id").on("change","#masterperson-kecamatan_id", function(e){
+        $("body").off("change","#profile-kecamatan_id").on("change","#profile-kecamatan_id", function(e){
             e.preventDefault();
             listKelurahan($(this).val());
         });

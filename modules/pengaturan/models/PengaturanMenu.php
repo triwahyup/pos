@@ -48,8 +48,9 @@ class PengaturanMenu extends \yii\db\ActiveRecord
     {
         return [
             [['name', 'urutan', 'position'], 'required'],
-            [['level', 'parent_1', 'parent_2', 'urutan', 'created_at', 'updated_at'], 'integer'],
-            [['id', 'parent_id', 'position'], 'string', 'max' => 3],
+            [['level', 'urutan', 'created_at', 'updated_at'], 'integer'],
+            [['parent_1', 'parent_2'], 'string'],
+            [['id', 'parent_id', 'position'], 'string', 'max' => 8],
             [['name', 'slug', 'link'], 'string', 'max' => 128],
             [['icon'], 'string', 'max' => 64],
             [['id'], 'unique'],
@@ -84,9 +85,9 @@ class PengaturanMenu extends \yii\db\ActiveRecord
         $total=0;
         if($model > 0){
             $model = PengaturanMenu::find()->orderBy(['id'=>SORT_DESC])->one();
-            $total = (int)substr($model->id, 1);
+            $total = (int)substr($model->id, -3);
         }
-        return (string)sprintf('%03s', ($total+1));
+        return (string)'MENU-'.sprintf('%03s', ($total+1));
     }
 
     public function getKode()

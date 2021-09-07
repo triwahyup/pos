@@ -4,6 +4,7 @@ namespace app\modules\master\models;
 
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
+use app\commands\Konstanta;
 use app\modules\master\models\MasterPerson;
 
 /**
@@ -17,8 +18,7 @@ class MasterSupplierSearch extends MasterPerson
     public function rules()
     {
         return [
-            [['code', 'name', 'address', 'phone_1', 'phone_2', 'email', 'fax', 'keterangan', 'masuk', 'keluar', 'tgl_jatuh_tempo', 'group_supplier_code'], 'safe'],
-            [['provinsi_id', 'kabupaten_id', 'kecamatan_id', 'kelurahan_id', 'kode_pos', 'type_user', 'status', 'created_at', 'updated_at'], 'integer'],
+            [['code', 'name', 'address', 'phone_1', 'email', 'tgl_jatuh_tempo', 'group_supplier_code'], 'safe'],
         ];
     }
 
@@ -40,7 +40,7 @@ class MasterSupplierSearch extends MasterPerson
      */
     public function search($params)
     {
-        $query = MasterPerson::find()->where(['type_user'=>2]);
+        $query = MasterPerson::find();
 
         // add conditions that should always apply here
 
@@ -56,30 +56,17 @@ class MasterSupplierSearch extends MasterPerson
             return $dataProvider;
         }
 
+        $query->where(['type_user'=>Konstanta::TYPE_SUPPLIER]);
         // grid filtering conditions
         $query->andFilterWhere([
-            'provinsi_id' => $this->provinsi_id,
-            'kabupaten_id' => $this->kabupaten_id,
-            'kecamatan_id' => $this->kecamatan_id,
-            'kelurahan_id' => $this->kelurahan_id,
-            'kode_pos' => $this->kode_pos,
-            'type_user' => $this->type_user,
-            'masuk' => $this->masuk,
-            'keluar' => $this->keluar,
             'tgl_jatuh_tempo' => $this->tgl_jatuh_tempo,
-            'status' => $this->status,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
         ]);
 
         $query->andFilterWhere(['like', 'code', $this->code])
             ->andFilterWhere(['like', 'name', $this->name])
             ->andFilterWhere(['like', 'address', $this->address])
             ->andFilterWhere(['like', 'phone_1', $this->phone_1])
-            ->andFilterWhere(['like', 'phone_2', $this->phone_2])
             ->andFilterWhere(['like', 'email', $this->email])
-            ->andFilterWhere(['like', 'fax', $this->fax])
-            ->andFilterWhere(['like', 'keterangan', $this->keterangan])
             ->andFilterWhere(['like', 'group_supplier_code', $this->group_supplier_code]);
 
         return $dataProvider;

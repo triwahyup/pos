@@ -2,7 +2,7 @@
 
 namespace app\modules\pengaturan\models;
 
-use app\commands\Helper;
+use app\commands\Konstanta;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use app\modules\master\models\MasterKode;
@@ -58,8 +58,7 @@ class RoleSearch extends MasterKode
             return $dataProvider;
         }
         
-        $query->where(['type'=>Helper::TYPE_USER])
-            ->andWhere('code <> "003"');
+        $query->where(['type'=>Konstanta::TYPE_USER]);
         $query->andFilterWhere(['like', 'code', $this->code])
             ->andFilterWhere(['like', 'name', $this->name])
             ->andFilterWhere(['like', 'type', $this->type]);
@@ -72,8 +71,7 @@ class RoleSearch extends MasterKode
                 ->groupBy('parent')
                 ->column();
             foreach($childs as $val){
-                $q = explode('#', $val);
-                $queryMenu= " OR (type='".$q[0]."' AND code='".$q[1]."')";
+                $queryMenu = " OR (code='".$val."')";
             }
             $query->andWhere($queryMenu);
         }

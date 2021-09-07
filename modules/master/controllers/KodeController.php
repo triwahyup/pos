@@ -2,7 +2,7 @@
 
 namespace app\modules\master\controllers;
 
-use app\commands\Helper;
+use app\commands\Konstanta;
 use app\models\AuthItem;
 use app\models\AuthItemChild;
 use app\models\AuthAssignment;
@@ -117,8 +117,8 @@ class KodeController extends Controller
                     $model->code = $model->newcode();
                     if($model->save()){
                         $auth = \Yii::$app->authManager;
-                        $author = $auth->createRole(strtolower($model->type).'#'.$model->code);
-                        if($model->type == Helper::TYPE_USER){
+                        $author = $auth->createRole(strtolower($model->code));
+                        if($model->type == Konstanta::TYPE_USER){
                             if(!$auth->add($author)){
                                 $success = false;
                                 $message = 'ERROR CREATE AUTH (MASTER KODE)';
@@ -248,9 +248,9 @@ class KodeController extends Controller
         $transaction = $connection->beginTransaction();
         try {
             if($model->delete()){
-                AuthItemChild::deleteAll("parent='".$model->type."#".$model->code."' OR child='".$model->type."#".$model->code."'");
-                AuthAssignment::deleteAll(['item_name' => $model->type."#".$model->code]);
-                AuthItem::deleteAll(['name' => $model->type."#".$model->code]);
+                AuthItemChild::deleteAll("parent='".$model->code."' OR child='".$model->code."'");
+                AuthAssignment::deleteAll(['item_name' => $model->code]);
+                AuthItem::deleteAll(['name' => $model->code]);
 
                 $message = 'DELETE KODE: '.$model->name;
                 $transaction->commit();

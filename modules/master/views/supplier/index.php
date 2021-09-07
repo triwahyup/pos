@@ -9,12 +9,12 @@ use app\commands\Helper;
 /* @var $searchModel app\modules\master\models\MasterSupplierSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Master Supplier';
+$this->title = 'Data Supplier';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="master-person-index">
     <p class="text-right">
-        <?= Html::a('<i class="fontello icon-plus"></i><span>Create Master Supplier</span>', ['create'], ['class' => 'btn btn-success btn-flat btn-sm']) ?>
+        <?= Html::a('<i class="fontello icon-plus"></i><span>Create Data Supplier</span>', ['create'], ['class' => 'btn btn-success btn-flat btn-sm']) ?>
     </p>
 
     <?= GridView::widget([
@@ -22,16 +22,11 @@ $this->params['breadcrumbs'][] = $this->title;
         'filterModel' => $searchModel,
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
-            [
-                'attribute' => 'code',
-                'contentOptions' => [
-                    'class' => 'text-center',
-                ],
-            ],
             'name',
             'address',
             [
                 'attribute' => 'phone_1',
+                'label' => 'Phone',
                 'contentOptions' => [
                     'class' => 'text-center',
                 ],

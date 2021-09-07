@@ -2,6 +2,7 @@
 
 namespace app\modules\master\controllers;
 
+use app\commands\Konstanta;
 use app\models\Logs;
 use app\models\User;
 use app\modules\master\models\MasterProvinsi;
@@ -106,13 +107,13 @@ class SupplierController extends Controller
         
         $message = '';
         $model = new MasterPerson();
-        $model->code = $model->newcode();
+        $model->code = $model->newcode(Konstanta::TYPE_SUPPLIER);
         if ($this->request->isPost) {
             if ($model->load($this->request->post())) {
                 $connection = \Yii::$app->db;
 			    $transaction = $connection->beginTransaction();
                 try {
-                    $model->type_user = 2; // TYPE SUPPLIER
+                    $model->type_user = Konstanta::TYPE_SUPPLIER;
                     $model->phone_1 = str_replace('-', '', $model->phone_1);
                     if(!empty($model->phone_2)){
                         $model->phone_2 = str_replace('-', '', $model->phone_2);
