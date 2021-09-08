@@ -17,7 +17,7 @@ use yii\widgets\ActiveForm;
                     'data' => $type,
                     'options' => ['placeholder' => 'Type Barang'],
                 ]) ?>
-            <?= $form->field($model, 'keterangan')->textarea(['rows' => 6]) ?>
+            <?= $form->field($model, 'keterangan')->textarea(['rows' => 4]) ?>
         </div>
     </div>
     <div class="text-right">

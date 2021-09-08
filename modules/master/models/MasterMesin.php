@@ -3,30 +3,27 @@
 namespace app\modules\master\models;
 
 use Yii;
-use app\commands\Konstanta;
-use app\modules\master\models\MasterKode;
 use yii\behaviors\TimestampBehavior;
 
 /**
- * This is the model class for table "master_satuan".
+ * This is the model class for table "master_mesin".
  *
  * @property string $code
  * @property string|null $name
- * @property string|null $type
- * @property float|null $qty
+ * @property string|null $jenis
  * @property string|null $keterangan
  * @property int|null $status
  * @property int|null $created_at
  * @property int|null $updated_at
  */
-class MasterSatuan extends \yii\db\ActiveRecord
+class MasterMesin extends \yii\db\ActiveRecord
 {
     /**
      * {@inheritdoc}
      */
     public static function tableName()
     {
-        return 'master_satuan';
+        return 'master_mesin';
     }
 
     public function behaviors()
@@ -42,11 +39,10 @@ class MasterSatuan extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['name', 'type', 'qty'], 'required'],
-            [['qty'], 'number'],
+            [['name', 'jenis'], 'required'],
             [['keterangan'], 'string'],
             [['status', 'created_at', 'updated_at'], 'integer'],
-            [['code', 'type'], 'string', 'max' => 8],
+            [['code', 'jenis'], 'string', 'max' => 8],
             [['name'], 'string', 'max' => 128],
             [['code'], 'unique'],
             [['status'], 'default', 'value' => 1],
@@ -61,8 +57,7 @@ class MasterSatuan extends \yii\db\ActiveRecord
         return [
             'code' => 'Code',
             'name' => 'Name',
-            'type' => 'Type',
-            'qty' => 'Qty',
+            'jenis' => 'Jenis',
             'keterangan' => 'Keterangan',
             'status' => 'Status',
             'created_at' => 'Created At',
@@ -70,30 +65,14 @@ class MasterSatuan extends \yii\db\ActiveRecord
         ];
     }
 
-    public function newcode($type)
+    public function newcode()
     {
-        $model = MasterSatuan::find()->where(['type'=>$type])->count();
+        $model = MasterMesin::find()->count();
         $total=0;
         if($model > 0){
-            $model = MasterSatuan::find()
-                ->where(['type'=>$type])
-                ->orderBy(['code'=>SORT_DESC])
-                ->one();
+            $model = MasterMesin::find()->orderBy(['code'=>SORT_DESC])->one();
             $total = (int)substr($model->code, -3);
         }
-        if($type == Konstanta::TYPE_KERTAS){
-            return (string)'KRTS-'.sprintf('%03s', ($total+1));
-        }
-        else if($type == Konstanta::TYPE_TINTA){
-            return (string)'TINT-'.sprintf('%03s', ($total+1));
-        }
-        else if($type == Konstanta::TYPE_LAIN){
-            return (string)'LAIN-'.sprintf('%03s', ($total+1));
-        }
-    }
-
-    public function getTypeBarang()
-    {
-        return $this->hasOne(MasterKode::className(), ['code' => 'type']);
+        return (string)'MSN-'.sprintf('%03s', ($total+1));
     }
 }

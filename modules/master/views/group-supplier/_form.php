@@ -13,7 +13,7 @@ use yii\widgets\ActiveForm;
     <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
         <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0">
             <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
-            <?= $form->field($model, 'keterangan')->textarea(['rows' => 6]) ?>
+            <?= $form->field($model, 'keterangan')->textarea(['rows' => 2]) ?>
         </div>
     </div>
     <div class="text-right">

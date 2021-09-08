@@ -3,16 +3,15 @@
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
-/* @var $model app\modules\master\models\MasterSatuan */
+/* @var $model app\modules\pengaturan\models\PengaturanApproval */
 
-$this->title = 'Update Data Satuan: ' . $model->name;
-$this->params['breadcrumbs'][] = ['label' => 'Data Satuan', 'url' => ['index']];
+$this->title = 'Update Pengaturan Approval: ' . $model->name;
+$this->params['breadcrumbs'][] = ['label' => 'Pengaturan Approval', 'url' => ['index']];
 $this->params['breadcrumbs'][] = ['label' => $model->name, 'url' => ['view', 'code' => $model->code]];
 $this->params['breadcrumbs'][] = 'Update';
 ?>
-<div class="master-satuan-update">
+<div class="pengaturan-approval-update">
     <?= $this->render('_form', [
         'model' => $model,
-        'type' => $type,
     ]) ?>
 </div>

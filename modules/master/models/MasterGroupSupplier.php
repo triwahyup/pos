@@ -3,6 +3,7 @@
 namespace app\modules\master\models;
 
 use Yii;
+use yii\behaviors\TimestampBehavior;
 
 /**
  * This is the model class for table "master_group_supplier".
@@ -24,18 +25,26 @@ class MasterGroupSupplier extends \yii\db\ActiveRecord
         return 'master_group_supplier';
     }
 
+    public function behaviors()
+    {
+        return [
+            TimestampBehavior::className(),
+        ];
+    }
+
     /**
      * {@inheritdoc}
      */
     public function rules()
     {
         return [
-            [['code'], 'required'],
+            [['name'], 'required'],
             [['keterangan'], 'string'],
             [['status', 'created_at', 'updated_at'], 'integer'],
             [['code'], 'string', 'max' => 8],
             [['name'], 'string', 'max' => 128],
             [['code'], 'unique'],
+            [['status'], 'default', 'value' => 1],
         ];
     }
 
@@ -52,5 +61,16 @@ class MasterGroupSupplier extends \yii\db\ActiveRecord
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
         ];
+    }
+
+    public function newcode()
+    {
+        $model = MasterGroupSupplier::find()->count();
+        $total=0;
+        if($model > 0){
+            $model = MasterGroupSupplier::find()->orderBy(['code'=>SORT_DESC])->one();
+            $total = (int)substr($model->code, -3);
+        }
+        return (string)'GRUP-'.sprintf('%03s', ($total+1));
     }
 }

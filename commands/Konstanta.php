@@ -16,4 +16,8 @@ class Konstanta
     const TYPE_KERTAS = 'KODE-008';
     const TYPE_TINTA = 'KODE-009';
     const TYPE_LAIN = 'KODE-010';
+    // Master Akun
+    const TYPE_PERSEDIAAN = '155';
+    const TYPE_PENJUALAN = '500';
+    const TYPE_HPP = '620';
 }

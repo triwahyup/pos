@@ -56,7 +56,7 @@ class MasterCustomerSearch extends MasterPerson
             return $dataProvider;
         }
 
-        $query->where(['type_user' => Konstanta::TYPE_CUSTOMER]);
+        $query->where(['type_user' => Konstanta::TYPE_CUSTOMER, 'status'=>1]);
         if(!empty($this->created_at)){
             $t1 = strtotime($this->created_at);
 			$t2 = strtotime("+1 days", $t1);

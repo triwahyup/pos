@@ -1,24 +1,20 @@
 <?php
-use kartik\widgets\Select2;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
+
 /* @var $this yii\web\View */
-/* @var $model app\modules\master\models\MasterSatuan */
+/* @var $model app\modules\master\models\MasterMesin */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 
-<div class="master-satuan-form">
+<div class="master-mesin-form">
     <?php $form = ActiveForm::begin(); ?>
     <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
         <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0">
             <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
-            <?= $form->field($model, 'type')->widget(Select2::classname(), [
-                    'data' => $type,
-                    'options' => ['placeholder' => 'Type Barang'],
-                ]) ?>
-            <?= $form->field($model, 'qty')->textInput() ?>
-            <?= $form->field($model, 'keterangan')->textarea(['rows' => 4]) ?>
+            <?= $form->field($model, 'jenis')->textInput(['maxlength' => true]) ?>
+            <?= $form->field($model, 'keterangan')->textarea(['rows' => 2]) ?>
         </div>
     </div>
     <div class="text-right">

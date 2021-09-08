@@ -3,6 +3,8 @@
 namespace app\modules\master\controllers;
 
 use app\commands\Konstanta;
+use app\models\AuthAssignment;
+use app\models\AuthItemChild;
 use app\models\Logs;
 use app\models\User;
 use app\modules\master\models\MasterKode;
@@ -112,6 +114,7 @@ class ProfileController extends Controller
             ->column();
         
         $message = '';
+        $success = true;
         $model = new Profile();
         if ($this->request->isPost) {
             if ($model->load($this->request->post())) {
@@ -135,41 +138,63 @@ class ProfileController extends Controller
                     $user->confirmed_at = time();
                     $user->created_at = time();
                     $user->updated_at = time();
-
                     if($user->save()){
+                        $authItems = AuthItemChild::findAll(['parent'=>strtolower($model->typeuser_code)]);
+                        if(count($authItems) > 0){
+                            foreach($authItems as $val){
+                                $authAssignment = new AuthAssignment();
+                                $authAssignment->item_name = $val->child;
+                                $authAssignment->user_id = $user->id;
+                                $authAssignment->created_at = time();
+                                if(!$authAssignment->save()){
+                                    $success = false;
+                                    $message = (count($authAssignment->errors) > 0) ? 'ERROR CREATE AUTH : ' : '';
+                                    foreach($authAssignment->errors as $error => $value){
+                                        $message .= $value[0].', ';
+                                    }
+                                    $message = substr($message, 0, -2);
+                                }
+                            }
+                        }
+                        
                         $model->user_id = $user->id;
                         $model->phone_1 = str_replace('-', '', $model->phone_1);
                         if(!empty($model->phone_2)){
                             $model->phone_2 = str_replace('-', '', $model->phone_2);
                         }
-                        if($model->save()){
-                            $transaction->commit();
-                            $message = 'CREATE KARYAWAN: '.$model->name;
-                            $logs =	[
-                                'type' => Logs::TYPE_USER,
-                                'description' => $message,
-                            ];
-                            Logs::addLog($logs);
-
-                            \Yii::$app->session->setFlash('success', $message);
-                            return $this->redirect(['view', 'user_id' => $model->user_id]);
-                        }else{
+                        if(!$model->save()){
+                            $success = false;
                             $message = (count($model->errors) > 0) ? 'ERROR CREATE KARYAWAN: ' : '';
                             foreach($model->errors as $error => $value){
                                 $message .= $value[0].', ';
                             }
                             $message = substr($message, 0, -2);
-                            $transaction->rollBack();
                         }
                     }else{
+                        $success = false;
                         $message = (count($user->errors) > 0) ? 'ERROR CREATE USER: ' : '';
                         foreach($user->errors as $error => $value){
                             $message .= $value[0].', ';
                         }
                         $message = substr($message, 0, -2);
+                    }
+
+                    if($success){
+                        $transaction->commit();
+                        $message = 'CREATE KARYAWAN: '.$model->name;
+                        $logs =	[
+                            'type' => Logs::TYPE_USER,
+                            'description' => $message,
+                        ];
+                        Logs::addLog($logs);
+
+                        \Yii::$app->session->setFlash('success', $message);
+                        return $this->redirect(['view', 'user_id' => $model->user_id]);
+                    }else{
                         $transaction->rollBack();
                     }
                 }catch(\Exception $e) {
+                    $success = false;
                     $message = $e->getMessage();
 				    $transaction->rollBack();
                 }
@@ -212,11 +237,31 @@ class ProfileController extends Controller
             ->column();
         
         $message = '';
+        $success = true;
         $model = $this->findModel($user_id);
         if ($this->request->isPost && $model->load($this->request->post())) {
             $connection = \Yii::$app->db;
             $transaction = $connection->beginTransaction();
             try {
+                AuthAssignment::deleteAll('user_id=:user_id', [':user_id'=>$user_id]);
+                $authItems = AuthItemChild::findAll(['parent'=>strtolower($model->typeuser_code)]);
+                if(count($authItems) > 0){
+                    foreach($authItems as $val){
+                        $authAssignment = new AuthAssignment();
+                        $authAssignment->item_name = $val->child;
+                        $authAssignment->user_id = $user_id;
+                        $authAssignment->created_at = time();
+                        if(!$authAssignment->save()){
+                            $success = false;
+                            $message = (count($authAssignment->errors) > 0) ? 'ERROR UPDATE AUTH : ' : '';
+                            foreach($authAssignment->errors as $error => $value){
+                                $message .= $value[0].', ';
+                            }
+                            $message = substr($message, 0, -2);
+                        }
+                    }
+                }
+
                 $user = User::findOne(['id'=>$user_id]);
                 $user->email = $model->email;
                 $user->updated_at = time();
@@ -225,34 +270,38 @@ class ProfileController extends Controller
                     if(!empty($model->phone_2)){
                         $model->phone_2 = str_replace('-', '', $model->phone_2);
                     }
-                    if($model->save()){
-                        $transaction->commit();
-                        $message = 'UPDATE KARYAWAN: '.$model->name;
-                        $logs =	[
-                            'type' => Logs::TYPE_USER,
-                            'description' => $message,
-                        ];
-                        Logs::addLog($logs);
-
-                        \Yii::$app->session->setFlash('success', $message);
-                        return $this->redirect(['view', 'user_id' => $model->user_id]);
-                    }else{
+                    if(!$model->save()){
+                        $success = false;
                         $message = (count($model->errors) > 0) ? 'ERROR UPDATE KARYAWAN: ' : '';
                         foreach($model->errors as $error => $value){
                             $message .= $value[0].', ';
                         }
                         $message = substr($message, 0, -2);
-                        $transaction->rollBack();
                     }
                 }else{
+                    $success = false;
                     $message = (count($user->errors) > 0) ? 'ERROR CREATE USER: ' : '';
                     foreach($user->errors as $error => $value){
                         $message .= $value[0].', ';
                     }
                     $message = substr($message, 0, -2);
+                }
+                if($success){
+                    $transaction->commit();
+                    $message = 'UPDATE KARYAWAN: '.$model->name;
+                    $logs =	[
+                        'type' => Logs::TYPE_USER,
+                        'description' => $message,
+                    ];
+                    Logs::addLog($logs);
+
+                    \Yii::$app->session->setFlash('success', $message);
+                    return $this->redirect(['view', 'user_id' => $model->user_id]);
+                }else{
                     $transaction->rollBack();
                 }
             }catch(\Exception $e) {
+                $success = false;
                 $message = $e->getMessage();
                 $transaction->rollBack();
             }
@@ -281,33 +330,60 @@ class ProfileController extends Controller
     public function actionDelete($user_id)
     {
         $message = '';
+        $success = true;
         $model = $this->findModel($user_id);
-        $user = User::findOne(['id'=>$user_id]);
-        $connection = \Yii::$app->db;
-        $transaction = $connection->beginTransaction();
-        try {
-            if($model->delete() && $user->delete()){
-                $message = 'DELETE KARYAWAN: '.$model->name;
-                $transaction->commit();
-                \Yii::$app->session->setFlash('success', $message);
-            }else{
-                $message = (count($model->errors) > 0) ? 'ERROR DELETE KARYAWAN' : '';
-                foreach($model->errors as $error=>$value){
-                    $message .= strtoupper($error).": ".$value[0].', ';
+        if(isset($model)){
+            $connection = \Yii::$app->db;
+			$transaction = $connection->beginTransaction();
+            try{
+                $model->status=0;
+                if(!$model->save()){
+                    $success = false;
+                    $message = (count($model->errors) > 0) ? 'ERROR DELETE KARYAWAN: ' : '';
+                    foreach($model->errors as $error => $value){
+                        $message .= $value[0].', ';
+                    }
+                    $message = substr($message, 0, -2);
                 }
-                $message = substr($message,0,-2);
+
+                $user = User::findOne(['id'=>$user_id]);
+                $user->status = 0;
+                $user->blocked_at = time();
+                if(!$user->save()){
+                    $success = false;
+                    $message = (count($user->errors) > 0) ? 'ERROR BLOCK USER: ' : '';
+                    foreach($user->errors as $error => $value){
+                        $message .= $value[0].', ';
+                    }
+                    $message = substr($message, 0, -2);
+                }
+
+                if($success){
+                    AuthAssignment::deleteAll('user_id=:user_id', [':user_id'=>$user_id]);
+                    $transaction->commit();
+                    $message = 'DELETE KARYAWAN:'. $model->name;
+                    $logs =	[
+                        'type' => Logs::TYPE_USER,
+                        'description' => $message,
+                    ];
+                    Logs::addLog($logs);
+                    \Yii::$app->session->setFlash('success', $message);
+                }else{
+                    $transaction->rollBack();
+                    \Yii::$app->session->setFlash('error', $message);
+                }
+            }catch(\Exception $e){
+				$success = false;
+				$message = $e->getMessage();
+				$transaction->rollBack();
                 \Yii::$app->session->setFlash('error', $message);
             }
-        }catch (\Exception $e) {
-            $message = $e->getMessage();
-            \Yii::$app->session->setFlash('error', $message);
-            $transaction->rollBack();
+            $logs =	[
+                'type' => Logs::TYPE_USER,
+                'description' => $message,
+            ];
+            Logs::addLog($logs);
         }
-        $logs = [
-			'type' => Logs::TYPE_USER,
-			'description' => $message,
-		];
-		Logs::addLog($logs);
         return $this->redirect(['index']);
     }
 

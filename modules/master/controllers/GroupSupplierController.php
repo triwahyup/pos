@@ -2,10 +2,13 @@
 
 namespace app\modules\master\controllers;
 
+use app\models\Logs;
+use app\models\User;
 use app\modules\master\models\MasterGroupSupplier;
 use app\modules\master\models\MasterGroupSupplierSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
+use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 
 /**
@@ -21,6 +24,31 @@ class GroupSupplierController extends Controller
         return array_merge(
             parent::behaviors(),
             [
+                'access' => [
+                    'class' => AccessControl::className(),
+				    'rules' => [
+                        [
+                            'actions' => ['create'],
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('group-supplier')),
+                            'roles' => ['@'],
+                        ],
+                        [
+                            'actions' => ['index', 'view'],
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('group-supplier')),
+                            'roles' => ['@'],
+                        ], 
+                        [
+                            'actions' => ['update'],
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('group-supplier')),
+                            'roles' => ['@'],
+                        ], 
+                        [
+                            'actions' => ['delete'],
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('group-supplier')),
+                            'roles' => ['@'],
+                        ],
+                    ],
+                ],
                 'verbs' => [
                     'class' => VerbFilter::className(),
                     'actions' => [
@@ -66,11 +94,49 @@ class GroupSupplierController extends Controller
      */
     public function actionCreate()
     {
+        $message = '';
+        $success = true;
         $model = new MasterGroupSupplier();
-
         if ($this->request->isPost) {
-            if ($model->load($this->request->post()) && $model->save()) {
-                return $this->redirect(['view', 'code' => $model->code]);
+            if ($model->load($this->request->post())) {
+                $connection = \Yii::$app->db;
+			    $transaction = $connection->beginTransaction();
+                try{
+                    $model->code = $model->newcode();
+                    if(!$model->save()){
+                        $success = false;
+                        $message = (count($model->errors) > 0) ? 'ERROR CREATE GROUP SUPPLIER: ' : '';
+                        foreach($model->errors as $error => $value){
+                            $message .= $value[0].', ';
+                        }
+                        $message = substr($message, 0, -2);
+                    }
+
+                    if($success){
+                        $transaction->commit();
+                        $message = 'CREATE GROUP SUPPLIER: '.$model->name;
+                        $logs =	[
+                            'type' => Logs::TYPE_USER,
+                            'description' => $message,
+                        ];
+                        Logs::addLog($logs);
+
+                        \Yii::$app->session->setFlash('success', $message);
+                        return $this->redirect(['view', 'code' => $model->code]);
+                    }else{
+                        $transaction->rollBack();
+                    }
+                }catch(\Exception $e){
+                    $success = false;
+                    $message = $e->getMessage();
+				    $transaction->rollBack();
+                }
+                $logs =	[
+                    'type' => Logs::TYPE_USER,
+                    'description' => $message,
+                ];
+                Logs::addLog($logs);
+                \Yii::$app->session->setFlash('error', $message);
             }
         } else {
             $model->loadDefaultValues();
@@ -90,10 +156,47 @@ class GroupSupplierController extends Controller
      */
     public function actionUpdate($code)
     {
+        $message = '';
+        $success = true;
         $model = $this->findModel($code);
+        if ($this->request->isPost && $model->load($this->request->post())) {
+            $connection = \Yii::$app->db;
+            $transaction = $connection->beginTransaction();
+            try{
+                if(!$model->save()){
+                    $success = false;
+                    $message = (count($model->errors) > 0) ? 'ERROR UPDATE GROUP SUPPLIER: ' : '';
+                    foreach($model->errors as $error => $value){
+                        $message .= $value[0].', ';
+                    }
+                    $message = substr($message, 0, -2);
+                }
 
-        if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'code' => $model->code]);
+                if($success){
+                    $transaction->commit();
+                    $message = 'UPDATE GROUP SUPPLIER: '.$model->name;
+                    $logs =	[
+                        'type' => Logs::TYPE_USER,
+                        'description' => $message,
+                    ];
+                    Logs::addLog($logs);
+
+                    \Yii::$app->session->setFlash('success', $message);
+                    return $this->redirect(['view', 'code' => $model->code]);
+                }else{
+                    $transaction->rollBack();
+                }
+            }catch(\Exception $e){
+                $success = false;
+                $message = $e->getMessage();
+                $transaction->rollBack();
+            }
+            $logs =	[
+                'type' => Logs::TYPE_USER,
+                'description' => $message,
+            ];
+            Logs::addLog($logs);
+            \Yii::$app->session->setFlash('error', $message);
         }
 
         return $this->render('update', [
@@ -110,8 +213,48 @@ class GroupSupplierController extends Controller
      */
     public function actionDelete($code)
     {
-        $this->findModel($code)->delete();
+        $success = true;
+		$message = '';
+        $model = $this->findModel($code);
+        if(isset($model)){
+            $connection = \Yii::$app->db;
+			$transaction = $connection->beginTransaction();
+            try{
+                $model->status = 0;
+                if(!$model->save()){
+                    $success = false;
+                    $message = (count($model->errors) > 0) ? 'ERROR DELETE GROUP SUPPLIER: ' : '';
+                    foreach($model->errors as $error => $value){
+                        $message .= $value[0].', ';
+                    }
+                    $message = substr($message, 0, -2);
+                }
 
+                if($success){
+                    $transaction->commit();
+                    $message = 'DELETE GROUP SUPPLIER:'. $model->name;
+                    $logs =	[
+                        'type' => Logs::TYPE_USER,
+                        'description' => $message,
+                    ];
+                    Logs::addLog($logs);
+                    \Yii::$app->session->setFlash('success', $message);
+                }else{
+                    $transaction->rollBack();
+                    \Yii::$app->session->setFlash('error', $message);
+                }
+            }catch(\Exception $e){
+				$success = false;
+				$message = $e->getMessage();
+				$transaction->rollBack();
+                \Yii::$app->session->setFlash('error', $message);
+            }
+            $logs =	[
+                'type' => Logs::TYPE_USER,
+                'description' => $message,
+            ];
+            Logs::addLog($logs);
+        }
         return $this->redirect(['index']);
     }
 
@@ -124,7 +267,7 @@ class GroupSupplierController extends Controller
      */
     protected function findModel($code)
     {
-        if (($model = MasterGroupSupplier::findOne($id)) !== null) {
+        if (($model = MasterGroupSupplier::findOne($code)) !== null) {
             return $model;
         }
 

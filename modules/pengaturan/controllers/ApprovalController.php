@@ -1,22 +1,25 @@
 <?php
 
-namespace app\modules\master\controllers;
+namespace app\modules\pengaturan\controllers;
 
+use app\commands\Konstanta;
 use app\models\Logs;
 use app\models\User;
-use app\modules\master\models\MasterAccounts;
-use app\modules\master\models\MasterAccountsSearch;
-use app\modules\master\models\MasterAccountsDetail;
-use app\modules\master\models\TempMasterAccountsDetail;
+use app\models\Profile;
+use app\modules\master\models\MasterKode;
+use app\modules\pengaturan\models\PengaturanApproval;
+use app\modules\pengaturan\models\PengaturanApprovalDetail;
+use app\modules\pengaturan\models\PengaturanApprovalSearch;
+use app\modules\pengaturan\models\TempPengaturanApprovalDetail;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 
 /**
- * AccountsController implements the CRUD actions for MasterAccounts model.
+ * ApprovalController implements the CRUD actions for PengaturanApproval model.
  */
-class AccountsController extends Controller
+class ApprovalController extends Controller
 {
     /**
      * @inheritDoc
@@ -31,22 +34,22 @@ class AccountsController extends Controller
 				    'rules' => [
                         [
                             'actions' => ['create', 'create-temp'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-accounts')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('approval')),
                             'roles' => ['@'],
                         ],
                         [
-                            'actions' => ['index', 'view', 'temp', 'get-temp'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-accounts')),
+                            'actions' => ['index', 'view', 'temp', 'type-approval'],
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('approval')),
                             'roles' => ['@'],
                         ], 
                         [
-                            'actions' => ['update', 'update-temp'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-accounts')),
+                            'actions' => ['update'],
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('approval')),
                             'roles' => ['@'],
                         ], 
                         [
                             'actions' => ['delete', 'delete-temp'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-accounts')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('approval')),
                             'roles' => ['@'],
                         ],
                     ],
@@ -62,12 +65,12 @@ class AccountsController extends Controller
     }
 
     /**
-     * Lists all MasterAccounts models.
+     * Lists all PengaturanApproval models.
      * @return mixed
      */
     public function actionIndex()
     {
-        $searchModel = new MasterAccountsSearch();
+        $searchModel = new PengaturanApprovalSearch();
         $dataProvider = $searchModel->search($this->request->queryParams);
 
         return $this->render('index', [
@@ -77,7 +80,7 @@ class AccountsController extends Controller
     }
 
     /**
-     * Displays a single MasterAccounts model.
+     * Displays a single PengaturanApproval model.
      * @param string $code Code
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
@@ -90,28 +93,31 @@ class AccountsController extends Controller
     }
 
     /**
-     * Creates a new MasterAccounts model.
+     * Creates a new PengaturanApproval model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
     public function actionCreate()
     {
-        $message = '';
         $success = true;
-        $model = new MasterAccounts();
+        $message = '';
+        $model = new PengaturanApproval();
         if ($this->request->isPost) {
             if ($model->load($this->request->post())) {
                 $connection = \Yii::$app->db;
 			    $transaction = $connection->beginTransaction();
                 try{
+                    $model->code = $model->newcode();
+                    $model->slug = strtolower(str_replace(' ','-', $model->name));
                     if($model->save()){
-                        if(count($model->temps) > 0){
-                            foreach($model->temps as $temp){
-                                $detail = new MasterAccountsDetail();
+                        if(count($model->temps()) > 0){
+                            foreach($model->temps() as $temp){
+                                $detail = new PengaturanApprovalDetail();
                                 $detail->attributes = $temp->attributes;
+                                $detail->approval_code = $model->code;
                                 if(!$detail->save()){
                                     $success = false;
-                                    $message = (count($detail->errors) > 0) ? 'ERROR CREATE ACCOUNTS DETAIL: ' : '';
+                                    $message = (count($detail->errors) > 0) ? 'ERROR CREATE APPROVE DETAIL: ' : '';
                                     foreach($detail->errors as $error => $value){
                                         $message .= strtoupper($value[0].', ');
                                     }
@@ -120,11 +126,11 @@ class AccountsController extends Controller
                             }
                         }else{
                             $success = false;
-                            $message = 'ERROR CREATE ACCOUNTS: DETAIL IS EMPTY.';
+                            $message = 'ERROR CREATE APPROVE: DETAIL IS EMPTY.';
                         }
                     }else{
                         $success = false;
-                        $message = (count($model->errors) > 0) ? 'ERROR CREATE ACCOUNTS: ' : '';
+                        $message = (count($model->errors) > 0) ? 'ERROR CREATE PENGATURAN APPROVAL: ' : '';
                         foreach($model->errors as $error => $value){
                             $message .= $value[0].', ';
                         }
@@ -134,7 +140,7 @@ class AccountsController extends Controller
                     if($success){
                         $this->emptyTemp();
                         $transaction->commit();
-                        $message = 'CREATE ACCOUNTS: '.$model->name;
+                        $message = 'CREATE PENGATURAN APPROVAL: '.$model->name;
                         $logs =	[
                             'type' => Logs::TYPE_USER,
                             'description' => $message,
@@ -169,7 +175,7 @@ class AccountsController extends Controller
     }
 
     /**
-     * Updates an existing MasterAccounts model.
+     * Updates an existing PengaturanApproval model.
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param string $code Code
      * @return mixed
@@ -177,24 +183,25 @@ class AccountsController extends Controller
      */
     public function actionUpdate($code)
     {
-        $message = '';
         $success = true;
+        $message = '';
         $model = $this->findModel($code);
         if ($this->request->isPost) {
-            if ($model->load($this->request->post())){
+            if ($model->load($this->request->post())) {
                 $connection = \Yii::$app->db;
                 $transaction = $connection->beginTransaction();
                 try{
+                    $model->slug = strtolower(str_replace(' ','-', $model->name));
                     if($model->save()){
                         if(count($model->temps) > 0){
                             foreach($model->details as $empty)
                                 $empty->delete();
                             foreach($model->temps as $temp){
-                                $detail = new MasterAccountsDetail();
+                                $detail = new PengaturanApprovalDetail();
                                 $detail->attributes = $temp->attributes;
                                 if(!$detail->save()){
                                     $success = false;
-                                    $message = (count($detail->errors) > 0) ? 'ERROR UPDATE ACCOUNTS DETAIL: ' : '';
+                                    $message = (count($detail->errors) > 0) ? 'ERROR UPDATE APPROVAL DETAIL: ' : '';
                                     foreach($detail->errors as $error => $value){
                                         $message .= strtoupper($value[0].', ');
                                     }
@@ -203,11 +210,11 @@ class AccountsController extends Controller
                             }
                         }else{
                             $success = false;
-                            $message = 'ERROR UPDATE ACCOUNTS: DETAIL IS EMPTY.';
+                            $message = 'ERROR UPDATE APPROVAL: DETAIL IS EMPTY.';
                         }
                     }else{
                         $success = false;
-                        $message = (count($model->errors) > 0) ? 'ERROR UPDATE ACCOUNTS: ' : '';
+                        $message = (count($model->errors) > 0) ? 'ERROR UPDATE APPROVAL: ' : '';
                         foreach($model->errors as $error => $value){
                             $message .= $value[0].', ';
                         }
@@ -217,7 +224,7 @@ class AccountsController extends Controller
                     if($success){
                         $this->emptyTemp();
                         $transaction->commit();
-                        $message = 'UPDATE ACCOUNTS: '.$model->name;
+                        $message = 'UPDATE APPROVAL: '.$model->name;
                         $logs =	[
                             'type' => Logs::TYPE_USER,
                             'description' => $message,
@@ -244,11 +251,11 @@ class AccountsController extends Controller
         }else{
             $this->emptyTemp();
             foreach($model->details as $detail){
-                $temp = new TempMasterAccountsDetail();
+                $temp = new TempPengaturanApprovalDetail();
                 $temp->attributes = $detail->attributes;
-                $temp->user_id = \Yii::$app->user->id;
+                $temp->user_create = \Yii::$app->user->id;
                 if(!$temp->save()){
-                    $message = (count($temp->errors) > 0) ? 'ERROR LOAD ACCOUNTS DETAIL: ' : '';
+                    $message = (count($temp->errors) > 0) ? 'ERROR LOAD APPROVAL DETAIL: ' : '';
                     foreach($temp->errors as $error => $value){
                         $message .= strtoupper($value[0].', ');
                     }
@@ -264,7 +271,7 @@ class AccountsController extends Controller
     }
 
     /**
-     * Deletes an existing MasterAccounts model.
+     * Deletes an existing PengaturanApproval model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param string $code Code
      * @return mixed
@@ -285,7 +292,7 @@ class AccountsController extends Controller
                         $detail->status = 0;
                         if(!$detail->save()){
                             $success = false;
-                            $message = (count($detail->errors) > 0) ? 'ERROR DELETE DETAIL ACCOUNTS: ' : '';
+                            $message = (count($detail->errors) > 0) ? 'ERROR DELETE DETAIL APPROVAL: ' : '';
                             foreach($detail->errors as $error => $value){
                                 $message .= $value[0].', ';
                             }
@@ -294,7 +301,7 @@ class AccountsController extends Controller
                     }
                 }else{
                     $success = false;
-                    $message = (count($model->errors) > 0) ? 'ERROR DELETE ACCOUNTS: ' : '';
+                    $message = (count($model->errors) > 0) ? 'ERROR DELETE APPROVAL: ' : '';
                     foreach($model->errors as $error => $value){
                         $message .= $value[0].', ';
                     }
@@ -303,7 +310,7 @@ class AccountsController extends Controller
 
                 if($success){
                     $transaction->commit();
-                    $message = 'DELETE ACCOUNTS: '.$model->name;
+                    $message = 'DELETE APPROVAL: '.$model->name;
                     $logs =	[
                         'type' => Logs::TYPE_USER,
                         'description' => $message,
@@ -330,71 +337,70 @@ class AccountsController extends Controller
     }
 
     /**
-     * Finds the MasterAccounts model based on its primary key value.
+     * Finds the PengaturanApproval model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param string $code Code
-     * @return MasterAccounts the loaded model
+     * @return PengaturanApproval the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($code)
     {
-        if (($model = MasterAccounts::findOne($code)) !== null) {
+        if (($model = PengaturanApproval::findOne($code)) !== null) {
             return $model;
         }
 
         throw new NotFoundHttpException('The requested page does not exist.');
     }
 
+    public function actionTypeApproval($type)
+    {
+        $model = [];
+        // USER
+        if($type == 1){
+            $model = Profile::find()
+                ->select(['name', 'user_id as code'])
+                ->where(['status'=>1])
+                ->asArray()
+                ->all();
+        }
+        // TYPEUSER
+        else if($type == 2){
+            $model = MasterKode::find()
+                ->select(['name', 'code'])
+                ->where(['type'=>Konstanta::TYPE_USER, 'status'=>1])
+                ->asArray()
+                ->all();
+        }
+        return  json_encode($model);
+    }
+
     public function actionTemp()
     {
-        $temps = TempMasterAccountsDetail::find(['user_id'=> \Yii::$app->user->id])->all();
+        $temps = TempPengaturanApprovalDetail::find(['user_created'=> \Yii::$app->user->id])->all();
         echo $this->renderAjax('_temp', [
             'temps'=>$temps,
         ]);
-    }
-
-    public function actionGetTemp($id)
-    {
-        $temp = $this->findTemp($id);
-        $data['id'] = $temp->id;
-        $data['name'] = $temp->name;
-        return json_encode($data);
     }
 
     public function actionCreateTemp()
     {
         $success = true;
         $message = '';
-        $model = new MasterAccounts();
+        $model = new PengaturanApproval();
         if($model->load($this->request->post())){
-            $temp = new TempMasterAccountsDetail();
-            $temp->accounts_code = $model->code;
-            $temp->name = $model->detail_name;
+            $temp = new TempPengaturanApprovalDetail();
             $temp->urutan = count($temp->count) +1;
-            $temp->user_id = \Yii::$app->user->id;
-            if($temp->save()){
-                $message = 'CREATE DATA ACCOUNT TEMP SUCCESSFULLY';
-            }else{
-                $success = false;
-                foreach($temp->errors as $error => $value){
-                    $message = $value[0].', ';
-                }
-                $message = substr($message, 0, -2);
+            $temp->user_create = \Yii::$app->user->id;
+            if(isset($model->code)){
+                $temp->approval_code = $model->code;
             }
-        }
-        return json_encode(['success'=>$success, 'message'=>$message]);
-    }
-
-    public function actionUpdateTemp()
-    {
-        $success = true;
-        $message = '';
-        $model = new MasterAccounts();
-        if($model->load($this->request->post())){
-            $temp = $this->findTemp($model->detail_id);
-            $temp->name = $model->detail_name;
+            if($model->type == 1){
+                $temp->user_id = $model->approval;
+            }else{
+                $temp->typeuser_code = $model->approval;
+            }
             if($temp->save()){
-                $message = 'UPDATE TEMP SUCCESSFULLY';
+                $message = 'CREATE TEMP SUCCESSFULLY';
             }else{
                 $success = false;
                 foreach($temp->errors as $error => $value){
@@ -437,7 +443,7 @@ class AccountsController extends Controller
 
     protected function findTemp($id)
     {
-        $temp = TempMasterAccountsDetail::findOne(['id'=>$id, 'user_id'=>\Yii::$app->user->id]);
+        $temp = TempPengaturanApprovalDetail::findOne(['id'=>$id, 'user_create'=>\Yii::$app->user->id]);
         if(isset($temp)){
             return $temp;
         }
@@ -446,11 +452,11 @@ class AccountsController extends Controller
 
     protected function emptyTemp()
     {
-        TempMasterAccountsDetail::deleteAll('user_id=:user_id', [':user_id'=>\Yii::$app->user->id]);
-        $temp = TempMasterAccountsDetail::find()->all();
+        TempPengaturanApprovalDetail::deleteAll('user_create=:user_create', [':user_create'=>\Yii::$app->user->id]);
+        $temp = TempPengaturanApprovalDetail::find()->all();
         if(empty($temp)){
             $connection = \Yii::$app->db;
-			$connection->createCommand('ALTER TABLE temp_master_accounts_detail AUTO_INCREMENT=1')->query();
+			$connection->createCommand('ALTER TABLE temp_pengaturan_approval_detail AUTO_INCREMENT=1')->query();
         }
     }
 }

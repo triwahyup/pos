@@ -4,12 +4,12 @@ namespace app\modules\master\models;
 
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use app\modules\master\models\MasterSatuan;
+use app\modules\master\models\MasterMesin;
 
 /**
- * MasterSatuanSearch represents the model behind the search form of `app\modules\master\models\MasterSatuan`.
+ * MasterMesinSearch represents the model behind the search form of `app\modules\master\models\MasterMesin`.
  */
-class MasterSatuanSearch extends MasterSatuan
+class MasterMesinSearch extends MasterMesin
 {
     /**
      * {@inheritdoc}
@@ -17,8 +17,7 @@ class MasterSatuanSearch extends MasterSatuan
     public function rules()
     {
         return [
-            [['code', 'name', 'type', 'keterangan', 'created_at', 'updated_at'], 'safe'],
-            [['qty'], 'number'],
+            [['name', 'jenis', 'created_at', 'updated_at'], 'safe'],
         ];
     }
 
@@ -40,9 +39,7 @@ class MasterSatuanSearch extends MasterSatuan
      */
     public function search($params)
     {
-        $query = MasterSatuan::find()
-            ->alias('a')
-            ->leftJoin('master_kode b', 'b.code = a.type');
+        $query = MasterMesin::find();
 
         // add conditions that should always apply here
 
@@ -58,23 +55,20 @@ class MasterSatuanSearch extends MasterSatuan
             return $dataProvider;
         }
 
-        $query->where(['a.status'=>1]);
-        // grid filtering conditions
+        $query->where(['status'=>1]);
         if(!empty($this->created_at)){
             $t1 = strtotime($this->created_at);
 			$t2 = strtotime("+1 days", $t1);
-			$query->andWhere('a.created_at >='.$t1.' and a.created_at <'.$t2);
+			$query->andWhere('created_at >='.$t1.' and created_at <'.$t2);
         }
         if(!empty($this->updated_at)){
             $t1 = strtotime($this->updated_at);
 			$t2 = strtotime("+1 days", $t1);
-			$query->andWhere('a.updated_at >='.$t1.' and a.updated_at <'.$t2);
+			$query->andWhere('updated_at >='.$t1.' and updated_at <'.$t2);
         }
-        if(!empty($this->type)){
-            $query->andWhere('b.name LIKE "%'.$this->type.'%"');
-        }
-        $query->andFilterWhere(['qty' => $this->qty]);
-        $query->andFilterWhere(['like', 'name', $this->name]);
+
+        $query->andFilterWhere(['like', 'name', $this->name])
+            ->andFilterWhere(['like', 'jenis', $this->jenis]);
 
         return $dataProvider;
     }

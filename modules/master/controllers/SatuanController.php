@@ -2,10 +2,15 @@
 
 namespace app\modules\master\controllers;
 
+use app\commands\Konstanta;
+use app\models\Logs;
+use app\models\User;
 use app\modules\master\models\MasterSatuan;
 use app\modules\master\models\MasterSatuanSearch;
+use app\modules\master\models\MasterKode;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
+use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 
 /**
@@ -21,6 +26,31 @@ class SatuanController extends Controller
         return array_merge(
             parent::behaviors(),
             [
+                'access' => [
+                    'class' => AccessControl::className(),
+				    'rules' => [
+                        [
+                            'actions' => ['create'],
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-satuan')),
+                            'roles' => ['@'],
+                        ],
+                        [
+                            'actions' => ['index', 'view'],
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-satuan')),
+                            'roles' => ['@'],
+                        ], 
+                        [
+                            'actions' => ['update'],
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-satuan')),
+                            'roles' => ['@'],
+                        ], 
+                        [
+                            'actions' => ['delete'],
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-satuan')),
+                            'roles' => ['@'],
+                        ],
+                    ],
+                ],
                 'verbs' => [
                     'class' => VerbFilter::className(),
                     'actions' => [
@@ -66,11 +96,55 @@ class SatuanController extends Controller
      */
     public function actionCreate()
     {
-        $model = new MasterSatuan();
+        $type = MasterKode::find()
+            ->select(['name'])
+            ->where(['type'=>Konstanta::TYPE_BARANG, 'status' => 1])
+            ->indexBy('code')
+            ->column();
 
+        $message = '';
+        $success = true;
+        $model = new MasterSatuan();
         if ($this->request->isPost) {
-            if ($model->load($this->request->post()) && $model->save()) {
-                return $this->redirect(['view', 'code' => $model->code]);
+            if ($model->load($this->request->post())) {
+                $connection = \Yii::$app->db;
+			    $transaction = $connection->beginTransaction();
+                try{
+                    $model->code = $model->newcode($model->type);
+                    if(!$model->save()){
+                        $success = false;
+                        $message = (count($model->errors) > 0) ? 'ERROR CREATE DATA SATUAN: ' : '';
+                        foreach($model->errors as $error => $value){
+                            $message .= $value[0].', ';
+                        }
+                        $message = substr($message, 0, -2);
+                    }
+
+                    if($success){
+                        $transaction->commit();
+                        $message = 'CREATE DATA SATUAN: '.$model->name;
+                        $logs =	[
+                            'type' => Logs::TYPE_USER,
+                            'description' => $message,
+                        ];
+                        Logs::addLog($logs);
+
+                        \Yii::$app->session->setFlash('success', $message);
+                        return $this->redirect(['view', 'code' => $model->code]);
+                    }else{
+                        $transaction->rollBack();
+                    }
+                }catch(\Exception $e){
+                    $success = false;
+                    $message = $e->getMessage();
+				    $transaction->rollBack();
+                }
+                $logs =	[
+                    'type' => Logs::TYPE_USER,
+                    'description' => $message,
+                ];
+                Logs::addLog($logs);
+                \Yii::$app->session->setFlash('error', $message);
             }
         } else {
             $model->loadDefaultValues();
@@ -78,6 +152,7 @@ class SatuanController extends Controller
 
         return $this->render('create', [
             'model' => $model,
+            'type' => $type,
         ]);
     }
 
@@ -90,14 +165,58 @@ class SatuanController extends Controller
      */
     public function actionUpdate($code)
     {
-        $model = $this->findModel($code);
+        $type = MasterKode::find()
+            ->select(['name'])
+            ->where(['type'=>Konstanta::TYPE_BARANG, 'status' => 1])
+            ->indexBy('code')
+            ->column();
 
-        if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'code' => $model->code]);
+        $message = '';
+        $success = true;
+        $model = $this->findModel($code);
+        if ($this->request->isPost && $model->load($this->request->post())) {
+            $connection = \Yii::$app->db;
+            $transaction = $connection->beginTransaction();
+            try{
+                if(!$model->save()){
+                    $success = false;
+                    $message = (count($model->errors) > 0) ? 'ERROR UPDATE DATA SATUAN: ' : '';
+                    foreach($model->errors as $error => $value){
+                        $message .= $value[0].', ';
+                    }
+                    $message = substr($message, 0, -2);
+                }
+
+                if($success){
+                    $transaction->commit();
+                    $message = 'UPDATE DATA SATUAN: '.$model->name;
+                    $logs =	[
+                        'type' => Logs::TYPE_USER,
+                        'description' => $message,
+                    ];
+                    Logs::addLog($logs);
+
+                    \Yii::$app->session->setFlash('success', $message);
+                    return $this->redirect(['view', 'code' => $model->code]);
+                }else{
+                    $transaction->rollBack();
+                }
+            }catch(\Exception $e){
+                $success = false;
+                $message = $e->getMessage();
+                $transaction->rollBack();
+            }
+            $logs =	[
+                'type' => Logs::TYPE_USER,
+                'description' => $message,
+            ];
+            Logs::addLog($logs);
+            \Yii::$app->session->setFlash('error', $message);
         }
 
         return $this->render('update', [
             'model' => $model,
+            'type' => $type,
         ]);
     }
 
@@ -110,8 +229,48 @@ class SatuanController extends Controller
      */
     public function actionDelete($code)
     {
-        $this->findModel($code)->delete();
+        $success = true;
+		$message = '';
+        $model = $this->findModel($code);
+        if(isset($model)){
+            $connection = \Yii::$app->db;
+			$transaction = $connection->beginTransaction();
+            try{
+                $model->status = 0;
+                if(!$model->save()){
+                    $success = false;
+                    $message = (count($model->errors) > 0) ? 'ERROR DELETE DATA SATUAN: ' : '';
+                    foreach($model->errors as $error => $value){
+                        $message .= $value[0].', ';
+                    }
+                    $message = substr($message, 0, -2);
+                }
 
+                if($success){
+                    $transaction->commit();
+                    $message = 'DELETE DATA SATUAN:'. $model->name;
+                    $logs =	[
+                        'type' => Logs::TYPE_USER,
+                        'description' => $message,
+                    ];
+                    Logs::addLog($logs);
+                    \Yii::$app->session->setFlash('success', $message);
+                }else{
+                    $transaction->rollBack();
+                    \Yii::$app->session->setFlash('error', $message);
+                }
+            }catch(\Exception $e){
+				$success = false;
+				$message = $e->getMessage();
+				$transaction->rollBack();
+                \Yii::$app->session->setFlash('error', $message);
+            }
+            $logs =	[
+                'type' => Logs::TYPE_USER,
+                'description' => $message,
+            ];
+            Logs::addLog($logs);
+        }
         return $this->redirect(['index']);
     }
 
@@ -124,7 +283,7 @@ class SatuanController extends Controller
      */
     protected function findModel($code)
     {
-        if (($model = MasterSatuan::findOne($id)) !== null) {
+        if (($model = MasterSatuan::findOne($code)) !== null) {
             return $model;
         }
 

@@ -5,15 +5,15 @@ use yii\grid\GridView;
 use app\commands\Helper;
 
 /* @var $this yii\web\View */
-/* @var $searchModel app\modules\master\models\MasterGroupBarangSearch */
+/* @var $searchModel app\modules\master\models\MasterMesinSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Group Barang';
+$this->title = 'Data Mesin';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="master-group-barang-index">
+<div class="master-mesin-index">
     <p class="text-right">
-        <?= Html::a('<i class="fontello icon-plus"></i><span>Create Group Barang</span>', ['create'], ['class' => 'btn btn-success btn-flat btn-sm']) ?>
+        <?= Html::a('<i class="fontello icon-plus"></i><span>Create Data Mesin</span>', ['create'], ['class' => 'btn btn-success btn-flat btn-sm']) ?>
     </p>
 
     <?= GridView::widget([
@@ -22,24 +22,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
             'name',
-            [
-                'attribute' => 'acc_persediaan_code',
-                'value' => function($model, $value) {
-                    return (isset($model->persediaan)) ? $model->persediaan->name : '';
-                }
-            ],
-            [
-                'attribute' => 'acc_penjualan_code',
-                'value' => function($model, $value) {
-                    return (isset($model->penjualan)) ? $model->penjualan->name : '';
-                }
-            ],
-            [
-                'attribute' => 'acc_hpp_code',
-                'value' => function($model, $value) {
-                    return (isset($model->hpp)) ? $model->hpp->name : '';
-                }
-            ],
+            'jenis',
             [
                 'attribute' => 'created_at',
                 'contentOptions' => [
@@ -116,4 +99,6 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
         ],
     ]); ?>
+
+
 </div>

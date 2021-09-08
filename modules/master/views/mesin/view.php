@@ -4,14 +4,14 @@ use yii\helpers\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model app\modules\master\models\MasterGroupBarang */
+/* @var $model app\modules\master\models\MasterMesin */
 
 $this->title = $model->name;
-$this->params['breadcrumbs'][] = ['label' => 'Group Barang', 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => 'Data Mesin', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
 ?>
-<div class="master-group-barang-view">
+<div class="master-mesin-view">
     <p class="text-right">
         <?= Html::a('<i class="fontello icon-plus"></i><span>Create</span>', ['create'], ['class' => 'btn btn-success btn-flat btn-sm']) ?>
         <?= Html::a('<i class="fontello icon-pencil"></i><span>Update</span>', ['update', 'code' => $model->code], ['class' => 'btn btn-warning btn-flat btn-sm']) ?>
@@ -30,24 +30,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'attributes' => [
                 'code',
                 'name',
-                [
-                    'attribute' => 'acc_persedian_code',
-                    'value' => function($model, $value) {
-                        return (isset($model->persediaan)) ? $model->persediaan->name : '';
-                    }
-                ],
-                [
-                    'attribute' => 'acc_penjualan_code',
-                    'value' => function($model, $value) {
-                        return (isset($model->penjualan)) ? $model->penjualan->name : '';
-                    }
-                ],
-                [
-                    'attribute' => 'acc_hpp_code',
-                    'value' => function($model, $value) {
-                        return (isset($model->hpp)) ? $model->hpp->name : '';
-                    }
-                ],
+                'jenis',
                 'keterangan:ntext',
                 [
                     'attribute' => 'status',

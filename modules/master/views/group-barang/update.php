@@ -13,5 +13,8 @@ $this->params['breadcrumbs'][] = 'Update';
 <div class="master-group-barang-update">
     <?= $this->render('_form', [
         'model' => $model,
+        'akunPersediaan' => $akunPersediaan,
+        'akunPenjualan' => $akunPenjualan,
+        'akunHpp' => $akunHpp
     ]) ?>
 </div>

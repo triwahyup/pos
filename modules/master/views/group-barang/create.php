@@ -12,5 +12,8 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="master-group-barang-create">
     <?= $this->render('_form', [
         'model' => $model,
+        'akunPersediaan' => $akunPersediaan,
+        'akunPenjualan' => $akunPenjualan,
+        'akunHpp' => $akunHpp
     ]) ?>
 </div>

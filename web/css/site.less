@@ -1,17 +1,20 @@
 @import url('core/main/prefix.less');
 
 @color_border: #a9a9a9;
-@color_navbar_header: #023f4e;
+@color_btnPagination: #187079;
+@color_btnPagination_hover: #065158;
+@color_btnPagination_active: #2e9ca7;
 @color_danger: #c10501;
 @color_danger_hover: #a94442;
 @color_default: #fff;
 @color_header: #d2d2d2;
-@color_header_form: #504e4e;
+@color_header_form: #b1b1b1;
 @color_header_table: #ecebe9;
-@color_text: #656565;
-@color_text_menu: #2e3838;
 @color_main: #186679;
 @color_main_hover: #01323e;
+@color_navbar_header: #023f4e;
+@color_text: #656565;
+@color_text_menu: #2e3838;
 @color_warning: #ff5302;
 @color_warning_hover: #ec4e04;
 
@@ -577,9 +580,10 @@ button {
     border-bottom: 1px dashed @color_border;
     display: inline-block;
     font-size: 12px;
-    margin-bottom: 10px;
+    margin-bottom: 5px;
     margin-top: 10px;
-    padding: 0 0 5px 0;
+    padding: 0px 0px 5px 0px;
+    text-align: right;
     width: 100%;
     .breadcrumb-item {
         display: inline-block;
@@ -605,13 +609,14 @@ button {
         margin-bottom: 20px;
         width: 100%;
         .formbox-header {
-            background-color: @color_header;
+            background-color: @color_header_form;
             height: 30px;
             padding: 0 20px;
             h5 {
-                color: @color_header_form;
+                color: @color_default;
                 font-size: 14px;
                 line-height: 30px;
+                margin-bottom: 0;
             }
         }
         .formbox-body {
@@ -740,6 +745,7 @@ form {
     font-size: 12px;
 }
 .table-bordered {
+    margin-bottom: 0;
     thead {
         th, td {
             font-size: 12px;
@@ -837,6 +843,41 @@ form {
 }
 .column-action {
     width: 100px;
+}
+.pagination {
+    .borderRadius(0);
+    .boxShadow(inset 0 0 5px 5px #c7c7c4);
+    background: linear-gradient(rgba(142,142,142,.4),rgb(189 189 189 / 80%) 100%);
+    display: inline-block;
+    padding: 10px 15px;
+    text-align: right;
+    width: 100%;
+    li {
+        .borderRadius(50%);
+        .boxShadow(0px 8px 8px rgb(0 0 0 / 20%));
+        background-color: @color_btnPagination;
+        display: inline-block;
+        height: 30px;
+        width: 30px;
+        a, span {
+            color: @color_default;
+            display: block;
+            font-size: 12px;
+            height: 30px;
+            line-height: 30px;
+            text-align: center;
+            width: 30px;
+        }
+        &.disabled {
+            background-color: @color_header;
+        }
+        &.active {
+            background-color: @color_btnPagination_active;
+        }
+        &:hover {
+            background-color: @color_btnPagination_hover;
+        }
+    }
 }
 /** END CUSTOM TABLE GRIDVIEW **/
 

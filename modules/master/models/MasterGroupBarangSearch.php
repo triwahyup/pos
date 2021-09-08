@@ -17,8 +17,7 @@ class MasterGroupBarangSearch extends MasterGroupBarang
     public function rules()
     {
         return [
-            [['code', 'name', 'acc_persedian_code', 'acc_penjualan_code', 'acc_hpp_code', 'keterangan'], 'safe'],
-            [['acc_persedian_urutan', 'acc_penjualan_urutan', 'acc_hpp_urutan', 'status', 'created_at', 'updated_at'], 'integer'],
+            [['name', 'created_at', 'updated_at', 'acc_persediaan_code', 'acc_penjualan_code', 'acc_hpp_code'], 'safe'],
         ];
     }
 
@@ -40,7 +39,12 @@ class MasterGroupBarangSearch extends MasterGroupBarang
      */
     public function search($params)
     {
-        $query = MasterGroupBarang::find();
+        $query = MasterGroupBarang::find()
+            ->alias('a')
+            ->leftJoin('master_accounts_detail b', 
+                '(b.accounts_code = a.acc_persediaan_code and b.urutan = a.acc_persediaan_urutan) 
+                OR (b.accounts_code = a.acc_penjualan_code and b.urutan = a.acc_penjualan_urutan)
+                OR (b.accounts_code = a.acc_hpp_code and b.urutan = a.acc_hpp_urutan)');
 
         // add conditions that should always apply here
 
@@ -56,22 +60,30 @@ class MasterGroupBarangSearch extends MasterGroupBarang
             return $dataProvider;
         }
 
+        $query->where(['a.status'=>1]);
         // grid filtering conditions
-        $query->andFilterWhere([
-            'acc_persedian_urutan' => $this->acc_persedian_urutan,
-            'acc_penjualan_urutan' => $this->acc_penjualan_urutan,
-            'acc_hpp_urutan' => $this->acc_hpp_urutan,
-            'status' => $this->status,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
-        ]);
+        if(!empty($this->created_at)){
+            $t1 = strtotime($this->created_at);
+			$t2 = strtotime("+1 days", $t1);
+			$query->andWhere('a.created_at >='.$t1.' and a.created_at <'.$t2);
+        }
+        if(!empty($this->updated_at)){
+            $t1 = strtotime($this->updated_at);
+			$t2 = strtotime("+1 days", $t1);
+			$query->andWhere('a.updated_at >='.$t1.' and a.updated_at <'.$t2);
+        }
 
-        $query->andFilterWhere(['like', 'code', $this->code])
-            ->andFilterWhere(['like', 'name', $this->name])
-            ->andFilterWhere(['like', 'acc_persedian_code', $this->acc_persedian_code])
-            ->andFilterWhere(['like', 'acc_penjualan_code', $this->acc_penjualan_code])
-            ->andFilterWhere(['like', 'acc_hpp_code', $this->acc_hpp_code])
-            ->andFilterWhere(['like', 'keterangan', $this->keterangan]);
+        if(!empty($this->acc_persediaan_code)){
+            $query->andWhere('b.name LIKE "%'.$this->acc_persediaan_code.'%"');
+        }
+        if(!empty($this->acc_penjualan_code)){
+            $query->andWhere('b.name LIKE "%'.$this->acc_penjualan_code.'%"');
+        }
+        if(!empty($this->acc_hpp_code)){
+            $query->andWhere('b.name LIKE "%'.$this->acc_hpp_code.'%"');
+        }
+
+        $query->andFilterWhere(['like', 'a.name', $this->name]);
 
         return $dataProvider;
     }

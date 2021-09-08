@@ -2,7 +2,6 @@
 
 namespace app\modules\pengaturan\controllers;
 
-use app\commands\Konstanta;
 use app\models\AuthAssignment;
 use app\models\AuthItemChild;
 use app\models\User;

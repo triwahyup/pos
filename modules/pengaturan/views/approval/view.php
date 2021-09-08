@@ -4,14 +4,14 @@ use yii\helpers\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model app\modules\master\models\MasterGroupBarang */
+/* @var $model app\modules\pengaturan\models\PengaturanApproval */
 
 $this->title = $model->name;
-$this->params['breadcrumbs'][] = ['label' => 'Group Barang', 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => 'Pengaturan Approval', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
 ?>
-<div class="master-group-barang-view">
+<div class="pengaturan-approval-view">
     <p class="text-right">
         <?= Html::a('<i class="fontello icon-plus"></i><span>Create</span>', ['create'], ['class' => 'btn btn-success btn-flat btn-sm']) ?>
         <?= Html::a('<i class="fontello icon-pencil"></i><span>Update</span>', ['update', 'code' => $model->code], ['class' => 'btn btn-warning btn-flat btn-sm']) ?>
@@ -30,25 +30,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'attributes' => [
                 'code',
                 'name',
-                [
-                    'attribute' => 'acc_persedian_code',
-                    'value' => function($model, $value) {
-                        return (isset($model->persediaan)) ? $model->persediaan->name : '';
-                    }
-                ],
-                [
-                    'attribute' => 'acc_penjualan_code',
-                    'value' => function($model, $value) {
-                        return (isset($model->penjualan)) ? $model->penjualan->name : '';
-                    }
-                ],
-                [
-                    'attribute' => 'acc_hpp_code',
-                    'value' => function($model, $value) {
-                        return (isset($model->hpp)) ? $model->hpp->name : '';
-                    }
-                ],
-                'keterangan:ntext',
+                'slug',
                 [
                     'attribute' => 'status',
                     'value'=> function ($model, $index) { 
@@ -75,5 +57,34 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
             ],
         ]) ?>
+    </div>
+    <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
+        <fieldset class="fieldset-box">
+            <legend>Data Detail</legend>
+            <div class="col-lg-12 col-md-12 col-xs-12">
+                <table class="table table-bordered table-custom" data-table="detail">
+                    <thead>
+                        <tr>
+                            <th class="text-center">No.</th>
+                            <th class="text-center">Level</th>
+                            <th class="text-center">User</th>
+                            <th class="text-center">Type User</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if(count($model->details) > 0): ?>
+                            <?php foreach($model->details as $index=>$val): ?>
+                                <tr>
+                                    <td class="text-center"><?=$index+1?></td>
+                                    <td class="text-center"><?=$val->urutan ?></td>
+                                    <td><?=(isset($val->profile)) ? $val->profile->name : '-' ?></td>
+                                    <td><?=(isset($val->typeUser)) ? $val->typeUser->name : '-' ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        </fieldset>
     </div>
 </div>

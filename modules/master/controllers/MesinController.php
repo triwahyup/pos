@@ -2,22 +2,19 @@
 
 namespace app\modules\master\controllers;
 
-use app\commands\Konstanta;
 use app\models\Logs;
 use app\models\User;
-use app\modules\master\models\MasterAccounts;
-use app\modules\master\models\MasterAccountsDetail;
-use app\modules\master\models\MasterGroupBarang;
-use app\modules\master\models\MasterGroupBarangSearch;
+use app\modules\master\models\MasterMesin;
+use app\modules\master\models\MasterMesinSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 
 /**
- * GroupBarangController implements the CRUD actions for MasterGroupBarang model.
+ * MesinController implements the CRUD actions for MasterMesin model.
  */
-class GroupBarangController extends Controller
+class MesinController extends Controller
 {
     /**
      * @inheritDoc
@@ -32,22 +29,22 @@ class GroupBarangController extends Controller
 				    'rules' => [
                         [
                             'actions' => ['create'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('group-barang')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-mesin')),
                             'roles' => ['@'],
                         ],
                         [
                             'actions' => ['index', 'view'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('group-barang')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-mesin')),
                             'roles' => ['@'],
                         ], 
                         [
                             'actions' => ['update'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('group-barang')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-mesin')),
                             'roles' => ['@'],
                         ], 
                         [
                             'actions' => ['delete'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('group-barang')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-mesin')),
                             'roles' => ['@'],
                         ],
                     ],
@@ -63,12 +60,12 @@ class GroupBarangController extends Controller
     }
 
     /**
-     * Lists all MasterGroupBarang models.
+     * Lists all MasterMesin models.
      * @return mixed
      */
     public function actionIndex()
     {
-        $searchModel = new MasterGroupBarangSearch();
+        $searchModel = new MasterMesinSearch();
         $dataProvider = $searchModel->search($this->request->queryParams);
 
         return $this->render('index', [
@@ -78,7 +75,7 @@ class GroupBarangController extends Controller
     }
 
     /**
-     * Displays a single MasterGroupBarang model.
+     * Displays a single MasterMesin model.
      * @param string $code Code
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
@@ -91,37 +88,15 @@ class GroupBarangController extends Controller
     }
 
     /**
-     * Creates a new MasterGroupBarang model.
+     * Creates a new MasterMesin model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
     public function actionCreate()
     {
-        $akunPersediaan = MasterAccountsDetail::find()
-            ->select(['name', 'accounts_code', 'urutan'])
-            ->where(['accounts_code'=>Konstanta::TYPE_PERSEDIAAN, 'status' => 1])
-            ->indexBy('urutan')
-            ->column();
-        $akunPenjualan = MasterAccountsDetail::find()
-            ->select(['name', 'accounts_code', 'urutan'])
-            ->where(['accounts_code'=>Konstanta::TYPE_PENJUALAN, 'status' => 1])
-            ->indexBy('urutan')
-            ->column();
-        $akunHpp = MasterAccountsDetail::find()
-            ->select(['name', 'accounts_code', 'urutan'])
-            ->where(['accounts_code'=>Konstanta::TYPE_HPP, 'status' => 1])
-            ->indexBy('urutan')
-            ->column();
-        
-        $message = '';
         $success = true;
-        $model = new MasterGroupBarang();
-        $acc_persediaan_code = MasterAccounts::findOne(['code'=>Konstanta::TYPE_PERSEDIAAN, 'status'=>1]);
-        $model->acc_persediaan_code = $acc_persediaan_code->code;
-        $acc_penjualan_code = MasterAccounts::findOne(['code'=>Konstanta::TYPE_PENJUALAN, 'status'=>1]);
-        $model->acc_penjualan_code = $acc_penjualan_code->code;
-        $acc_hpp_code = MasterAccounts::findOne(['code'=>Konstanta::TYPE_HPP, 'status'=>1]);
-        $model->acc_hpp_code = $acc_hpp_code->code;
+        $message = '';
+        $model = new MasterMesin();
         if ($this->request->isPost) {
             if ($model->load($this->request->post())) {
                 $connection = \Yii::$app->db;
@@ -130,7 +105,7 @@ class GroupBarangController extends Controller
                     $model->code = $model->newcode();
                     if(!$model->save()){
                         $success = false;
-                        $message = (count($model->errors) > 0) ? 'ERROR CREATE GROUP BARANG: ' : '';
+                        $message = (count($model->errors) > 0) ? 'ERROR CREATE DATA MESIN: ' : '';
                         foreach($model->errors as $error => $value){
                             $message .= $value[0].', ';
                         }
@@ -139,7 +114,7 @@ class GroupBarangController extends Controller
 
                     if($success){
                         $transaction->commit();
-                        $message = 'CREATE GROUP BARANG: '.$model->name;
+                        $message = 'CREATE DATA MESIN: '.$model->name;
                         $logs =	[
                             'type' => Logs::TYPE_USER,
                             'description' => $message,
@@ -169,14 +144,11 @@ class GroupBarangController extends Controller
 
         return $this->render('create', [
             'model' => $model,
-            'akunPersediaan' => $akunPersediaan,
-            'akunPenjualan' => $akunPenjualan,
-            'akunHpp' => $akunHpp
         ]);
     }
 
     /**
-     * Updates an existing MasterGroupBarang model.
+     * Updates an existing MasterMesin model.
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param string $code Code
      * @return mixed
@@ -184,24 +156,8 @@ class GroupBarangController extends Controller
      */
     public function actionUpdate($code)
     {
-        $akunPersediaan = MasterAccountsDetail::find()
-            ->select(['name', 'accounts_code', 'urutan'])
-            ->where(['accounts_code'=>Konstanta::TYPE_PERSEDIAAN, 'status' => 1])
-            ->indexBy('urutan')
-            ->column();
-        $akunPenjualan = MasterAccountsDetail::find()
-            ->select(['name', 'accounts_code', 'urutan'])
-            ->where(['accounts_code'=>Konstanta::TYPE_PENJUALAN, 'status' => 1])
-            ->indexBy('urutan')
-            ->column();
-        $akunHpp = MasterAccountsDetail::find()
-            ->select(['name', 'accounts_code', 'urutan'])
-            ->where(['accounts_code'=>Konstanta::TYPE_HPP, 'status' => 1])
-            ->indexBy('urutan')
-            ->column();
-
-        $message = '';
         $success = true;
+        $message = '';
         $model = $this->findModel($code);
         if ($this->request->isPost && $model->load($this->request->post())) {
             $connection = \Yii::$app->db;
@@ -209,7 +165,7 @@ class GroupBarangController extends Controller
             try{
                 if(!$model->save()){
                     $success = false;
-                    $message = (count($model->errors) > 0) ? 'ERROR UPDATE GROUP BARANG: ' : '';
+                    $message = (count($model->errors) > 0) ? 'ERROR UPDATE DATA MESIN: ' : '';
                     foreach($model->errors as $error => $value){
                         $message .= $value[0].', ';
                     }
@@ -218,7 +174,7 @@ class GroupBarangController extends Controller
 
                 if($success){
                     $transaction->commit();
-                    $message = 'UPDATE GROUP BARANG: '.$model->name;
+                    $message = 'UPDATE DATA MESIN: '.$model->name;
                     $logs =	[
                         'type' => Logs::TYPE_USER,
                         'description' => $message,
@@ -245,14 +201,11 @@ class GroupBarangController extends Controller
 
         return $this->render('update', [
             'model' => $model,
-            'akunPersediaan' => $akunPersediaan,
-            'akunPenjualan' => $akunPenjualan,
-            'akunHpp' => $akunHpp
         ]);
     }
 
     /**
-     * Deletes an existing MasterGroupBarang model.
+     * Deletes an existing MasterMesin model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param string $code Code
      * @return mixed
@@ -270,7 +223,7 @@ class GroupBarangController extends Controller
                 $model->status = 0;
                 if(!$model->save()){
                     $success = false;
-                    $message = (count($model->errors) > 0) ? 'ERROR DELETE GROUP BARANG: ' : '';
+                    $message = (count($model->errors) > 0) ? 'ERROR DELETE DATA MESIN: ' : '';
                     foreach($model->errors as $error => $value){
                         $message .= $value[0].', ';
                     }
@@ -279,7 +232,7 @@ class GroupBarangController extends Controller
 
                 if($success){
                     $transaction->commit();
-                    $message = 'DELETE GROUP BARANG:'. $model->name;
+                    $message = 'DELETE DATA MESIN: '. $model->name;
                     $logs =	[
                         'type' => Logs::TYPE_USER,
                         'description' => $message,
@@ -306,15 +259,15 @@ class GroupBarangController extends Controller
     }
 
     /**
-     * Finds the MasterGroupBarang model based on its primary key value.
+     * Finds the MasterMesin model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param string $code Code
-     * @return MasterGroupBarang the loaded model
+     * @return MasterMesin the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($code)
     {
-        if (($model = MasterGroupBarang::findOne($code)) !== null) {
+        if (($model = MasterMesin::findOne($code)) !== null) {
             return $model;
         }
 

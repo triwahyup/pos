@@ -21,7 +21,7 @@ use yii\widgets\MaskedInput;
     <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
         <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0">
             <?= $form->field($model, 'group_supplier_code')->widget(Select2::classname(), [
-                    'data' => [],
+                    'data' => $groupSupplier,
                     'options' => ['placeholder' => 'Group Supplier'],
                 ]) ?>
         </div>

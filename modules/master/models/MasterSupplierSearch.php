@@ -56,7 +56,7 @@ class MasterSupplierSearch extends MasterPerson
             return $dataProvider;
         }
 
-        $query->where(['type_user'=>Konstanta::TYPE_SUPPLIER]);
+        $query->where(['type_user'=>Konstanta::TYPE_SUPPLIER, 'status'=>1]);
         // grid filtering conditions
         $query->andFilterWhere([
             'tgl_jatuh_tempo' => $this->tgl_jatuh_tempo,

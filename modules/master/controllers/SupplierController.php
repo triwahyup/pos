@@ -5,6 +5,7 @@ namespace app\modules\master\controllers;
 use app\commands\Konstanta;
 use app\models\Logs;
 use app\models\User;
+use app\modules\master\models\MasterGroupSupplier;
 use app\modules\master\models\MasterProvinsi;
 use app\modules\master\models\MasterKabupaten;
 use app\modules\master\models\MasterKecamatan;
@@ -104,8 +105,14 @@ class SupplierController extends Controller
             ->where(['status' => 1])
             ->indexBy('id')
             ->column();
+        $groupSupplier = MasterGroupSupplier::find()
+            ->select(['name'])
+            ->where(['status' => 1])
+            ->indexBy('code')
+            ->column();
         
         $message = '';
+        $success = true;
         $model = new MasterPerson();
         $model->code = $model->newcode(Konstanta::TYPE_SUPPLIER);
         if ($this->request->isPost) {
@@ -118,7 +125,15 @@ class SupplierController extends Controller
                     if(!empty($model->phone_2)){
                         $model->phone_2 = str_replace('-', '', $model->phone_2);
                     }
-                    if($model->save()){
+                    if(!$model->save()){
+                        $success = false;
+                        $message = (count($model->errors) > 0) ? 'ERROR CREATE SUPPLIER: ' : '';
+                        foreach($model->errors as $error => $value){
+                            $message .= $value[0].', ';
+                        }
+                        $message = substr($message, 0, -2);
+                    }
+                    if($success){
                         $transaction->commit();
                         $message = 'CREATE SUPPLIER: '.$model->name;
                         $logs =	[
@@ -130,14 +145,10 @@ class SupplierController extends Controller
                         \Yii::$app->session->setFlash('success', $message);
                         return $this->redirect(['view', 'code' => $model->code]);
                     }else{
-                        $message = (count($model->errors) > 0) ? 'ERROR CREATE SUPPLIER: ' : '';
-                        foreach($model->errors as $error => $value){
-                            $message .= $value[0].', ';
-                        }
-                        $message = substr($message, 0, -2);
                         $transaction->rollBack();
                     }
                 }catch(\Exception $e) {
+                    $success = false;
                     $message = $e->getMessage();
 				    $transaction->rollBack();
                 }
@@ -155,6 +166,7 @@ class SupplierController extends Controller
         return $this->render('create', [
             'model' => $model,
             'dataProvinsi' => $dataProvinsi,
+            'groupSupplier' => $groupSupplier,
         ]);
     }
 
@@ -172,8 +184,14 @@ class SupplierController extends Controller
             ->where(['status' => 1])
             ->indexBy('id')
             ->column();
+        $groupSupplier = MasterGroupSupplier::find()
+            ->select(['name'])
+            ->where(['status' => 1])
+            ->indexBy('code')
+            ->column();
         
         $message = '';
+        $success = true;
         $model = $this->findModel($code);
         if ($this->request->isPost && $model->load($this->request->post())) {
             $connection = \Yii::$app->db;
@@ -183,7 +201,15 @@ class SupplierController extends Controller
                 if(!empty($model->phone_2)){
                     $model->phone_2 = str_replace('-', '', $model->phone_2);
                 }
-                if($model->save()){
+                if(!$model->save()){
+                    $success = false;
+                    $message = (count($model->errors) > 0) ? 'ERROR UPDATE SUPPLIER: ' : '';
+                    foreach($model->errors as $error => $value){
+                        $message .= $value[0].', ';
+                    }
+                    $message = substr($message, 0, -2);
+                }
+                if($success){
                     $transaction->commit();
                     $message = 'UPDATE SUPPLIER: '.$model->name;
                     $logs =	[
@@ -195,14 +221,10 @@ class SupplierController extends Controller
                     \Yii::$app->session->setFlash('success', $message);
                     return $this->redirect(['view', 'code' => $model->code]);
                 }else{
-                    $message = (count($model->errors) > 0) ? 'ERROR UPDATE SUPPLIER: ' : '';
-                    foreach($model->errors as $error => $value){
-                        $message .= $value[0].', ';
-                    }
-                    $message = substr($message, 0, -2);
                     $transaction->rollBack();
                 }
             }catch(\Exception $e) {
+                $success = false;
                 $message = $e->getMessage();
                 $transaction->rollBack();
             }
@@ -217,6 +239,7 @@ class SupplierController extends Controller
         return $this->render('update', [
             'model' => $model,
             'dataProvinsi' => $dataProvinsi,
+            'groupSupplier' => $groupSupplier,
         ]);
     }
 
@@ -229,33 +252,48 @@ class SupplierController extends Controller
      */
     public function actionDelete($code)
     {
-        $message = '';
+        $success = true;
+		$message = '';
         $model = $this->findModel($code);
-        $connection = \Yii::$app->db;
-        $transaction = $connection->beginTransaction();
-        try {
-            if($model->delete()){
-                $message = 'DELETE SUPPLIER: '.$model->name;
-                $transaction->commit();
-                \Yii::$app->session->setFlash('success', $message);
-            }else{
-                $message = (count($model->errors) > 0) ? 'ERROR DELETE SUPPLIER' : '';
-                foreach($model->errors as $error=>$value){
-                    $message .= strtoupper($error).": ".$value[0].', ';
+        if(isset($model)){
+            $connection = \Yii::$app->db;
+			$transaction = $connection->beginTransaction();
+            try{
+                $model->status = 0;
+                if(!$model->save()){
+                    $success = false;
+                    $message = (count($model->errors) > 0) ? 'ERROR DELETE SUPPLIER: ' : '';
+                    foreach($model->errors as $error => $value){
+                        $message .= $value[0].', ';
+                    }
+                    $message = substr($message, 0, -2);
                 }
-                $message = substr($message,0,-2);
+
+                if($success){
+                    $transaction->commit();
+                    $message = 'DELETE SUPPLIER:'. $model->name;
+                    $logs =	[
+                        'type' => Logs::TYPE_USER,
+                        'description' => $message,
+                    ];
+                    Logs::addLog($logs);
+                    \Yii::$app->session->setFlash('success', $message);
+                }else{
+                    $transaction->rollBack();
+                    \Yii::$app->session->setFlash('error', $message);
+                }
+            }catch(\Exception $e){
+				$success = false;
+				$message = $e->getMessage();
+				$transaction->rollBack();
                 \Yii::$app->session->setFlash('error', $message);
             }
-        }catch (\Exception $e) {
-            $message = $e->getMessage();
-            \Yii::$app->session->setFlash('error', $message);
-            $transaction->rollBack();
+            $logs =	[
+                'type' => Logs::TYPE_USER,
+                'description' => $message,
+            ];
+            Logs::addLog($logs);
         }
-        $logs = [
-			'type' => Logs::TYPE_USER,
-			'description' => $message,
-		];
-		Logs::addLog($logs);
         return $this->redirect(['index']);
     }
 

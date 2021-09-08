@@ -1,15 +1,15 @@
 <?php
 
-namespace app\modules\master\models;
+namespace app\modules\pengaturan\models;
 
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use app\modules\master\models\MasterGroupSupplier;
+use app\modules\pengaturan\models\PengaturanApproval;
 
 /**
- * MasterGroupSupplierSearch represents the model behind the search form of `app\modules\master\models\MasterGroupSupplier`.
+ * PengaturanApprovalSearch represents the model behind the search form of `app\modules\pengaturan\models\PengaturanApproval`.
  */
-class MasterGroupSupplierSearch extends MasterGroupSupplier
+class PengaturanApprovalSearch extends PengaturanApproval
 {
     /**
      * {@inheritdoc}
@@ -17,7 +17,7 @@ class MasterGroupSupplierSearch extends MasterGroupSupplier
     public function rules()
     {
         return [
-            [['code', 'name', 'keterangan', 'created_at', 'updated_at'], 'safe'],
+            [['name', 'slug'], 'safe'],
         ];
     }
 
@@ -39,7 +39,7 @@ class MasterGroupSupplierSearch extends MasterGroupSupplier
      */
     public function search($params)
     {
-        $query = MasterGroupSupplier::find();
+        $query = PengaturanApproval::find();
 
         // add conditions that should always apply here
 
@@ -55,20 +55,9 @@ class MasterGroupSupplierSearch extends MasterGroupSupplier
             return $dataProvider;
         }
 
-        $query->where(['status'=>1]);
-        // grid filtering conditions
-        if(!empty($this->created_at)){
-            $t1 = strtotime($this->created_at);
-			$t2 = strtotime("+1 days", $t1);
-			$query->andWhere('created_at >='.$t1.' and created_at <'.$t2);
-        }
-        if(!empty($this->updated_at)){
-            $t1 = strtotime($this->updated_at);
-			$t2 = strtotime("+1 days", $t1);
-			$query->andWhere('updated_at >='.$t1.' and updated_at <'.$t2);
-        }
-
-        $query->andFilterWhere(['like', 'name', $this->name]);
+        $query->where(['status'=>1])
+            ->andFilterWhere(['like', 'name', $this->name])
+            ->andFilterWhere(['like', 'slug', $this->slug]);
 
         return $dataProvider;
     }

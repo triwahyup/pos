@@ -17,8 +17,7 @@ class ProfileSearch extends Profile
     public function rules()
     {
         return [
-            [['user_id', 'status', 'created_at', 'updated_at'], 'integer'],
-            [['name', 'nik', 'nip', 'tgl_lahir', 'tempat_lahir', 'alamat', 'provinsi_id', 'kabupaten_id', 'kecamatan_id', 'kelurahan_id', 'kode_pos', 'phone_1', 'phone_2', 'email', 'keterangan', 'tgl_masuk', 'tgl_keluar', 'golongan', 'foto', 'typeuser_code'], 'safe'],
+            [['name', 'phone_1', 'tgl_masuk', 'typeuser_code'], 'safe'],
         ];
     }
 
@@ -56,33 +55,12 @@ class ProfileSearch extends Profile
             return $dataProvider;
         }
 
-        // grid filtering conditions
-        $query->andFilterWhere([
-            'user_id' => $this->user_id,
-            'tgl_lahir' => $this->tgl_lahir,
-            'tgl_masuk' => $this->tgl_masuk,
-            'tgl_keluar' => $this->tgl_keluar,
-            'status' => $this->status,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
-        ]);
-
+        $query->where(['status' => 1])
+            ->andWhere('user_id <> 1');
+        
         $query->andFilterWhere(['like', 'name', $this->name])
-            ->andFilterWhere(['like', 'nik', $this->nik])
-            ->andFilterWhere(['like', 'nip', $this->nip])
-            ->andFilterWhere(['like', 'tempat_lahir', $this->tempat_lahir])
-            ->andFilterWhere(['like', 'alamat', $this->alamat])
-            ->andFilterWhere(['like', 'provinsi_id', $this->provinsi_id])
-            ->andFilterWhere(['like', 'kabupaten_id', $this->kabupaten_id])
-            ->andFilterWhere(['like', 'kecamatan_id', $this->kecamatan_id])
-            ->andFilterWhere(['like', 'kelurahan_id', $this->kelurahan_id])
-            ->andFilterWhere(['like', 'kode_pos', $this->kode_pos])
             ->andFilterWhere(['like', 'phone_1', $this->phone_1])
-            ->andFilterWhere(['like', 'phone_2', $this->phone_2])
-            ->andFilterWhere(['like', 'email', $this->email])
-            ->andFilterWhere(['like', 'keterangan', $this->keterangan])
-            ->andFilterWhere(['like', 'golongan', $this->golongan])
-            ->andFilterWhere(['like', 'foto', $this->foto])
+            ->andFilterWhere(['like', 'tgl_masuk', $this->tgl_masuk])
             ->andFilterWhere(['like', 'typeuser_code', $this->typeuser_code]);
 
         return $dataProvider;
