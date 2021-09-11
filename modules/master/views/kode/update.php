@@ -13,6 +13,5 @@ $this->params['breadcrumbs'][] = 'Update';
 <div class="master-kode-update">
     <?= $this->render('_form', [
         'model' => $model,
-        'type' => $type,
     ]) ?>
 </div>

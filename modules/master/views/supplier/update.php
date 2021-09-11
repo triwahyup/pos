@@ -5,7 +5,7 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 /* @var $model app\modules\master\models\MasterPerson */
 
-$this->title = 'Update Data Supplier: ' . $model->name;
+$this->title = 'Update Supplier: ' . $model->name;
 $this->params['breadcrumbs'][] = ['label' => 'Data Supplier', 'url' => ['index']];
 $this->params['breadcrumbs'][] = ['label' => $model->name, 'url' => ['view', 'code' => $model->code]];
 $this->params['breadcrumbs'][] = 'Update';
@@ -16,5 +16,4 @@ $this->params['breadcrumbs'][] = 'Update';
         'dataProvinsi' => $dataProvinsi,
         'groupSupplier' => $groupSupplier,
     ]) ?>
-
 </div>

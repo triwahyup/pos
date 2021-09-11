@@ -3,7 +3,6 @@
 namespace app\modules\master\models;
 
 use Yii;
-use app\commands\Konstanta;
 use app\modules\master\models\MasterKode;
 use yii\behaviors\TimestampBehavior;
 
@@ -12,7 +11,7 @@ use yii\behaviors\TimestampBehavior;
  *
  * @property string $code
  * @property string|null $name
- * @property string|null $type
+ * @property string|null $type_code
  * @property float|null $qty
  * @property string|null $keterangan
  * @property int|null $status
@@ -42,12 +41,13 @@ class MasterSatuan extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['name', 'type', 'qty'], 'required'],
+            [['name', 'type_code', 'qty'], 'required'],
             [['qty'], 'number'],
             [['keterangan'], 'string'],
             [['status', 'created_at', 'updated_at'], 'integer'],
-            [['code', 'type'], 'string', 'max' => 8],
+            [['code'], 'string', 'max' => 3],
             [['name'], 'string', 'max' => 128],
+            [['type_code'], 'string', 'max' => 8],
             [['code'], 'unique'],
             [['status'], 'default', 'value' => 1],
         ];
@@ -61,7 +61,7 @@ class MasterSatuan extends \yii\db\ActiveRecord
         return [
             'code' => 'Code',
             'name' => 'Name',
-            'type' => 'Type',
+            'type_code' => 'Type',
             'qty' => 'Qty',
             'keterangan' => 'Keterangan',
             'status' => 'Status',
@@ -70,30 +70,19 @@ class MasterSatuan extends \yii\db\ActiveRecord
         ];
     }
 
-    public function newcode($type)
+    public function generateCode()
     {
-        $model = MasterSatuan::find()->where(['type'=>$type])->count();
+        $model = MasterSatuan::find()->count();
         $total=0;
         if($model > 0){
-            $model = MasterSatuan::find()
-                ->where(['type'=>$type])
-                ->orderBy(['code'=>SORT_DESC])
-                ->one();
-            $total = (int)substr($model->code, -3);
+            $model = MasterSatuan::find()->orderBy(['code'=>SORT_DESC])->one();
+            $total = (int)substr($model->code, 1);
         }
-        if($type == Konstanta::TYPE_KERTAS){
-            return (string)'KRTS-'.sprintf('%03s', ($total+1));
-        }
-        else if($type == Konstanta::TYPE_TINTA){
-            return (string)'TINT-'.sprintf('%03s', ($total+1));
-        }
-        else if($type == Konstanta::TYPE_LAIN){
-            return (string)'LAIN-'.sprintf('%03s', ($total+1));
-        }
+        return (string)sprintf('%03s', ($total+1));
     }
 
-    public function getTypeBarang()
+    public function getTypeCode()
     {
-        return $this->hasOne(MasterKode::className(), ['code' => 'type']);
+        return $this->hasOne(MasterKode::className(), ['code' => 'type_code']);
     }
 }

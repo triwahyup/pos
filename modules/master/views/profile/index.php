@@ -1,8 +1,8 @@
 <?php
+use app\commands\Helper;
 use kartik\date\DatePicker;
 use yii\helpers\Html;
 use yii\grid\GridView;
-use app\commands\Helper;
 
 /* @var $this yii\web\View */
 /* @var $searchModel app\modules\master\models\ProfileSearch */
@@ -15,8 +15,6 @@ $this->params['breadcrumbs'][] = $this->title;
     <p class="text-right">
         <?= Html::a('<i class="fontello icon-plus"></i><span>Create Data Karyawan</span>', ['create'], ['class' => 'btn btn-success btn-flat btn-sm']) ?>
     </p>
-
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
@@ -92,6 +90,4 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
         ],
     ]); ?>
-
-
 </div>

@@ -1,8 +1,8 @@
 <?php
+use app\commands\Helper;
 use kartik\date\DatePicker;
 use yii\helpers\Html;
 use yii\grid\GridView;
-use app\commands\Helper;
 
 /* @var $this yii\web\View */
 /* @var $searchModel app\modules\master\models\MasterKodeSearch */
@@ -22,13 +22,8 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
             'name',
-            [
-                'attribute' => 'type',
-                'value' => function($model, $index, $key) {
-                    return (!empty($model->typeKode)) ? $model->typeKode->name : NULL;
-                }
-            ],
-            'description',
+            'type',
+            'value',
             [
                 'attribute' => 'created_at',
                 'contentOptions' => [

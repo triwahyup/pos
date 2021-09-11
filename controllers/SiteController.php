@@ -7,6 +7,7 @@ use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\web\Response;
 use yii\filters\VerbFilter;
+use app\commands\Konstanta;
 use app\models\LoginForm;
 use app\models\Logs;
 use app\models\User;
@@ -224,7 +225,7 @@ class SiteController extends Controller
         $menuItems = [];
         $querys = \Yii::$app->db->createCommand("
             SELECT * FROM pengaturan_menu
-            WHERE position='KODE-002' 
+            WHERE status=1 AND type_code='".Konstanta::NAVBAR_LEFT."' 
             ".(( \Yii::$app->user->identity->getIsDeveloper()) ? '' : " AND (
                 slug IN (
                     SELECT item_name FROM auth_assignment WHERE user_id = '".\Yii::$app->user->id."'
@@ -234,39 +235,39 @@ class SiteController extends Controller
         
         $data = [];
         foreach($querys as $menu){
-            $data[$menu['id']] = $menu['parent_id'];
+            $data[$menu['code']] = $menu['parent_code'];
             if($menu['level'] == 1){
-                $menuItems[$menu['id']] = [
+                $menuItems[$menu['code']] = [
                     'urutan' => $menu['urutan'],
 					'label' => $menu['name'],
-                    'menuId' => $menu['id'],
+                    'menuId' => $menu['code'],
 					'slug' => $menu['slug'],
                     'url' => $menu['link'],
-					'parentId' => $menu['parent_id'],
+					'parentId' => $menu['parent_code'],
                 ];
             }
             else if($menu['level'] == 2){
-                if(!empty($menu['parent_id'])){
-                    $menuItems[$menu['parent_id']]['items'][$menu['id']] = [
+                if(!empty($menu['parent_code'])){
+                    $menuItems[$menu['parent_code']]['items'][$menu['code']] = [
                         'urutan' => $menu['urutan'],
                         'label' => $menu['name'],
-                        'menuId' => $menu['id'],
+                        'menuId' => $menu['code'],
                         'slug' => $menu['slug'],
                         'url' => $menu['link'],
-                        'parentId' => $menu['parent_id'],
+                        'parentId' => $menu['parent_code'],
                     ];
                 }
             }
             else if($menu['level'] == 3){
-                if(!empty($menu['parent_id'])){
-                    if(!empty($data[$menu['parent_id']])){
-                        $menuItems[$data[$menu['parent_id']]]['items'][$menu['parent_id']]['items'][$menu['id']] = [
+                if(!empty($menu['parent_code'])){
+                    if(!empty($data[$menu['parent_code']])){
+                        $menuItems[$data[$menu['parent_code']]]['items'][$menu['parent_code']]['items'][$menu['code']] = [
                             'urutan' => $menu['urutan'],
                             'label' => $menu['name'],
-                            'menuId' => $menu['id'],
+                            'menuId' => $menu['code'],
                             'slug' => $menu['slug'],
                             'url' => $menu['link'],
-                            'parentId' => $menu['parent_id'],
+                            'parentId' => $menu['parent_code'],
                         ];
                     }
                 }

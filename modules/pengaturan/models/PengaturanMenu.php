@@ -9,15 +9,16 @@ use yii\behaviors\TimestampBehavior;
 /**
  * This is the model class for table "pengaturan_menu".
  *
- * @property string $id
+ * @property string $code
  * @property string|null $name
  * @property string|null $slug
- * @property int|null $level
  * @property string|null $link
  * @property string|null $icon
- * @property int|null $parent_id
+ * @property string|null $parent_code
+ * @property string|null $type_code
+ * @property int|null $level
  * @property int|null $urutan
- * @property int|null $position
+ * @property int|null $status
  * @property int|null $created_at
  * @property int|null $updated_at
  */
@@ -47,13 +48,14 @@ class PengaturanMenu extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['name', 'urutan', 'position'], 'required'],
-            [['level', 'urutan', 'created_at', 'updated_at'], 'integer'],
-            [['parent_1', 'parent_2'], 'string'],
-            [['id', 'parent_id', 'position'], 'string', 'max' => 8],
+            [['name', 'urutan'], 'required'],
+            [['parent_1', 'parent_2'], 'safe'],
+            [['level', 'urutan', 'status', 'created_at', 'updated_at'], 'integer'],
+            [['code', 'parent_code', 'type_code'], 'string', 'max' => 3],
             [['name', 'slug', 'link'], 'string', 'max' => 128],
             [['icon'], 'string', 'max' => 64],
-            [['id'], 'unique'],
+            [['code'], 'unique'],
+            [['status'], 'default', 'value' => 1],
         ];
     }
 
@@ -63,45 +65,44 @@ class PengaturanMenu extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
+            'code' => 'Code',
             'name' => 'Name',
             'slug' => 'Slug',
-            'level' => 'Level',
             'link' => 'Link',
             'icon' => 'Icon',
-            'parent_id' => 'Parent',
+            'parent_code' => 'Parent',
+            'type_code' => 'Position',
+            'level' => 'Level',
             'urutan' => 'Urutan',
-            'position' => 'Position',
+            'status' => 'Status',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
-            'parent_1' => 'Parent Menu 1',
-            'parent_2' => 'Parent Menu 2',
         ];
     }
 
-    public function newcode()
+    public function generateCode()
     {
         $model = PengaturanMenu::find()->count();
         $total=0;
         if($model > 0){
-            $model = PengaturanMenu::find()->orderBy(['id'=>SORT_DESC])->one();
-            $total = (int)substr($model->id, -3);
+            $model = PengaturanMenu::find()->orderBy(['code'=>SORT_DESC])->one();
+            $total = (int)substr($model->code, 1);
         }
-        return (string)'MENU-'.sprintf('%03s', ($total+1));
+        return (string)sprintf('%03s', ($total+1));
     }
 
-    public function getKode()
+    public function getTypeKode()
     {
-        return $this->hasOne(MasterKode::className(), ['code' => 'position']);
+        return $this->hasOne(MasterKode::className(), ['code' => 'type_code']);
     }
 
     public function getParent()
     {
-        return $this->hasOne(PengaturanMenu::className(), ['id' => 'parent_id']);
+        return $this->hasOne(PengaturanMenu::className(), ['code' => 'parent_code']);
     }
 
     public function getChild()
     {
-        return $this->hasMany(PengaturanMenu::className(), ['parent_id' => 'id'])->orderBy(['urutan' => SORT_ASC]);;
+        return $this->hasMany(PengaturanMenu::className(), ['parent_code' => 'code'])->orderBy(['urutan' => SORT_ASC]);;
     }
 }

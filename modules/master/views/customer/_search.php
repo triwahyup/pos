@@ -31,13 +31,9 @@ use yii\widgets\ActiveForm;
 
     <?php // echo $form->field($model, 'kode_pos') ?>
 
-    <?php // echo $form->field($model, 'contact') ?>
+    <?php // echo $form->field($model, 'phone_1') ?>
 
-    <?php // echo $form->field($model, 'telp_1') ?>
-
-    <?php // echo $form->field($model, 'telp_2') ?>
-
-    <?php // echo $form->field($model, 'handphone') ?>
+    <?php // echo $form->field($model, 'phone_2') ?>
 
     <?php // echo $form->field($model, 'email') ?>
 
@@ -46,10 +42,6 @@ use yii\widgets\ActiveForm;
     <?php // echo $form->field($model, 'keterangan') ?>
 
     <?php // echo $form->field($model, 'type_user') ?>
-
-    <?php // echo $form->field($model, 'masuk') ?>
-
-    <?php // echo $form->field($model, 'keluar') ?>
 
     <?php // echo $form->field($model, 'tgl_jatuh_tempo') ?>
 

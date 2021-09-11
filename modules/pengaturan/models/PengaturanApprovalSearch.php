@@ -17,7 +17,8 @@ class PengaturanApprovalSearch extends PengaturanApproval
     public function rules()
     {
         return [
-            [['name', 'slug'], 'safe'],
+            [['code', 'name', 'slug'], 'safe'],
+            [['status', 'created_at', 'updated_at'], 'integer'],
         ];
     }
 
@@ -55,7 +56,14 @@ class PengaturanApprovalSearch extends PengaturanApproval
             return $dataProvider;
         }
 
-        $query->where(['status'=>1])
+        // grid filtering conditions
+        $query->andFilterWhere([
+            'status' => $this->status,
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
+        ]);
+
+        $query->andFilterWhere(['like', 'code', $this->code])
             ->andFilterWhere(['like', 'name', $this->name])
             ->andFilterWhere(['like', 'slug', $this->slug]);
 

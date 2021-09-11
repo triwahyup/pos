@@ -1,7 +1,7 @@
 <?php
+use app\commands\Helper;
 use yii\helpers\Html;
 use yii\grid\GridView;
-use app\commands\Helper;
 
 /* @var $this yii\web\View */
 /* @var $searchModel app\modules\pengaturan\models\PengaturanApprovalSearch */
@@ -56,6 +56,4 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
         ],
     ]); ?>
-
-
 </div>

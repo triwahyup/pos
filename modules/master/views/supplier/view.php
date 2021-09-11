@@ -60,9 +60,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 'phone_2',
                 'email:email',
                 'fax',
-                'keterangan',
+                'keterangan:ntext',
                 'tgl_jatuh_tempo',
-                'group_supplier_code',
+                [
+                    'attribute' => 'group_supplier_code',
+                    'value'=> function ($model, $index) {
+                        return (isset($model->groupSupplier)) ? $model->groupSupplier->name : '';
+                    }
+                ],
                 [
                     'attribute' => 'status',
                     'value'=> function ($model, $index) { 

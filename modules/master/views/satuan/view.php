@@ -31,22 +31,22 @@ $this->params['breadcrumbs'][] = $this->title;
                 'code',
                 'name',
                 [
-                    'attribute' => 'type',
-                    'value'=> function ($model, $index) {
-                        return (isset($model->typeBarang)) ? $model->typeBarang->name : NULL;
+                    'attribute' => 'type_code',
+                    'value' => function ($model, $index) { 
+                        return (isset($model->typeCode)) ? $model->typeCode->name : '';
                     }
                 ],
                 'qty',
                 'keterangan:ntext',
                 [
                     'attribute' => 'status',
-                    'value'=> function ($model, $index) { 
+                    'value' => function ($model, $index) { 
                         return ($model->status == 1) ? 'Active' : 'Delete';
                     }
                 ],
                 [
                     'attribute'=>'created_at',
-                    'value'=> function ($model, $index) { 
+                    'value' => function ($model, $index) { 
                         if(!empty($model->created_at))
                         {
                             return date('d-m-Y H:i:s',$model->created_at);

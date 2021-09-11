@@ -17,7 +17,7 @@ class MasterKodeSearch extends MasterKode
     public function rules()
     {
         return [
-            [['code', 'name', 'type', 'description', 'created_at', 'updated_at'], 'safe'],
+            [['name', 'type', 'value', 'created_at', 'updated_at'], 'safe'],
         ];
     }
 
@@ -55,6 +55,8 @@ class MasterKodeSearch extends MasterKode
             return $dataProvider;
         }
 
+        // grid filtering conditions
+        $query->where(['status' => 1]);
         if(!empty($this->created_at)){
             $t1 = strtotime($this->created_at);
 			$t2 = strtotime("+1 days", $t1);
@@ -65,11 +67,10 @@ class MasterKodeSearch extends MasterKode
 			$t2 = strtotime("+1 days", $t1);
 			$query->andWhere('updated_at >='.$t1.' and updated_at <'.$t2);
         }
-
-        $query->andFilterWhere(['like', 'code', $this->code])
-            ->andFilterWhere(['like', 'name', $this->name])
+        
+        $query->andFilterWhere(['like', 'name', $this->name])
             ->andFilterWhere(['like', 'type', $this->type])
-            ->andFilterWhere(['like', 'description', $this->description]);
+            ->andFilterWhere(['like', 'value', $this->value]);
 
         return $dataProvider;
     }

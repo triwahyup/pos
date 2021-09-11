@@ -113,13 +113,13 @@ class ProfileController extends Controller
             ->indexBy('code')
             ->column();
         
-        $message = '';
         $success = true;
+        $message = '';
         $model = new Profile();
         if ($this->request->isPost) {
             if ($model->load($this->request->post())) {
                 $connection = \Yii::$app->db;
-			    $transaction = $connection->beginTransaction();
+                $transaction = $connection->beginTransaction();
                 try {
                     $user = new User();
                     $user->attributes = $model->attributes;
@@ -139,7 +139,7 @@ class ProfileController extends Controller
                     $user->created_at = time();
                     $user->updated_at = time();
                     if($user->save()){
-                        $authItems = AuthItemChild::findAll(['parent'=>strtolower($model->typeuser_code)]);
+                        $authItems = AuthItemChild::findAll(['parent'=>str_replace(' ','-', $model->typeUser->value)]);
                         if(count($authItems) > 0){
                             foreach($authItems as $val){
                                 $authAssignment = new AuthAssignment();
@@ -235,16 +235,18 @@ class ProfileController extends Controller
             ->where(['type'=>Konstanta::TYPE_USER, 'status' => 1])
             ->indexBy('code')
             ->column();
-        
-        $message = '';
+
         $success = true;
+        $message = '';
+        $user = User::findOne(['id'=>$user_id]);
         $model = $this->findModel($user_id);
+        $model->username = $user->username;
         if ($this->request->isPost && $model->load($this->request->post())) {
             $connection = \Yii::$app->db;
             $transaction = $connection->beginTransaction();
             try {
                 AuthAssignment::deleteAll('user_id=:user_id', [':user_id'=>$user_id]);
-                $authItems = AuthItemChild::findAll(['parent'=>strtolower($model->typeuser_code)]);
+                $authItems = AuthItemChild::findAll(['parent'=>str_replace(' ','-', $model->typeUser->value)]);
                 if(count($authItems) > 0){
                     foreach($authItems as $val){
                         $authAssignment = new AuthAssignment();
@@ -262,9 +264,11 @@ class ProfileController extends Controller
                     }
                 }
 
-                $user = User::findOne(['id'=>$user_id]);
                 $user->email = $model->email;
                 $user->updated_at = time();
+                if(!empty($model->current_password)){
+                    $user->password = $model->new_password;
+                }
                 if($user->save()){
                     $model->phone_1 = str_replace('-', '', $model->phone_1);
                     if(!empty($model->phone_2)){
@@ -329,8 +333,8 @@ class ProfileController extends Controller
      */
     public function actionDelete($user_id)
     {
-        $message = '';
         $success = true;
+        $message = '';
         $model = $this->findModel($user_id);
         if(isset($model)){
             $connection = \Yii::$app->db;
@@ -400,19 +404,6 @@ class ProfileController extends Controller
             return $model;
         }
 
-        throw new NotFoundHttpException('The requested page does not exist.');
-    }
-
-    public function actionListKabupaten($provinsiId)
-    {
-        if(isset($provinsiId)){
-            $model = MasterKabupaten::find()
-                ->select(['id', 'name'])
-                ->where(['provinsi_id'=>$provinsiId, 'status'=>1])
-                ->asArray()
-                ->all();
-            return json_encode($model);
-        }
         throw new NotFoundHttpException('The requested page does not exist.');
     }
 

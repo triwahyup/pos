@@ -1,9 +1,9 @@
 <?php
+
 namespace app\modules\master\models;
 
 use Yii;
 use app\models\AuthItemChild;
-use app\modules\master\models\MasterKodeType;
 use app\modules\pengaturan\models\PengaturanMenu;
 use yii\behaviors\TimestampBehavior;
 
@@ -12,8 +12,8 @@ use yii\behaviors\TimestampBehavior;
  *
  * @property string $code
  * @property string|null $name
- * @property string|null $type
- * @property string|null $description
+ * @property resource|null $type
+ * @property string|null $value
  * @property int|null $status
  * @property int|null $created_at
  * @property int|null $updated_at
@@ -41,11 +41,11 @@ class MasterKode extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['code', 'name', 'type'], 'required'],
+            [['name', 'type'], 'required'],
             [['status', 'created_at', 'updated_at'], 'integer'],
-            [['code', 'type'], 'string', 'max' => 8],
+            [['code'], 'string', 'max' => 3],
             [['name'], 'string', 'max' => 64],
-            [['description'], 'string', 'max' => 128],
+            [['type', 'value'], 'string', 'max' => 32],
             [['code'], 'unique'],
             [['status'], 'default', 'value' => 1],
         ];
@@ -60,37 +60,32 @@ class MasterKode extends \yii\db\ActiveRecord
             'code' => 'Code',
             'name' => 'Name',
             'type' => 'Type',
-            'description' => 'Description',
+            'value' => 'Value',
             'status' => 'Status',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
         ];
     }
 
-    public function newcode()
+    public function generateCode()
     {
         $model = MasterKode::find()->count();
         $total=0;
         if($model > 0){
             $model = MasterKode::find()->orderBy(['code'=>SORT_DESC])->one();
-            $total = (int)substr($model->code, -3);
+            $total = (int)substr($model->code, 1);
         }
-        return (string)'KODE-'.sprintf('%03s', ($total+1));
-    }
-
-    public function getTypeKode()
-    {
-        return $this->hasOne(MasterKodeType::className(), ['code' => 'type']);
+        return (string)sprintf('%03s', ($total+1));
     }
 
     public function getMenu()
     {
-		return AuthItemChild::findAll(['parent'=>$this->code]);
+		return AuthItemChild::find()->where(['parent'=>$this->value])->all();
     }
 
     public function getAuthItem()
     {
-        $model = AuthItemChild::findAll(['parent'=>$this->code]);
+        $model = AuthItemChild::findAll(['parent'=>$this->value]);
         $data = [];
         foreach($model as $val){
 			$menu = PengaturanMenu::findOne(['slug'=>$val->child]);

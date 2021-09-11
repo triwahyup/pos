@@ -9,10 +9,10 @@ use app\modules\master\models\MasterKode;
 /**
  * This is the model class for table "temp_pengaturan_approval_detail".
  *
- * @property string|null $approval_code
- * @property int|null $urutan
  * @property int $id
  * @property int|null $user_create
+ * @property string|null $code
+ * @property int|null $urutan
  * @property int|null $user_id
  * @property string|null $typeuser_code
  */
@@ -32,8 +32,8 @@ class TempPengaturanApprovalDetail extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['urutan', 'user_create', 'user_id'], 'integer'],
-            [['approval_code', 'typeuser_code'], 'string', 'max' => 8],
+            [['user_create', 'urutan', 'user_id'], 'integer'],
+            [['code', 'typeuser_code'], 'string', 'max' => 3],
         ];
     }
 
@@ -43,10 +43,10 @@ class TempPengaturanApprovalDetail extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'approval_code' => 'Approval Code',
-            'urutan' => 'Urutan',
             'id' => 'ID',
             'user_create' => 'User Create',
+            'code' => 'Code',
+            'urutan' => 'Urutan',
             'user_id' => 'User ID',
             'typeuser_code' => 'Typeuser Code',
         ];

@@ -1,9 +1,8 @@
 <?php
-
+use app\commands\Helper;
+use kartik\date\DatePicker;
 use yii\helpers\Html;
 use yii\grid\GridView;
-use kartik\date\DatePicker;
-use app\commands\Helper;
 
 /* @var $this yii\web\View */
 /* @var $searchModel app\modules\master\models\MasterSupplierSearch */
@@ -53,6 +52,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 'contentOptions' => [
                     'class' => 'text-center',
                 ],
+                'value'=> function ($model, $index) {
+                    return (isset($model->groupSupplier)) ? $model->groupSupplier->name : '';
+                }
             ],
             [
                 'buttons' => [
@@ -88,4 +90,6 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
         ],
     ]); ?>
+
+
 </div>

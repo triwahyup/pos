@@ -41,7 +41,7 @@ class MasterGroupSupplier extends \yii\db\ActiveRecord
             [['name'], 'required'],
             [['keterangan'], 'string'],
             [['status', 'created_at', 'updated_at'], 'integer'],
-            [['code'], 'string', 'max' => 8],
+            [['code'], 'string', 'max' => 3],
             [['name'], 'string', 'max' => 128],
             [['code'], 'unique'],
             [['status'], 'default', 'value' => 1],
@@ -63,14 +63,14 @@ class MasterGroupSupplier extends \yii\db\ActiveRecord
         ];
     }
 
-    public function newcode()
+    public function generateCode()
     {
         $model = MasterGroupSupplier::find()->count();
         $total=0;
         if($model > 0){
             $model = MasterGroupSupplier::find()->orderBy(['code'=>SORT_DESC])->one();
-            $total = (int)substr($model->code, -3);
+            $total = (int)substr($model->code, 1);
         }
-        return (string)'GRUP-'.sprintf('%03s', ($total+1));
+        return (string)sprintf('%03s', ($total+1));
     }
 }

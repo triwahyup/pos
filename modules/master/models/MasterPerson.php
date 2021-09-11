@@ -1,13 +1,14 @@
 <?php
+
 namespace app\modules\master\models;
 
 use Yii;
-use yii\behaviors\TimestampBehavior;
-use app\commands\Konstanta;
+use app\modules\master\models\MasterGroupSupplier;
 use app\modules\master\models\MasterProvinsi;
 use app\modules\master\models\MasterKabupaten;
 use app\modules\master\models\MasterKecamatan;
 use app\modules\master\models\MasterKelurahan;
+use yii\behaviors\TimestampBehavior;
 
 /**
  * This is the model class for table "master_person".
@@ -56,18 +57,19 @@ class MasterPerson extends \yii\db\ActiveRecord
     {
         return [
             [['code', 'name'], 'required'],
-            [['tgl_jatuh_tempo'], 'safe'],
+            [['keterangan'], 'string'],
             [['type_user', 'status', 'created_at', 'updated_at'], 'integer'],
-            [['name', 'address', 'keterangan'], 'string', 'max' => 128],
-            [['email', 'fax'], 'string', 'max' => 32],
+            [['tgl_jatuh_tempo'], 'safe'],
+            [['code', 'group_supplier_code'], 'string', 'max' => 3],
+            [['name', 'address'], 'string', 'max' => 128],
             [['provinsi_id'], 'string', 'max' => 2],
             [['kabupaten_id'], 'string', 'max' => 4],
             [['kecamatan_id'], 'string', 'max' => 7],
             [['kelurahan_id'], 'string', 'max' => 10],
-            [['code', 'kode_pos', 'group_supplier_code'], 'string', 'max' => 8],
+            [['kode_pos'], 'string', 'max' => 8],
             [['phone_1', 'phone_2'], 'string', 'max' => 16],
+            [['email', 'fax'], 'string', 'max' => 32],
             [['code'], 'unique'],
-            [['email'], 'trim'],
             [['status'], 'default', 'value' => 1],
         ];
     }
@@ -92,7 +94,7 @@ class MasterPerson extends \yii\db\ActiveRecord
             'fax' => 'Fax',
             'keterangan' => 'Keterangan',
             'type_user' => 'Type User',
-            'tgl_jatuh_tempo' => 'Tgl Jatuh Tempo',
+            'tgl_jatuh_tempo' => 'Term In',
             'group_supplier_code' => 'Group Supplier',
             'status' => 'Status',
             'created_at' => 'Created At',
@@ -100,23 +102,15 @@ class MasterPerson extends \yii\db\ActiveRecord
         ];
     }
 
-    public function newcode($typerUser)
+    public function generateCode()
     {
-        $model = MasterPerson::find()->where(['type_user'=>$typerUser])->count();
+        $model = MasterPerson::find()->count();
         $total=0;
         if($model > 0){
-            $model = MasterPerson::find()
-                ->where(['type_user'=>$typerUser])
-                ->orderBy(['code'=>SORT_DESC])
-                ->one();
-            $total = (int)substr($model->code, -3);
+            $model = MasterPerson::find()->orderBy(['code'=>SORT_DESC])->one();
+            $total = (int)substr($model->code, 1);
         }
-        if($typerUser == Konstanta::TYPE_CUSTOMER){
-            return (string)'CUST-'.sprintf('%03s', ($total+1));
-        }
-        else if($typerUser == Konstanta::TYPE_SUPPLIER){
-            return (string)'SUP-'.sprintf('%03s', ($total+1));
-        }
+        return (string)sprintf('%03s', ($total+1));
     }
 
     public function getProvinsi()
@@ -137,5 +131,10 @@ class MasterPerson extends \yii\db\ActiveRecord
     public function getKelurahan()
     {
         return $this->hasOne(MasterKelurahan::className(), ['id' => 'kelurahan_id']);
+    }
+
+    public function getGroupSupplier()
+    {
+        return $this->hasOne(MasterGroupSupplier::className(), ['code' => 'group_supplier_code']);
     }
 }

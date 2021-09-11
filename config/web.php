@@ -79,11 +79,17 @@ $config = [
     ],
     'params' => $params,
     'modules' => [
+        'inventory' => [
+            'class' => 'app\modules\inventory\Module',
+        ],
         'master' => [
             'class' => 'app\modules\master\Module',
         ],
         'pengaturan' => [
             'class' => 'app\modules\pengaturan\Module',
+        ],
+        'purchasing' => [
+            'class' => 'app\modules\purchasing\Module',
         ],
         'report' => [
             'class' => 'app\modules\report\Module',

@@ -125,6 +125,11 @@ $(document).ready(function(){
 			}
 		}
 	});
+
+	$("body").off("click","#btn-remove").on("click","#btn-remove", function(e){
+		e.preventDefault();
+		$("[data-form]").empty();
+	});
 });
 
 var temp = {

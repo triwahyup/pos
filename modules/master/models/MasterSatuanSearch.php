@@ -17,7 +17,7 @@ class MasterSatuanSearch extends MasterSatuan
     public function rules()
     {
         return [
-            [['code', 'name', 'type', 'keterangan', 'created_at', 'updated_at'], 'safe'],
+            [['name', 'type_code', 'created_at', 'updated_at'], 'safe'],
             [['qty'], 'number'],
         ];
     }
@@ -42,7 +42,7 @@ class MasterSatuanSearch extends MasterSatuan
     {
         $query = MasterSatuan::find()
             ->alias('a')
-            ->leftJoin('master_kode b', 'b.code = a.type');
+            ->leftJoin('master_kode b', 'b.code = a.type_code');
 
         // add conditions that should always apply here
 
@@ -58,8 +58,8 @@ class MasterSatuanSearch extends MasterSatuan
             return $dataProvider;
         }
 
-        $query->where(['a.status'=>1]);
         // grid filtering conditions
+        $query->where(['a.status'=>1]);
         if(!empty($this->created_at)){
             $t1 = strtotime($this->created_at);
 			$t2 = strtotime("+1 days", $t1);
@@ -70,11 +70,11 @@ class MasterSatuanSearch extends MasterSatuan
 			$t2 = strtotime("+1 days", $t1);
 			$query->andWhere('a.updated_at >='.$t1.' and a.updated_at <'.$t2);
         }
-        if(!empty($this->type)){
-            $query->andWhere('b.name LIKE "%'.$this->type.'%"');
+        if(!empty($this->type_code)){
+            $query->andWhere('b.name LIKE "%'.$this->type_code.'%"');
         }
-        $query->andFilterWhere(['qty' => $this->qty]);
-        $query->andFilterWhere(['like', 'name', $this->name]);
+        $query->andFilterWhere(['qty' => $this->qty])
+            ->andFilterWhere(['like', 'a.name', $this->name]);
 
         return $dataProvider;
     }

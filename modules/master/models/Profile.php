@@ -3,12 +3,12 @@
 namespace app\modules\master\models;
 
 use Yii;
+use app\models\User;
 use app\modules\master\models\MasterKode;
 use app\modules\master\models\MasterProvinsi;
 use app\modules\master\models\MasterKabupaten;
 use app\modules\master\models\MasterKecamatan;
 use app\modules\master\models\MasterKelurahan;
-
 use yii\behaviors\TimestampBehavior;
 
 /**
@@ -43,7 +43,10 @@ class Profile extends \yii\db\ActiveRecord
 {
     public $username;
     public $password;
-
+    public $current_password;
+    public $new_password;
+	public $retype_new_password;
+    
     /**
      * {@inheritdoc}
      */
@@ -67,17 +70,20 @@ class Profile extends \yii\db\ActiveRecord
         return [
             [['user_id', 'name', 'nik', 'email', 'typeuser_code'], 'required'],
             [['user_id', 'status', 'created_at', 'updated_at'], 'integer'],
-            [['tgl_lahir', 'tgl_masuk', 'tgl_keluar', 'password', 'username'], 'safe'],
+            [['tgl_lahir', 'tgl_masuk', 'tgl_keluar', 'username', 'password', 'current_password', 'new_password', 'retype_new_password'], 'safe'],
             [['name', 'tempat_lahir', 'alamat', 'keterangan', 'foto'], 'string', 'max' => 128],
             [['nik', 'nip', 'email'], 'string', 'max' => 32],
             [['provinsi_id'], 'string', 'max' => 2],
             [['kabupaten_id'], 'string', 'max' => 4],
             [['kecamatan_id'], 'string', 'max' => 7],
             [['kelurahan_id'], 'string', 'max' => 10],
-            [['kode_pos', 'typeuser_code'], 'string', 'max' => 8],
+            [['kode_pos'], 'string', 'max' => 8],
             [['phone_1', 'phone_2'], 'string', 'max' => 16],
+            [['password', 'new_password', 'retype_new_password'], 'string', 'max' => 18],
             [['golongan'], 'string', 'max' => 5],
+            [['typeuser_code'], 'string', 'max' => 3],
             [['user_id'], 'unique'],
+            ['password', 'validatePassword'],
             [['status'], 'default', 'value' => 1],
         ];
     }
@@ -95,10 +101,10 @@ class Profile extends \yii\db\ActiveRecord
             'tgl_lahir' => 'Tgl Lahir',
             'tempat_lahir' => 'Tempat Lahir',
             'alamat' => 'Alamat',
-            'provinsi_id' => 'Provinsi ID',
-            'kabupaten_id' => 'Kabupaten ID',
-            'kecamatan_id' => 'Kecamatan ID',
-            'kelurahan_id' => 'Kelurahan ID',
+            'provinsi_id' => 'Provinsi',
+            'kabupaten_id' => 'Kabupaten',
+            'kecamatan_id' => 'Kecamatan',
+            'kelurahan_id' => 'Kelurahan',
             'kode_pos' => 'Kode Pos',
             'phone_1' => 'Phone 1',
             'phone_2' => 'Phone 2',
@@ -112,8 +118,9 @@ class Profile extends \yii\db\ActiveRecord
             'status' => 'Status',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
-            'username' => 'Username',
-            'password' => 'Password',
+            'current_password' => 'Masukkan password saat ini',
+            'new_password' => 'Masukkan password baru',
+			'retype_new_password' => 'Ulangi password baru',
         ];
     }
 
@@ -141,4 +148,21 @@ class Profile extends \yii\db\ActiveRecord
     {
         return $this->hasOne(MasterKelurahan::className(), ['id' => 'kelurahan_id']);
     }
+
+    public function validatePassword($attribute, $params)
+    {
+        if (!$this->hasErrors()) {
+            $user = User::findOne(\Yii::$app->user->id);
+			if (!$user || !$user->validatePassword($this->current_password)) {
+                $this->addError($attribute, 'Incorrect username or password.');
+            }
+        }
+    }
+
+    public function validatespace($attribute, $params)
+	{
+		if (preg_match('/\s+/', $params)) {
+			$this->addError($attribute, 'No white spaces allowed!');
+		}
+	}
 }

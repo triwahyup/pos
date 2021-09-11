@@ -18,7 +18,7 @@ class MasterCustomerSearch extends MasterPerson
     public function rules()
     {
         return [
-            [['code', 'name', 'address', 'phone_1', 'created_at', 'updated_at'], 'safe'],
+            [[ 'name', 'address', 'phone_1', 'created_at', 'updated_at'], 'safe'],
         ];
     }
 
@@ -56,6 +56,7 @@ class MasterCustomerSearch extends MasterPerson
             return $dataProvider;
         }
 
+        // grid filtering conditions
         $query->where(['type_user' => Konstanta::TYPE_CUSTOMER, 'status'=>1]);
         if(!empty($this->created_at)){
             $t1 = strtotime($this->created_at);
@@ -67,12 +68,11 @@ class MasterCustomerSearch extends MasterPerson
 			$t2 = strtotime("+1 days", $t1);
 			$query->andWhere('updated_at >='.$t1.' and updated_at <'.$t2);
         }
-        $query->andFilterWhere(['like', 'code', $this->code])
-            ->andFilterWhere(['like', 'name', $this->name])
-            ->andFilterWhere(['like', 'address', $this->address])
+
+        $query->andFilterWhere(['like', 'name', $this->name])
             ->andFilterWhere(['like', 'phone_1', $this->phone_1])
-            ->andFilterWhere(['like', 'email', $this->email]);
-        
+            ->andFilterWhere(['like', 'address', $this->address]);
+
         return $dataProvider;
     }
 }

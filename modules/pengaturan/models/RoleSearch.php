@@ -58,8 +58,7 @@ class RoleSearch extends MasterKode
             return $dataProvider;
         }
         
-        $query->where(['type'=>Konstanta::TYPE_USER]);
-        $query->andFilterWhere(['like', 'code', $this->code])
+        $query->where(['type'=>Konstanta::TYPE_USER])
             ->andFilterWhere(['like', 'name', $this->name])
             ->andFilterWhere(['like', 'type', $this->type]);
 

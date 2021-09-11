@@ -4,34 +4,36 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model app\modules\pengaturan\models\MenuSearch */
+/* @var $model app\modules\pengaturan\models\PengaturanMenuSearch */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 
-<div class="menu-search">
+<div class="pengaturan-menu-search">
 
     <?php $form = ActiveForm::begin([
         'action' => ['index'],
         'method' => 'get',
     ]); ?>
 
-    <?= $form->field($model, 'id') ?>
+    <?= $form->field($model, 'code') ?>
 
     <?= $form->field($model, 'name') ?>
 
     <?= $form->field($model, 'slug') ?>
 
-    <?= $form->field($model, 'level') ?>
-
     <?= $form->field($model, 'link') ?>
 
-    <?php // echo $form->field($model, 'icon') ?>
+    <?= $form->field($model, 'icon') ?>
 
-    <?php // echo $form->field($model, 'parent_id') ?>
+    <?php // echo $form->field($model, 'parent_code') ?>
+
+    <?php // echo $form->field($model, 'type_code') ?>
+
+    <?php // echo $form->field($model, 'level') ?>
 
     <?php // echo $form->field($model, 'urutan') ?>
 
-    <?php // echo $form->field($model, 'type') ?>
+    <?php // echo $form->field($model, 'status') ?>
 
     <?php // echo $form->field($model, 'created_at') ?>
 

@@ -55,9 +55,8 @@ class ProfileSearch extends Profile
             return $dataProvider;
         }
 
-        $query->where(['status' => 1])
-            ->andWhere('user_id <> 1');
-        
+        // grid filtering conditions
+        $query->where(['status' => 1]);
         $query->andFilterWhere(['like', 'name', $this->name])
             ->andFilterWhere(['like', 'phone_1', $this->phone_1])
             ->andFilterWhere(['like', 'tgl_masuk', $this->tgl_masuk])

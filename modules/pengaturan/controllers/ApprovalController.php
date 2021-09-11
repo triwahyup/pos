@@ -107,14 +107,14 @@ class ApprovalController extends Controller
                 $connection = \Yii::$app->db;
 			    $transaction = $connection->beginTransaction();
                 try{
-                    $model->code = $model->newcode();
+                    $model->code = $model->generateCode();
                     $model->slug = strtolower(str_replace(' ','-', $model->name));
                     if($model->save()){
                         if(count($model->temps()) > 0){
                             foreach($model->temps() as $temp){
                                 $detail = new PengaturanApprovalDetail();
                                 $detail->attributes = $temp->attributes;
-                                $detail->approval_code = $model->code;
+                                $detail->attributes = $model->attributes;
                                 if(!$detail->save()){
                                     $success = false;
                                     $message = (count($detail->errors) > 0) ? 'ERROR CREATE APPROVE DETAIL: ' : '';
@@ -214,7 +214,7 @@ class ApprovalController extends Controller
                         }
                     }else{
                         $success = false;
-                        $message = (count($model->errors) > 0) ? 'ERROR UPDATE APPROVAL: ' : '';
+                        $message = (count($model->errors) > 0) ? 'ERROR UPDATE PENGATURAN APPROVAL: ' : '';
                         foreach($model->errors as $error => $value){
                             $message .= $value[0].', ';
                         }
@@ -224,7 +224,7 @@ class ApprovalController extends Controller
                     if($success){
                         $this->emptyTemp();
                         $transaction->commit();
-                        $message = 'UPDATE APPROVAL: '.$model->name;
+                        $message = 'UPDATE PENGATURAN APPROVAL: '.$model->name;
                         $logs =	[
                             'type' => Logs::TYPE_USER,
                             'description' => $message,
@@ -301,7 +301,7 @@ class ApprovalController extends Controller
                     }
                 }else{
                     $success = false;
-                    $message = (count($model->errors) > 0) ? 'ERROR DELETE APPROVAL: ' : '';
+                    $message = (count($model->errors) > 0) ? 'ERROR DELETE PENGATURAN APPROVAL: ' : '';
                     foreach($model->errors as $error => $value){
                         $message .= $value[0].', ';
                     }
@@ -310,7 +310,7 @@ class ApprovalController extends Controller
 
                 if($success){
                     $transaction->commit();
-                    $message = 'DELETE APPROVAL: '.$model->name;
+                    $message = 'DELETE PENGATURAN APPROVAL: '.$model->name;
                     $logs =	[
                         'type' => Logs::TYPE_USER,
                         'description' => $message,
@@ -392,7 +392,7 @@ class ApprovalController extends Controller
             $temp->urutan = count($temp->count) +1;
             $temp->user_create = \Yii::$app->user->id;
             if(isset($model->code)){
-                $temp->approval_code = $model->code;
+                $temp->code = $model->code;
             }
             if($model->type == 1){
                 $temp->user_id = $model->approval;

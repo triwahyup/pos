@@ -1,5 +1,4 @@
 <?php
-
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
@@ -23,20 +22,15 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
         ]) ?>
     </p>
-    
+
     <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 pading-right-0">
         <?= DetailView::widget([
             'model' => $model,
             'attributes' => [
                 'code',
                 'name',
-                [
-                    'attribute' => 'type',
-                    'value'=> function ($model, $index) { 
-                        return (!empty($model->typeKode)) ? $model->typeKode->name : NULL;
-                    }
-                ],
-                'description',
+                'type',
+                'value',
                 [
                     'attribute' => 'status',
                     'value'=> function ($model, $index) { 

@@ -17,8 +17,7 @@ class PengaturanMenuSearch extends PengaturanMenu
     public function rules()
     {
         return [
-            [['id', 'name', 'slug', 'link', 'icon'], 'safe'],
-            [['level', 'parent_id', 'urutan', 'position', 'created_at', 'updated_at'], 'integer'],
+            [['name', 'link', 'parent_code', 'type_code', 'level', 'urutan'], 'safe'],
         ];
     }
 
@@ -59,18 +58,14 @@ class PengaturanMenuSearch extends PengaturanMenu
         // grid filtering conditions
         $query->andFilterWhere([
             'level' => $this->level,
-            'link' => $this->link,
-            'parent_id' => $this->parent_id,
             'urutan' => $this->urutan,
-            'position' => $this->position,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
         ]);
 
-        $query->andFilterWhere(['like', 'id', $this->id])
+        $query->where(['status' => 1])
             ->andFilterWhere(['like', 'name', $this->name])
-            ->andFilterWhere(['like', 'slug', $this->slug])
-            ->andFilterWhere(['like', 'icon', $this->icon]);
+            ->andFilterWhere(['like', 'link', $this->link])
+            ->andFilterWhere(['like', 'parent_code', $this->parent_code])
+            ->andFilterWhere(['like', 'type_code', $this->type_code]);
 
         return $dataProvider;
     }

@@ -55,8 +55,8 @@ class MasterGroupSupplierSearch extends MasterGroupSupplier
             return $dataProvider;
         }
 
-        $query->where(['status'=>1]);
         // grid filtering conditions
+        $query->where(['status'=>1]);
         if(!empty($this->created_at)){
             $t1 = strtotime($this->created_at);
 			$t2 = strtotime("+1 days", $t1);

@@ -98,19 +98,19 @@ class SatuanController extends Controller
     {
         $type = MasterKode::find()
             ->select(['name'])
-            ->where(['type'=>Konstanta::TYPE_BARANG, 'status' => 1])
+            ->where(['type'=>Konstanta::TYPE_MATERIAL, 'status' => 1])
             ->indexBy('code')
             ->column();
 
-        $message = '';
         $success = true;
+        $message = '';
         $model = new MasterSatuan();
         if ($this->request->isPost) {
             if ($model->load($this->request->post())) {
                 $connection = \Yii::$app->db;
 			    $transaction = $connection->beginTransaction();
                 try{
-                    $model->code = $model->newcode($model->type);
+                    $model->code = $model->generateCode();
                     if(!$model->save()){
                         $success = false;
                         $message = (count($model->errors) > 0) ? 'ERROR CREATE DATA SATUAN: ' : '';
@@ -167,12 +167,12 @@ class SatuanController extends Controller
     {
         $type = MasterKode::find()
             ->select(['name'])
-            ->where(['type'=>Konstanta::TYPE_BARANG, 'status' => 1])
+            ->where(['type'=>Konstanta::TYPE_MATERIAL, 'status' => 1])
             ->indexBy('code')
             ->column();
 
-        $message = '';
         $success = true;
+        $message = '';
         $model = $this->findModel($code);
         if ($this->request->isPost && $model->load($this->request->post())) {
             $connection = \Yii::$app->db;

@@ -11,7 +11,7 @@ $this->params['breadcrumbs'][] = ['label' => 'Data Customer', 'url' => ['index']
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
 ?>
-<div class="master-person-view view-container">
+<div class="master-person-view">
     <p class="text-right">
         <?= Html::a('<i class="fontello icon-plus"></i><span>Create</span>', ['create'], ['class' => 'btn btn-success btn-flat btn-sm']) ?>
         <?= Html::a('<i class="fontello icon-pencil"></i><span>Update</span>', ['update', 'code' => $model->code], ['class' => 'btn btn-warning btn-flat btn-sm']) ?>
@@ -60,7 +60,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'phone_2',
                 'email:email',
                 'fax',
-                'keterangan',
+                'keterangan:ntext',
                 [
                     'attribute' => 'status',
                     'value'=> function ($model, $index) { 

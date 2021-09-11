@@ -1,8 +1,8 @@
 <?php
+use app\commands\Helper;
 use kartik\date\DatePicker;
 use yii\helpers\Html;
 use yii\grid\GridView;
-use app\commands\Helper;
 
 /* @var $this yii\web\View */
 /* @var $searchModel app\modules\master\models\MasterSatuanSearch */
@@ -15,7 +15,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <p class="text-right">
         <?= Html::a('<i class="fontello icon-plus"></i><span>Create Data Satuan</span>', ['create'], ['class' => 'btn btn-success btn-flat btn-sm']) ?>
     </p>
-
+    
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
@@ -23,15 +23,15 @@ $this->params['breadcrumbs'][] = $this->title;
             ['class' => 'yii\grid\SerialColumn'],
             'name',
             [
-                'attribute' => 'type',
-                'value' => function($model, $index, $value) {
-                    return (isset($model->typeBarang)) ? $model->typeBarang->name : NULL;
+                'attribute' => 'type_code',
+                'value' => function($model, $index, $key){
+                    return (isset($model->typeCode)) ? $model->typeCode->name : '';
                 }
             ],
             [
                 'attribute' => 'qty',
                 'contentOptions' => [
-                    'class' => 'text-right',
+                    'class' => 'text-center',
                 ],
             ],
             [
@@ -110,6 +110,4 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
         ],
     ]); ?>
-
-
 </div>

@@ -5,19 +5,20 @@ use Yii;
 
 class Konstanta
 {
-    // Master Kode Type
-    const TYPE_MENU = 'KODE-001';
-    const TYPE_USER = 'KODE-002';
-    const TYPE_BARANG = 'KODE-003';
-    // Master Person
+    const TYPE_MENU = 'MENU';
+    const TYPE_USER = 'USER';
+    const TYPE_MATERIAL = 'MATERIAL';
+    
     const TYPE_CUSTOMER = 1;
     const TYPE_SUPPLIER = 2;
-    // Master Barang
-    const TYPE_KERTAS = 'KODE-008';
-    const TYPE_TINTA = 'KODE-009';
-    const TYPE_LAIN = 'KODE-010';
-    // Master Akun
-    const TYPE_PERSEDIAAN = '155';
-    const TYPE_PENJUALAN = '500';
-    const TYPE_HPP = '620';
+    
+    const NAVBAR_TOP = '001';
+    const NAVBAR_LEFT = '002';
+
+    const MATERIAL_KERTAS = 'KERTAS';
+    const MATERIAL_TINTA = 'TINTA';
+    const MATERIAL_LAIN = 'LAIN2';
+    const MATERIAL_BP = 'BAHAN PEMBANTU';
+    const MATERIAL_KERTAS_CODE = '007';
+    const MATERIAL_TINTA_CODE = '008';
 }

@@ -3,14 +3,10 @@
 namespace app\modules\master\controllers;
 
 use app\commands\Konstanta;
-use app\models\AuthItem;
-use app\models\AuthItemChild;
-use app\models\AuthAssignment;
 use app\models\Logs;
 use app\models\User;
 use app\modules\master\models\MasterKode;
 use app\modules\master\models\MasterKodeSearch;
-use app\modules\master\models\MasterKodeType;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\AccessControl;
@@ -99,13 +95,6 @@ class KodeController extends Controller
      */
     public function actionCreate()
     {
-        $type = MasterKodeType::find()
-            ->select(['name'])
-            ->where(['status'=>1])
-            ->orderBy(['name'=>SORT_ASC])
-            ->indexBy('code')
-            ->column();
-        
         $success = true;
         $message = '';
         $model = new MasterKode();
@@ -114,10 +103,10 @@ class KodeController extends Controller
                 $connection = \Yii::$app->db;
 			    $transaction = $connection->beginTransaction();
                 try {
-                    $model->code = $model->newcode();
+                    $model->code = $model->generateCode();
                     if($model->save()){
                         $auth = \Yii::$app->authManager;
-                        $author = $auth->createRole(strtolower($model->code));
+                        $author = $auth->createRole(str_replace(' ', '-', $model->value));
                         if($model->type == Konstanta::TYPE_USER){
                             if(!$auth->add($author)){
                                 $success = false;
@@ -164,7 +153,6 @@ class KodeController extends Controller
 
         return $this->render('create', [
             'model' => $model,
-            'type' => $type,
         ]);
     }
 
@@ -177,20 +165,13 @@ class KodeController extends Controller
      */
     public function actionUpdate($code)
     {
-        $type = MasterKodeType::find()
-            ->select(['name'])
-            ->where(['status'=>1])
-            ->orderBy(['name'=>SORT_ASC])
-            ->indexBy('code')
-            ->column();
-
         $success = true;
         $message = '';
         $model = $this->findModel($code);
         if ($this->request->isPost && $model->load($this->request->post())) {
             $connection = \Yii::$app->db;
             $transaction = $connection->beginTransaction();
-            try {
+            try{
                 if(!$model->save()){
                     $success = false;
                     $message = (count($model->errors) > 0) ? 'ERROR UPDATE KODE: ' : '';
@@ -229,7 +210,6 @@ class KodeController extends Controller
 
         return $this->render('update', [
             'model' => $model,
-            'type' => $type,
         ]);
     }
 
@@ -242,37 +222,48 @@ class KodeController extends Controller
      */
     public function actionDelete($code)
     {
-        $message = '';
+        $success = true;
+		$message = '';
         $model = $this->findModel($code);
-        $connection = \Yii::$app->db;
-        $transaction = $connection->beginTransaction();
-        try {
-            if($model->delete()){
-                AuthItemChild::deleteAll("parent='".$model->code."' OR child='".$model->code."'");
-                AuthAssignment::deleteAll(['item_name' => $model->code]);
-                AuthItem::deleteAll(['name' => $model->code]);
-
-                $message = 'DELETE KODE: '.$model->name;
-                $transaction->commit();
-                \Yii::$app->session->setFlash('success', $message);
-            }else{
-                $message = (count($model->errors) > 0) ? 'ERROR DELETE KODE' : '';
-                foreach($model->errors as $error=>$value){
-                    $message .= strtoupper($error).": ".$value[0].', ';
+        if(isset($model)){
+            $connection = \Yii::$app->db;
+			$transaction = $connection->beginTransaction();
+            try{
+                $model->status = 0;
+                if(!$model->save()){
+                    $success = false;
+                    $message = (count($model->errors) > 0) ? 'ERROR DELETE KODE: ' : '';
+                    foreach($model->errors as $error => $value){
+                        $message .= $value[0].', ';
+                    }
+                    $message = substr($message, 0, -2);
                 }
-                $message = substr($message,0,-2);
+
+                if($success){
+                    $transaction->commit();
+                    $message = 'DELETE KODE: '. $model->name;
+                    $logs =	[
+                        'type' => Logs::TYPE_USER,
+                        'description' => $message,
+                    ];
+                    Logs::addLog($logs);
+                    \Yii::$app->session->setFlash('success', $message);
+                }else{
+                    $transaction->rollBack();
+                    \Yii::$app->session->setFlash('error', $message);
+                }
+            }catch(\Exception $e){
+				$success = false;
+				$message = $e->getMessage();
+				$transaction->rollBack();
                 \Yii::$app->session->setFlash('error', $message);
             }
-        }catch (\Exception $e) {
-            $message = $e->getMessage();
-            \Yii::$app->session->setFlash('error', $message);
-            $transaction->rollBack();
+            $logs =	[
+                'type' => Logs::TYPE_USER,
+                'description' => $message,
+            ];
+            Logs::addLog($logs);
         }
-        $logs = [
-			'type' => Logs::TYPE_USER,
-			'description' => $message,
-		];
-		Logs::addLog($logs);
         return $this->redirect(['index']);
     }
 

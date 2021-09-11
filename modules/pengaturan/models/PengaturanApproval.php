@@ -21,7 +21,7 @@ class PengaturanApproval extends \yii\db\ActiveRecord
 {
     public $type;
     public $approval;
-
+    
     /**
      * {@inheritdoc}
      */
@@ -46,7 +46,7 @@ class PengaturanApproval extends \yii\db\ActiveRecord
             [['name'], 'required'],
             [['type', 'approval'], 'safe'],
             [['status', 'created_at', 'updated_at'], 'integer'],
-            [['code'], 'string', 'max' => 8],
+            [['code'], 'string', 'max' => 3],
             [['name', 'slug'], 'string', 'max' => 64],
             [['code'], 'unique'],
             [['status'], 'default', 'value' => 1],
@@ -65,34 +65,42 @@ class PengaturanApproval extends \yii\db\ActiveRecord
             'status' => 'Status',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
-            'type' => 'Type',
-            'approval' => 'User Approve',
         ];
     }
 
-    public function newcode()
+    public function generateCode()
     {
         $model = PengaturanApproval::find()->count();
         $total=0;
         if($model > 0){
             $model = PengaturanApproval::find()->orderBy(['code'=>SORT_DESC])->one();
-            $total = (int)substr($model->code, -3);
+            $total = (int)substr($model->code, 1);
         }
-        return (string)'APP-'.sprintf('%03s', ($total+1));
+        return (string)sprintf('%03s', ($total+1));
     }
 
     public function getDetails()
     {
-        return $this->hasMany(PengaturanApprovalDetail::className(), ['approval_code' => 'code']);
+        return $this->hasMany(PengaturanApprovalDetail::className(), ['code' => 'code']);
     }
 
     public function getTemps()
     {
-        return $this->hasMany(TempPengaturanApprovalDetail::className(), ['approval_code' => 'code']);
+        return $this->hasMany(TempPengaturanApprovalDetail::className(), ['code' => 'code']);
     }
 
     public function temps()
     {
         return TempPengaturanApprovalDetail::find()->where(['user_create' => \Yii::$app->user->id])->all();
     }
+
+    public function approval($slug)
+	{
+        $detail = [];
+		$model = PengaturanApproval::findOne(['slug'=>$slug]);
+		if(isset($model)){
+			$detail = PengaturanApprovalDetail::findAll(['code'=>$model->code]);
+		}
+		return $detail;
+	}
 }

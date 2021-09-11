@@ -10,67 +10,67 @@ use yii\widgets\ActiveForm;
 ?>
 
 <div class="pengaturan-approval-form">
-    <?php $form = ActiveForm::begin(['id'=>'form']); ?>
-    <div class="col-lg-12 col-md-12 col-xs-12">
-        <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0">
-            <?php if(!$model->isNewRecord): ?>
-                <?= $form->field($model, 'code')->hiddenInput()->label(false) ?>
-            <?php endif; ?>
-            <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
-            <?= $form->field($model, 'type')->widget(Select2::classname(), [
-                    'data' => [1 => 'User', 2 => 'Type User'],
-                    'options' => ['placeholder' => 'Type User'],
-                ]) ?>
-            <?= $form->field($model, 'approval')->widget(Select2::classname(), [
-                    'data' => [],
-                    'options' => ['placeholder' => 'User yang approve'],
-                ]) ?>
-        </div>
-    </div>
-    <div class="col-lg-12 col-md-12 col-xs-12">
-        <button class="btn btn-success" data-button="create_temp">
-            <i class="fontello icon-plus"></i>
-            <span>Tambah User Approval</span>
-        </button>
-    </div>
-    <div class="col-lg-12 col-md-12 col-xs-12 margin-top-30">
-        <table class="table table-bordered table-custom" data-table="detail">
-            <thead>
-                <tr>
-                    <th class="text-center">No.</th>
-                    <th class="text-center">Level</th>
-                    <th class="text-center">User</th>
-                    <th class="text-center">Type User</th>
-                    <th class="text-center">Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php if(count($model->temps) > 0): ?>
-                    <?php foreach($model->temps as $index=>$val): ?>
-                        <tr>
-                            <td class="text-center"><?=$index+1?></td>
-                            <td class="text-center"><?=$val->urutan ?></td>
-                            <td><?=(isset($val->profile)) ? $val->profile->name : '-' ?></td>
-                            <td><?=(isset($val->typeUser)) ? $val->typeUser->name : '-' ?></td>
-                            <td class="text-center">
-                                <button class="btn btn-danger btn-xs btn-sm" data-id="<?=$val->id ?>" data-button="delete_temp">
-                                    <i class="fontello icon-trash"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                <?php else : ?>
-                    <tr>
-                        <td class="text-center text-danger" colspan="5">Data is empty</td>
-                    </tr>
+    <?php $form = ActiveForm::begin(['id' => 'form']); ?>
+        <div class="col-lg-12 col-md-12 col-xs-12">
+            <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0">
+                <?php if(!$model->isNewRecord): ?>
+                    <?= $form->field($model, 'code')->hiddenInput()->label(false) ?>
                 <?php endif; ?>
-            </tbody>
-        </table>
-    </div>
-    <div class="col-lg-12 col-md-12 col-xs-12 text-right">
-        <div class="margin-top-20"></div>
-        <?= Html::submitButton('<i class="fontello icon-floppy"></i><span>Save</span>', ['class' => 'btn btn-success']) ?>
-    </div>
+                <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
+                <?= $form->field($model, 'type')->widget(Select2::classname(), [
+                        'data' => [1 => 'User', 2 => 'Type User'],
+                        'options' => ['placeholder' => 'Type User'],
+                    ]) ?>
+                <?= $form->field($model, 'approval')->widget(Select2::classname(), [
+                        'data' => [],
+                        'options' => ['placeholder' => 'User yang approve'],
+                    ]) ?>
+            </div>
+        </div>
+        <div class="col-lg-12 col-md-12 col-xs-12">
+            <button class="btn btn-success" data-button="create_temp">
+                <i class="fontello icon-plus"></i>
+                <span>Tambah User Approval</span>
+            </button>
+        </div>
+        <div class="col-lg-12 col-md-12 col-xs-12 margin-top-30">
+            <table class="table table-bordered table-custom" data-table="detail">
+                <thead>
+                    <tr>
+                        <th class="text-center">No.</th>
+                        <th class="text-center">Level</th>
+                        <th class="text-center">User</th>
+                        <th class="text-center">Type User</th>
+                        <th class="text-center">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if(count($model->temps) > 0): ?>
+                        <?php foreach($model->temps as $index=>$val): ?>
+                            <tr>
+                                <td class="text-center"><?=$index+1?></td>
+                                <td class="text-center"><?=$val->urutan ?></td>
+                                <td><?=(isset($val->profile)) ? $val->profile->name : '-' ?></td>
+                                <td><?=(isset($val->typeUser)) ? $val->typeUser->name : '-' ?></td>
+                                <td class="text-center">
+                                    <button class="btn btn-danger btn-xs btn-sm" data-id="<?=$val->id ?>" data-button="delete_temp">
+                                        <i class="fontello icon-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php else : ?>
+                        <tr>
+                            <td class="text-center text-danger" colspan="5">Data is empty</td>
+                        </tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+        <div class="col-lg-12 col-md-12 col-xs-12 text-right">
+            <div class="margin-top-20"></div>
+            <?= Html::submitButton('<i class="fontello icon-floppy"></i><span>Save</span>', ['class' => 'btn btn-success']) ?>
+        </div>
     <?php ActiveForm::end(); ?>
 </div>
 <script>

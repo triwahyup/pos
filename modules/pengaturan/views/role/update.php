@@ -34,8 +34,8 @@ $this->params['breadcrumbs'][] = 'Update';
                         </div>
                     <?php endforeach; ?>
                 </div>
-                <div class="col-lg-12 col-xs-12 margin-top-20 margin-bottom-20 text-right">
-                    <?= Html::submitButton('Save Change', ['class' => 'btn btn-success btn-flat btn-sm']) ?>
+                <div class="col-lg-12 margin-bottom-20 margin-top-20 text-right">
+                    <?= Html::submitButton('<i class="fontello icon-floppy"></i><span>Save</span>', ['class' => 'btn btn-success']) ?>
                 </div>
             <?php ActiveForm::end(); ?>
         </fieldset>

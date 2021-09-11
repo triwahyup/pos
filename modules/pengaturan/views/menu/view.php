@@ -4,18 +4,18 @@ use yii\helpers\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model app\modules\pengaturan\models\Menu */
+/* @var $model app\modules\pengaturan\models\PengaturanMenu */
 
 $this->title = $model->name;
 $this->params['breadcrumbs'][] = ['label' => 'Menu', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
 ?>
-<div class="menu-view view-container">
+<div class="pengaturan-menu-view">
     <p class="text-right">
         <?= Html::a('<i class="fontello icon-plus"></i><span>Create</span>', ['create'], ['class' => 'btn btn-success btn-flat btn-sm']) ?>
-        <?= Html::a('<i class="fontello icon-pencil"></i><span>Update</span>', ['update', 'id' => $model->id], ['class' => 'btn btn-warning btn-flat btn-sm']) ?>
-        <?= Html::a('<i class="fontello icon-trash"></i><span>Delete</span>', ['delete', 'id' => $model->id], [
+        <?= Html::a('<i class="fontello icon-pencil"></i><span>Update</span>', ['update', 'code' => $model->code], ['class' => 'btn btn-warning btn-flat btn-sm']) ?>
+        <?= Html::a('<i class="fontello icon-trash"></i><span>Delete</span>', ['delete', 'code' => $model->code], [
             'class' => 'btn btn-danger btn-flat btn-sm',
             'data' => [
                 'confirm' => 'Are you sure you want to delete this item?',
@@ -28,24 +28,30 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= DetailView::widget([
             'model' => $model,
             'attributes' => [
-                'id',
+                'code',
                 'name',
                 'slug',
-                'level',
                 'link',
                 [
-                    'attribute'=>'parent_id',
-                    'value'=> function ($model, $index) { 
+                    'attribute' => 'parent_code',
+                    'value' => function ($model, $index) { 
                         return (isset($model->parent)) ? $model->parent->name : '-';
                     }
                 ],
                 [
-                    'attribute'=>'type',
-                    'value'=> function ($model, $index) { 
-                        return (isset($model->kode)) ? $model->kode->name : '-';
+                    'attribute' => 'type_code',
+                    'value' => function ($model, $index) { 
+                        return (isset($model->typeCode)) ? $model->typeCode->name : '-';
                     }
                 ],
+                'level',
                 'urutan',
+                [
+                    'attribute' => 'status',
+                    'value'=> function ($model, $index) { 
+                        return ($model->status == 1) ? 'Active' : 'Delete';
+                    }
+                ],
                 [
                     'attribute'=>'created_at',
                     'value'=> function ($model, $index) { 

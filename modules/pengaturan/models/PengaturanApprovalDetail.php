@@ -10,7 +10,7 @@ use yii\behaviors\TimestampBehavior;
 /**
  * This is the model class for table "pengaturan_approval_detail".
  *
- * @property string $approval_code
+ * @property string $code
  * @property int $urutan
  * @property int|null $user_id
  * @property string|null $typeuser_code
@@ -41,9 +41,10 @@ class PengaturanApprovalDetail extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
+            [['code', 'urutan'], 'required'],
             [['urutan', 'user_id', 'status', 'created_at', 'updated_at'], 'integer'],
-            [['approval_code', 'typeuser_code'], 'string', 'max' => 8],
-            [['approval_code', 'urutan'], 'unique', 'targetAttribute' => ['approval_code', 'urutan']],
+            [['code', 'typeuser_code'], 'string', 'max' => 3],
+            [['code', 'urutan'], 'unique', 'targetAttribute' => ['code', 'urutan']],
         ];
     }
 
@@ -53,10 +54,10 @@ class PengaturanApprovalDetail extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'approval_code' => 'Approval Code',
+            'code' => 'Code',
             'urutan' => 'Urutan',
             'user_id' => 'User ID',
-            'typeuser_code' => 'Typeuser',
+            'typeuser_code' => 'Typeuser Code',
             'status' => 'Status',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',

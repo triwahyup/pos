@@ -105,15 +105,15 @@ class CustomerController extends Controller
             ->indexBy('id')
             ->column();
         
-        $message = '';
         $success = true;
+        $message = '';
         $model = new MasterPerson();
-        $model->code = $model->newcode(Konstanta::TYPE_CUSTOMER);
         if ($this->request->isPost) {
             if ($model->load($this->request->post())) {
                 $connection = \Yii::$app->db;
 			    $transaction = $connection->beginTransaction();
                 try {
+                    $model->code = $model->generateCode();
                     $model->type_user = Konstanta::TYPE_CUSTOMER;
                     $model->phone_1 = str_replace('-', '', $model->phone_1);
                     if(!empty($model->phone_2)){
@@ -178,8 +178,8 @@ class CustomerController extends Controller
             ->indexBy('id')
             ->column();
         
-        $message = '';
         $success = true;
+        $message = '';
         $model = $this->findModel($code);
         if ($this->request->isPost && $model->load($this->request->post())) {
             $connection = \Yii::$app->db;

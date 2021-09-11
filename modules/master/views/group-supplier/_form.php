@@ -16,7 +16,7 @@ use yii\widgets\ActiveForm;
             <?= $form->field($model, 'keterangan')->textarea(['rows' => 2]) ?>
         </div>
     </div>
-    <div class="text-right">
+    <div class="form-group text-right">
         <?= Html::submitButton('<i class="fontello icon-floppy"></i><span>Save</span>', ['class' => 'btn btn-success']) ?>
     </div>
     <?php ActiveForm::end(); ?>

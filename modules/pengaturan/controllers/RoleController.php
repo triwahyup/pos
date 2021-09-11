@@ -2,7 +2,7 @@
 
 namespace app\modules\pengaturan\controllers;
 
-use app\models\AuthAssignment;
+use app\commands\Konstanta;
 use app\models\AuthItemChild;
 use app\models\User;
 use app\modules\master\models\MasterKode;
@@ -64,30 +64,31 @@ class RoleController extends Controller
     public function actionUpdate($code)
     {
         $typeCode = MasterKode::findOne(['code'=>$code]);
+        $parent = str_replace(' ','-', $typeCode->value);
         if($typeCode !== NULL){
             $menus = PengaturanMenu::find()
-                ->where(['level'=>1, 'position'=>'KODE-002'])
-                ->orderBy(['position'=>SORT_DESC, 'urutan'=>SORT_ASC])
+                ->where(['level'=>1, 'type_code'=>Konstanta::NAVBAR_LEFT])
+                ->orderBy(['type_code'=>SORT_DESC, 'urutan'=>SORT_ASC])
                 ->all();
 
+            $success = true;
             $message = '';
-			$success = true;
             $model = new RoleForm();
             if($model->load(\Yii::$app->request->post())){
                 $connection = \Yii::$app->db;
 				$transaction = $connection->beginTransaction();
                 try{
                     if(count($model->menu) > 0){
-                        AuthItemChild::deleteAll('parent =:parent', [':parent'=>$code]);
+                        AuthItemChild::deleteAll('parent =:parent', [':parent'=>$parent]);
                         $auth = \Yii::$app->authManager;
-                        $getParent = $auth->getRole($code);
+                        $getParent = $auth->getRole($parent);
                         $role = '';
                         foreach($model->menu as $menu){
                             $role .= $menu.', ';
 							$getChild = $auth->getRole($menu);
                             if(!$auth->addChild($getParent, $getChild)){
                                 $success = false;
-								$message = '{code: '.$code.'}. Insert Auth Item Child not validate';
+								$message = '{code: '.$typeCode->value.'}. Insert Auth Item Child not validate';
 							}
                         }
                         if($success){
@@ -110,7 +111,7 @@ class RoleController extends Controller
 					\Yii::$app->session->setFlash('error', $message);
 				}
             }else{
-                $model->name = $code;
+                $model->name = $parent;
 				$model->menu = [];
 				foreach($typeCode->menu as $role){
                     $model->menu[] = $role->child;
@@ -127,9 +128,9 @@ class RoleController extends Controller
         }
     }
 
-    protected function findModel($id)
+    protected function findModel($code)
     {
-        if (($model = PengaturanMenu::findOne($id)) !== null) {
+        if (($model = PengaturanMenu::findOne($code)) !== null) {
             return $model;
         }
 
