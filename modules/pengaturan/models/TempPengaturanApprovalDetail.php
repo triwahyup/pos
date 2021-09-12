@@ -54,7 +54,12 @@ class TempPengaturanApprovalDetail extends \yii\db\ActiveRecord
 
     public function getCount()
     {
-        return TempPengaturanApprovalDetail::find(['user_create'=> \Yii::$app->user->id])->all();
+        return TempPengaturanApprovalDetail::find()->where(['user_create'=> \Yii::$app->user->id])->count();
+    }
+
+    public function getTmps()
+    {
+        return TempPengaturanApprovalDetail::find()->where(['user_create'=> \Yii::$app->user->id])->all();
     }
 
     public function getProfile()

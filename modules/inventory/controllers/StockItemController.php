@@ -3,13 +3,13 @@
 namespace app\modules\inventory\controllers;
 
 use app\models\User;
-use app\modules\inventory\models\InventoryMaterialItemSearch;
+use app\modules\inventory\models\InventoryStockItemSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 
-class StockMaterialItemController extends Controller
+class StockItemController extends Controller
 {
     /**
      * @inheritDoc
@@ -24,7 +24,7 @@ class StockMaterialItemController extends Controller
 				    'rules' => [
                         [
                             'actions' => ['index'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('stock-material-item')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('stock-item')),
                             'roles' => ['@'],
                         ],
                     ],
@@ -40,12 +40,12 @@ class StockMaterialItemController extends Controller
     }
 
     /**
-     * Lists all InventoryMaterialItem models.
+     * Lists all InventoryStockItem models.
      * @return mixed
      */
     public function actionIndex()
     {
-        $searchModel = new InventoryMaterialItemSearch();
+        $searchModel = new InventoryStockItemSearch();
         $dataProvider = $searchModel->search($this->request->queryParams);
 
         return $this->render('index', [

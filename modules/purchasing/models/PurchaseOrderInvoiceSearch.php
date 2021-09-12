@@ -41,7 +41,9 @@ class PurchaseOrderInvoiceSearch extends PurchaseOrderInvoice
      */
     public function search($params)
     {
-        $query = PurchaseOrderInvoice::find();
+        $query = PurchaseOrderInvoice::find()
+            ->alias('a')
+            ->leftJoin('master_person b', 'b.code = a.supplier_code');
 
         // add conditions that should always apply here
 
@@ -58,26 +60,19 @@ class PurchaseOrderInvoiceSearch extends PurchaseOrderInvoice
         }
 
         // grid filtering conditions
+        $query->where(['a.status'=>1]);
         $query->andFilterWhere([
             'tgl_invoice' => $this->tgl_invoice,
-            'tgl_po' => $this->tgl_po,
-            'tgl_kirim' => $this->tgl_kirim,
-            'term_in' => $this->term_in,
-            'total_ppn' => $this->total_ppn,
-            'total_order' => $this->total_order,
             'total_invoice' => $this->total_invoice,
-            'user_id' => $this->user_id,
             'post' => $this->post,
-            'status' => $this->status,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
         ]);
+        if(!empty($this->supplier_code)){
+            $query->andWhere('b.code LIKE "%'.$this->supplier_code.'%" OR b.name LIKE "%'.$this->supplier_code.'%"');
+        }
 
         $query->andFilterWhere(['like', 'no_invoice', $this->no_invoice])
             ->andFilterWhere(['like', 'no_bukti', $this->no_bukti])
-            ->andFilterWhere(['like', 'no_po', $this->no_po])
-            ->andFilterWhere(['like', 'supplier_code', $this->supplier_code])
-            ->andFilterWhere(['like', 'keterangan', $this->keterangan]);
+            ->andFilterWhere(['like', 'no_po', $this->no_po]);
 
         return $dataProvider;
     }

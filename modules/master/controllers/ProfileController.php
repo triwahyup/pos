@@ -37,22 +37,22 @@ class ProfileController extends Controller
 				    'rules' => [
                         [
                             'actions' => ['create'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-karyawan')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-user')),
                             'roles' => ['@'],
                         ],
                         [
                             'actions' => ['index', 'view', 'list-kabupaten', 'list-kecamatan', 'list-kelurahan'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-karyawan')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-user')),
                             'roles' => ['@'],
                         ], 
                         [
                             'actions' => ['update'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-karyawan')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-user')),
                             'roles' => ['@'],
                         ], 
                         [
                             'actions' => ['delete'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-karyawan')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-user')),
                             'roles' => ['@'],
                         ],
                     ],
@@ -164,7 +164,7 @@ class ProfileController extends Controller
                         }
                         if(!$model->save()){
                             $success = false;
-                            $message = (count($model->errors) > 0) ? 'ERROR CREATE KARYAWAN: ' : '';
+                            $message = (count($model->errors) > 0) ? 'ERROR CREATE DATA USER: ' : '';
                             foreach($model->errors as $error => $value){
                                 $message .= $value[0].', ';
                             }
@@ -181,7 +181,7 @@ class ProfileController extends Controller
 
                     if($success){
                         $transaction->commit();
-                        $message = 'CREATE KARYAWAN: '.$model->name;
+                        $message = 'CREATE DATA USER: '.$model->name;
                         $logs =	[
                             'type' => Logs::TYPE_USER,
                             'description' => $message,
@@ -276,7 +276,7 @@ class ProfileController extends Controller
                     }
                     if(!$model->save()){
                         $success = false;
-                        $message = (count($model->errors) > 0) ? 'ERROR UPDATE KARYAWAN: ' : '';
+                        $message = (count($model->errors) > 0) ? 'ERROR UPDATE DATA USER: ' : '';
                         foreach($model->errors as $error => $value){
                             $message .= $value[0].', ';
                         }
@@ -292,7 +292,7 @@ class ProfileController extends Controller
                 }
                 if($success){
                     $transaction->commit();
-                    $message = 'UPDATE KARYAWAN: '.$model->name;
+                    $message = 'UPDATE DATA USER: '.$model->name;
                     $logs =	[
                         'type' => Logs::TYPE_USER,
                         'description' => $message,
@@ -343,7 +343,7 @@ class ProfileController extends Controller
                 $model->status=0;
                 if(!$model->save()){
                     $success = false;
-                    $message = (count($model->errors) > 0) ? 'ERROR DELETE KARYAWAN: ' : '';
+                    $message = (count($model->errors) > 0) ? 'ERROR DELETE DATA USER: ' : '';
                     foreach($model->errors as $error => $value){
                         $message .= $value[0].', ';
                     }
@@ -365,7 +365,7 @@ class ProfileController extends Controller
                 if($success){
                     AuthAssignment::deleteAll('user_id=:user_id', [':user_id'=>$user_id]);
                     $transaction->commit();
-                    $message = 'DELETE KARYAWAN:'. $model->name;
+                    $message = 'DELETE DATA USER:'. $model->name;
                     $logs =	[
                         'type' => Logs::TYPE_USER,
                         'description' => $message,
@@ -404,6 +404,19 @@ class ProfileController extends Controller
             return $model;
         }
 
+        throw new NotFoundHttpException('The requested page does not exist.');
+    }
+
+    public function actionListKabupaten($provinsiId)
+    {
+        if(isset($provinsiId)){
+            $model = MasterKabupaten::find()
+                ->select(['id', 'name'])
+                ->where(['provinsi_id'=>$provinsiId, 'status'=>1])
+                ->asArray()
+                ->all();
+            return json_encode($model);
+        }
         throw new NotFoundHttpException('The requested page does not exist.');
     }
 

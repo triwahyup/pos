@@ -5,7 +5,7 @@ namespace app\modules\master\controllers;
 use app\commands\Konstanta;
 use app\models\Logs;
 use app\models\User;
-use app\modules\inventory\models\InventoryMaterialItem;
+use app\modules\inventory\models\InventoryStockItem;
 use app\modules\master\models\MasterGroupMaterial;
 use app\modules\master\models\MasterGroupSupplier;
 use app\modules\master\models\MasterKode;
@@ -115,8 +115,10 @@ class MaterialItemController extends Controller
                 $connection = \Yii::$app->db;
 			    $transaction = $connection->beginTransaction();
                 try{
+                    $model->harga_beli = str_replace(',','', $model->harga_beli);
+                    $model->harga_jual = str_replace(',','', $model->harga_jual);
                     if($model->save()){
-                        $stockItem = new InventoryMaterialItem();
+                        $stockItem = new InventoryStockItem();
                         $stockItem->item_code = $model->code;
                         if(!$stockItem->save()){
                             $success = false;
@@ -188,6 +190,8 @@ class MaterialItemController extends Controller
             $connection = \Yii::$app->db;
             $transaction = $connection->beginTransaction();
             try{
+                $model->harga_beli = str_replace(',','', $model->harga_beli);
+                $model->harga_jual = str_replace(',','', $model->harga_jual);
                 if(!$model->save()){
                     $success = false;
                     $message = (count($model->errors) > 0) ? 'ERROR UPDATE ITEM: ' : '';
@@ -248,7 +252,7 @@ class MaterialItemController extends Controller
             try{
                 $model->status = 0;
                 if($model->save()){
-                    $stockItem = InventoryMaterialItem::findOne(['item_code'=>$code, 'status' => 1]);
+                    $stockItem = InventoryStockItem::findOne(['item_code'=>$code, 'status' => 1]);
                     if(isset($stockItem)){
                         $stockItem->status = 0;
                         if(!$stockItem->save()){

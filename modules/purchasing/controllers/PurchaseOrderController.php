@@ -13,6 +13,8 @@ use app\modules\pengaturan\models\PengaturanApproval;
 use app\modules\purchasing\models\PurchaseOrder;
 use app\modules\purchasing\models\PurchaseOrderApproval;
 use app\modules\purchasing\models\PurchaseOrderDetail;
+use app\modules\purchasing\models\PurchaseOrderInvoice;
+use app\modules\purchasing\models\PurchaseOrderInvoiceDetail;
 use app\modules\purchasing\models\PurchaseOrderSearch;
 use app\modules\purchasing\models\TempPurchaseOrderDetail;
 use yii\web\Controller;
@@ -295,18 +297,23 @@ class PurchaseOrderController extends Controller
                 \Yii::$app->session->setFlash('error', 'Dokumen ini masih dalam proses Approval.');
                 return $this->redirect(['index']);
             }else{
-                $this->emptyTemp();
-                foreach($model->details as $detail){
-                    $temp = new TempPurchaseOrderDetail();
-                    $temp->attributes = $detail->attributes;
-                    $temp->user_id = \Yii::$app->user->id;
-                    if(!$temp->save()){
-                        $message = (count($temp->errors) > 0) ? 'ERROR LOAD PO DETAIL: ' : '';
-                        foreach($temp->errors as $error => $value){
-                            $message .= strtoupper($value[0].', ');
+                if($model->post == 1){
+                    \Yii::$app->session->setFlash('error', 'Dokumen ini sudah di Invoice Order.');
+                    return $this->redirect(['index']);
+                }else{
+                    $this->emptyTemp();
+                    foreach($model->details as $detail){
+                        $temp = new TempPurchaseOrderDetail();
+                        $temp->attributes = $detail->attributes;
+                        $temp->user_id = \Yii::$app->user->id;
+                        if(!$temp->save()){
+                            $message = (count($temp->errors) > 0) ? 'ERROR LOAD PO DETAIL: ' : '';
+                            foreach($temp->errors as $error => $value){
+                                $message .= strtoupper($value[0].', ');
+                            }
+                            $message = substr($message, 0, -2);
+                            \Yii::$app->session->setFlash('error', $message);
                         }
-                        $message = substr($message, 0, -2);
-                        \Yii::$app->session->setFlash('error', $message);
                     }
                 }
             }
@@ -335,55 +342,60 @@ class PurchaseOrderController extends Controller
             if($model->status_approval == 1){
                 \Yii::$app->session->setFlash('error', 'Dokumen ini masih dalam proses Approval.');
             }else{
-                $connection = \Yii::$app->db;
-                $transaction = $connection->beginTransaction();
-                try{
-                    $model->status = 0;
-                    if($model->save()){
-                        foreach($model->details as $detail){
-                            $detail->status = 0;
-                            if(!$detail->save()){
-                                $success = false;
-                                $message = (count($detail->errors) > 0) ? 'ERROR DELETE DETAIL PO: ' : '';
-                                foreach($detail->errors as $error => $value){
-                                    $message .= $value[0].', ';
+                if($model->post == 1){
+                    \Yii::$app->session->setFlash('error', 'Dokumen ini sudah di Invoice Order.');
+                    return $this->redirect(['index']);
+                }else{
+                    $connection = \Yii::$app->db;
+                    $transaction = $connection->beginTransaction();
+                    try{
+                        $model->status = 0;
+                        if($model->save()){
+                            foreach($model->details as $detail){
+                                $detail->status = 0;
+                                if(!$detail->save()){
+                                    $success = false;
+                                    $message = (count($detail->errors) > 0) ? 'ERROR DELETE DETAIL PO: ' : '';
+                                    foreach($detail->errors as $error => $value){
+                                        $message .= $value[0].', ';
+                                    }
+                                    $message = substr($message, 0, -2);
                                 }
-                                $message = substr($message, 0, -2);
                             }
+                        }else{
+                            $success = false;
+                            $message = (count($model->errors) > 0) ? 'ERROR DELETE PO: ' : '';
+                            foreach($model->errors as $error => $value){
+                                $message .= $value[0].', ';
+                            }
+                            $message = substr($message, 0, -2);
                         }
-                    }else{
+        
+                        if($success){
+                            $transaction->commit();
+                            $message = 'DELETE PO: '.$model->no_po;
+                            $logs =	[
+                                'type' => Logs::TYPE_USER,
+                                'description' => $message,
+                            ];
+                            Logs::addLog($logs);
+                            \Yii::$app->session->setFlash('success', $message);
+                        }else{
+                            $transaction->rollBack();
+                            \Yii::$app->session->setFlash('error', $message);
+                        }
+                    }catch(\Exception $e){
                         $success = false;
-                        $message = (count($model->errors) > 0) ? 'ERROR DELETE PO: ' : '';
-                        foreach($model->errors as $error => $value){
-                            $message .= $value[0].', ';
-                        }
-                        $message = substr($message, 0, -2);
-                    }
-    
-                    if($success){
-                        $transaction->commit();
-                        $message = 'DELETE PO: '.$model->no_po;
-                        $logs =	[
-                            'type' => Logs::TYPE_USER,
-                            'description' => $message,
-                        ];
-                        Logs::addLog($logs);
-                        \Yii::$app->session->setFlash('success', $message);
-                    }else{
+                        $message = $e->getMessage();
                         $transaction->rollBack();
                         \Yii::$app->session->setFlash('error', $message);
                     }
-                }catch(\Exception $e){
-                    $success = false;
-                    $message = $e->getMessage();
-                    $transaction->rollBack();
-                    \Yii::$app->session->setFlash('error', $message);
+                    $logs =	[
+                        'type' => Logs::TYPE_USER,
+                        'description' => $message,
+                    ];
+                    Logs::addLog($logs);
                 }
-                $logs =	[
-                    'type' => Logs::TYPE_USER,
-                    'description' => $message,
-                ];
-                Logs::addLog($logs);
             }
         }
         return $this->redirect(['index']);
@@ -413,6 +425,7 @@ class PurchaseOrderController extends Controller
             ->leftJoin('master_satuan b', 'b.code = a.satuan_code')
             ->where(['a.status'=>1])
             ->andWhere('a.code LIKE "%'.$q.'%" OR a.name LIKE "%'.$q.'%"')
+            ->limit(6)
             ->asArray()
             ->all();
         return json_encode(['results'=>$model]);
@@ -453,7 +466,7 @@ class PurchaseOrderController extends Controller
             $temp = new TempPurchaseOrderDetail();
             $temp->attributes = (array)$po;
             $temp->name = ($temp->item) ? $temp->item->name : '';
-            $temp->urutan = count($temp->count) +1;
+            $temp->urutan = $temp->count +1;
             $temp->user_id = \Yii::$app->user->id;
             
             $hargaBeli = str_replace(',', '', $temp->harga_beli);
@@ -520,7 +533,7 @@ class PurchaseOrderController extends Controller
         $temp = $this->findTemp($id);
         if(isset($temp)){
             if($temp->delete()){
-                foreach($temp->count as $index=>$val){
+                foreach($temp->tmps as $index=>$val){
                     $val->urutan = $index +1;
                     if(!$val->save()){
                         $success = false;
@@ -921,12 +934,66 @@ class PurchaseOrderController extends Controller
             $connection = \Yii::$app->db;
             $transaction = $connection->beginTransaction();
             try{
+                $model->post=1;
+                if($model->save()){
+                    $invoiceOrder = new PurchaseOrderInvoice();
+                    $invoiceOrder->attributes = $model->attributes;
+                    $invoiceOrder->no_invoice = $invoiceOrder->generateCode();
+                    $invoiceOrder->post=0;
+                    if($invoiceOrder->save()){
+                        foreach($model->details as $detail){
+                            $invoiceOrderDetail = new PurchaseOrderInvoiceDetail();
+                            $invoiceOrderDetail->attributes = $detail->attributes;
+                            $invoiceOrderDetail->attributes = $invoiceOrder->attributes;
+                            if(!$invoiceOrderDetail->save()){
+                                $success = false;
+                                $message = (count($invoiceOrderDetail->errors) > 0) ? 'ERROR CREATE INVOICE ORDER DETAIL: ' : '';
+                                foreach($invoiceOrderDetail->errors as $error => $value){
+                                    $message .= strtoupper($value[0].', ');
+                                }
+                                $message = substr($message, 0, -2);
+                            }
+                        }
+                    }else{
+                        $success = false;
+                        $message = (count($invoiceOrder->errors) > 0) ? 'ERROR CREATE INVOICE ORDER: ' : '';
+                        foreach($invoiceOrder->errors as $error => $value){
+                            $message .= strtoupper($value[0].', ');
+                        }
+                        $message = substr($message, 0, -2);
+                    }
+                }else{
+                    $success = false;
+                    $message = (count($model->errors) > 0) ? 'ERROR POST PO TO INVOICE ORDER: ' : '';
+                    foreach($model->errors as $error => $value){
+                        $message .= strtoupper($value[0].', ');
+                    }
+                    $message = substr($message, 0, -2);
+                }
 
+                if($success){
+                    $message = 'POST PO TO INVOICE ORDER: '.$model->no_po.' SUCCESS';
+                    $transaction->commit();
+                    $logs =	[
+                        'type' => Logs::TYPE_USER,
+                        'description' => $message,
+                    ];
+                    Logs::addLog($logs);
+                    \Yii::$app->session->setFlash('success', $message);
+                    return $this->redirect(['view', 'no_po' => $model->no_po]);
+                }else{
+                    $transaction->rollBack();
+                }
             }catch(Exception $e){
                 $success = false;
                 $message = $e->getMessage();
                 $transaction->rollBack();
             }
+            $logs =	[
+                'type' => Logs::TYPE_USER,
+                'description' => $message,
+            ];
+            Logs::addLog($logs);
         }else{
             $success = false;
             $message = 'Data Purchase Order not valid.';

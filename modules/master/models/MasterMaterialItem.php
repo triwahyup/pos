@@ -53,7 +53,7 @@ class MasterMaterialItem extends \yii\db\ActiveRecord
     {
         return [
             [['code', 'name', 'type_code', 'satuan_code', 'material_code'], 'required'],
-            [['type_code', 'material_code'], 'safe'],
+            [['type_code', 'material_code', 'harga_beli', 'harga_jual'], 'safe'],
             [['panjang', 'lebar', 'gram'], 'number'],
             [['keterangan'], 'string'],
             [['status', 'created_at', 'updated_at'], 'integer'],
@@ -85,6 +85,8 @@ class MasterMaterialItem extends \yii\db\ActiveRecord
             'status' => 'Status',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
+            'harga_beli' => 'Harga Beli',
+            'harga_jual' => 'Harga Jual',
         ];
     }
 

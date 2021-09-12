@@ -2,10 +2,10 @@
 use yii\helpers\Html;
 use yii\grid\GridView;
 
-$this->title = 'Inventory Material Item';
+$this->title = 'Inventory Stock Item';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="inventory-material-index">
+<div class="inventory-stock-index">
 <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,

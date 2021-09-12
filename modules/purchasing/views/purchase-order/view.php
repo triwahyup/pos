@@ -13,7 +13,8 @@ $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="purchase-order-view">
     <p class="text-right">
-        <?php if($model->status_approval != 1): ?>
+        <?= Html::a('<i class="fontello icon-plus"></i><span>Create</span>', ['create'], ['class' => 'btn btn-success btn-flat btn-sm']) ?>
+        <?php if($model->status_approval != 1 && $model->status_approval != 2): ?>
             <?= Html::a('<i class="fontello icon-pencil"></i><span>Update</span>', ['update', 'no_po' => $model->no_po], ['class' => 'btn btn-warning btn-flat btn-sm']) ?>
             <?= Html::a('<i class="fontello icon-trash"></i><span>Delete</span>', ['delete', 'no_po' => $model->no_po], [
                 'class' => 'btn btn-danger btn-flat btn-sm',
@@ -140,7 +141,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                     $totalOrder += $val->total_order; ?>
                                     <tr>
                                         <td class="text-center"><?=$index+1?></td>
-                                        <td><?=(isset($val->item)) ? '<span class="text-success">'.$val->item->code .'</span><br />'. $val->item->name : '' ?></td>
+                                        <td class="font-size-10"><?=(isset($val->item)) ? '<span class="text-success">'.$val->item->code .'</span><br />'. $val->item->name : '' ?></td>
                                         <td class="text-center"><?=$val->satuan ?></td>
                                         <td class="text-right"><?=number_format($val->qty_order) ?></td>
                                         <td class="text-right"><?=number_format($val->harga_beli).'.-' ?></td>
@@ -209,7 +210,7 @@ $this->params['breadcrumbs'][] = $this->title;
             <?= Html::a('<i class="fontello icon-paper-plane-1"></i><span>Send Approval</span>', ['send-approval', 'no_po'=>$model->no_po], ['class' => 'btn btn-info btn-flat btn-sm']) ?>
         </div>
     <?php endif; ?>
-    <?php if($model->status_approval == 2): ?>
+    <?php if($model->status_approval == 2 && ($model->post == 0 || empty($model->post))): ?>
         <div class="text-center">
             <?= Html::a('<i class="fontello icon-ok"></i><span>Post to Invoice Order</span>', ['post', 'no_po'=>$model->no_po], ['class' => 'btn btn-info btn-flat btn-sm']) ?>
         </div>

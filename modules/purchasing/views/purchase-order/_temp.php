@@ -4,7 +4,7 @@
         $totalOrder += $val->total_order; ?>
         <tr>
             <td class="text-center"><?=$index+1?></td>
-            <td><?=(isset($val->item)) ? '<span class="text-success">'.$val->item->code .'</span><br />'. $val->item->name : '' ?></td>
+            <td class="font-size-10"><?=(isset($val->item)) ? '<span class="text-success">'.$val->item->code .'</span><br />'. $val->item->name : '' ?></td>
             <td class="text-center"><?=$val->satuan ?></td>
             <td class="text-right"><?=number_format($val->qty_order) ?></td>
             <td class="text-right"><?=number_format($val->harga_beli).'.-' ?></td>

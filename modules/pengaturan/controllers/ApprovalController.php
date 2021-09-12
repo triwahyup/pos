@@ -389,7 +389,7 @@ class ApprovalController extends Controller
         $model = new PengaturanApproval();
         if($model->load($this->request->post())){
             $temp = new TempPengaturanApprovalDetail();
-            $temp->urutan = count($temp->count) +1;
+            $temp->urutan = $temp->count +1;
             $temp->user_create = \Yii::$app->user->id;
             if(isset($model->code)){
                 $temp->code = $model->code;
@@ -419,7 +419,7 @@ class ApprovalController extends Controller
         $temp = $this->findTemp($id);
         if(isset($temp)){
             if($temp->delete()){
-                foreach($temp->count as $index=>$val){
+                foreach($temp->tmps as $index=>$val){
                     $val->urutan = $index +1;
                     if(!$val->save()){
                         $success = false;

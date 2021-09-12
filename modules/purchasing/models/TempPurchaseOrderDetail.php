@@ -70,7 +70,12 @@ class TempPurchaseOrderDetail extends \yii\db\ActiveRecord
 
     public function getCount()
     {
-        return TempPurchaseOrderDetail::find(['user_id'=> \Yii::$app->user->id])->all();
+        return TempPurchaseOrderDetail::find()->where(['user_id'=> \Yii::$app->user->id])->count();
+    }
+
+    public function getTmps()
+    {
+        return TempPurchaseOrderDetail::find()->where(['user_id'=> \Yii::$app->user->id])->all();
     }
 
     public function getItem()

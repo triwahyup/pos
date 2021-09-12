@@ -52,6 +52,11 @@ class TempMasterKodeAkunDetail extends \yii\db\ActiveRecord
 
     public function getCount()
     {
-        return TempMasterKodeAkunDetail::find(['user_id'=> \Yii::$app->user->id])->all();
+        return TempMasterKodeAkunDetail::find()->where(['user_id'=> \Yii::$app->user->id])->count();
+    }
+
+    public function getTmps()
+    {
+        return TempMasterKodeAkunDetail::find()->where(['user_id'=> \Yii::$app->user->id])->all();
     }
 }

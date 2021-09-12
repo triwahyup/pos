@@ -370,7 +370,7 @@ class KodeAkunController extends Controller
             $temp = new TempMasterKodeAkunDetail();
             $temp->code = $model->code;
             $temp->name = $model->detail_name;
-            $temp->urutan = count($temp->count) +1;
+            $temp->urutan = $temp->count +1;
             $temp->user_id = \Yii::$app->user->id;
             if($temp->save()){
                 $message = 'CREATE TEMP SUCCESSFULLY';
@@ -413,7 +413,7 @@ class KodeAkunController extends Controller
         $temp = $this->findTemp($id);
         if(isset($temp)){
             if($temp->delete()){
-                foreach($temp->count as $index=>$val){
+                foreach($temp->tmps as $index=>$val){
                     $val->urutan = $index +1;
                     if(!$val->save()){
                         $success = false;

@@ -3,6 +3,7 @@ use kartik\widgets\Select2;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\ActiveForm;
+use yii\widgets\MaskedInput;
 
 /* @var $this yii\web\View */
 /* @var $model app\modules\master\models\MasterMaterialItem */
@@ -42,6 +43,30 @@ use yii\widgets\ActiveForm;
             <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0">
                 <?= $form->field($model, 'lebar')->textInput() ?>
                 <?= $form->field($model, 'gram')->textInput() ?>
+                <?= $form->field($model, 'harga_beli')->widget(MaskedInput::className(), [
+                    'clientOptions' => [
+                        'alias' =>  'decimal',
+                        'groupSeparator' => ',',
+                        'autoGroup' => true
+                    ],
+                    'options' => [
+                        'data-temp' => 1, 
+                        'data-align' => 'text-right'
+                    ]
+                ]) ?>
+                <?= $form->field($model, 'harga_jual')->widget(MaskedInput::className(), [
+                    'clientOptions' => [
+                        'alias' =>  'decimal',
+                        'groupSeparator' => ',',
+                        'autoGroup' => true
+                    ],
+                    'options' => [
+                        'data-temp' => 1, 
+                        'data-align' => 'text-right'
+                    ]
+                ]) ?>
+            </div>
+            <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0">
                 <?= $form->field($model, 'keterangan')->textarea(['rows' => 6]) ?>
             </div>
         </div>

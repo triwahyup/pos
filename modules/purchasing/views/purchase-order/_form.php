@@ -43,6 +43,7 @@ JS;
                         'type' => DatePicker::TYPE_INPUT,
                         'options' => [
                             'placeholder' => 'yyyy-mm-dd',
+                            'value' => date('Y-m-d'),
                         ],
                         'pluginOptions' => [
                             'autoclose' => true,
@@ -136,16 +137,16 @@ JS;
                 <div class="col-lg-12 col-md-12 col-xs-12">
                     <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-right-0">
                         <?= $form->field($model, 'harga_beli')->widget(MaskedInput::className(), [
-                                'clientOptions' => [
-                                    'alias' =>  'decimal',
-                                    'groupSeparator' => ',',
-                                    'autoGroup' => true
-                                ],
-                                'options' => [
-                                    'data-temp' => 1, 
-                                    'data-align' => 'text-right'
-                                ]
-                            ]) ?>
+                            'clientOptions' => [
+                                'alias' =>  'decimal',
+                                'groupSeparator' => ',',
+                                'autoGroup' => true
+                            ],
+                            'options' => [
+                                'data-temp' => 1, 
+                                'data-align' => 'text-right'
+                            ]
+                        ]) ?>
                     </div>
                     <div class="col-lg-1 col-md-1 col-sm-12 col-xs-12 padding-right-0">
                         <?= $form->field($model, 'qty_order')->textInput(['data-temp' => 1, 'data-align' => 'text-right']) ?>
@@ -187,7 +188,7 @@ JS;
                                         $totalOrder += $val->total_order; ?>
                                         <tr>
                                             <td class="text-center"><?=$index+1?></td>
-                                            <td><?=(isset($val->item)) ? '<span class="text-success">'.$val->item->code .'</span><br />'. $val->item->name : '' ?></td>
+                                            <td class="font-size-10"><?=(isset($val->item)) ? '<span class="text-success">'.$val->item->code .'</span><br />'. $val->item->name : '' ?></td>
                                             <td class="text-center"><?=$val->satuan ?></td>
                                             <td class="text-right"><?=number_format($val->qty_order) ?></td>
                                             <td class="text-right"><?=number_format($val->harga_beli).'.-' ?></td>

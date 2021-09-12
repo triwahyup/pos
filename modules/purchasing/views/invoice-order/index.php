@@ -16,13 +16,70 @@ $this->params['breadcrumbs'][] = $this->title;
         'filterModel' => $searchModel,
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
-            'no_invoice',
-            'tgl_invoice',
-            'no_bukti',
-            'no_po',
-            'supplier_code',
-            'total_invoice',
-            'post'
+            [
+                'attribute' => 'no_invoice',
+                'contentOptions' => [
+                    'class' => 'text-center',
+                ],
+                'format' => 'raw',
+                'value' => function($model, $index, $key) {
+                    return Html::a($model->no_invoice, ['view', 'no_invoice' => $model->no_invoice]);
+                }
+            ],
+            [
+                'attribute' => 'tgl_invoice',
+                'contentOptions' => [
+                    'class' => 'text-center',
+                ],
+                'filter' => DatePicker::widget([
+                    'model' => $searchModel, 
+                    'name' => 'tgl_invoice', 
+                    'type' => DatePicker::TYPE_COMPONENT_APPEND,
+                    'pickerButton' => false,
+                    'attribute' => 'tgl_invoice',
+                    'pluginOptions' => [
+                        'format' => 'yyyy-mm-dd',
+                        'autoclose' => true,
+                    ],
+                ]),
+            ],
+            [
+                'attribute' => 'no_bukti',
+                'contentOptions' => [
+                    'class' => 'text-center',
+                ],
+            ],
+            [
+                'attribute' => 'no_po',
+                'contentOptions' => [
+                    'class' => 'text-center',
+                ],
+            ],
+            [
+                'attribute' => 'supplier_code',
+                'value' => function($model, $index, $key) {
+                    return (isset($model->supplier)) ? $model->supplier->name : '';
+                }
+            ],
+            [
+                'attribute' => 'total_invoice',
+                'contentOptions' => [
+                    'class' => 'text-right',
+                ],
+                'value' => function($model, $index, $key) {
+                    return number_format($model->total_order).'.-';
+                }
+            ],
+            [
+                'attribute' => 'post',
+                'contentOptions' => [
+                    'class' => 'text-center',
+                ],
+                'format' => 'raw',
+                'value' => function ($model, $index, $key) { 
+                    return $model->statusPost;
+                }
+            ],
         ],
     ]); ?>
 </div>

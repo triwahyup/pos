@@ -63,6 +63,18 @@ $this->params['breadcrumbs'][] = $this->title;
                 'panjang',
                 'lebar',
                 'gram',
+                [
+                    'attribute' => 'harga_beli',
+                    'value' => function ($model, $index) { 
+                        return 'Rp.'.number_format($model->harga_beli).'.-';
+                    }
+                ],
+                [
+                    'attribute' => 'harga_jual',
+                    'value' => function ($model, $index) { 
+                        return 'Rp.'.number_format($model->harga_jual).'.-';
+                    }
+                ],
                 'keterangan:ntext',
                 [
                     'attribute' => 'status',

@@ -85,7 +85,7 @@ class MasterKode extends \yii\db\ActiveRecord
 
     public function getAuthItem()
     {
-        $model = AuthItemChild::findAll(['parent'=>$this->value]);
+        $model = AuthItemChild::findAll(['parent'=>str_replace(' ','-', $this->value)]);
         $data = [];
         foreach($model as $val){
 			$menu = PengaturanMenu::findOne(['slug'=>$val->child]);

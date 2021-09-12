@@ -3,6 +3,7 @@
 namespace app\modules\purchasing\models;
 
 use Yii;
+use app\modules\master\models\MasterMaterialItem;
 use yii\behaviors\TimestampBehavior;
 
 /**
@@ -81,5 +82,10 @@ class PurchaseOrderInvoiceDetail extends \yii\db\ActiveRecord
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
         ];
+    }
+
+    public function getItem()
+    {
+        return $this->hasOne(MasterMaterialItem::className(), ['code' => 'item_code']);
     }
 }

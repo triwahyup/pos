@@ -78,9 +78,9 @@ class PurchaseOrder extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'no_po' => 'No Po',
-            'tgl_po' => 'Tgl Po',
-            'tgl_kirim' => 'Tgl Kirim',
+            'no_po' => 'No. Po',
+            'tgl_po' => 'Tgl. Po',
+            'tgl_kirim' => 'Tgl. Kirim',
             'term_in' => 'Term In',
             'supplier_code' => 'Supplier',
             'keterangan' => 'Keterangan',

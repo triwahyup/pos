@@ -4,9 +4,9 @@ namespace app\modules\inventory\models;
 
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use app\modules\inventory\models\InventoryMaterialItem;
+use app\modules\inventory\models\InventoryStockItem;
 
-class InventoryMaterialItemSearch extends InventoryMaterialItem
+class InventoryStockItemSearch extends InventoryStockItem
 {
     /**
      * {@inheritdoc}
@@ -37,7 +37,7 @@ class InventoryMaterialItemSearch extends InventoryMaterialItem
      */
     public function search($params)
     {
-        $query = InventoryMaterialItem::find()
+        $query = InventoryStockItem::find()
             ->alias('a')
             ->leftJoin('master_material_item b', 'b.code = a.item_code');
 
