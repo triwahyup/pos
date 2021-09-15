@@ -33,6 +33,7 @@ class PurchaseOrder extends \yii\db\ActiveRecord
     public $satuan;
     public $qty_order;
     public $harga_beli;
+    public $harga_jual;
     public $ppn;
     public $total;
     public $id;
@@ -59,7 +60,7 @@ class PurchaseOrder extends \yii\db\ActiveRecord
     {
         return [
             [['no_po', 'tgl_po', 'tgl_kirim', 'term_in', 'supplier_code', 'user_request'], 'required'],
-            [['tgl_po', 'tgl_kirim', 'total_order', 'harga_beli'], 'safe'],
+            [['tgl_po', 'tgl_kirim', 'total_order', 'harga_beli', 'harga_jual'], 'safe'],
             [['term_in', 'user_id', 'user_request', 'status', 'status_approval', 'status_terima', 'created_at', 'updated_at', 'id', 'post'], 'integer'],
             [['keterangan'], 'string'],
             [['ppn', 'total', 'qty_order'], 'number'],

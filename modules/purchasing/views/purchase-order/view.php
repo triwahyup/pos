@@ -14,16 +14,14 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="purchase-order-view">
     <p class="text-right">
         <?= Html::a('<i class="fontello icon-plus"></i><span>Create</span>', ['create'], ['class' => 'btn btn-success btn-flat btn-sm']) ?>
-        <?php if($model->status_approval != 1 && $model->status_approval != 2): ?>
-            <?= Html::a('<i class="fontello icon-pencil"></i><span>Update</span>', ['update', 'no_po' => $model->no_po], ['class' => 'btn btn-warning btn-flat btn-sm']) ?>
-            <?= Html::a('<i class="fontello icon-trash"></i><span>Delete</span>', ['delete', 'no_po' => $model->no_po], [
+        <?= Html::a('<i class="fontello icon-pencil"></i><span>Update</span>', ['update', 'no_po' => $model->no_po], ['class' => 'btn btn-warning btn-flat btn-sm']) ?>
+        <?= Html::a('<i class="fontello icon-trash"></i><span>Delete</span>', ['delete', 'no_po' => $model->no_po], [
                 'class' => 'btn btn-danger btn-flat btn-sm',
                 'data' => [
                     'confirm' => 'Are you sure you want to delete this item?',
                     'method' => 'post',
                 ],
             ]) ?>
-        <?php endif; ?>
     </p>
 
     <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 pading-right-0">
@@ -205,18 +203,18 @@ $this->params['breadcrumbs'][] = $this->title;
             <div class="margin-bottom-20"></div>
         </div>
     <?php endif; ?>
-    <?php if($model->status_approval == 0 || $model->status_approval == 3): ?>
-        <div class="text-center">
+    <?php if($sendApproval): ?>
+        <div class="text-right">
             <?= Html::a('<i class="fontello icon-paper-plane-1"></i><span>Send Approval</span>', ['send-approval', 'no_po'=>$model->no_po], ['class' => 'btn btn-info btn-flat btn-sm']) ?>
         </div>
     <?php endif; ?>
-    <?php if($model->status_approval == 2 && ($model->post == 0 || empty($model->post))): ?>
-        <div class="text-center">
+    <?php if($postInvoice): ?>
+        <div class="text-right">
             <?= Html::a('<i class="fontello icon-ok"></i><span>Post to Invoice Order</span>', ['post', 'no_po'=>$model->no_po], ['class' => 'btn btn-info btn-flat btn-sm']) ?>
         </div>
     <?php endif; ?>
-    <?php if($is_userApproval): ?>
-        <div class="text-center">
+    <?php if($typeApproval): ?>
+        <div class="text-right">
             <button data-button="popup_app" class="btn btn-success" data-code="<?=$model->no_po ?>" data-type="APPROVE">
                 <i class="fontello icon-ok"></i>
                 <span>Approve</span>

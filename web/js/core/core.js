@@ -1327,6 +1327,9 @@ var input = {
 						$(this).wrap("<div class=\"input-container\" />");
 						$(this).after("<span class=\"box\"><i class=\"fontello "+$(this).attr("data-icons")+"\"></i></span>");
 					}
+					if($(this).attr("data-icons") == 'rupiah'){
+						$("span.box > i.fontello").text("Rp.");
+					}
 					
 					$(this).parents(".input-container").find(".box").css({
 						backgroundColor: $(this).attr("data-color"),

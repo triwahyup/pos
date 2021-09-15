@@ -60,6 +60,7 @@ $this->params['breadcrumbs'][] = $this->title;
         </div>
     </div>
     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
+        <div class="margin-top-20"></div>
         <div class="document-container">
             <div class="document-header">No. Purchase Order: <?=$model->no_po ?></div>
             <div class="document-body">

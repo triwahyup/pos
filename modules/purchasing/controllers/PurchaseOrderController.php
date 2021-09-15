@@ -99,16 +99,31 @@ class PurchaseOrderController extends Controller
     public function actionView($no_po)
     {
         $model = $this->findModel($no_po);
+        $typeuser = \Yii::$app->user->identity->profile->typeUser->value;
+        $sendApproval = false;
+        $postInvoice = false;
+        if($typeuser == 'ADMINISTRATOR' || $typeuser == 'ADMIN'){
+            if($model->status_approval == 0 || $model->status_approval == 3){
+                $sendApproval = true;
+            }
+            if($model->status_approval == 2 && ($model->post == 0 || empty($model->post))){
+                $postInvoice = true;
+            }
+            
+        }
+        $typeApproval = false;
         $approval = PurchaseOrderApproval::findOne(['no_po'=>$no_po, 'status'=>2]);
-        $is_userApproval = false;
         if(isset($approval)){
             if(($model->status_approval==1) && ($approval->user_id == \Yii::$app->user->id) || ($approval->typeuser_code == \Yii::$app->user->identity->profile->typeuser_code)){
-                $is_userApproval = true;
+                $typeApproval = true;
             }
         }
+        
         return $this->render('view', [
             'model' => $model,
-            'is_userApproval' => $is_userApproval,
+            'sendApproval' => $sendApproval,
+            'postInvoice' => $postInvoice,
+            'typeApproval' => $typeApproval,
         ]);
     }
 
@@ -421,7 +436,7 @@ class PurchaseOrderController extends Controller
     {
         $model = MasterMaterialItem::find()
             ->alias('a')
-            ->select(['concat(a.code, "-", a.name) as text', 'a.code id', 'b.name as satuan'])
+            ->select(['concat(a.code, "-", a.name) as text', 'a.code id', 'b.name as satuan', 'harga_beli', 'harga_jual'])
             ->leftJoin('master_satuan b', 'b.code = a.satuan_code')
             ->where(['a.status'=>1])
             ->andWhere('a.code LIKE "%'.$q.'%" OR a.name LIKE "%'.$q.'%"')
@@ -446,14 +461,8 @@ class PurchaseOrderController extends Controller
 
     public function actionGetTemp($id)
     {
-        $temp = $this->findTemp($id);
-        $data['id'] = $temp->id;
-        $data['qty_order'] = $temp->qty_order;
-        $data['ppn'] = $temp->ppn;
-        $data['harga_beli'] = $temp->harga_beli;
-        $data['satuan'] = $temp->satuan;
-        $data['item_code'] = $temp->item_code;
-        return json_encode($data);
+        $temp = TempPurchaseOrderDetail::find()->where(['id'=>$id])->asArray()->one();
+        return json_encode($temp);
     }
 
     public function actionCreateTemp()
@@ -477,6 +486,7 @@ class PurchaseOrderController extends Controller
             }else{
                 $temp->total_order = $hargaBeli * $temp->qty_order;
             }
+            $temp->harga_jual = str_replace(',', '', $temp->harga_jual);
             if($temp->save()){
                 $message = 'CREATE TEMP SUCCESSFULLY';
             }else{
@@ -511,6 +521,7 @@ class PurchaseOrderController extends Controller
             }else{
                 $temp->total_order = $hargaBeli * $temp->qty_order;
             }
+            $temp->harga_jual = str_replace(',', '', $temp->harga_jual);
             if($temp->save()){
                 $message = 'UPDATE TEMP SUCCESSFULLY';
             }else{
@@ -823,8 +834,8 @@ class PurchaseOrderController extends Controller
                 $app = PurchaseOrderApproval::findOne(['no_po'=>$no_po, 'urutan'=>$urutan]);
                 if(isset($app)){
                     $name = '';
-					if(!empty($app->user_id)){
-						$name = 'Yth. Bpk/Ibu '. $app->profile->name;
+                    if(!empty($app->user_id)){
+						$name = 'Yth. Bpk/Ibu '. $app->profile[0]->name;
 					}else{
 						$name = 'Yth. Bpk/Ibu Divisi <b>'. $app->typeUser->value .'</b>';
 					}
@@ -843,45 +854,63 @@ class PurchaseOrderController extends Controller
 							'name' => $name,
                             'url' => \Yii::$app->params['URL'].'/purchasing/purchase-order/view&no_po='.$approval->no_po,
                         ]);
-                        $subject = 'Approval Purchase Order '. $app->no_po;
+                        
                         $logs_mail = new LogsMailSend();
                         $logs_mail->type = 'APPROVAL PURCHASE ORDER';
                         $logs_mail->email = substr($str_mail, 0, -2);
                         $logs_mail->bcc = '';
-                        $logs_mail->subject = $subject;
+                        $logs_mail->subject = 'Approval Purchase Order '. $app->no_po;
 						$logs_mail->body = $body;
 						$logs_mail->keterangan = '';
-						$logs_mail->status = 0;
+                        $logs_mail->status = 0;
                         if(!$logs_mail->save()){
                             $success = false;
                             foreach($logs_mail->errors as $error=>$value){
-								$message .= strtoupper($error).": ".$value[0].', ';
-							}
-							$message = substr($message, 0, -2);
+                                $message .= strtoupper($error).": ".$value[0].', ';
+                            }
+                            $message = substr($message, 0, -2);
                         }
 
                         $app->status=2;
                         if(!$app->save()){
                             $success = false;
                             foreach($app->errors as $error=>$value){
-								$message .= strtoupper($error).": ".$value[0].', ';
-							}
-							$message = substr($message, 0, -2);
+                                $message .= strtoupper($error).": ".$value[0].', ';
+                            }
+                            $message = substr($message, 0, -2);
                         }
+                        
+                        // $sendMail = \Yii::$app->mailer->compose()
+                        //     ->setFrom(['whye755@gmail.com' => 'Notification Reminder Approval'])
+                        //     ->setTo($logs_mail->email, $profile->name)
+                        //     ->setSubject($logs_mail->subject)
+                        //     ->setHtmlBody($body);
+                        // if($sendmail->send()){
+                        // }else{
+                        //     $logs_mail->status = 0;
+                        //     if(!$logs_mail->save()){
+                        //         $success = false;
+                        //         foreach($logs_mail->errors as $error=>$value){
+                        //             $message .= strtoupper($error).": ".$value[0].', ';
+                        //         }
+                        //         $message = substr($message, 0, -2);
+                        //     }
+                        //     $message = 'Gagal Send Email. Coba Sesaat Lagi.';
+                        // }
                     }else{
                         $success = false;
 						$message = 'Email user to approval is EMPTY';
                     }
                 }else{
                     $success = false;
-					$message = 'Approval is EMPTY';
+					$message = 'Pengaturan Approval belum di setting.';
                 }
             }else{
                 $akhir = true;
             }
         }else{
             $success = false;
-			$message = 'APPROVAL is EMPTY';
+			$message = 'Pengaturan Approval belum di setting.';
         }
         return json_encode(['success'=>$success, 'message'=>$message, 'akhir'=>$akhir]);
     }
@@ -902,15 +931,15 @@ class PurchaseOrderController extends Controller
                 'url' => \Yii::$app->params['URL'].'/purchasing/purchase-order/view&no_po='.$approval->no_po,
             ]);
 
-            $subject = 'Approval Purchase Order '. $approval->no_po;
             $logs_mail = new LogsMailSend();
             $logs_mail->type = 'APPROVAL PURCHASE ORDER';
             $logs_mail->email = (isset($approval->po->profile)) ? $approval->po->profile->email : '';
             $logs_mail->bcc = '';
-            $logs_mail->subject = $subject;
+            $logs_mail->subject = 'Approval Purchase Order '. $approval->no_po;
             $logs_mail->body = $body;
             $logs_mail->keterangan = '';
             $logs_mail->status = 0;
+            $logs_mail->status = 1;
             if(!$logs_mail->save()){
                 $success = false;
                 foreach($logs_mail->errors as $error=>$value){
@@ -918,9 +947,25 @@ class PurchaseOrderController extends Controller
                 }
                 $message = substr($message, 0, -2);
             }
+            // $sendMail = \Yii::$app->mailer->compose()
+            //     ->setFrom(['whye755@gmail.com' => 'Notification Reminder Approval'])
+            //     ->setTo($logs_mail->email, $profile->name)
+            //     ->setSubject($logs_mail->subject)
+            //     ->setHtmlBody($body);
+            // if($sendmail->send()){
+            // }else{
+            //     if(!$logs_mail->save()){
+            //         $success = false;
+            //         foreach($logs_mail->errors as $error=>$value){
+            //             $message .= strtoupper($error).": ".$value[0].', ';
+            //         }
+            //         $message = substr($message, 0, -2);
+            //     }
+            //     $message = 'Gagal Send Email. Coba Sesaat Lagi.';
+            // }
         }else{
             $success = false;
-			$message = 'APPROVAL is EMPTY';
+			$message = 'Pengaturan Approval belum di setting.';
         }
         return json_encode(['success'=>$success, 'message'=>$message]);
     }
@@ -944,7 +989,7 @@ class PurchaseOrderController extends Controller
                         foreach($model->details as $detail){
                             $invoiceOrderDetail = new PurchaseOrderInvoiceDetail();
                             $invoiceOrderDetail->attributes = $detail->attributes;
-                            $invoiceOrderDetail->attributes = $invoiceOrder->attributes;
+                            $invoiceOrderDetail->no_invoice = $invoiceOrder->no_invoice;
                             if(!$invoiceOrderDetail->save()){
                                 $success = false;
                                 $message = (count($invoiceOrderDetail->errors) > 0) ? 'ERROR CREATE INVOICE ORDER DETAIL: ' : '';

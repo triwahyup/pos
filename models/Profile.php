@@ -3,6 +3,7 @@
 namespace app\models;
 
 use Yii;
+use app\modules\master\models\MasterKode;
 
 /**
  * This is the model class for table "profile".
@@ -46,5 +47,10 @@ class Profile extends \yii\db\ActiveRecord
             'foto' => 'Foto',
             'typeuser_code' => 'Type User',
         ];
+    }
+
+    public function getTypeUser()
+    {
+        return $this->hasOne(MasterKode::className(), ['code' => 'typeuser_code']);
     }
 }

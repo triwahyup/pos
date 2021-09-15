@@ -144,14 +144,35 @@ JS;
                             ],
                             'options' => [
                                 'data-temp' => 1, 
-                                'data-align' => 'text-right'
+                                'data-align' => 'text-right',
+                                'readonly' => true,
+                                'data-name' => 'iconbox',
+                                'data-icons' => 'rupiah',
                             ]
                         ]) ?>
                     </div>
-                    <div class="col-lg-1 col-md-1 col-sm-12 col-xs-12 padding-right-0">
+                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-right-0">
+                        <?= $form->field($model, 'harga_jual')->widget(MaskedInput::className(), [
+                            'clientOptions' => [
+                                'alias' =>  'decimal',
+                                'groupSeparator' => ',',
+                                'autoGroup' => true
+                            ],
+                            'options' => [
+                                'data-temp' => 1, 
+                                'data-align' => 'text-right',
+                                'readonly' => true,
+                                'data-name' => 'iconbox',
+                                'data-icons' => 'rupiah',
+                            ]
+                        ]) ?>
+                    </div>
+                </div>
+                <div class="col-lg-12 col-md-12 col-xs-12">
+                    <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
                         <?= $form->field($model, 'qty_order')->textInput(['data-temp' => 1, 'data-align' => 'text-right']) ?>
                     </div>
-                    <div class="col-lg-1 col-md-1 col-sm-12 col-xs-12 padding-right-0">
+                    <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
                         <?= $form->field($model, 'ppn')->textInput(['data-temp' => 1, 'data-align' => 'text-right']) ?>
                     </div>
                     <div class="col-lg-1 col-md-1 col-sm-12 col-xs-12 padding-right-0 hidden">
@@ -239,7 +260,11 @@ function listItem(q)
 		beforeSend: function (data){},
         success: function(data){
             var o = $.parseJSON(data);
-            $("#purchaseorder-satuan").val(o.results[0].satuan);
+            $.each(o.results[0], function(index, value){
+                if(index!="id"){
+                    $("#purchaseorder-"+index).val(value);
+                }
+            });
         },
         complete: function(){}
     });
@@ -283,8 +308,11 @@ function get_temp(id)
         success: function(data){
             var o = $.parseJSON(data);
             $.each(o, function(index, value){
-                $("#purchaseorder-"+index).val(value);
-                $("#purchaseorder-"+index).val(value).trigger("change");
+                if(value=='item_code'){
+                    $("#purchaseorder-"+index).val(value).trigger("change");
+                }else{
+                    $("#purchaseorder-"+index).val(value);
+                }
             });
         },
         complete: function(){
@@ -374,10 +402,13 @@ function delete_temp(id)
     });
 }
 
+$(function(){
+    <?php if(!$model->isNewRecord): ?>
+        init_temp();
+    <?php endif; ?>
+});
+
 var timeOut = 3000;
-<?php if(!$model->isNewRecord): ?>
-    init_temp();
-<?php endif; ?>
 $(document).ready(function(){
     $("body").off("change","#purchaseorder-item_code").on("change","#purchaseorder-item_code", function(e){
         e.preventDefault();

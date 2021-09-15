@@ -6,6 +6,7 @@ use app\models\Logs;
 use app\models\User;
 use app\modules\inventory\models\InventoryStockItem;
 use app\modules\inventory\models\InventoryStockTransaction;
+use app\modules\purchasing\models\PurchaseOrder;
 use app\modules\purchasing\models\PurchaseOrderInvoice;
 use app\modules\purchasing\models\PurchaseOrderInvoiceDetail;
 use app\modules\purchasing\models\PurchaseOrderInvoiceSearch;
@@ -175,7 +176,9 @@ class InvoiceOrderController extends Controller
                 if(!empty($model->no_bukti) && !empty($model->tgl_invoice)){
                     if($model->total_invoice!=0){
                         $model->status_terima=1;
-                        if($model->save()){
+                        $purchaseOrder = PurchaseOrder::findOne(['no_po'=>$model->no_po]);
+                        $purchaseOrder->status_terima=1;
+                        if($model->save() && $purchaseOrder->save()){
                             $message = 'TERIMA INVOICE ORDER: '.$model->no_invoice.' SUCCESS';
                             $transaction->commit();
                             $logs =	[
