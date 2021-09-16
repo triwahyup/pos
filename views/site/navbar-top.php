@@ -1,4 +1,5 @@
 <?php
+    use app\models\User;
 	use yii\helpers\Html;
 	use yii\helpers\Url;
 ?>
@@ -20,9 +21,24 @@
         </a>
     </li>
     <li>
-        <a href="javascript:void(0)">
-            <span><?= \Yii::$app->user->identity->profile->name ?></span>
-        </a>
+        <?php
+            $originUser = '';
+            $originalId = \Yii::$app->session->get('user.idbeforeswitch');
+            if($originalId): 
+                $user = User::findOne($originalId);
+                $originUser = (isset($user)) ? $user->profile->name : '';
+            ?>
+            <?= Html::a('<i class="fontello icon-retweet"></i><span>'.$originUser.'</span>', ['/site/switch'], [
+                    'data' => [
+                        'confirm' => 'Back to Your Account?',
+                        'method' => 'post',
+                    ],
+                    'class' => 'btn-switch-toggle btn-danger',
+                    'title' => 'Back to Your Account',
+                ]) ?>
+        <?php else: ?>
+            <a href="javascript:void(0)"><?=\Yii::$app->user->identity->profile->name ?></a>
+        <?php endif; ?>
     </li>
     <li>
         <?= Html::a('Sign Out ', ['/site/logout'], ['data-method' => 'post']) ?>

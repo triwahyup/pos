@@ -11,6 +11,7 @@ use app\commands\Konstanta;
 use app\models\LoginForm;
 use app\models\Logs;
 use app\models\User;
+use app\modules\purchasing\models\PurchaseOrderApproval;
 
 class SiteController extends Controller
 {
@@ -22,25 +23,19 @@ class SiteController extends Controller
         return [
             'access' => [
                 'class' => AccessControl::className(),
-                'only' => ['index', 'register', 'switch', 'logout', 'request-password-reset', 'reset-password'],
+                'only' => ['index', 'logout', 'switch'],
                 'rules' => [
                     [
-                        'actions' => ['index', 'login', 'logout', 'navbar-top', 'navbar-left'],
+                        'actions' => ['index', 'login', 'logout', 'navbar-top', 'navbar-left', 'switch'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
-                    [
-						'actions' => ['register', 'request-password-reset', 'reset-password'],
-						'allow' => true, 
-						'roles' => ['?'],
-					],
                 ],
             ],
             'verbs' => [
                 'class' => VerbFilter::className(),
                 'actions' => [
                     'logout' => ['post'],
-                    'switch' => ['post'],
                 ],
             ],
         ];
@@ -62,6 +57,31 @@ class SiteController extends Controller
         ];
     }
 
+    public function actionSwitch()
+    {
+        $originalId = \Yii::$app->session->get('user.idbeforeswitch');
+        if($originalId){
+            $userOrigin = User::findOne($originalId);
+			$userOld = User::findOne(\Yii::$app->user->id);
+            if(isset($userOrigin)){
+				$duration = 0;
+				$logs = [
+					'type' => Logs::TYPE_USER,
+					'user' => $userOrigin->id,
+					'description' => 'Back Switch from User "'.$userOld->profile->name.'"',
+				];
+				Logs::addLog($logs);
+				
+				\Yii::$app->user->switchIdentity($userOrigin, $duration);
+				\Yii::$app->session->remove('user.idbeforeswitch');
+				return $this->goHome();
+			}else{
+				\Yii::$app->session->setFlash('error', 'User not found !');
+			}
+        }
+        return $this->goBack();
+    }
+
     /**
      * Displays homepage.
      *
@@ -69,7 +89,37 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
-        return $this->render('index');
+        $purchaseApp = PurchaseOrderApproval::find()->where(['status'=>2])->all();
+        $countPurchaseApp=0;
+        $userApproval = false;
+        $listApproval = '';
+        foreach($purchaseApp as $val){
+            $user = '';
+            if(!empty($val->user_id)){
+                if(!empty($val->user->profile)){
+                    $user = $val->user->profile->name;
+                }
+            }
+            if(!empty($val->typeuser_code)){
+                $user = $val->typeUser->name;
+            }
+            
+            if($val->user_id == \Yii::$app->user->id OR $val->typeuser_code == \Yii::$app->user->identity->profile->typeuser_code){
+                $userApproval = true;
+                $countPurchaseApp += 1;
+                $listApproval .= '<li><a href="'.\Yii::$app->params['URL'].'/purchasing/purchase-order/view&no_po='.$val->no_po.'">'.$countPurchaseApp.'). Approval PO: '.$val->no_po.'<i>'.$user.'</i></a></li>';
+            }else{
+                $countPurchaseApp += 1;
+                $listApproval .= '<li><span>'.$countPurchaseApp.'). Approval PO: '.$val->no_po.'<i>'.$user.'</i></span></li>';
+            }
+        }
+        
+        return $this->render('index', [
+            'purchaseApp' => $purchaseApp,
+            'countPurchaseApp' => $countPurchaseApp,
+            'userApproval' => $userApproval,
+            'listApproval' => $listApproval,
+        ]);
     }
 
     /**
@@ -114,87 +164,6 @@ class SiteController extends Controller
         }else{
             return $this->redirect(['register']);
 		}
-    }
-
-    public function actionRegister()
-	{
-		if(User::find()->count()){
-			return $this->redirect(['login']);
-		}else{
-			$this->layout = 'main-register';
-			
-			$superuser = new SuperuserForm;
-			$superuser->iserror = 0;
-			if($superuser->load( \Yii::$app->request->post())){
-				if($superuser->register()){
-					$superuser->iserror = 1;
-				}
-			}
-			
-			return $this->render('register', [
-				'register' => $register,
-				'superuser' => $superuser,
-			]);
-		}
-	}
-
-    public function actionSwitch()
-	{
-		$originalId = \Yii::$app->session->get('user.idbeforeswitch');
-		if($originalId) {
-			$user = User::findOne($originalId);
-			$tmp = User::findOne(Yii::$app->user->id);
-			if(isset($user)){
-				$duration = 0;
-				$logs = [
-					'type' => Logs::TYPE_USER,
-					'user' => $user->id,
-					'description' => 'Back Switch from User "'.$tmp->profile->name.'"',
-				];
-				
-				\Yii::$app->user->switchIdentity($user, $duration);
-				\Yii::$app->session->remove('user.idbeforeswitch');
-				
-				Logs::addLog($logs);
-				return $this->goHome();
-			}else{
-				\Yii::$app->session->setFlash('error', 'User not found !');
-			}
-		}
-		return $this->goBack();
-	}
-
-    public function actionRequestPasswordReset()
-	{
-		$this->layout = 'main-login';
-		
-        $model = new PasswordResetRequestForm();
-        if (!$model->load(\Yii::$app->request->post()) || !$model->validate()) {
-            return $this->render('requestPasswordResetToken', ['model' => $model]);
-        }
-        if (!$model->sendEmail()){
-            \Yii::$app->session->setFlash('error', 'Sorry, we are unable to reset password for email provided.');
-        }else{
-			\Yii::$app->session->setFlash('success', 'Check your email for further instructions.');
-			return $this->refresh();
-		}
-        return $this->goHome();
-    }
-
-    public function actionResetPassword($token)
-	{
-		$this->layout = 'main-login';
-		
-        try {
-            $model = new ResetPasswordForm($token);
-        } catch (InvalidParamException $e) {
-            throw new BadRequestHttpException($e->getMessage());
-        }
-        if(!$model->load( \Yii::$app->request->post()) || !$model->validate() || !$model->resetPassword()) {
-            return $this->render('resetPassword', ['model' => $model]);
-        }
-        \Yii::$app->session->setFlash('success', 'New password was saved. Please login to your account');
-        return $this->goHome();      
     }
 
     /**

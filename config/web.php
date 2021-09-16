@@ -49,16 +49,15 @@ $config = [
             // send all mails to a file by default. You have to set
             // 'useFileTransport' to false and configure a transport
             // for the mailer to send real emails.
-            
-            'useFileTransport' => true,
-            // 'transport' => [
-            //     'class' => 'Swift_SmtpTransport',
+            // 'useFileTransport' => true,
+            'transport' => [
+                'class' => 'Swift_SmtpTransport',
                 // 'host' => 'abs@alfanthariq.com',
                 // 'username' => 'abs@alfanthariq.com',
                 // 'password' => ')hzoW&K*r~[*',
-            //     'port' => '587',
-            //     'encryption' => 'tls',
-            // ],
+                'port' => '587',
+                'encryption' => 'tls',
+            ],
         ],
         'log' => [
             'traceLevel' => YII_DEBUG ? 3 : 0,

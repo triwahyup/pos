@@ -32,6 +32,11 @@ class ProfileController extends Controller
                     'class' => AccessControl::className(),
 				    'rules' => [
                         [
+                            'actions' => ['list-kabupaten', 'list-kecamatan', 'list-kelurahan'],
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-user')),
+                            'roles' => ['@'],
+                        ], 
+                        [
                             'actions' => ['update'],
                             'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('profile')),
                             'roles' => ['@'],
@@ -170,5 +175,44 @@ class ProfileController extends Controller
             'dataProvinsi' => $dataProvinsi,
             'typeUser' => $typeUser,
         ]);
+    }
+
+    public function actionListKabupaten($provinsiId)
+    {
+        if(isset($provinsiId)){
+            $model = MasterKabupaten::find()
+                ->select(['name', 'id'])
+                ->where(['provinsi_id'=>$provinsiId, 'status'=>1])
+                ->asArray()
+                ->all();
+            return json_encode($model);
+        }
+        throw new NotFoundHttpException('The requested page does not exist.');
+    }
+
+    public function actionListKecamatan($kecamatanId)
+    {
+        if(isset($kecamatanId)){
+            $model = MasterKecamatan::find()
+                ->select(['id', 'name'])
+                ->where(['kabupaten_id'=>$kecamatanId, 'status'=>1])
+                ->asArray()
+                ->all();
+            return json_encode($model);
+        }
+        throw new NotFoundHttpException('The requested page does not exist.');
+    }
+
+    public function actionListKelurahan($kelurahanId)
+    {
+        if(isset($kelurahanId)){
+            $model = MasterKelurahan::find()
+                ->select(['id', 'name'])
+                ->where(['kecamatan_id'=>$kelurahanId, 'status'=>1])
+                ->asArray()
+                ->all();
+            return json_encode($model);
+        }
+        throw new NotFoundHttpException('The requested page does not exist.');
     }
 }

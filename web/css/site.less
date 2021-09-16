@@ -10,10 +10,13 @@
 @color_header: #d2d2d2;
 @color_header_form: #b1b1b1;
 @color_header_table: #ecebe9;
+@color_info: #5abcc5;
+@color_info_hover: #58abb3;
 @color_main: #186679;
 @color_main_hover: #01323e;
 @color_navbar_header: #023f4e;
 @color_success: #28a745;
+@color_success_hover: #289241;
 @color_text: #656565;
 @color_text_menu: #2e3838;
 @color_warning: #ff5302;
@@ -314,6 +317,19 @@ button {
                     left: 20px;
                 }
             }
+        }
+    }
+    .btn-switch-toggle {
+        text-align: center;
+        width: 120px;
+        .fontello {
+            font-size: 16px !important;
+        }
+        span {
+            margin-left: 10px;
+        }
+        &:focus {
+            .boxShadow(unset);
         }
     }
 }
@@ -664,6 +680,78 @@ button {
 .container-collapse {
 	padding-left: 20px;
 }
+.cube-container {
+    display: inline-block;
+    height: 120px;
+    width: 100%;
+    .cube-left {
+        display: inline-block;
+        float: left;
+        height: 120px;
+        position: relative;
+        width: 20%;
+        .fontello {
+            color: @color_default;
+            font-size: 60px;
+            left: 50%;
+        }
+    }
+    .cube-right {
+        display: inline-block;
+        float: right;
+        height: 120px;
+        padding: 10px;
+        width: 80%;
+        p {
+            border-bottom: 1px solid #e6f2fd;
+            color: #e6f2fd;
+            margin-bottom: 0;
+            padding-bottom: 5px;
+        }
+        ul {
+            margin-top: 5px;
+            padding: 0;
+            li {
+                span, a {
+                    color: #e6f2fd;
+                    font-size: 12px;
+                    margin-left: 10px;
+                }
+                i {
+                    font-size: 9px;
+                    font-weight: 700;
+                    margin-left: 5px;
+                    top: -8px;
+                    position: relative;
+                }
+            }
+        }
+    }
+    &.cube-success {
+        background-color: @color_success;
+        .cube-left {
+            background-color: @color_success_hover;
+        }
+    }
+    &.cube-danger {
+        background-color: @color_danger;
+        .cube-left {
+            background-color: @color_danger_hover;
+        }
+    }
+    &.cube-warning {
+        background-color: @color_warning;
+        .cube-left {
+            background-color: @color_warning_hover;
+        }
+    }
+    &.cube-info {
+        background-color: @color_info;
+        .cube-left {
+            background-color: @color_info_hover;
+        }
+    }
+}
 /** END CONTAINER **/
 
 /** CUSTOM FORM && KARTIK WIDGET **/
@@ -924,7 +1012,7 @@ form {
 .pagination {
     .borderRadius(0);
     .boxShadow(inset 0 0 20px 1px #c7c7c4);
-    background: linear-gradient(rgb(204 204 204 / 40%),rgb(236 236 236 / 80%) 100%);
+    background: linear-gradient(rgb(251 247 247 / 40%),#fff 100%);
     display: inline-block;
     padding: 5px 15px;
     text-align: right;
@@ -954,6 +1042,24 @@ form {
         &:hover {
             background-color: @color_btnPagination_hover;
         }
+    }
+}
+.btn-switch-user {
+    .borderRadius(5px);
+    background-color: #e40962;
+    display: inline-block;
+    height: 24px;
+    position: relative;
+    text-align: center;
+    width: 100px;
+    .fontello {
+        color: @color_default;
+        left: 15px;
+    }
+    span {
+        color: @color_default;
+        line-height: 24px;
+        margin-left: 15px;
     }
 }
 /** END CUSTOM TABLE GRIDVIEW **/

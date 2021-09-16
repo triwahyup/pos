@@ -41,7 +41,7 @@ class ProfileController extends Controller
                             'roles' => ['@'],
                         ],
                         [
-                            'actions' => ['index', 'view', 'list-kabupaten', 'list-kecamatan', 'list-kelurahan'],
+                            'actions' => ['index', 'switch', 'view', 'list-kabupaten', 'list-kecamatan', 'list-kelurahan'],
                             'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-user')),
                             'roles' => ['@'],
                         ], 
@@ -65,6 +65,50 @@ class ProfileController extends Controller
                 ],
             ]
         );
+    }
+
+    public function actionSwitch($user_id)
+    {
+        $initialId = \Yii::$app->user->getId();
+        if($user_id == $initialId){
+            $message = 'Tidak bisa switch user menggunakan user yang sama.';
+            \Yii::$app->session->setFlash('danger', $message);
+            $logs = [
+				'type' => Logs::TYPE_USER,
+				'user' => $initialId,
+				'description' => "{".$user_id."} SWITCH USER! ".$message,
+			];
+			Logs::addLog($logs);
+        }else{
+            $profile = $this->findModel($user_id);
+            if(\Yii::$app->user->identity->profile->typeUser->value == 'ADMINISTRATOR'){
+                if(!$profile->user->validateBlocked()){
+                    $duration = 0;
+                    $logs = [
+                        'type' => Logs::TYPE_USER,
+                        'user' => $initialId,
+                        'description' => '{'.$user_id.'} Switch to User "'.$profile->name.'"',
+                    ];
+                    Logs::addLog($logs);
+    
+                    \Yii::$app->user->switchIdentity($profile->user, $duration); 
+                    \Yii::$app->session->set('user.idbeforeswitch', $initialId);
+                    return $this->goHome();
+                }else{
+                    $message = 'Switch Failed, user '.$profile->name.' is already blocked.';
+                    \Yii::$app->session->setFlash('danger', $message);
+                    $logs = [
+                        'type' => Logs::TYPE_USER,
+                        'user' => $initialId,
+                        'description' => '{'.$user_id.'} '.$message,
+                    ];
+                    Logs::addLog($logs);
+                }
+            }else{
+                \Yii::$app->session->setFlash('danger', 'Anda tidak mempunyai akses untuk melakukan switch user.');
+            }
+        }
+        return $this->redirect(['index']);
     }
 
     /**

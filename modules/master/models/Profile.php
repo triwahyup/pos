@@ -149,6 +149,11 @@ class Profile extends \yii\db\ActiveRecord
         return $this->hasOne(MasterKelurahan::className(), ['id' => 'kelurahan_id']);
     }
 
+    public function getUser()
+    {
+        return $this->hasOne(User::className(), ['id' => 'user_id']);
+    }
+
     public function validatePassword($attribute, $params)
     {
         if (!$this->hasErrors()) {

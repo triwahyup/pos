@@ -30,27 +30,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
             ],
             [
-                'attribute' => 'tgl_masuk',
-                'contentOptions' => [
-                    'class' => 'text-center',
-                ],
-                'filter' => DatePicker::widget([
-                    'model' => $searchModel, 
-                    'name' => 'tgl_masuk', 
-                    'type' => DatePicker::TYPE_COMPONENT_APPEND,
-                    'pickerButton' => false,
-                    'attribute' => 'tgl_masuk',
-                    'pluginOptions' => [
-                        'format' => 'yyyy-mm-dd',
-                        'autoclose' => true,
-                    ],
-                ]),
-                'value' => function($model, $index, $key)
-                {
-                    return (!empty($model->tgl_masuk)) ? date('Y-m-d', strtotime($model->tgl_masuk)) : NULL;
-                }
-            ],
-            [
                 'attribute' => 'typeuser_code',
                 'value' => function($model, $index, $key) {
                     return (isset($model->typeUser)) ? $model->typeUser->name : NULL;
@@ -81,12 +60,25 @@ $this->params['breadcrumbs'][] = $this->title;
                                 ],
                             ]);
                     },
+                    'switch' => function ($url, $model){
+						return Html::a('<i class="fontello icon-retweet"></i><span>Swith User</span>', [
+                            'switch', 'user_id'=>$model->user_id
+                        ], [
+                            'data' => [
+                                'confirm' => 'Switch to this user "'.$model->name.'"?',
+                                'method' => 'post',
+                            ],
+                            'class' => 'btn-switch-user',
+                            'title' => 'Switch User to '.$model->name,
+                        ]);
+					},
                 ],
                 'class' => 'yii\grid\ActionColumn',
                 'contentOptions' => [
                     'class' => 'text-center column-action',
+                    'style' => 'width: 200px',
                 ],
-                'template' => '{view} {update} {delete}',
+                'template' => '{view} {update} {delete} {switch}',
             ],
         ],
     ]); ?>
