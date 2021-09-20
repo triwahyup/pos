@@ -2,7 +2,6 @@
 
 namespace app\modules\pengaturan\controllers;
 
-use app\commands\Konstanta;
 use app\models\Logs;
 use app\models\User;
 use app\modules\master\models\MasterKode;
@@ -98,7 +97,7 @@ class MenuController extends Controller
     {
         $typeMenu = MasterKode::find()
             ->select(['name'])
-            ->where(['type'=>Konstanta::TYPE_MENU, 'status'=>1])
+            ->where(['type'=>\Yii::$app->params['TYPE_MENU'], 'status'=>1])
             ->indexBy('code')
             ->column();
         
@@ -186,7 +185,7 @@ class MenuController extends Controller
     {
         $typeMenu = MasterKode::find()
             ->select(['name'])
-            ->where(['type'=>Konstanta::TYPE_MENU, 'status'=>1])
+            ->where(['type'=>\Yii::$app->params['TYPE_MENU'], 'status'=>1])
             ->indexBy('code')
             ->column();
 

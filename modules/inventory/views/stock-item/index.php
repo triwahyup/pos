@@ -23,30 +23,45 @@ $this->params['breadcrumbs'][] = $this->title;
                 'contentOptions' => [
                     'class' => 'text-right',
                 ],
+                'value' => function($model, $value) {
+                    return number_format($model->qty_in);
+                }
             ],
             [
                 'attribute' => 'qty_out',
                 'contentOptions' => [
                     'class' => 'text-right',
                 ],
+                'value' => function($model, $value) {
+                    return number_format($model->qty_out);
+                }
             ],
             [
                 'attribute' => 'qty_retur',
                 'contentOptions' => [
                     'class' => 'text-right',
                 ],
+                'value' => function($model, $value) {
+                    return number_format($model->qty_retur);
+                }
             ],
             [
                 'attribute' => 'onhand',
                 'contentOptions' => [
                     'class' => 'text-right',
                 ],
+                'value' => function($model, $value) {
+                    return number_format($model->onhand);
+                }
             ],
             [
                 'attribute' => 'onsales',
                 'contentOptions' => [
                     'class' => 'text-right',
                 ],
+                'value' => function($model, $value) {
+                    return number_format($model->onsales);
+                }
             ],
         ],
     ]); ?>

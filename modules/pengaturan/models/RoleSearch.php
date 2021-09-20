@@ -2,7 +2,6 @@
 
 namespace app\modules\pengaturan\models;
 
-use app\commands\Konstanta;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use app\modules\master\models\MasterKode;
@@ -58,7 +57,7 @@ class RoleSearch extends MasterKode
             return $dataProvider;
         }
         
-        $query->where(['type'=>Konstanta::TYPE_USER])
+        $query->where(['type'=>\Yii::$app->params['TYPE_USER']])
             ->andFilterWhere(['like', 'name', $this->name])
             ->andFilterWhere(['like', 'type', $this->type]);
 

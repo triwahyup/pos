@@ -93,9 +93,6 @@ $config = [
         'report' => [
             'class' => 'app\modules\report\Module',
         ],
-        'transaksi' => [
-            'class' => 'app\modules\transaksi\Module',
-        ],
     ],
 ];
 

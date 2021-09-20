@@ -108,22 +108,28 @@ $this->params['breadcrumbs'][] = $this->title;
                             ['title'=>'View', 'aria-label'=>'View', 'data-pjax'=>true]);
                     },
                     'update' => function ($url, $model) {
-                        return Html::a(Helper::buttonIcons()['pencil'],
-                            ['update', 'no_po'=>$model->no_po],
-                            ['title'=>'Update', 'aria-label'=>'Update', 'data-pjax'=>true]);
+                        if(\Yii::$app->user->identity->profile->typeUser->value == 'ADMINISTRATOR' 
+                            || \Yii::$app->user->identity->profile->typeUser->value == 'ADMIN'){
+                            return Html::a(Helper::buttonIcons()['pencil'],
+                                ['update', 'no_po'=>$model->no_po],
+                                ['title'=>'Update', 'aria-label'=>'Update', 'data-pjax'=>true]);
+                        }
                     },
                     'delete' => function ($url, $model) {
-                        return Html::a(Helper::buttonIcons()['trash'],
-                            ['delete', 'no_po'=>$model->no_po],
-                            [
-                                'title'=>'Delete',
-                                'aria-label'=>'Delete', 
-                                'data-pjax'=>true,
-                                'data' => [
-                                    'confirm' => 'Are you sure you want to delete this item?',
-                                    'method' => 'post',
-                                ],
-                            ]);
+                        if(\Yii::$app->user->identity->profile->typeUser->value == 'ADMINISTRATOR' 
+                            || \Yii::$app->user->identity->profile->typeUser->value == 'ADMIN'){
+                            return Html::a(Helper::buttonIcons()['trash'],
+                                ['delete', 'no_po'=>$model->no_po],
+                                [
+                                    'title'=>'Delete',
+                                    'aria-label'=>'Delete', 
+                                    'data-pjax'=>true,
+                                    'data' => [
+                                        'confirm' => 'Are you sure you want to delete this item?',
+                                        'method' => 'post',
+                                    ],
+                                ]);
+                        }
                     },
                 ],
                 'class' => 'yii\grid\ActionColumn',

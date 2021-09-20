@@ -80,6 +80,11 @@ class PurchaseOrderApproval extends \yii\db\ActiveRecord
         return $this->hasOne(MasterKode::className(), ['code' => 'typeuser_code']);
     }
 
+    public function getName()
+    {
+        return $this->hasOne(Profile::className(), ['user_id' => 'user_id']);
+    }
+
     public function getUser()
     {
         return $this->hasOne(User::className(), ['id' => 'user_id']);

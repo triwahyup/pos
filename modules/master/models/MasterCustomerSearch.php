@@ -4,7 +4,6 @@ namespace app\modules\master\models;
 
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use app\commands\Konstanta;
 use app\modules\master\models\MasterPerson;
 
 /**
@@ -57,7 +56,7 @@ class MasterCustomerSearch extends MasterPerson
         }
 
         // grid filtering conditions
-        $query->where(['type_user' => Konstanta::TYPE_CUSTOMER, 'status'=>1]);
+        $query->where(['type_user' => \Yii::$app->params['TYPE_CUSTOMER'], 'status'=>1]);
         if(!empty($this->created_at)){
             $t1 = strtotime($this->created_at);
 			$t2 = strtotime("+1 days", $t1);

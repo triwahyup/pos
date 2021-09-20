@@ -4,6 +4,7 @@ namespace app\modules\purchasing\models;
 
 use Yii;
 use app\modules\master\models\MasterPerson;
+use app\modules\purchasing\models\PurchaseOrder;
 use app\modules\purchasing\models\PurchaseOrderInvoiceDetail;
 use yii\behaviors\TimestampBehavior;
 
@@ -56,10 +57,10 @@ class PurchaseOrderInvoice extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['tgl_invoice', 'tgl_po', 'tgl_kirim', 'total_invoice'], 'safe'],
+            [['tgl_invoice', 'tgl_po', 'tgl_kirim', 'total_invoice', 'qty_terima', 'harga_beli'], 'safe'],
             [['term_in', 'user_id', 'post', 'status', 'created_at', 'updated_at', 'status_terima', 'urutan'], 'integer'],
             [['keterangan'], 'string'],
-            [['total_ppn', 'total_order', 'ppn', 'qty_terima', 'harga_beli'], 'number'],
+            [['total_ppn', 'total_order', 'ppn'], 'number'],
             [['no_invoice', 'no_po'], 'string', 'max' => 12],
             [['no_bukti'], 'string', 'max' => 32],
             [['supplier_code'], 'string', 'max' => 3],
@@ -92,7 +93,14 @@ class PurchaseOrderInvoice extends \yii\db\ActiveRecord
             'status' => 'Status',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
+            'ppn' => 'Ppn (%)',
         ];
+    }
+
+    public function beforeSave($attribute)
+    {
+        $this->total_invoice = str_replace(',', '', $this->total_invoice);
+        return parent::beforeSave($attribute);
     }
 
     public function generateCode()
@@ -104,6 +112,11 @@ class PurchaseOrderInvoice extends \yii\db\ActiveRecord
             $total = (int)substr($model->no_invoice, -4);
         }
         return (string)date('Ymd').sprintf('%04s', ($total+1));
+    }
+
+    public function getPurchase()
+    {
+        return $this->hasOne(PurchaseOrder::className(), ['no_po' => 'no_po']);
     }
 
     public function getSupplier()

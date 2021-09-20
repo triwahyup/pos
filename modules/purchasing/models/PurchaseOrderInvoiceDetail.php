@@ -49,12 +49,13 @@ class PurchaseOrderInvoiceDetail extends \yii\db\ActiveRecord
     {
         return [
             [['no_invoice', 'urutan'], 'required'],
+            [['qty_terima', 'harga_beli'], 'safe'],
             [['urutan', 'status', 'created_at', 'updated_at'], 'integer'],
-            [['qty_order', 'qty_terima', 'harga_beli', 'harga_jual', 'ppn', 'total_order', 'total_invoice'], 'number'],
+            [['qty_order', 'harga_jual', 'ppn', 'total_order', 'total_invoice'], 'number'],
             [['no_invoice'], 'string', 'max' => 12],
             [['item_code'], 'string', 'max' => 7],
             [['name'], 'string', 'max' => 128],
-            [['satuan'], 'string', 'max' => 3],
+            [['satuan'], 'string', 'max' => 5],
             [['no_invoice', 'urutan'], 'unique', 'targetAttribute' => ['no_invoice', 'urutan']],
             [['status'], 'default', 'value' => 1],
         ];

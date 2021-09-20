@@ -78,7 +78,17 @@ use yii\widgets\MaskedInput;
                 </div>
                 <div class="col-lg-12 col-md-12 col-xs-12">
                     <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
-                        <?= $form->field($model, 'qty_terima')->textInput(['data-temp' => 1, 'data-align' => 'text-right']) ?>
+                        <?= $form->field($model, 'qty_terima')->widget(MaskedInput::className(), [
+                            'clientOptions' => [
+                                'alias' =>  'decimal',
+                                'groupSeparator' => ',',
+                                'autoGroup' => true
+                            ],
+                            'options' => [
+                                'data-temp' => 1, 
+                                'data-align' => 'text-right'
+                            ]
+                        ]) ?>
                     </div>
                     <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
                         <?= $form->field($model, 'ppn')->textInput(['data-temp' => 1, 'data-align' => 'text-right']) ?>

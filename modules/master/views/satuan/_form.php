@@ -17,7 +17,6 @@ use yii\widgets\ActiveForm;
                         'data' => $type,
                         'options' => ['placeholder' => 'Type Barang'],
                     ]) ?>
-                <?= $form->field($model, 'qty')->textInput() ?>
                 <?= $form->field($model, 'keterangan')->textarea(['rows' => 2]) ?>
             </div>
         </div>

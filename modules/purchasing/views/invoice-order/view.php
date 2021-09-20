@@ -26,7 +26,12 @@ $this->params['breadcrumbs'][] = $this->title;
             <?= DetailView::widget([
                 'model' => $model,
                 'attributes' => [
-                    'total_ppn',
+                    [
+                        'attribute' => 'total_ppn',
+                        'value' => function($model, $index){
+                            return number_format($model->total_ppn).'%';
+                        }
+                    ],
                     [
                         'attribute' => 'total_invoice',
                         'value' => function($model, $index){
@@ -86,7 +91,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 padding-left-0">
                         <div class="row">
                             <label class="div-label">User Request</label>
-                            <strong><?=(isset($model->profile)) ? $model->profile->name : '-' ?></strong>
+                            <strong><?=(isset($model->purchase->request)) ? $model->purchase->request->name : '-' ?></strong>
                         </div>
                         <div class="row">
                             <label class="div-label">Supplier</label>
@@ -186,10 +191,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <p class="text-right">
         <?php if($model->status_terima==0): ?>
             <?= Html::a('<i class="fontello icon-pencil"></i><span>Update</span>', ['update', 'no_invoice' => $model->no_invoice], ['class' => 'btn btn-warning btn-flat btn-sm']) ?>
-            <?= Html::a('<i class="fontello icon-ok"></i><span>Post to Terima Invoice</span>', ['terima', 'no_invoice' => $model->no_invoice], ['class' => 'btn btn-success btn-flat btn-sm']) ?>
-        <?php endif; ?>
-        <?php if($model->status_terima==1 && $model->post==0): ?>
-            <?= Html::a('<i class="fontello icon-ok"></i><span>Post to Stock Material</span>', ['post', 'no_invoice' => $model->no_invoice], ['class' => 'btn btn-primary btn-flat btn-sm']) ?>
+            <?= Html::a('<i class="fontello icon-ok"></i><span>Konfirmasi Terima Item Material</span>', ['terima', 'no_invoice' => $model->no_invoice], ['class' => 'btn btn-success btn-flat btn-sm']) ?>
         <?php endif; ?>
     </p>
 </div>

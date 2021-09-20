@@ -60,13 +60,14 @@ class PurchaseOrder extends \yii\db\ActiveRecord
     {
         return [
             [['no_po', 'tgl_po', 'tgl_kirim', 'term_in', 'supplier_code', 'user_request'], 'required'],
-            [['tgl_po', 'tgl_kirim', 'total_order', 'harga_beli', 'harga_jual'], 'safe'],
+            [['tgl_po', 'tgl_kirim', 'total_order', 'harga_beli', 'harga_jual', 'qty_order'], 'safe'],
             [['term_in', 'user_id', 'user_request', 'status', 'status_approval', 'status_terima', 'created_at', 'updated_at', 'id', 'post'], 'integer'],
             [['keterangan'], 'string'],
-            [['ppn', 'total', 'qty_order'], 'number'],
+            [['ppn', 'total'], 'number'],
             [['no_po'], 'string', 'max' => 12],
             [['item_code'], 'string', 'max' => 7],
-            [['supplier_code', 'satuan'], 'string', 'max' => 3],
+            [['satuan'], 'string', 'max' => 5],
+            [['supplier_code'], 'string', 'max' => 3],
             [['no_po'], 'unique'],
             [['status_approval', 'status_terima', 'post'], 'default', 'value' => 0],
             [['status'], 'default', 'value' => 1],
@@ -101,6 +102,12 @@ class PurchaseOrder extends \yii\db\ActiveRecord
             'satuan' => 'Satuan',
             'id' => 'id',
         ];
+    }
+
+    public function beforeSave($attribute)
+    {
+        $this->total_order = str_replace(',', '', $this->total_order);
+        return parent::beforeSave($attribute);
     }
 
     public function generateCode()

@@ -29,12 +29,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 }
             ],
             [
-                'attribute' => 'qty',
-                'contentOptions' => [
-                    'class' => 'text-center',
-                ],
-            ],
-            [
                 'attribute' => 'created_at',
                 'contentOptions' => [
                     'class' => 'text-center',

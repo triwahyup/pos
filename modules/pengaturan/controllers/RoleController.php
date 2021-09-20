@@ -2,7 +2,6 @@
 
 namespace app\modules\pengaturan\controllers;
 
-use app\commands\Konstanta;
 use app\models\AuthItemChild;
 use app\models\User;
 use app\modules\master\models\MasterKode;
@@ -67,7 +66,7 @@ class RoleController extends Controller
         $parent = str_replace(' ','-', $typeCode->value);
         if($typeCode !== NULL){
             $menus = PengaturanMenu::find()
-                ->where(['level'=>1, 'type_code'=>Konstanta::NAVBAR_LEFT])
+                ->where(['level'=>1, 'type_code'=>\Yii::$app->params['NAVBAR_LEFT']])
                 ->orderBy(['type_code'=>SORT_DESC, 'urutan'=>SORT_ASC])
                 ->all();
 

@@ -2,7 +2,6 @@
 
 namespace app\modules\master\controllers;
 
-use app\commands\Konstanta;
 use app\models\Logs;
 use app\models\User;
 use app\modules\inventory\models\InventoryStockItem;
@@ -103,7 +102,7 @@ class MaterialItemController extends Controller
     {
         $type = MasterKode::find()
             ->select(['name'])
-            ->where(['type'=>Konstanta::TYPE_MATERIAL, 'status' => 1])
+            ->where(['type'=>\Yii::$app->params['TYPE_MATERIAL'], 'status' => 1])
             ->indexBy('code')
             ->column();
 

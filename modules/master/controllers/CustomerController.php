@@ -2,7 +2,6 @@
 
 namespace app\modules\master\controllers;
 
-use app\commands\Konstanta;
 use app\models\Logs;
 use app\models\User;
 use app\modules\master\models\MasterProvinsi;
@@ -114,7 +113,7 @@ class CustomerController extends Controller
 			    $transaction = $connection->beginTransaction();
                 try {
                     $model->code = $model->generateCode();
-                    $model->type_user = Konstanta::TYPE_CUSTOMER;
+                    $model->type_user = \Yii::$app->params['TYPE_CUSTOMER'];
                     $model->phone_1 = str_replace('-', '', $model->phone_1);
                     if(!empty($model->phone_2)){
                         $model->phone_2 = str_replace('-', '', $model->phone_2);

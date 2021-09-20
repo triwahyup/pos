@@ -3,7 +3,6 @@
 namespace app\modules\master\models;
 
 use Yii;
-use app\commands\Konstanta;
 use app\modules\master\models\MasterGroupMaterial;
 use app\modules\master\models\MasterGroupSupplier;
 use app\modules\master\models\MasterKode;
@@ -98,9 +97,9 @@ class MasterMaterialItem extends \yii\db\ActiveRecord
             $model = MasterMaterialItem::find()->where(['type_code'=>$type])->orderBy(['code'=>SORT_DESC])->one();
             $total = (int)substr($model->code, -6);
         }
-        if($type == Konstanta::MATERIAL_KERTAS_CODE){
+        if($type == \Yii::$app->params['MATERIAL_KERTAS_CODE']){
             return (string)'1'.sprintf('%06s', ($total+1));
-        }else if($type == Konstanta::MATERIAL_TINTA_CODE){
+        }else if($type == \Yii::$app->params['MATERIAL_TINTA_CODE']){
             return (string)'2'.sprintf('%06s', ($total+1));
         }else{
             return (string)'3'.sprintf('%06s', ($total+1));

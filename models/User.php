@@ -146,7 +146,7 @@ class User extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
 
     public function getIsDeveloper(){
 		if(isset( \Yii::$app->user->identity->username)){
-			if(in_array(strtolower( \Yii::$app->user->identity->username), Yii::$app->params['developer'])){
+			if(in_array(strtolower( \Yii::$app->user->identity->username), \Yii::$app->params['DEVELOPER'])){
 				return true;				
 			}
 		}

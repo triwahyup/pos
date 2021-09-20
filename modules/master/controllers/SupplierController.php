@@ -2,7 +2,6 @@
 
 namespace app\modules\master\controllers;
 
-use app\commands\Konstanta;
 use app\models\Logs;
 use app\models\User;
 use app\modules\master\models\MasterGroupSupplier;
@@ -120,7 +119,7 @@ class SupplierController extends Controller
 			    $transaction = $connection->beginTransaction();
                 try {
                     $model->code = $model->generateCode();
-                    $model->type_user = Konstanta::TYPE_SUPPLIER;
+                    $model->type_user = \Yii::$app->params['TYPE_SUPPLIER'];
                     $model->phone_1 = str_replace('-', '', $model->phone_1);
                     if(!empty($model->phone_2)){
                         $model->phone_2 = str_replace('-', '', $model->phone_2);

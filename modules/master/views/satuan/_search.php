@@ -21,8 +21,6 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'type_code') ?>
 
-    <?= $form->field($model, 'qty') ?>
-
     <?= $form->field($model, 'keterangan') ?>
 
     <?php // echo $form->field($model, 'status') ?>

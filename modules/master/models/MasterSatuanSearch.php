@@ -18,7 +18,6 @@ class MasterSatuanSearch extends MasterSatuan
     {
         return [
             [['name', 'type_code', 'created_at', 'updated_at'], 'safe'],
-            [['qty'], 'number'],
         ];
     }
 
@@ -73,8 +72,7 @@ class MasterSatuanSearch extends MasterSatuan
         if(!empty($this->type_code)){
             $query->andWhere('b.name LIKE "%'.$this->type_code.'%"');
         }
-        $query->andFilterWhere(['qty' => $this->qty])
-            ->andFilterWhere(['like', 'a.name', $this->name]);
+        $query->andFilterWhere(['like', 'a.name', $this->name]);
 
         return $dataProvider;
     }

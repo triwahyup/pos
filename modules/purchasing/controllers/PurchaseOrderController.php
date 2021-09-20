@@ -2,7 +2,6 @@
 
 namespace app\modules\purchasing\controllers;
 
-use app\commands\Konstanta;
 use app\models\Logs;
 use app\models\LogsMailSend;
 use app\models\User;
@@ -124,6 +123,7 @@ class PurchaseOrderController extends Controller
             'sendApproval' => $sendApproval,
             'postInvoice' => $postInvoice,
             'typeApproval' => $typeApproval,
+            'typeuser' => $typeuser,
         ]);
     }
 
@@ -136,7 +136,7 @@ class PurchaseOrderController extends Controller
     {
         $supplier = MasterPerson::find()
             ->select(['name'])
-            ->where(['type_user'=>Konstanta::TYPE_SUPPLIER, 'status' => 1])
+            ->where(['type_user'=>\Yii::$app->params['TYPE_SUPPLIER'], 'status' => 1])
             ->indexBy('code')
             ->column();
         $profile = Profile::find()
@@ -154,7 +154,6 @@ class PurchaseOrderController extends Controller
                 $connection = \Yii::$app->db;
 			    $transaction = $connection->beginTransaction();
                 try{
-                    $model->total_order = str_replace(',','', $model->total_order);
                     $model->user_id = \Yii::$app->user->id;
                     if($model->save()){
                         if(count($model->temps) > 0){
@@ -233,7 +232,7 @@ class PurchaseOrderController extends Controller
     {
         $supplier = MasterPerson::find()
             ->select(['name'])
-            ->where(['type_user'=>Konstanta::TYPE_SUPPLIER, 'status' => 1])
+            ->where(['type_user'=>\Yii::$app->params['TYPE_SUPPLIER'], 'status' => 1])
             ->indexBy('code')
             ->column();
         $profile = Profile::find()
@@ -250,7 +249,6 @@ class PurchaseOrderController extends Controller
                 $connection = \Yii::$app->db;
                 $transaction = $connection->beginTransaction();
                 try{
-                    $model->total_order = str_replace(',','', $model->total_order);
                     if($model->save()){
                         if(count($model->temps) > 0){
                             foreach($model->details as $empty)
@@ -478,15 +476,15 @@ class PurchaseOrderController extends Controller
             $temp->urutan = $temp->count +1;
             $temp->user_id = \Yii::$app->user->id;
             
-            $hargaBeli = str_replace(',', '', $temp->harga_beli);
-            $temp->harga_beli = $hargaBeli;
+            $temp->harga_beli = str_replace(',','', $temp->harga_beli);
+            $temp->qty_order = str_replace(',','', $temp->qty_order);
             if(!empty($temp->ppn)){
-                $ppn = $hargaBeli * $temp->qty_order / ($temp->ppn*100);
-                $temp->total_order = ($hargaBeli * $temp->qty_order) - $ppn;
+                $ppn = $temp->harga_beli * $temp->qty_order / ($temp->ppn*100);
+                $temp->total_order = ($temp->harga_beli * $temp->qty_order) + $ppn;
             }else{
-                $temp->total_order = $hargaBeli * $temp->qty_order;
+                $temp->total_order = $temp->harga_beli * $temp->qty_order;
             }
-            $temp->harga_jual = str_replace(',', '', $temp->harga_jual);
+            $temp->harga_jual = str_replace(',','', $temp->harga_jual);
             if($temp->save()){
                 $message = 'CREATE TEMP SUCCESSFULLY';
             }else{
@@ -513,15 +511,15 @@ class PurchaseOrderController extends Controller
             $temp->attributes = (array)$po;
             $temp->name = ($temp->item) ? $temp->item->name : '';
             
-            $hargaBeli = str_replace(',', '', $temp->harga_beli);
-            $temp->harga_beli = $hargaBeli;
+            $temp->harga_beli = str_replace(',','', $temp->harga_beli);
+            $temp->qty_order = str_replace(',','', $temp->qty_order);
             if(!empty($temp->ppn)){
-                $ppn = $hargaBeli * $temp->qty_order / ($temp->ppn*100);
-                $temp->total_order = ($hargaBeli * $temp->qty_order) - $ppn;
+                $ppn = $temp->harga_beli * $temp->qty_order / ($temp->ppn*100);
+                $temp->total_order = ($temp->harga_beli * $temp->qty_order) + $ppn;
             }else{
-                $temp->total_order = $hargaBeli * $temp->qty_order;
+                $temp->total_order = $temp->harga_beli * $temp->qty_order;
             }
-            $temp->harga_jual = str_replace(',', '', $temp->harga_jual);
+            $temp->harga_jual = str_replace(',','', $temp->harga_jual);
             if($temp->save()){
                 $message = 'UPDATE TEMP SUCCESSFULLY';
             }else{

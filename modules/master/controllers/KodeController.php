@@ -2,7 +2,6 @@
 
 namespace app\modules\master\controllers;
 
-use app\commands\Konstanta;
 use app\models\Logs;
 use app\models\User;
 use app\modules\master\models\MasterKode;
@@ -107,7 +106,7 @@ class KodeController extends Controller
                     if($model->save()){
                         $auth = \Yii::$app->authManager;
                         $author = $auth->createRole(str_replace(' ', '-', $model->value));
-                        if($model->type == Konstanta::TYPE_USER){
+                        if($model->type == \Yii::$app->params['TYPE_USER']){
                             if(!$auth->add($author)){
                                 $success = false;
                                 $message = 'ERROR CREATE AUTH (MASTER KODE)';

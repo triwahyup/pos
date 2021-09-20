@@ -2,7 +2,6 @@
 
 namespace app\modules\master\controllers;
 
-use app\commands\Konstanta;
 use app\models\AuthAssignment;
 use app\models\AuthItemChild;
 use app\models\Logs;
@@ -153,7 +152,7 @@ class ProfileController extends Controller
             ->column();
         $typeUser = MasterKode::find()
             ->select(['name'])
-            ->where(['type'=>Konstanta::TYPE_USER, 'status' => 1])
+            ->where(['type'=>\Yii::$app->params['TYPE_USER'], 'status' => 1])
             ->indexBy('code')
             ->column();
         
@@ -276,7 +275,7 @@ class ProfileController extends Controller
             ->column();
         $typeUser = MasterKode::find()
             ->select(['name'])
-            ->where(['type'=>Konstanta::TYPE_USER, 'status' => 1])
+            ->where(['type'=>\Yii::$app->params['TYPE_USER'], 'status' => 1])
             ->indexBy('code')
             ->column();
 

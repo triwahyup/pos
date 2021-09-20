@@ -12,7 +12,6 @@ use yii\behaviors\TimestampBehavior;
  * @property string $code
  * @property string|null $name
  * @property string|null $type_code
- * @property float|null $qty
  * @property string|null $keterangan
  * @property int|null $status
  * @property int|null $created_at
@@ -41,8 +40,7 @@ class MasterSatuan extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['name', 'type_code', 'qty'], 'required'],
-            [['qty'], 'number'],
+            [['name', 'type_code'], 'required'],
             [['keterangan'], 'string'],
             [['status', 'created_at', 'updated_at'], 'integer'],
             [['code'], 'string', 'max' => 3],
@@ -62,7 +60,6 @@ class MasterSatuan extends \yii\db\ActiveRecord
             'code' => 'Code',
             'name' => 'Name',
             'type_code' => 'Type',
-            'qty' => 'Qty',
             'keterangan' => 'Keterangan',
             'status' => 'Status',
             'created_at' => 'Created At',

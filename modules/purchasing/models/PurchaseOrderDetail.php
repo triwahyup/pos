@@ -51,7 +51,7 @@ class PurchaseOrderDetail extends \yii\db\ActiveRecord
             [['no_po'], 'string', 'max' => 12],
             [['item_code'], 'string', 'max' => 7],
             [['name'], 'string', 'max' => 128],
-            [['satuan'], 'string', 'max' => 3],
+            [['satuan'], 'string', 'max' => 5],
             [['no_po', 'urutan'], 'unique', 'targetAttribute' => ['no_po', 'urutan']],
             [['status'], 'default', 'value' => 1],
         ];

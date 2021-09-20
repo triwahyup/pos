@@ -7,7 +7,6 @@ use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\web\Response;
 use yii\filters\VerbFilter;
-use app\commands\Konstanta;
 use app\models\LoginForm;
 use app\models\Logs;
 use app\models\User;
@@ -194,7 +193,7 @@ class SiteController extends Controller
         $menuItems = [];
         $querys = \Yii::$app->db->createCommand("
             SELECT * FROM pengaturan_menu
-            WHERE status=1 AND type_code='".Konstanta::NAVBAR_LEFT."' 
+            WHERE status=1 AND type_code='".\Yii::$app->params['NAVBAR_LEFT']."' 
             ".(( \Yii::$app->user->identity->getIsDeveloper()) ? '' : " AND (
                 slug IN (
                     SELECT item_name FROM auth_assignment WHERE user_id = '".\Yii::$app->user->id."'

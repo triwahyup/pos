@@ -13,15 +13,17 @@ $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="purchase-order-view">
     <p class="text-right">
-        <?= Html::a('<i class="fontello icon-plus"></i><span>Create</span>', ['create'], ['class' => 'btn btn-success btn-flat btn-sm']) ?>
-        <?= Html::a('<i class="fontello icon-pencil"></i><span>Update</span>', ['update', 'no_po' => $model->no_po], ['class' => 'btn btn-warning btn-flat btn-sm']) ?>
-        <?= Html::a('<i class="fontello icon-trash"></i><span>Delete</span>', ['delete', 'no_po' => $model->no_po], [
-                'class' => 'btn btn-danger btn-flat btn-sm',
-                'data' => [
-                    'confirm' => 'Are you sure you want to delete this item?',
-                    'method' => 'post',
-                ],
-            ]) ?>
+        <?php if($typeuser == 'ADMINISTRATOR' || $typeuser == 'ADMIN'): ?>
+            <?= Html::a('<i class="fontello icon-plus"></i><span>Create</span>', ['create'], ['class' => 'btn btn-success btn-flat btn-sm']) ?>
+            <?= Html::a('<i class="fontello icon-pencil"></i><span>Update</span>', ['update', 'no_po' => $model->no_po], ['class' => 'btn btn-warning btn-flat btn-sm']) ?>
+            <?= Html::a('<i class="fontello icon-trash"></i><span>Delete</span>', ['delete', 'no_po' => $model->no_po], [
+                    'class' => 'btn btn-danger btn-flat btn-sm',
+                    'data' => [
+                        'confirm' => 'Are you sure you want to delete this item?',
+                        'method' => 'post',
+                    ],
+                ]) ?>
+        <?php endif; ?>
     </p>
 
     <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 pading-right-0">
@@ -189,7 +191,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                         <td class="text-center"><?=$index+1 ?></td>
                                         <td class="text-center"><?=($approval->status == 3 || $approval->status == 4) ? date('Y-m-d', $approval->updated_at) : '-' ?></td>
                                         <td class="text-center"><?=$approval->urutan ?></td>
-                                        <td><?=(!empty($approval->user_id)) ? (isset($approval->po->profile)) ? $approval->po->profile->name : '' : '' ?></td>
+                                        <td><?=(!empty($approval->user_id)) ? (isset($approval->name)) ? $approval->name->name : '' : '' ?></td>
                                         <td><?=(!empty($approval->typeuser_code)) ? (isset($approval->typeUser)) ? $approval->typeUser->name : '' : '' ?></td>
                                         <td class="text-center"><?=$approval->statusApproval ?></td>
                                         <td><?=(!empty($approval->comment)) ? '<span class="font-size-10"><strong>Comment:</strong> '.$approval->comment.'</span>' : '' ?></td>

@@ -35,7 +35,6 @@ $this->params['breadcrumbs'][] = $this->title;
                         return (isset($model->typeCode)) ? $model->typeCode->name : '';
                     }
                 ],
-                'qty',
                 'keterangan:ntext',
                 [
                     'attribute' => 'status',

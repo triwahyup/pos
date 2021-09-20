@@ -2,7 +2,6 @@
 
 namespace app\modules\pengaturan\controllers;
 
-use app\commands\Konstanta;
 use app\models\Logs;
 use app\models\User;
 use app\models\Profile;
@@ -367,7 +366,7 @@ class ApprovalController extends Controller
         else if($type == 2){
             $model = MasterKode::find()
                 ->select(['name', 'code'])
-                ->where(['type'=>Konstanta::TYPE_USER, 'status'=>1])
+                ->where(['type'=>\Yii::$app->params['TYPE_USER'], 'status'=>1])
                 ->asArray()
                 ->all();
         }
