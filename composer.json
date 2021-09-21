@@ -23,8 +23,7 @@
         "brixms/yii2-phpdotenv": "dev-master",
         "phpoffice/phpexcel": "1.8.x-dev",
         "kartik-v/yii2-mpdf": "*",
-        "kartik-v/yii2-widgets": "*",
-        ""
+        "kartik-v/yii2-widgets": "*"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.1.0",

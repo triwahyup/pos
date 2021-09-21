@@ -2,10 +2,17 @@
 
 namespace app\modules\master\controllers;
 
+use app\models\Logs;
+use app\models\User;
+use app\modules\master\models\MasterProvinsi;
+use app\modules\master\models\MasterKabupaten;
+use app\modules\master\models\MasterKecamatan;
+use app\modules\master\models\MasterKelurahan;
 use app\modules\master\models\MasterPerson;
 use app\modules\master\models\MasterOutsourceSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
+use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 
 /**
@@ -21,6 +28,31 @@ class OutsourceController extends Controller
         return array_merge(
             parent::behaviors(),
             [
+                'access' => [
+                    'class' => AccessControl::className(),
+				    'rules' => [
+                        [
+                            'actions' => ['create'],
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-outsource')),
+                            'roles' => ['@'],
+                        ],
+                        [
+                            'actions' => ['index', 'view', 'list-kabupaten', 'list-kecamatan', 'list-kelurahan'],
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-outsource')),
+                            'roles' => ['@'],
+                        ], 
+                        [
+                            'actions' => ['update'],
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-outsource')),
+                            'roles' => ['@'],
+                        ], 
+                        [
+                            'actions' => ['delete'],
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-outsource')),
+                            'roles' => ['@'],
+                        ],
+                    ],
+                ],
                 'verbs' => [
                     'class' => VerbFilter::className(),
                     'actions' => [
@@ -66,11 +98,59 @@ class OutsourceController extends Controller
      */
     public function actionCreate()
     {
+        $dataProvinsi = MasterProvinsi::find()
+            ->select(['name'])
+            ->where(['status' => 1])
+            ->indexBy('id')
+            ->column();
+        
+        $success = true;
+        $message = '';
         $model = new MasterPerson();
-
         if ($this->request->isPost) {
-            if ($model->load($this->request->post()) && $model->save()) {
-                return $this->redirect(['view', 'code' => $model->code]);
+            if ($model->load($this->request->post())) {
+                $connection = \Yii::$app->db;
+			    $transaction = $connection->beginTransaction();
+                try {
+                    $model->code = $model->generateCode();
+                    $model->type_user = \Yii::$app->params['TYPE_OUTSOURCE'];
+                    $model->phone_1 = str_replace('-', '', $model->phone_1);
+                    if(!empty($model->phone_2)){
+                        $model->phone_2 = str_replace('-', '', $model->phone_2);
+                    }
+                    if(!$model->save()){
+                        $success = false;
+                        $message = (count($model->errors) > 0) ? 'ERROR CREATE OUTSOURCE: ' : '';
+                        foreach($model->errors as $error => $value){
+                            $message .= $value[0].', ';
+                        }
+                        $message = substr($message, 0, -2);
+                    }
+                    if($success){
+                        $transaction->commit();
+                        $message = 'CREATE OUTSOURCE: '.$model->name;
+                        $logs =	[
+                            'type' => Logs::TYPE_USER,
+                            'description' => $message,
+                        ];
+                        Logs::addLog($logs);
+    
+                        \Yii::$app->session->setFlash('success', $message);
+                        return $this->redirect(['view', 'code' => $model->code]);
+                    }else{
+                        $transaction->rollBack();
+                    }
+                }catch(\Exception $e) {
+                    $success = false;
+                    $message = $e->getMessage();
+				    $transaction->rollBack();
+                }
+                $logs =	[
+                    'type' => Logs::TYPE_USER,
+                    'description' => $message,
+                ];
+                Logs::addLog($logs);
+                \Yii::$app->session->setFlash('error', $message);
             }
         } else {
             $model->loadDefaultValues();
@@ -78,6 +158,7 @@ class OutsourceController extends Controller
 
         return $this->render('create', [
             'model' => $model,
+            'dataProvinsi' => $dataProvinsi,
         ]);
     }
 
@@ -90,14 +171,61 @@ class OutsourceController extends Controller
      */
     public function actionUpdate($code)
     {
+        $dataProvinsi = MasterProvinsi::find()
+            ->select(['name'])
+            ->where(['status' => 1])
+            ->indexBy('id')
+            ->column();
+        
+        $success = true;
+        $message = '';
         $model = $this->findModel($code);
+        if ($this->request->isPost && $model->load($this->request->post())) {
+            $connection = \Yii::$app->db;
+            $transaction = $connection->beginTransaction();
+            try {
+                $model->phone_1 = str_replace('-', '', $model->phone_1);
+                if(!empty($model->phone_2)){
+                    $model->phone_2 = str_replace('-', '', $model->phone_2);
+                }
+                if(!$model->save()){
+                    $success = false;
+                    $message = (count($model->errors) > 0) ? 'ERROR UPDATE OUTSOURCE: ' : '';
+                    foreach($model->errors as $error => $value){
+                        $message .= $value[0].', ';
+                    }
+                    $message = substr($message, 0, -2);
+                }
+                if($success){
+                    $transaction->commit();
+                    $message = 'UPDATE OUTSOURCE: '.$model->name;
+                    $logs =	[
+                        'type' => Logs::TYPE_USER,
+                        'description' => $message,
+                    ];
+                    Logs::addLog($logs);
 
-        if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'code' => $model->code]);
+                    \Yii::$app->session->setFlash('success', $message);
+                    return $this->redirect(['view', 'code' => $model->code]);
+                }else{
+                    $transaction->rollBack();
+                }
+            }catch(\Exception $e) {
+                $success = false;
+                $message = $e->getMessage();
+                $transaction->rollBack();
+            }
+            $logs =	[
+                'type' => Logs::TYPE_USER,
+                'description' => $message,
+            ];
+            Logs::addLog($logs);
+            \Yii::$app->session->setFlash('error', $message);
         }
 
         return $this->render('update', [
             'model' => $model,
+            'dataProvinsi' => $dataProvinsi,
         ]);
     }
 
@@ -110,8 +238,48 @@ class OutsourceController extends Controller
      */
     public function actionDelete($code)
     {
-        $this->findModel($code)->delete();
+        $success = true;
+		$message = '';
+        $model = $this->findModel($code);
+        if(isset($model)){
+            $connection = \Yii::$app->db;
+			$transaction = $connection->beginTransaction();
+            try{
+                $model->status = 0;
+                if(!$model->save()){
+                    $success = false;
+                    $message = (count($model->errors) > 0) ? 'ERROR DELETE OUTSOURCE: ' : '';
+                    foreach($model->errors as $error => $value){
+                        $message .= $value[0].', ';
+                    }
+                    $message = substr($message, 0, -2);
+                }
 
+                if($success){
+                    $transaction->commit();
+                    $message = 'DELETE OUTSOURCE:'. $model->name;
+                    $logs =	[
+                        'type' => Logs::TYPE_USER,
+                        'description' => $message,
+                    ];
+                    Logs::addLog($logs);
+                    \Yii::$app->session->setFlash('success', $message);
+                }else{
+                    $transaction->rollBack();
+                    \Yii::$app->session->setFlash('error', $message);
+                }
+            }catch(\Exception $e){
+				$success = false;
+				$message = $e->getMessage();
+				$transaction->rollBack();
+                \Yii::$app->session->setFlash('error', $message);
+            }
+            $logs =	[
+                'type' => Logs::TYPE_USER,
+                'description' => $message,
+            ];
+            Logs::addLog($logs);
+        }
         return $this->redirect(['index']);
     }
 
@@ -124,10 +292,49 @@ class OutsourceController extends Controller
      */
     protected function findModel($code)
     {
-        if (($model = MasterPerson::findOne($id)) !== null) {
+        if (($model = MasterPerson::findOne($code)) !== null) {
             return $model;
         }
 
+        throw new NotFoundHttpException('The requested page does not exist.');
+    }
+
+    public function actionListKabupaten($provinsiId)
+    {
+        if(isset($provinsiId)){
+            $model = MasterKabupaten::find()
+                ->select(['id', 'name'])
+                ->where(['provinsi_id'=>$provinsiId, 'status'=>1])
+                ->asArray()
+                ->all();
+            return json_encode($model);
+        }
+        throw new NotFoundHttpException('The requested page does not exist.');
+    }
+
+    public function actionListKecamatan($kecamatanId)
+    {
+        if(isset($kecamatanId)){
+            $model = MasterKecamatan::find()
+                ->select(['id', 'name'])
+                ->where(['kabupaten_id'=>$kecamatanId, 'status'=>1])
+                ->asArray()
+                ->all();
+            return json_encode($model);
+        }
+        throw new NotFoundHttpException('The requested page does not exist.');
+    }
+
+    public function actionListKelurahan($kelurahanId)
+    {
+        if(isset($kelurahanId)){
+            $model = MasterKelurahan::find()
+                ->select(['id', 'name'])
+                ->where(['kecamatan_id'=>$kelurahanId, 'status'=>1])
+                ->asArray()
+                ->all();
+            return json_encode($model);
+        }
         throw new NotFoundHttpException('The requested page does not exist.');
     }
 }

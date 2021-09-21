@@ -327,14 +327,14 @@ class MenuController extends Controller
         if(!empty($_POST['parent'])){
             $model = PengaturanMenu::find()
                 ->select(['code', 'name'])
-                ->where(['level'=>$_POST['level'], 'parent_code'=>$_POST['parent']])
+                ->where(['level'=>$_POST['level'], 'parent_code'=>$_POST['parent'], 'status'=>1])
                 ->orderBy(['code'=>SORT_ASC])
                 ->asArray()
                 ->all();
         }else{
             $model = PengaturanMenu::find()
                 ->select(['code', 'name'])
-                ->where(['level'=>$_POST['level'], 'type_code'=>$_POST['position']])
+                ->where(['level'=>$_POST['level'], 'type_code'=>$_POST['position'], 'status'=>1])
                 ->orderBy(['code'=>SORT_ASC])
                 ->asArray()
                 ->all();

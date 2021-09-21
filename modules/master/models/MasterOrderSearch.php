@@ -4,12 +4,12 @@ namespace app\modules\master\models;
 
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use app\modules\master\models\MasterPerson;
+use app\modules\master\models\MasterOrder;
 
 /**
- * MasterOutsourceSearch represents the model behind the search form of `app\modules\master\models\MasterPerson`.
+ * MasterOrderSearch represents the model behind the search form of `app\modules\master\models\MasterOrder`.
  */
-class MasterOutsourceSearch extends MasterPerson
+class MasterOrderSearch extends MasterOrder
 {
     /**
      * {@inheritdoc}
@@ -17,7 +17,8 @@ class MasterOutsourceSearch extends MasterPerson
     public function rules()
     {
         return [
-            [[ 'name', 'address', 'phone_1', 'created_at', 'updated_at'], 'safe'],
+            [['code', 'name', 'keterangan'], 'safe'],
+            [['status', 'created_at', 'updated_at'], 'integer'],
         ];
     }
 
@@ -39,7 +40,7 @@ class MasterOutsourceSearch extends MasterPerson
      */
     public function search($params)
     {
-        $query = MasterPerson::find();
+        $query = MasterOrder::find();
 
         // add conditions that should always apply here
 
@@ -56,22 +57,16 @@ class MasterOutsourceSearch extends MasterPerson
         }
 
         // grid filtering conditions
-        $query->where(['type_user' => \Yii::$app->params['TYPE_OUTSOURCE'], 'status'=>1]);
-        if(!empty($this->created_at)){
-            $t1 = strtotime($this->created_at);
-			$t2 = strtotime("+1 days", $t1);
-			$query->andWhere('created_at >='.$t1.' and created_at <'.$t2);
-        }
-        if(!empty($this->updated_at)){
-            $t1 = strtotime($this->updated_at);
-			$t2 = strtotime("+1 days", $t1);
-			$query->andWhere('updated_at >='.$t1.' and updated_at <'.$t2);
-        }
+        $query->andFilterWhere([
+            'status' => $this->status,
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
+        ]);
 
-        $query->andFilterWhere(['like', 'name', $this->name])
-            ->andFilterWhere(['like', 'phone_1', $this->phone_1])
-            ->andFilterWhere(['like', 'address', $this->address]);
-            
+        $query->andFilterWhere(['like', 'code', $this->code])
+            ->andFilterWhere(['like', 'name', $this->name])
+            ->andFilterWhere(['like', 'keterangan', $this->keterangan]);
+
         return $dataProvider;
     }
 }

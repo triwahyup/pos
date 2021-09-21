@@ -4,14 +4,14 @@ use yii\helpers\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model app\modules\master\models\MasterPerson */
+/* @var $model app\modules\master\models\MasterOrder */
 
 $this->title = $model->name;
-$this->params['breadcrumbs'][] = ['label' => 'Data Outsourcing', 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => 'Data Order', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
 ?>
-<div class="master-person-view">
+<div class="master-order-view">
     <p class="text-right">
         <?= Html::a('<i class="fontello icon-plus"></i><span>Create</span>', ['create'], ['class' => 'btn btn-success btn-flat btn-sm']) ?>
         <?= Html::a('<i class="fontello icon-pencil"></i><span>Update</span>', ['update', 'code' => $model->code], ['class' => 'btn btn-warning btn-flat btn-sm']) ?>
@@ -28,38 +28,9 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= DetailView::widget([
             'model' => $model,
             'attributes' => [
+                'code',
                 'name',
-                'address',
-                [
-                    'attribute' => 'provinsi_id',
-                    'value'=> function ($model, $index) { 
-                        return (isset($model->provinsi)) ? $model->provinsi->name : '-';
-                    }
-                ],
-                [
-                    'attribute' => 'kabupaten_id',
-                    'value'=> function ($model, $index) { 
-                        return (isset($model->kabupaten)) ? $model->kabupaten->name : '-';
-                    }
-                ],
-                [
-                    'attribute' => 'kecamatan_id',
-                    'value'=> function ($model, $index) { 
-                        return (isset($model->kecamatan)) ? $model->kecamatan->name : '-';
-                    }
-                ],
-                [
-                    'attribute' => 'kelurahan_id',
-                    'value'=> function ($model, $index) { 
-                        return (isset($model->kelurahan)) ? $model->kelurahan->name : '-';
-                    }
-                ],
-                'kode_pos',
-                'phone_1',
-                'phone_2',
-                'email:email',
-                'fax',
-                'keterangan:ntext',
+                'keterangan',
                 [
                     'attribute' => 'status',
                     'value'=> function ($model, $index) { 

@@ -12,8 +12,8 @@ use yii\widgets\MaskedInput;
 
 <div class="master-person-form">
     <?php $form = ActiveForm::begin(); ?>
-    <fieldset class="fieldset-box">
-        <legend>Detail Alamat</legend>
+        <fieldset class="fieldset-box">
+            <legend>Detail Alamat</legend>
             <div class="margin-bottom-20 full-width"></div>
             <div class="col-lg-12 col-md-12 col-xs-12">
                 <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
