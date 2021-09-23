@@ -34,3 +34,6 @@ tests/_support/_generated
 
 #env
 .env
+
+#web
+/web/assets

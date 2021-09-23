@@ -144,7 +144,7 @@ class ProfileController extends Controller
                 }
                 if($success){
                     $transaction->commit();
-                    $message = 'UPDATE DATA USER: '.$model->name;
+                    $message = '['.$model->user_id.'] SUCCESS UPDATE USER.';
                     $logs =	[
                         'type' => Logs::TYPE_USER,
                         'description' => $message,

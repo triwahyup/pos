@@ -123,7 +123,7 @@ class KodeController extends Controller
 
                     if($success){
                         $transaction->commit();
-                        $message = 'CREATE KODE: '.$model->code.':'.$model->name;
+                        $message = '['.$model->code.'] SUCCESS CREATE KODE.';
                         $logs =	[
                             'type' => Logs::TYPE_USER,
                             'description' => $message,
@@ -182,7 +182,7 @@ class KodeController extends Controller
 
                 if($success){
                     $transaction->commit();
-                    $message = 'UPDATE KODE: '.$model->code.':'.$model->name;
+                    $message = '['.$model->code.'] SUCCESS UPDATE KODE.';
                     $logs =	[
                         'type' => Logs::TYPE_USER,
                         'description' => $message,
@@ -240,12 +240,7 @@ class KodeController extends Controller
 
                 if($success){
                     $transaction->commit();
-                    $message = 'DELETE KODE: '. $model->name;
-                    $logs =	[
-                        'type' => Logs::TYPE_USER,
-                        'description' => $message,
-                    ];
-                    Logs::addLog($logs);
+                    $message = '['.$model->code.'] SUCCESS DELETE KODE.';
                     \Yii::$app->session->setFlash('success', $message);
                 }else{
                     $transaction->rollBack();

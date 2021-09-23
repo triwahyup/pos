@@ -111,7 +111,7 @@ class InvoiceOrderController extends Controller
                             $model->total_ppn = $total_ppn;
                             if($model->save()){
                                 $transaction->commit();
-                                $message = 'UPDATE INVOICE ORDER: '.$model->no_invoice;
+                                $message = '['.$model->no_invoice.'] SUCCESS UPDATE INVOICE ORDER.';
                                 $logs =	[
                                     'type' => Logs::TYPE_USER,
                                     'description' => $message,
@@ -240,7 +240,7 @@ class InvoiceOrderController extends Controller
                     }
 
                     if($success){
-                        $message = 'TERIMA INVOICE ORDER: '.$model->no_invoice.' SUCCESS';
+                        $message = '['.$model->no_invoice.'] SUCCESS TERIMA INVOICE ORDER.';
                         $transaction->commit();
                         $logs =	[
                             'type' => Logs::TYPE_USER,

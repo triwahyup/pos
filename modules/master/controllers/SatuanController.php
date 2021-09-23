@@ -121,7 +121,7 @@ class SatuanController extends Controller
 
                     if($success){
                         $transaction->commit();
-                        $message = 'CREATE DATA SATUAN: '.$model->name;
+                        $message = '['.$model->code.'] SUCCESS CREATE SATUAN.';
                         $logs =	[
                             'type' => Logs::TYPE_USER,
                             'description' => $message,
@@ -188,7 +188,7 @@ class SatuanController extends Controller
 
                 if($success){
                     $transaction->commit();
-                    $message = 'UPDATE DATA SATUAN: '.$model->name;
+                    $message = '['.$model->code.'] SUCCESS UPDATE SATUAN.';
                     $logs =	[
                         'type' => Logs::TYPE_USER,
                         'description' => $message,
@@ -247,12 +247,7 @@ class SatuanController extends Controller
 
                 if($success){
                     $transaction->commit();
-                    $message = 'DELETE DATA SATUAN:'. $model->name;
-                    $logs =	[
-                        'type' => Logs::TYPE_USER,
-                        'description' => $message,
-                    ];
-                    Logs::addLog($logs);
+                    $message = '['.$model->code.'] SUCCESS DELETE SATUAN.';
                     \Yii::$app->session->setFlash('success', $message);
                 }else{
                     $transaction->rollBack();

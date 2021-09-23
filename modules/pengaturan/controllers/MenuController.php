@@ -140,7 +140,7 @@ class MenuController extends Controller
 
                     if($success){
                         $transaction->commit();
-                        $message = 'CREATE MENU: '.$model->name.', SLUG: '.$model->slug;
+                        $message = '['.$model->code.'] SUCCESS CREATE MENU: '.$model->name.', SLUG: '.$model->slug;
                         $logs =	[
                             'type' => Logs::TYPE_USER,
                             'description' => $message,
@@ -221,7 +221,7 @@ class MenuController extends Controller
 
                 if($success){
                     $transaction->commit();
-                    $message = 'UPDATE MENU: '.$model->name.', SLUG: '.$model->slug;
+                    $message = '['.$model->code.'] SUCCESS UPDATE MENU: '.$model->name.', SLUG: '.$model->slug;
                     $logs =	[
                         'type' => Logs::TYPE_USER,
                         'description' => $message,
@@ -280,12 +280,7 @@ class MenuController extends Controller
 
                 if($success){
                     $transaction->commit();
-                    $message = 'DELETE MENU: '.$model->name;
-                    $logs =	[
-                        'type' => Logs::TYPE_USER,
-                        'description' => $message,
-                    ];
-                    Logs::addLog($logs);
+                    $message = '['.$model->code.'] SUCCESS DELETE MENU.';
                     \Yii::$app->session->setFlash('success', $message);
                 }else{
                     $transaction->rollBack();

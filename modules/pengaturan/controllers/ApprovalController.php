@@ -139,7 +139,7 @@ class ApprovalController extends Controller
                     if($success){
                         $this->emptyTemp();
                         $transaction->commit();
-                        $message = 'CREATE PENGATURAN APPROVAL: '.$model->name;
+                        $message = '['.$model->code.'] SUCCESS CREATE PENGATURAN APPROVAL.';
                         $logs =	[
                             'type' => Logs::TYPE_USER,
                             'description' => $message,
@@ -223,7 +223,7 @@ class ApprovalController extends Controller
                     if($success){
                         $this->emptyTemp();
                         $transaction->commit();
-                        $message = 'UPDATE PENGATURAN APPROVAL: '.$model->name;
+                        $message = '['.$model->code.'] SUCCESS UPDATE PENGATURAN APPROVAL.';
                         $logs =	[
                             'type' => Logs::TYPE_USER,
                             'description' => $message,
@@ -309,12 +309,7 @@ class ApprovalController extends Controller
 
                 if($success){
                     $transaction->commit();
-                    $message = 'DELETE PENGATURAN APPROVAL: '.$model->name;
-                    $logs =	[
-                        'type' => Logs::TYPE_USER,
-                        'description' => $message,
-                    ];
-                    Logs::addLog($logs);
+                    $message = '['.$model->code.'] SUCCESS DELETE PENGATURAN APPROVAL.';
                     \Yii::$app->session->setFlash('success', $message);
                 }else{
                     $transaction->rollBack();

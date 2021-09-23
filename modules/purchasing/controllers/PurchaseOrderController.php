@@ -185,7 +185,7 @@ class PurchaseOrderController extends Controller
                     if($success){
                         $this->emptyTemp();
                         $transaction->commit();
-                        $message = 'CREATE PO: '.$model->no_po;
+                        $message = '['.$model->no_po.'] SUCCESS CREATE PO.';
                         $logs =	[
                             'type' => Logs::TYPE_USER,
                             'description' => $message,
@@ -281,7 +281,7 @@ class PurchaseOrderController extends Controller
                     if($success){
                         $this->emptyTemp();
                         $transaction->commit();
-                        $message = 'UPDATE PO: '.$model->no_po;
+                        $message = '['.$model->no_po.'] SUCCESS UPDATE PO.';
                         $logs =	[
                             'type' => Logs::TYPE_USER,
                             'description' => $message,
@@ -386,12 +386,7 @@ class PurchaseOrderController extends Controller
         
                         if($success){
                             $transaction->commit();
-                            $message = 'DELETE PO: '.$model->no_po;
-                            $logs =	[
-                                'type' => Logs::TYPE_USER,
-                                'description' => $message,
-                            ];
-                            Logs::addLog($logs);
+                            $message = '['.$model->no_po.'] SUCCESS DELETE PO.';
                             \Yii::$app->session->setFlash('success', $message);
                         }else{
                             $transaction->rollBack();
@@ -628,7 +623,7 @@ class PurchaseOrderController extends Controller
                 if($success){
                     $mailapproval = json_decode($this->mailapproval($model->no_po));
                     if($mailapproval->success){
-                        $message = 'PURCHASE ORDER: SEND APPROVAL '.$model->no_po.' SUCCESS';
+                        $message = '['.$model->no_po.'] SUCCESS SEND APPROVAL PO.';
                         $transaction->commit();
                         \Yii::$app->session->setFlash('success', $message);
                     }else{
@@ -695,7 +690,7 @@ class PurchaseOrderController extends Controller
                                     }
                                     if($is_akhir){
                                         $transaction->commit();
-                                        $message = 'APPROVE PO: '. $approval->no_po .' SUCCESS.';
+                                        $message = '['.$model->no_po.'] SUCCESS APPROVE PO.';
                                         \Yii::$app->session->setFlash('success', $message);
                                         return $this->redirect(['view', 'no_po' => $model->no_po]);
                                     }else{
@@ -738,7 +733,7 @@ class PurchaseOrderController extends Controller
                                     $mailakhir = json_decode($this->mailapproval_akhir($model->no_po, $approval->comment));
                                     if($mailakhir->success){
                                         $transaction->commit();
-                                        $message = 'REJECT PO: '. $approval->no_po;
+                                        $message = '['.$model->no_po.'] SUCCESS REJECT PO.';
                                         \Yii::$app->session->setFlash('success', $message);
                                         return $this->redirect(['view', 'no_po' => $model->no_po]);
                                     }else{
@@ -1015,7 +1010,7 @@ class PurchaseOrderController extends Controller
                 }
 
                 if($success){
-                    $message = 'POST PO TO INVOICE ORDER: '.$model->no_po.' SUCCESS';
+                    $message = '['.$model->no_po.'] SUCCESS POST PO TO INVOICE ORDER.';
                     $transaction->commit();
                     $logs =	[
                         'type' => Logs::TYPE_USER,

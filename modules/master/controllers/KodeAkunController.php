@@ -134,7 +134,7 @@ class KodeAkunController extends Controller
                     if($success){
                         $this->emptyTemp();
                         $transaction->commit();
-                        $message = 'CREATE AKUN: '.$model->name;
+                        $message = '['.$model->code.'] SUCCESS CREATE AKUN.';
                         $logs =	[
                             'type' => Logs::TYPE_USER,
                             'description' => $message,
@@ -217,7 +217,7 @@ class KodeAkunController extends Controller
                     if($success){
                         $this->emptyTemp();
                         $transaction->commit();
-                        $message = 'UPDATE AKUN: '.$model->name;
+                        $message = '['.$model->code.'] SUCCESS UPDATE AKUN.';
                         $logs =	[
                             'type' => Logs::TYPE_USER,
                             'description' => $message,
@@ -303,12 +303,7 @@ class KodeAkunController extends Controller
 
                 if($success){
                     $transaction->commit();
-                    $message = 'DELETE AKUN: '.$model->name;
-                    $logs =	[
-                        'type' => Logs::TYPE_USER,
-                        'description' => $message,
-                    ];
-                    Logs::addLog($logs);
+                    $message = '['.$model->code.'] SUCCESS DELETE AKUN.';
                     \Yii::$app->session->setFlash('success', $message);
                 }else{
                     $transaction->rollBack();

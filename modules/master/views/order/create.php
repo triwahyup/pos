@@ -12,5 +12,6 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="master-order-create">
     <?= $this->render('_form', [
         'model' => $model,
+        'temp' => $temp,
     ]) ?>
 </div>

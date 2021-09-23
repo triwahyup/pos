@@ -2,10 +2,16 @@
 
 namespace app\modules\master\controllers;
 
+use app\models\Logs;
+use app\models\User;
+use app\modules\master\models\MasterMaterialItem;
 use app\modules\master\models\MasterOrder;
+use app\modules\master\models\MasterOrderDetail;
+use app\modules\master\models\TempMasterOrderDetail;
 use app\modules\master\models\MasterOrderSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
+use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 
 /**
@@ -21,6 +27,31 @@ class OrderController extends Controller
         return array_merge(
             parent::behaviors(),
             [
+                'access' => [
+                    'class' => AccessControl::className(),
+				    'rules' => [
+                        [
+                            'actions' => ['create', 'create-temp'],
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-order')),
+                            'roles' => ['@'],
+                        ],
+                        [
+                            'actions' => ['index', 'view', 'list-item', 'temp', 'get-temp'],
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-order')),
+                            'roles' => ['@'],
+                        ], 
+                        [
+                            'actions' => ['update', 'update-temp'],
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-order')),
+                            'roles' => ['@'],
+                        ], 
+                        [
+                            'actions' => ['delete', 'delete-temp'],
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-order')),
+                            'roles' => ['@'],
+                        ],
+                    ],
+                ],
                 'verbs' => [
                     'class' => VerbFilter::className(),
                     'actions' => [
@@ -66,18 +97,78 @@ class OrderController extends Controller
      */
     public function actionCreate()
     {
+        $success = true;
+        $message = '';
         $model = new MasterOrder();
-
+        $temp = new TempMasterOrderDetail();
         if ($this->request->isPost) {
-            if ($model->load($this->request->post()) && $model->save()) {
-                return $this->redirect(['view', 'code' => $model->code]);
+            if ($model->load($this->request->post())) {
+                $connection = \Yii::$app->db;
+			    $transaction = $connection->beginTransaction();
+                try{
+                    $model->code = $model->generateCode();
+                    if($model->save()){
+                        if(count($model->temps) > 0){
+                            foreach($model->temps as $temp){
+                                $detail = new MasterOrderDetail();
+                                $detail->attributes = $temp->attributes;
+                                if(!$detail->save()){
+                                    $success = false;
+                                    $message = (count($detail->errors) > 0) ? 'ERROR CREATE DATA ORDER DETAIL: ' : '';
+                                    foreach($detail->errors as $error => $value){
+                                        $message .= strtoupper($value[0].', ');
+                                    }
+                                    $message = substr($message, 0, -2);
+                                }
+                            }
+                        }else{
+                            $success = false;
+                            $message = 'ERROR CREATE DATA ORDER: DETAIL IS EMPTY.';
+                        }
+                    }else{
+                        $success = false;
+                        $message = (count($model->errors) > 0) ? 'ERROR CREATE DATA ORDER: ' : '';
+                        foreach($model->errors as $error => $value){
+                            $message .= $value[0].', ';
+                        }
+                        $message = substr($message, 0, -2);
+                    }
+
+                    if($success){
+                        $this->emptyTemp();
+                        $transaction->commit();
+                        $message = 'CREATE DATA ORDER: '.$model->name;
+                        $logs =	[
+                            'type' => Logs::TYPE_USER,
+                            'description' => $message,
+                        ];
+                        Logs::addLog($logs);
+
+                        \Yii::$app->session->setFlash('success', $message);
+                        return $this->redirect(['view', 'code' => $model->code]);
+                    }else{
+                        $transaction->rollBack();
+                    }
+                }catch(\Exception $e){
+                    $success = false;
+                    $message = $e->getMessage();
+				    $transaction->rollBack();
+                }
+                $logs =	[
+                    'type' => Logs::TYPE_USER,
+                    'description' => $message,
+                ];
+                Logs::addLog($logs);
+                \Yii::$app->session->setFlash('error', $message);
             }
         } else {
             $model->loadDefaultValues();
+            $this->emptyTemp();
         }
 
         return $this->render('create', [
             'model' => $model,
+            'temp' => $temp,
         ]);
     }
 
@@ -90,14 +181,91 @@ class OrderController extends Controller
      */
     public function actionUpdate($code)
     {
+        $success = true;
+        $message = '';
         $model = $this->findModel($code);
+        $temp = new TempMasterOrderDetail();
+        if ($this->request->isPost) {
+            if ($model->load($this->request->post())){
+                $connection = \Yii::$app->db;
+                $transaction = $connection->beginTransaction();
+                try{
+                    if($model->save()){
+                        if(count($model->temps) > 0){
+                            foreach($model->details as $empty)
+                                $empty->delete();
+                            foreach($model->temps as $temp){
+                                $detail = new MasterOrderDetail();
+                                $detail->attributes = $temp->attributes;
+                                if(!$detail->save()){
+                                    $success = false;
+                                    $message = (count($detail->errors) > 0) ? 'ERROR UPDATE DATA ORDER DETAIL: ' : '';
+                                    foreach($detail->errors as $error => $value){
+                                        $message .= strtoupper($value[0].', ');
+                                    }
+                                    $message = substr($message, 0, -2);
+                                }
+                            }
+                        }else{
+                            $success = false;
+                            $message = 'ERROR UPDATE DATA ORDER: DETAIL IS EMPTY.';
+                        }
+                    }else{
+                        $success = false;
+                        $message = (count($model->errors) > 0) ? 'ERROR UPDATE DATA ORDER: ' : '';
+                        foreach($model->errors as $error => $value){
+                            $message .= $value[0].', ';
+                        }
+                        $message = substr($message, 0, -2);
+                    }
 
-        if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'code' => $model->code]);
+                    if($success){
+                        $this->emptyTemp();
+                        $transaction->commit();
+                        $message = 'UPDATE DATA ORDER: '.$model->name;
+                        $logs =	[
+                            'type' => Logs::TYPE_USER,
+                            'description' => $message,
+                        ];
+                        Logs::addLog($logs);
+
+                        \Yii::$app->session->setFlash('success', $message);
+                        return $this->redirect(['view', 'code' => $model->code]);
+                    }else{
+                        $transaction->rollBack();
+                    }
+                }catch(\Exception $e){
+                    $success = false;
+                    $message = $e->getMessage();
+                    $transaction->rollBack();
+                }
+                $logs =	[
+                    'type' => Logs::TYPE_USER,
+                    'description' => $message,
+                ];
+                Logs::addLog($logs);
+                \Yii::$app->session->setFlash('error', $message);
+            }
+        }else{
+            $this->emptyTemp();
+            foreach($model->details as $detail){
+                $temp = new TempMasterOrderDetail();
+                $temp->attributes = $detail->attributes;
+                $temp->user_id = \Yii::$app->user->id;
+                if(!$temp->save()){
+                    $message = (count($temp->errors) > 0) ? 'ERROR LOAD DATA ORDER DETAIL: ' : '';
+                    foreach($temp->errors as $error => $value){
+                        $message .= strtoupper($value[0].', ');
+                    }
+                    $message = substr($message, 0, -2);
+                    \Yii::$app->session->setFlash('error', $message);
+                }
+            }
         }
 
         return $this->render('update', [
             'model' => $model,
+            'temp' => $temp,
         ]);
     }
 
@@ -110,8 +278,60 @@ class OrderController extends Controller
      */
     public function actionDelete($code)
     {
-        $this->findModel($code)->delete();
+        $success = true;
+		$message = '';
+        $model = $this->findModel($code);
+        if(isset($model)){
+            $connection = \Yii::$app->db;
+			$transaction = $connection->beginTransaction();
+            try{
+                $model->status = 0;
+                if($model->save()){
+                    foreach($model->details as $detail){
+                        $detail->status = 0;
+                        if(!$detail->save()){
+                            $success = false;
+                            $message = (count($detail->errors) > 0) ? 'ERROR DELETE DETAIL DATA ORDER: ' : '';
+                            foreach($detail->errors as $error => $value){
+                                $message .= $value[0].', ';
+                            }
+                            $message = substr($message, 0, -2);
+                        }
+                    }
+                }else{
+                    $success = false;
+                    $message = (count($model->errors) > 0) ? 'ERROR DELETE DATA ORDER: ' : '';
+                    foreach($model->errors as $error => $value){
+                        $message .= $value[0].', ';
+                    }
+                    $message = substr($message, 0, -2);
+                }
 
+                if($success){
+                    $transaction->commit();
+                    $message = 'DELETE DATA ORDER: '.$model->name;
+                    $logs =	[
+                        'type' => Logs::TYPE_USER,
+                        'description' => $message,
+                    ];
+                    Logs::addLog($logs);
+                    \Yii::$app->session->setFlash('success', $message);
+                }else{
+                    $transaction->rollBack();
+                    \Yii::$app->session->setFlash('error', $message);
+                }
+            }catch(\Exception $e){
+				$success = false;
+				$message = $e->getMessage();
+				$transaction->rollBack();
+                \Yii::$app->session->setFlash('error', $message);
+            }
+            $logs =	[
+                'type' => Logs::TYPE_USER,
+                'description' => $message,
+            ];
+            Logs::addLog($logs);
+        }
         return $this->redirect(['index']);
     }
 
@@ -124,10 +344,116 @@ class OrderController extends Controller
      */
     protected function findModel($code)
     {
-        if (($model = MasterOrder::findOne($id)) !== null) {
+        if (($model = MasterOrder::findOne($code)) !== null) {
             return $model;
         }
 
         throw new NotFoundHttpException('The requested page does not exist.');
+    }
+
+    public function actionListItem($q)
+    {
+        $model = MasterMaterialItem::find()
+            ->alias('a')
+            ->select(['concat(a.code, "-", a.name) as text', 'a.code id', 'b.name as satuan', 'harga_beli', 'harga_jual'])
+            ->leftJoin('master_satuan b', 'b.code = a.satuan_code')
+            ->where(['a.status'=>1])
+            ->andWhere('a.code LIKE "%'.$q.'%" OR a.name LIKE "%'.$q.'%"')
+            ->limit(6)
+            ->asArray()
+            ->all();
+        return json_encode(['results'=>$model]);
+    }
+
+    public function actionTemp()
+    {
+        $temps = TempMasterOrderDetail::findAll(['user_id'=> \Yii::$app->user->id]);
+        foreach($temps as $temp){
+            $total_order += $temp->total_order;
+        }
+        $model =  $this->renderAjax('_temp', [
+            'temps'=>$temps,
+        ]);
+        return json_encode(['model'=>$model]);
+    }
+
+    public function actionGetTemp($id)
+    {
+        $temp = TempMasterOrderDetail::find()->where(['id'=>$id])->asArray()->one();
+        return json_encode($temp);
+    }
+
+    public function actionCreateTemp()
+    {
+        $request = \Yii::$app->request;
+        $success = true;
+        $message = '';
+        if($request->isPost){
+
+        }else{
+            throw new NotFoundHttpException('The requested data does not exist.');
+        }
+        return json_encode(['success'=>$success, 'message'=>$message]);
+    }
+
+    public function actionUpdateTemp()
+    {
+        $request = \Yii::$app->request;
+        $success = true;
+        $message = '';
+        if($request->isPost){
+
+        }else{
+            throw new NotFoundHttpException('The requested data does not exist.');
+        }
+        return json_encode(['success'=>$success, 'message'=>$message]);
+    }
+
+    public function actionDeleteTemp($id)
+    {
+        $success = true;
+        $message = '';
+        $temp = $this->findTemp($id);
+        if(isset($temp)){
+            if($temp->delete()){
+                foreach($temp->tmps as $index=>$val){
+                    $val->urutan = $index +1;
+                    if(!$val->save()){
+                        $success = false;
+                        foreach($val->errors as $error => $value){
+                            $message .= strtoupper($value[0].', ');
+                        }
+                        $message = substr($message, 0, -2);
+                    }
+                }
+                $message = 'DELETE TEMP SUCCESSFULLY';
+            }else{
+                $success = false;
+                foreach($temp->errors as $error => $value){
+                    $message = $value[0].', ';
+                }
+                $message = substr($message, 0, -2);
+            }
+        }
+        return json_encode(['success'=>$success, 'message'=>$message]);
+    }
+
+    protected function findTemp($id)
+    {
+        $temp = TempMasterOrderDetail::findOne(['id'=>$id, 'user_id'=>\Yii::$app->user->id]);
+        if(isset($temp)){
+            return $temp;
+        }
+        throw new NotFoundHttpException('The requested page does not exist.');
+    }
+
+    protected function emptyTemp()
+    {
+        TempMasterOrderDetail::deleteAll('user_id=:user_id', [':user_id'=>\Yii::$app->user->id]);
+        $temp = TempMasterOrderDetail::find()->all();
+        if(empty($temp)){
+            $connection = \Yii::$app->db;
+			$connection->createCommand('ALTER TABLE temp_master_order_detail AUTO_INCREMENT=1')->query();
+        }
     }
 }

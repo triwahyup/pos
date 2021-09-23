@@ -138,7 +138,7 @@ class MaterialItemController extends Controller
 
                     if($success){
                         $transaction->commit();
-                        $message = 'CREATE ITEM: '.$model->name;
+                        $message = '['.$model->code.'] SUCCESS CREATE ITEM.';
                         $logs =	[
                             'type' => Logs::TYPE_USER,
                             'description' => $message,
@@ -202,7 +202,7 @@ class MaterialItemController extends Controller
 
                 if($success){
                     $transaction->commit();
-                    $message = 'UPDATE ITEM: '.$model->name;
+                    $message = '['.$model->code.'] SUCCESS UPDATE ITEM.';
                     $logs =	[
                         'type' => Logs::TYPE_USER,
                         'description' => $message,
@@ -274,12 +274,7 @@ class MaterialItemController extends Controller
 
                 if($success){
                     $transaction->commit();
-                    $message = 'DELETE ITEM:'. $model->name;
-                    $logs =	[
-                        'type' => Logs::TYPE_USER,
-                        'description' => $message,
-                    ];
-                    Logs::addLog($logs);
+                    $message = '['.$model->code.'] SUCCESS DELETE ITEM.';
                     \Yii::$app->session->setFlash('success', $message);
                 }else{
                     $transaction->rollBack();

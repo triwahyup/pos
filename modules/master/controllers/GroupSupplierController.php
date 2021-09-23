@@ -114,7 +114,7 @@ class GroupSupplierController extends Controller
 
                     if($success){
                         $transaction->commit();
-                        $message = 'CREATE GROUP SUPPLIER: '.$model->name;
+                        $message = '['.$model->code.'] SUCCESS CREATE GROUP SUPPLIER.';
                         $logs =	[
                             'type' => Logs::TYPE_USER,
                             'description' => $message,
@@ -174,7 +174,7 @@ class GroupSupplierController extends Controller
 
                 if($success){
                     $transaction->commit();
-                    $message = 'UPDATE GROUP SUPPLIER: '.$model->name;
+                    $message = '['.$model->code.'] SUCCESS UPDATE GROUP SUPPLIER.';
                     $logs =	[
                         'type' => Logs::TYPE_USER,
                         'description' => $message,
@@ -232,12 +232,7 @@ class GroupSupplierController extends Controller
 
                 if($success){
                     $transaction->commit();
-                    $message = 'DELETE GROUP SUPPLIER:'. $model->name;
-                    $logs =	[
-                        'type' => Logs::TYPE_USER,
-                        'description' => $message,
-                    ];
-                    Logs::addLog($logs);
+                    $message = '['.$model->code.'] SUCCESS DELETE GROUP SUPPLIER.';
                     \Yii::$app->session->setFlash('success', $message);
                 }else{
                     $transaction->rollBack();

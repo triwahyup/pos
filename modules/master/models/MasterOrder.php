@@ -3,6 +3,9 @@
 namespace app\modules\master\models;
 
 use Yii;
+use app\modules\master\models\MasterOrderDetail;
+use app\modules\master\models\TempMasterOrderDetail;
+use yii\behaviors\TimestampBehavior;
 
 /**
  * This is the model class for table "master_order".
@@ -24,17 +27,25 @@ class MasterOrder extends \yii\db\ActiveRecord
         return 'master_order';
     }
 
+    public function behaviors()
+	{
+        return [
+            TimestampBehavior::className(),
+        ];
+    }
+
     /**
      * {@inheritdoc}
      */
     public function rules()
     {
         return [
-            [['code'], 'required'],
+            [['name'], 'required'],
             [['status', 'created_at', 'updated_at'], 'integer'],
             [['code'], 'string', 'max' => 3],
             [['name', 'keterangan'], 'string', 'max' => 128],
             [['code'], 'unique'],
+            [['status'], 'default', 'value' => 1],
         ];
     }
 
@@ -51,5 +62,26 @@ class MasterOrder extends \yii\db\ActiveRecord
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
         ];
+    }
+
+    public function generateCode()
+    {
+        $model = MasterOrder::find()->count();
+        $total=0;
+        if($model > 0){
+            $model = MasterOrder::find()->orderBy(['code'=>SORT_DESC])->one();
+            $total = (int)substr($model->code, 1);
+        }
+        return (string)sprintf('%03s', ($total+1));
+    }
+
+    public function getDetails()
+    {
+        return $this->hasMany(MasterOrderDetail::className(), ['order_code' => 'code']);
+    }
+
+    public function getTemps()
+    {
+        return $this->hasMany(TempMasterOrderDetail::className(), ['order_code' => 'code']);
     }
 }

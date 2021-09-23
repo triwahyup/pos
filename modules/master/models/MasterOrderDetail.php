@@ -3,6 +3,8 @@
 namespace app\modules\master\models;
 
 use Yii;
+use app\modules\master\models\MasterMaterialItem;
+use yii\behaviors\TimestampBehavior;
 
 /**
  * This is the model class for table "master_order_detail".
@@ -34,6 +36,13 @@ class MasterOrderDetail extends \yii\db\ActiveRecord
         return 'master_order_detail';
     }
 
+    public function behaviors()
+    {
+        return [
+            TimestampBehavior::className(),
+        ];
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -42,11 +51,12 @@ class MasterOrderDetail extends \yii\db\ActiveRecord
         return [
             [['order_code', 'urutan'], 'required'],
             [['urutan', 'potong', 'objek', 'mesin', 'jumlah_warna', 'lembar_ikat', 'status', 'created_at', 'updated_at'], 'integer'],
-            [['panjang', 'lebar', 'harga_jual', 'harga_cetak'], 'number'],
+            [['panjang', 'lebar', 'harga_jual', 'harga_cetak', 'harga_beli', 'min_order_ct', 'min_order_lb'], 'number'],
             [['order_code'], 'string', 'max' => 3],
             [['item_code'], 'string', 'max' => 7],
             [['satuan'], 'string', 'max' => 5],
             [['order_code', 'urutan'], 'unique', 'targetAttribute' => ['order_code', 'urutan']],
+            [['status'], 'default', 'value' => 1],
         ];
     }
 
@@ -73,5 +83,10 @@ class MasterOrderDetail extends \yii\db\ActiveRecord
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
         ];
+    }
+
+    public function getItem()
+    {
+        return $this->hasOne(MasterMaterialItem::className(), ['code' => 'item_code']);
     }
 }

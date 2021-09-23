@@ -13,5 +13,6 @@ $this->params['breadcrumbs'][] = 'Update';
 <div class="master-order-update">
     <?= $this->render('_form', [
         'model' => $model,
+        'temp' => $temp,
     ]) ?>
 </div>

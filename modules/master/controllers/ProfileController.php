@@ -224,7 +224,7 @@ class ProfileController extends Controller
 
                     if($success){
                         $transaction->commit();
-                        $message = 'CREATE DATA USER: '.$model->name;
+                        $message = '['.$model->user_id.'] SUCCESS CREATE USER.';
                         $logs =	[
                             'type' => Logs::TYPE_USER,
                             'description' => $message,
@@ -335,7 +335,7 @@ class ProfileController extends Controller
                 }
                 if($success){
                     $transaction->commit();
-                    $message = 'UPDATE DATA USER: '.$model->name;
+                    $message = '['.$model->user_id.'] SUCCESS UPDATE USER.';
                     $logs =	[
                         'type' => Logs::TYPE_USER,
                         'description' => $message,
@@ -408,12 +408,7 @@ class ProfileController extends Controller
                 if($success){
                     AuthAssignment::deleteAll('user_id=:user_id', [':user_id'=>$user_id]);
                     $transaction->commit();
-                    $message = 'DELETE DATA USER:'. $model->name;
-                    $logs =	[
-                        'type' => Logs::TYPE_USER,
-                        'description' => $message,
-                    ];
-                    Logs::addLog($logs);
+                    $message = '['.$model->user_id.'] SUCCESS DELETE USER.';
                     \Yii::$app->session->setFlash('success', $message);
                 }else{
                     $transaction->rollBack();

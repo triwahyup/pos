@@ -128,7 +128,7 @@ class OutsourceController extends Controller
                     }
                     if($success){
                         $transaction->commit();
-                        $message = 'CREATE OUTSOURCE: '.$model->name;
+                        $message = '['.$model->code.'] SUCCESS CREATE OUTSOURCE.';
                         $logs =	[
                             'type' => Logs::TYPE_USER,
                             'description' => $message,
@@ -198,7 +198,7 @@ class OutsourceController extends Controller
                 }
                 if($success){
                     $transaction->commit();
-                    $message = 'UPDATE OUTSOURCE: '.$model->name;
+                    $message = '['.$model->code.'] SUCCESS UPDATE OUTSOURCE.';
                     $logs =	[
                         'type' => Logs::TYPE_USER,
                         'description' => $message,
@@ -257,12 +257,7 @@ class OutsourceController extends Controller
 
                 if($success){
                     $transaction->commit();
-                    $message = 'DELETE OUTSOURCE:'. $model->name;
-                    $logs =	[
-                        'type' => Logs::TYPE_USER,
-                        'description' => $message,
-                    ];
-                    Logs::addLog($logs);
+                    $message = '['.$model->code.'] SUCCESS DELETE OUTSOURCE.';
                     \Yii::$app->session->setFlash('success', $message);
                 }else{
                     $transaction->rollBack();

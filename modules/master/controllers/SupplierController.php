@@ -134,7 +134,7 @@ class SupplierController extends Controller
                     }
                     if($success){
                         $transaction->commit();
-                        $message = 'CREATE SUPPLIER: '.$model->name;
+                        $message = '['.$model->code.'] SUCCESS CREATE SUPPLIER.';
                         $logs =	[
                             'type' => Logs::TYPE_USER,
                             'description' => $message,
@@ -210,7 +210,7 @@ class SupplierController extends Controller
                 }
                 if($success){
                     $transaction->commit();
-                    $message = 'UPDATE SUPPLIER: '.$model->name;
+                    $message = '['.$model->code.'] SUCCESS UPDATE SUPPLIER.';
                     $logs =	[
                         'type' => Logs::TYPE_USER,
                         'description' => $message,
@@ -270,12 +270,7 @@ class SupplierController extends Controller
 
                 if($success){
                     $transaction->commit();
-                    $message = 'DELETE SUPPLIER:'. $model->name;
-                    $logs =	[
-                        'type' => Logs::TYPE_USER,
-                        'description' => $message,
-                    ];
-                    Logs::addLog($logs);
+                    $message = '['.$model->code.'] SUCCESS DELETE SUPPLIER.';
                     \Yii::$app->session->setFlash('success', $message);
                 }else{
                     $transaction->rollBack();

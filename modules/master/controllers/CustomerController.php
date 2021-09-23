@@ -128,7 +128,7 @@ class CustomerController extends Controller
                     }
                     if($success){
                         $transaction->commit();
-                        $message = 'CREATE CUSTOMER: '.$model->name;
+                        $message = '['.$model->code.'] SUCCESS CREATE CUSTOMER.';
                         $logs =	[
                             'type' => Logs::TYPE_USER,
                             'description' => $message,
@@ -198,7 +198,7 @@ class CustomerController extends Controller
                 }
                 if($success){
                     $transaction->commit();
-                    $message = 'UPDATE CUSTOMER: '.$model->name;
+                    $message = '['.$model->code.'] SUCCESS UPDATE CUSTOMER.';
                     $logs =	[
                         'type' => Logs::TYPE_USER,
                         'description' => $message,
@@ -257,12 +257,7 @@ class CustomerController extends Controller
 
                 if($success){
                     $transaction->commit();
-                    $message = 'DELETE CUSTOMER:'. $model->name;
-                    $logs =	[
-                        'type' => Logs::TYPE_USER,
-                        'description' => $message,
-                    ];
-                    Logs::addLog($logs);
+                    $message = '['.$model->code.'] SUCCESS DELETE CUSTOMER.';
                     \Yii::$app->session->setFlash('success', $message);
                 }else{
                     $transaction->rollBack();
