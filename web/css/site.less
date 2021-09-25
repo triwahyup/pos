@@ -216,6 +216,12 @@ button {
         background-image: url('../img/background-login.jpeg');
         background-repeat: no-repeat;
         background-size: cover;
+        .form-layer {
+            background-color: #000;
+            height: 100%;
+            opacity: .6;
+            width: 100%;
+        }
         .form-wrap {
             background-color: #000;
             opacity: .8;
@@ -224,6 +230,7 @@ button {
             right: 0;
             top: 0;
             width: 420px;
+            z-index: 1;
             h3, h6, label {
                 color: @color_default;
             }

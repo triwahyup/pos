@@ -93,6 +93,9 @@ $config = [
         'report' => [
             'class' => 'app\modules\report\Module',
         ],
+        'sales' => [
+            'class' => 'app\modules\sales\Module',
+        ],
     ],
 ];
 

@@ -41,7 +41,7 @@ class TempMasterOrderDetail extends \yii\db\ActiveRecord
     {
         return [
             [['urutan', 'potong', 'objek', 'mesin', 'jumlah_warna', 'lembar_ikat', 'user_id'], 'integer'],
-            [['panjang', 'lebar', 'harga_jual', 'harga_cetak', 'harga_beli', 'min_order_ct', 'min_order_lb'], 'number'],
+            [['panjang', 'lebar', 'harga_jual', 'harga_cetak', 'harga_beli', 'min_order_ct', 'min_order_lb'], 'safe'],
             [['order_code'], 'string', 'max' => 3],
             [['item_code'], 'string', 'max' => 7],
             [['satuan'], 'string', 'max' => 5],
@@ -70,6 +70,13 @@ class TempMasterOrderDetail extends \yii\db\ActiveRecord
             'harga_cetak' => 'Harga Cetak',
             'user_id' => 'User ID',
         ];
+    }
+
+    public function beforeSave($attribute)
+    {
+        $this->harga_jual = str_replace(',', '', $this->harga_jual);
+        $this->harga_cetak = str_replace(',', '', $this->harga_cetak);
+        return parent::beforeSave($attribute);
     }
 
     public function getCount()

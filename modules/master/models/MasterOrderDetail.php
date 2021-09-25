@@ -49,7 +49,6 @@ class MasterOrderDetail extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['order_code', 'urutan'], 'required'],
             [['urutan', 'potong', 'objek', 'mesin', 'jumlah_warna', 'lembar_ikat', 'status', 'created_at', 'updated_at'], 'integer'],
             [['panjang', 'lebar', 'harga_jual', 'harga_cetak', 'harga_beli', 'min_order_ct', 'min_order_lb'], 'number'],
             [['order_code'], 'string', 'max' => 3],

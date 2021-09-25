@@ -17,8 +17,7 @@ class MasterOrderSearch extends MasterOrder
     public function rules()
     {
         return [
-            [['code', 'name', 'keterangan'], 'safe'],
-            [['status', 'created_at', 'updated_at'], 'integer'],
+            [['name', 'keterangan', 'created_at', 'updated_at'], 'safe'],
         ];
     }
 
@@ -57,16 +56,19 @@ class MasterOrderSearch extends MasterOrder
         }
 
         // grid filtering conditions
-        $query->andFilterWhere([
-            'status' => $this->status,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
-        ]);
+        $query->where(['status' => 1]);
+        if(!empty($this->created_at)){
+            $t1 = strtotime($this->created_at);
+			$t2 = strtotime("+1 days", $t1);
+			$query->andWhere('created_at >='.$t1.' and created_at <'.$t2);
+        }
+        if(!empty($this->updated_at)){
+            $t1 = strtotime($this->updated_at);
+			$t2 = strtotime("+1 days", $t1);
+			$query->andWhere('updated_at >='.$t1.' and updated_at <'.$t2);
+        }
 
-        $query->andFilterWhere(['like', 'code', $this->code])
-            ->andFilterWhere(['like', 'name', $this->name])
-            ->andFilterWhere(['like', 'keterangan', $this->keterangan]);
-
+        $query->andFilterWhere(['like', 'name', $this->name]);
         return $dataProvider;
     }
 }

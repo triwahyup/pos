@@ -108,10 +108,11 @@ class OrderController extends Controller
                 try{
                     $model->code = $model->generateCode();
                     if($model->save()){
-                        if(count($model->temps) > 0){
-                            foreach($model->temps as $temp){
+                        if(count($model->temps()) > 0){
+                            foreach($model->temps() as $temp){
                                 $detail = new MasterOrderDetail();
                                 $detail->attributes = $temp->attributes;
+                                $detail->order_code = $model->code;
                                 if(!$detail->save()){
                                     $success = false;
                                     $message = (count($detail->errors) > 0) ? 'ERROR CREATE DATA ORDER DETAIL: ' : '';
@@ -137,7 +138,7 @@ class OrderController extends Controller
                     if($success){
                         $this->emptyTemp();
                         $transaction->commit();
-                        $message = 'CREATE DATA ORDER: '.$model->name;
+                        $message = '['.$model->code.'] SUCCESS CREATE ORDER.';
                         $logs =	[
                             'type' => Logs::TYPE_USER,
                             'description' => $message,
@@ -222,7 +223,7 @@ class OrderController extends Controller
                     if($success){
                         $this->emptyTemp();
                         $transaction->commit();
-                        $message = 'UPDATE DATA ORDER: '.$model->name;
+                        $message = '['.$model->code.'] SUCCESS UPDATE ORDER.';
                         $logs =	[
                             'type' => Logs::TYPE_USER,
                             'description' => $message,
@@ -309,12 +310,7 @@ class OrderController extends Controller
 
                 if($success){
                     $transaction->commit();
-                    $message = 'DELETE DATA ORDER: '.$model->name;
-                    $logs =	[
-                        'type' => Logs::TYPE_USER,
-                        'description' => $message,
-                    ];
-                    Logs::addLog($logs);
+                    $message = '['.$model->code.'] SUCCESS DELETE ORDER.';
                     \Yii::$app->session->setFlash('success', $message);
                 }else{
                     $transaction->rollBack();
@@ -355,7 +351,7 @@ class OrderController extends Controller
     {
         $model = MasterMaterialItem::find()
             ->alias('a')
-            ->select(['concat(a.code, "-", a.name) as text', 'a.code id', 'b.name as satuan', 'harga_beli', 'harga_jual'])
+            ->select(['concat(a.code, "-", a.name) as text', 'a.code id','a.*', 'b.name as satuan'])
             ->leftJoin('master_satuan b', 'b.code = a.satuan_code')
             ->where(['a.status'=>1])
             ->andWhere('a.code LIKE "%'.$q.'%" OR a.name LIKE "%'.$q.'%"')
@@ -368,9 +364,6 @@ class OrderController extends Controller
     public function actionTemp()
     {
         $temps = TempMasterOrderDetail::findAll(['user_id'=> \Yii::$app->user->id]);
-        foreach($temps as $temp){
-            $total_order += $temp->total_order;
-        }
         $model =  $this->renderAjax('_temp', [
             'temps'=>$temps,
         ]);
@@ -389,7 +382,22 @@ class OrderController extends Controller
         $success = true;
         $message = '';
         if($request->isPost){
-
+            $data = $request->post('TempMasterOrderDetail');
+            $temp = new TempMasterOrderDetail();
+            $temp->attributes = (array)$data;
+            if(!empty($request->post('MasterOrder')['code'])){
+                $temp->order_code = $request->post('MasterOrder')['code'];
+            }
+            $temp->urutan = $temp->count +1;
+            if($temp->save()){
+                $message = 'CREATE TEMP SUCCESSFULLY';
+            }else{
+                $success = false;
+                foreach($temp->errors as $error => $value){
+                    $message = $value[0].', ';
+                }
+                $message = substr($message, 0, -2);
+            }
         }else{
             throw new NotFoundHttpException('The requested data does not exist.');
         }
@@ -402,7 +410,18 @@ class OrderController extends Controller
         $success = true;
         $message = '';
         if($request->isPost){
-
+            $data = $request->post('TempMasterOrderDetail');
+            $temp = $this->findTemp($data['id']);
+            $temp->attributes = (array)$data;
+            if($temp->save()){
+                $message = 'UPDATE TEMP SUCCESSFULLY';
+            }else{
+                $success = false;
+                foreach($temp->errors as $error => $value){
+                    $message = $value[0].', ';
+                }
+                $message = substr($message, 0, -2);
+            }
         }else{
             throw new NotFoundHttpException('The requested data does not exist.');
         }

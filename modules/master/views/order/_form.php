@@ -35,6 +35,7 @@ JS;
     <?php $form = ActiveForm::begin(['id'=>'form']); ?>
         <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">    
             <div class="col-lg-4 col-md-4 col-xs-12 padding-left-0">
+                <?= $form->field($model, 'code')->hiddenInput(['maxlength' => true])->label(false) ?>
                 <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
                 <?= $form->field($model, 'keterangan')->textarea(['rows' => 2]) ?>
             </div>
@@ -61,7 +62,7 @@ JS;
                                     'allowClear' => true,
                                     'minimumInputLength' => 2,
                                     'ajax' => [
-                                        'url' => Url::to(['purchase-order/list-item']),
+                                        'url' => Url::to(['order/list-item']),
                                         'dataType' => 'json',
                                         'delay' => 250,
                                         'data' => new JsExpression("function(params) {
@@ -252,8 +253,8 @@ JS;
                             <tr>
                                 <th class="text-center">No.</th>
                                 <th class="text-center">Bahan</th>
-                                <th class="text-center">Potong (PxL)</th>
-                                <th class="text-center">Lb. Potong / Objek</th>
+                                <th class="text-center">PxL</th>
+                                <th class="text-center">Potong / Objek</th>
                                 <th class="text-center">Mesin / Jml. Warna</th>
                                 <th class="text-center">Harga (Ct/Lb)</th>
                                 <th class="text-center">Lb. Ikat</th>
@@ -267,10 +268,12 @@ JS;
                                     <tr>
                                         <td class="text-center"><?=$index+1?></td>
                                         <td class="font-size-10"><?=(isset($val->item)) ? '<span class="text-success">'.$val->item->code .'</span><br />'. $val->item->name : '' ?></td>
-                                        <td class="text-right"></td>
-                                        <td class="text-right"></td>
-                                        <td class="text-right"></td>
-                                        <td class="text-right"></td>
+                                        <td class="text-center"><?=$val->panjang.'x'.$val->lebar ?></td>
+                                        <td class="text-center"><?=$val->potong.'/'.$val->objek ?></td>
+                                        <td class="text-center"><?=$val->mesin.'/'.$val->jumlah_warna ?></td>
+                                        <td class="text-right"><?='Rp.'.number_format($val->harga_jual) .'.- / Rp. '.number_format($val->harga_cetak).'.-' ?></td>
+                                        <td class="text-center"><?=$val->lembar_ikat ?></td>
+                                        <td class="text-center"><?=$val->min_order_ct.'/'.$val->min_order_lb ?></td>
                                         <td class="text-center">
                                             <button class="btn btn-warning btn-xs btn-sm" data-id="<?=$val->id ?>" data-button="update_temp">
                                                 <i class="fontello icon-pencil"></i>
@@ -317,7 +320,10 @@ function listItem(q)
                 }
             });
         },
-        complete: function(){}
+        complete: function(){
+            $("#tempmasterorderdetail-min_order_ct").val(20);
+            $("#tempmasterorderdetail-min_order_lb").val(2000);
+        }
     });
 }
 

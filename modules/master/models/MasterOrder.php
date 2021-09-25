@@ -84,4 +84,9 @@ class MasterOrder extends \yii\db\ActiveRecord
     {
         return $this->hasMany(TempMasterOrderDetail::className(), ['order_code' => 'code']);
     }
+
+    public function temps()
+    {
+        return TempMasterOrderDetail::find()->where(['user_id' => \Yii::$app->user->id])->all();
+    }
 }
