@@ -23,8 +23,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 'contentOptions' => [
                     'class' => 'text-right',
                 ],
+                'format' => 'raw',
                 'value' => function($model, $value) {
-                    return number_format($model->qty_in);
+                    return '<strong>'.number_format($model->qty_in) .'</strong><br />'. $model->konversi($model->item, $model->qty_in);
                 }
             ],
             [
@@ -32,8 +33,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 'contentOptions' => [
                     'class' => 'text-right',
                 ],
+                'format' => 'raw',
                 'value' => function($model, $value) {
-                    return number_format($model->qty_out);
+                    return '<strong>'.number_format($model->qty_out) .'</strong><br />'. $model->konversi($model->item, $model->qty_out);
                 }
             ],
             [
@@ -41,8 +43,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 'contentOptions' => [
                     'class' => 'text-right',
                 ],
+                'format' => 'raw',
                 'value' => function($model, $value) {
-                    return number_format($model->qty_retur);
+                    return '<strong>'.number_format($model->qty_retur) .'</strong><br />'. $model->konversi($model->item, $model->qty_retur);
                 }
             ],
             [
@@ -50,8 +53,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 'contentOptions' => [
                     'class' => 'text-right',
                 ],
+                'format' => 'raw',
                 'value' => function($model, $value) {
-                    return number_format($model->onhand);
+                    return '<strong>'.number_format($model->onhand) .'</strong><br />'. $model->konversi($model->item, $model->onhand);
                 }
             ],
             [
@@ -59,8 +63,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 'contentOptions' => [
                     'class' => 'text-right',
                 ],
+                'format' => 'raw',
                 'value' => function($model, $value) {
-                    return number_format($model->onsales);
+                    return '<strong>'.number_format($model->onsales) .'</strong><br />'. $model->konversi($model->item, $model->onsales);
                 }
             ],
         ],

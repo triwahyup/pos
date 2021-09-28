@@ -471,7 +471,7 @@ class PurchaseOrderController extends Controller
             $data = $request->post('TempPurchaseOrderDetail');
             $temp = new TempPurchaseOrderDetail();
             $temp->attributes = (array)$data;
-            $temp->name = ($temp->item) ? $temp->item->name : '';
+            $temp->attributes = ($temp->item) ? $temp->item->attributes : '';
             $temp->urutan = $temp->count +1;
             $temp->user_id = \Yii::$app->user->id;
             if(!empty($request->post('PurchaseOrder')['no_po'])){
@@ -502,7 +502,7 @@ class PurchaseOrderController extends Controller
             $data = $request->post('TempPurchaseOrderDetail');
             $temp = $this->findTemp($data['id']);
             $temp->attributes = (array)$data;
-            $temp->name = ($temp->item) ? $temp->item->name : '';
+            $temp->attributes = ($temp->item) ? $temp->item->attributes : '';
             $temp->total_order = $temp->totalBeli;
             if($temp->save()){
                 $message = 'UPDATE TEMP SUCCESSFULLY';

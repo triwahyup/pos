@@ -31,9 +31,13 @@ use yii\behaviors\TimestampBehavior;
  */
 class PurchaseOrderInvoice extends \yii\db\ActiveRecord
 {
-    public $qty_terima;
+    public $qty_terima_1;
+    public $qty_terima_2;
+    public $qty_terima_3;
+    public $harga_beli_1;
+    public $harga_beli_2;
+    public $harga_beli_3;
     public $ppn;
-    public $harga_beli;
     public $urutan;
 
     /**
@@ -57,7 +61,7 @@ class PurchaseOrderInvoice extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['tgl_invoice', 'tgl_po', 'tgl_kirim', 'total_invoice', 'qty_terima', 'harga_beli'], 'safe'],
+            [['tgl_invoice', 'tgl_po', 'tgl_kirim', 'total_invoice', 'qty_terima_1', 'qty_terima_2', 'qty_terima_3', 'harga_beli_1', 'harga_beli_2', 'harga_beli_3'], 'safe'],
             [['term_in', 'user_id', 'post', 'status', 'created_at', 'updated_at', 'status_terima', 'urutan'], 'integer'],
             [['keterangan'], 'string'],
             [['total_ppn', 'total_order', 'ppn'], 'number'],
@@ -94,6 +98,12 @@ class PurchaseOrderInvoice extends \yii\db\ActiveRecord
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
             'ppn' => 'Ppn (%)',
+            'harga_beli_1' => 'Harga Beli 1',
+            'harga_beli_2' => 'Harga Beli 2',
+            'harga_beli_3' => 'Harga Beli 3',
+            'qty_terima_1' => 'QTY Terima 1',
+            'qty_terima_2' => 'QTY Terima 2',
+            'qty_terima_3' => 'QTY Terima 3',
         ];
     }
 

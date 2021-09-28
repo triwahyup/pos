@@ -49,13 +49,13 @@ class PurchaseOrderInvoiceDetail extends \yii\db\ActiveRecord
     {
         return [
             [['no_invoice', 'urutan'], 'required'],
-            [['qty_terima', 'harga_beli'], 'safe'],
             [['urutan', 'status', 'created_at', 'updated_at'], 'integer'],
-            [['qty_order', 'harga_jual', 'ppn', 'total_order', 'total_invoice'], 'number'],
+            [['qty_order_1', 'qty_order_2', 'qty_order_3', 'qty_terima_1', 'qty_terima_2', 'qty_terima_3', 'harga_beli_1', 'harga_beli_2', 'harga_beli_3', 'harga_jual_1', 'harga_jual_2', 'harga_jual_3', 'ppn', 'total_order', 'total_invoice'], 'safe'],
             [['no_invoice'], 'string', 'max' => 12],
             [['item_code'], 'string', 'max' => 7],
             [['name'], 'string', 'max' => 128],
-            [['satuan'], 'string', 'max' => 5],
+            [['satuan_code', 'type_code', 'material_code', 'group_material_code', 'group_supplier_code'], 'string', 'max' => 3],
+            [['um_1', 'um_2', 'um_3'], 'string', 'max' => 5],
             [['no_invoice', 'urutan'], 'unique', 'targetAttribute' => ['no_invoice', 'urutan']],
             [['status'], 'default', 'value' => 1],
         ];
@@ -72,10 +72,21 @@ class PurchaseOrderInvoiceDetail extends \yii\db\ActiveRecord
             'item_code' => 'Item Code',
             'name' => 'Name',
             'satuan' => 'Satuan',
-            'qty_order' => 'Qty Order',
-            'qty_terima' => 'Qty Terima',
-            'harga_beli' => 'Harga Beli',
-            'harga_jual' => 'Harga Jual',
+            'um_1' => 'UM 1',
+            'um_2' => 'UM 2',
+            'um_3' => 'UM 3',
+            'qty_order_1' => 'Qty Order 1',
+            'qty_order_2' => 'Qty Order 2',
+            'qty_order_3' => 'Qty Order 3',
+            'qty_terima_1' => 'Qty Terima 1',
+            'qty_terima_2' => 'Qty Terima 2',
+            'qty_terima_3' => 'Qty Terima 3',
+            'harga_beli_1' => 'Harga Beli 1',
+            'harga_beli_2' => 'Harga Beli 2',
+            'harga_beli_3' => 'Harga Beli 3',
+            'harga_jual_1' => 'Harga Jual 1',
+            'harga_jual_2' => 'Harga Jual 2',
+            'harga_jual_3' => 'Harga Jual 3',
             'ppn' => 'Ppn',
             'total_order' => 'Total Order',
             'total_invoice' => 'Total Invoice',
@@ -88,5 +99,39 @@ class PurchaseOrderInvoiceDetail extends \yii\db\ActiveRecord
     public function getItem()
     {
         return $this->hasOne(MasterMaterialItem::className(), ['code' => 'item_code']);
+    }
+
+    public function beforeSave($attribute)
+    {
+        $this->harga_beli_1 = str_replace(',', '', $this->harga_beli_1);
+        $this->harga_beli_2 = str_replace(',', '', $this->harga_beli_2);
+        $this->harga_beli_3 = str_replace(',', '', $this->harga_beli_3);
+        $this->qty_terima_1 = str_replace(',', '', $this->qty_terima_1);
+        $this->qty_terima_2 = str_replace(',', '', $this->qty_terima_2);
+        $this->qty_terima_3 = str_replace(',', '', $this->qty_terima_3);
+        return parent::beforeSave($attribute);
+    }
+
+    public function getTotalInvoice()
+    {
+        $total_invoice=0;
+        if(!empty($this->qty_terima_1)){
+            $harga_beli_1 = str_replace(',', '', $this->harga_beli_1);
+            $total_invoice += $this->qty_terima_1 * $harga_beli_1;
+        }
+        if(!empty($this->qty_terima_2)){
+            $harga_beli_2 = str_replace(',', '', $this->harga_beli_2);
+            $total_invoice += $this->qty_terima_2 * $harga_beli_2;
+        }
+        if(!empty($this->qty_terima_3)){
+            $harga_beli_3 = str_replace(',', '', $this->harga_beli_3);
+            $total_invoice += $this->qty_terima_3 * $harga_beli_3;
+        }
+
+        if(!empty($this->ppn)){
+            $ppn = $total_invoice / ($this->ppn*100);
+            $total_invoice += $ppn;
+        }
+        return $total_invoice;
     }
 }

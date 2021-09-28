@@ -74,4 +74,37 @@ class InventoryStockItem extends \yii\db\ActiveRecord
     {
         return $this->hasOne(MasterMaterialItem::className(), ['code' => 'item_code']);
     }
+
+    public function satuanTerkecil($item_code, $qty_terima)
+    {
+        $item = MasterMaterialItem::findOne($item_code);
+        $total_material = 0;
+        if(isset($item->typeCode)){
+            $type = $item->typeCode->value;
+            if($type == 'KERTAS'){
+                $total_material = ($qty_terima[0] * 500) + $qty_terima[1];
+            }
+        }
+        return $total_material;
+    }
+
+    public function konversi($item_code, $qty)
+    {
+        $item = MasterMaterialItem::findOne($item_code);
+        $desc = '';
+        $result = [];
+        if(isset($item)){
+            $result[0] = floor($qty / 500);
+            $sisa = $qty - ($result[0] * 500);
+            $result[1] = $sisa;
+        }
+        foreach($result as $index=>$val){
+            if(!empty($val)){
+                $desc .= $val .((!empty($val)) ? ' '.$item['um_'.($index+1)] : '').' / ';
+            }else{
+                $desc = '';
+            }
+        }
+        return substr($desc, 0, -2);
+    }
 }

@@ -53,53 +53,126 @@ use yii\widgets\MaskedInput;
             </div>
         </div>
         <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
-            <div class="margin-top-20"></div>
-            <fieldset class="fieldset-box">
+            <fieldset class="fieldset-box padding-20">
                 <legend>Detail Item</legend>
-                <div class="margin-top-20"></div>
-                <div class="col-lg-12 col-md-12 col-xs-12">
-                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-right-0">
-                        <?= $form->field($model, 'harga_beli')->widget(MaskedInput::className(), [
-                            'clientOptions' => [
-                                'alias' =>  'decimal',
-                                'groupSeparator' => ',',
-                                'autoGroup' => true
-                            ],
-                            'options' => [
-                                'data-temp' => 1, 
-                                'data-align' => 'text-right'
-                            ]
-                        ]) ?>
+                <div class="form-container">
+                    <div class="margin-top-20"></div>
+                    <div class="col-lg-12 col-md-12 col-xs-12">
+                        <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
+                            <label>QTY Terima:</label>
+                        </div>
+                        <div class="col-lg-1 col-md-1 col-sm-12 col-xs-12 padding-right-0">
+                            <?= $form->field($model, 'qty_terima_1')->widget(MaskedInput::className(), [
+                                'clientOptions' => [
+                                    'alias' =>  'decimal',
+                                    'groupSeparator' => ',',
+                                    'autoGroup' => true
+                                ],
+                                'options' => [
+                                    'data-temp' => 1, 
+                                    'data-align' => 'text-right'
+                                ]
+                            ])->label(false) ?>
+                        </div>
+                        <div class="col-lg-1 col-md-1 col-sm-12 col-xs-12 padding-right-0">
+                            <?= $form->field($model, 'qty_terima_2')->widget(MaskedInput::className(), [
+                                'clientOptions' => [
+                                    'alias' =>  'decimal',
+                                    'groupSeparator' => ',',
+                                    'autoGroup' => true
+                                ],
+                                'options' => [
+                                    'data-temp' => 1, 
+                                    'data-align' => 'text-right'
+                                ]
+                            ])->label(false) ?>
+                        </div>
+                        <div class="col-lg-1 col-md-1 col-sm-12 col-xs-12 padding-right-0">
+                            <?= $form->field($model, 'qty_terima_3')->widget(MaskedInput::className(), [
+                                'clientOptions' => [
+                                    'alias' =>  'decimal',
+                                    'groupSeparator' => ',',
+                                    'autoGroup' => true
+                                ],
+                                'options' => [
+                                    'data-temp' => 1, 
+                                    'data-align' => 'text-right'
+                                ]
+                            ])->label(false) ?>
+                        </div>
                     </div>
-                    <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
-                        <?= $form->field($model, 'no_invoice')->hiddenInput()->label(false) ?>
-                        <?= $form->field($model, 'urutan')->hiddenInput(['data-temp' => 1])->label(false) ?>
+                    <div class="col-lg-12 col-md-12 col-xs-12">
+                        <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
+                            <label>Harga Beli:</label>
+                        </div>
+                        <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
+                            <?= $form->field($model, 'harga_beli_1')->widget(MaskedInput::className(), [
+                                    'clientOptions' => [
+                                        'alias' =>  'decimal',
+                                        'groupSeparator' => ',',
+                                        'autoGroup' => true
+                                    ],
+                                    'options' => [
+                                        'data-align' => 'text-right',
+                                        'data-name' => 'iconbox',
+                                        'data-icons' => 'rupiah',
+                                        'data-temp' => 1,
+                                        'readonly' => true,
+                                    ]
+                                ])->label(false) ?>
+                        </div>
+                        <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
+                            <?= $form->field($model, 'harga_beli_2')->widget(MaskedInput::className(), [
+                                    'clientOptions' => [
+                                        'alias' =>  'decimal',
+                                        'groupSeparator' => ',',
+                                        'autoGroup' => true
+                                    ],
+                                    'options' => [
+                                        'data-align' => 'text-right',
+                                        'data-name' => 'iconbox',
+                                        'data-icons' => 'rupiah',
+                                        'data-temp' => 1,
+                                        'readonly' => true,
+                                    ]
+                                ])->label(false) ?>
+                        </div>
+                        <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
+                            <?= $form->field($model, 'harga_beli_3')->widget(MaskedInput::className(), [
+                                    'clientOptions' => [
+                                        'alias' =>  'decimal',
+                                        'groupSeparator' => ',',
+                                        'autoGroup' => true
+                                    ],
+                                    'options' => [
+                                        'data-align' => 'text-right',
+                                        'data-name' => 'iconbox',
+                                        'data-icons' => 'rupiah',
+                                        'data-temp' => 1,
+                                        'readonly' => true,
+                                    ]
+                                ])->label(false) ?>
+                        </div>
                     </div>
-                </div>
-                <div class="col-lg-12 col-md-12 col-xs-12">
-                    <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
-                        <?= $form->field($model, 'qty_terima')->widget(MaskedInput::className(), [
-                            'clientOptions' => [
-                                'alias' =>  'decimal',
-                                'groupSeparator' => ',',
-                                'autoGroup' => true
-                            ],
-                            'options' => [
-                                'data-temp' => 1, 
-                                'data-align' => 'text-right'
-                            ]
-                        ]) ?>
+                    <div class="col-lg-12 col-md-12 col-xs-12">
+                        <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
+                            <label>PPN (%):</label>
+                        </div>
+                        <div class="col-lg-1 col-md-1 col-sm-12 col-xs-12 padding-right-0">
+                            <?= $form->field($model, 'ppn')->textInput(['data-temp' => 1, 'data-align' => 'text-right'])->label(false) ?>
+                        </div>
+                        <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
+                            <?= $form->field($model, 'no_invoice')->hiddenInput()->label(false) ?>
+                            <?= $form->field($model, 'urutan')->hiddenInput(['data-temp' => 1])->label(false) ?>
+                        </div>
                     </div>
-                    <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
-                        <?= $form->field($model, 'ppn')->textInput(['data-temp' => 1, 'data-align' => 'text-right']) ?>
-                    </div>
-                </div>
-                <div class="col-lg-12 col-md-12 col-xs-12">
-                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                        <button class="btn btn-success margin-bottom-20 hidden" data-button="create_temp">
-                            <i class="fontello icon-plus"></i>
-                            <span>Tambah Data Detail</span>
-                        </button>
+                    <div class="col-lg-12 col-md-12 col-xs-12">
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 text-right">
+                            <button class="btn btn-success margin-bottom-20 hidden" data-button="create_temp">
+                                <i class="fontello icon-plus"></i>
+                                <span>Tambah Data Detail</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <div class="col-lg-12 col-md-12 col-xs-12">
@@ -109,10 +182,9 @@ use yii\widgets\MaskedInput;
                                 <tr>
                                     <th class="text-center">No.</th>
                                     <th class="text-center">Item</th>
-                                    <th class="text-center">Satuan</th>
-                                    <th class="text-center">QTY Order</th>
-                                    <th class="text-center">QTY Terima</th>
-                                    <th class="text-center">Harga Beli</th>
+                                    <th class="text-center" colspan="3">QTY Order</th>
+                                    <th class="text-center" colspan="3">QTY Terima</th>
+                                    <th class="text-center" colspan="3">Harga Beli</th>
                                     <th class="text-center">Ppn (%)</th>
                                     <th class="text-center">Total Order</th>
                                     <th class="text-center">Total Invoice</th>
@@ -127,10 +199,15 @@ use yii\widgets\MaskedInput;
                                     <tr>
                                         <td class="text-center"><?=$index+1?></td>
                                         <td class="font-size-10"><?=(isset($val->item)) ? '<span class="text-success">'.$val->item->code .'</span><br />'. $val->item->name : '' ?></td>
-                                        <td class="text-center"><?=$val->satuan ?></td>
-                                        <td class="text-right"><?=number_format($val->qty_order) ?></td>
-                                        <td class="text-right"><?=number_format($val->qty_terima) ?></td>
-                                        <td class="text-right"><?=number_format($val->harga_beli).'.-' ?></td>
+                                        <?php for($a=1;$a<=3;$a++): ?>
+                                            <td class="text-right"><?=(!empty($val['qty_order_'.$a])) ? number_format($val['qty_order_'.$a]).'<br /><span class="text-muted font-size-10">'.$val['um_'.$a].'</span>' : null ?></td>
+                                        <?php endfor; ?>
+                                        <?php for($a=1;$a<=3;$a++): ?>
+                                            <td class="text-right"><?=(!empty($val['qty_terima_'.$a])) ? number_format($val['qty_terima_'.$a]).'<br /><span class="text-muted font-size-10">'.$val['um_'.$a].'</span>' : null ?></td>
+                                        <?php endfor; ?>
+                                        <?php for($a=1;$a<=3;$a++): ?>
+                                            <td class="text-right"><?=(!empty($val['qty_order_'.$a])) ? number_format($val['harga_beli_'.$a]).'.- <br /><span class="text-muted font-size-10">Per '.$val['um_'.$a].'</span>' : null ?></td>
+                                        <?php endfor; ?>
                                         <td class="text-right"><?=(!empty($val->ppn)) ? $val->ppn.'%' : '' ?></td>
                                         <td class="text-right"><?=number_format($val->total_order).'.-' ?></td>
                                         <td class="text-right"><?=number_format($val->total_invoice).'.-' ?></td>

@@ -101,7 +101,7 @@ class InvoiceOrderController extends Controller
                     if($model->no_bukti!="" && $model->tgl_invoice!=""){
                         $total_ppn=0;
                         foreach($model->details as $val){
-                            if($val->qty_terima==0){
+                            if($val->qty_terima_1==0){
                                 $success = false;
                                 $message = 'QTY Terima item '.$val->item_code.'-'.$val->name.' masih 0.';
                             }
@@ -181,7 +181,7 @@ class InvoiceOrderController extends Controller
             try{
                 if(!empty($model->no_bukti) && !empty($model->tgl_invoice)){
                     foreach($model->details as $val){
-                        if($val->qty_terima==0){
+                        if($val->qty_terima_1==0){
                             $success = false;
                             $message = 'QTY Terima item '.$val->item_code.'-'.$val->name.' masih 0.';
                         }
@@ -196,8 +196,12 @@ class InvoiceOrderController extends Controller
                             foreach($model->details as $val){
                                 $stockItem = InventoryStockItem::findOne(['item_code'=>$val->item_code, 'status'=>1]);
                                 if(isset($stockItem)){
-                                    $stockItem->qty_in = $stockItem->qty_in+$val->qty_terima;
-                                    $stockItem->onhand = $stockItem->onhand+$val->qty_terima;
+                                    $konversi = $stockItem->satuanTerkecil($val->item_code, [
+                                        0 => $val->qty_terima_1,
+                                        1 => $val->qty_terima_2
+                                    ]);
+                                    $stockItem->qty_in = $stockItem->qty_in+$konversi;
+                                    $stockItem->onhand = $stockItem->onhand+$konversi;
                                     if(!$stockItem->save()){
                                         $success = false;
                                         $message = (count($stockItem->errors) > 0) ? 'ERROR UPDATE STOCK ITEM: ' : '';
@@ -214,8 +218,8 @@ class InvoiceOrderController extends Controller
                                     $stockTransaction->tgl_document = $model->tgl_invoice;
                                     $stockTransaction->type_document = "INVOICE ORDER";
                                     $stockTransaction->status_document = "IN";
-                                    $stockTransaction->qty_in = $val->qty_terima;
-                                    $stockTransaction->onhand = (isset($stockTransaction->onHand)) ? $stockTransaction->onHand->qty_in+$val->qty_terima : $val->qty_terima;
+                                    $stockTransaction->qty_in = $konversi;
+                                    $stockTransaction->onhand = (isset($stockTransaction->onHand)) ? $stockTransaction->onHand->qty_in+$konversi : $konversi;
                                     if(!$stockTransaction->save()){
                                         $success = false;
                                         $message = (count($stockTransaction->errors) > 0) ? 'ERROR UPDATE STOCK TRANSACTION: ' : '';
@@ -294,9 +298,13 @@ class InvoiceOrderController extends Controller
     {
         $temp = PurchaseOrderInvoiceDetail::findOne(['no_invoice'=>$no_invoice, 'urutan'=>$urutan]);
         $data['urutan'] = $temp->urutan;
-        $data['harga_beli'] = $temp->harga_beli;
+        $data['harga_beli_1'] = $temp->harga_beli_1;
+        $data['harga_beli_2'] = $temp->harga_beli_2;
+        $data['harga_beli_3'] = $temp->harga_beli_3;
+        $data['qty_terima_1'] = (!empty($temp->qty_terima_1)) ? $temp->qty_terima_1 : $temp->qty_order_1;
+        $data['qty_terima_2'] = (!empty($temp->qty_terima_2)) ? $temp->qty_terima_2 : $temp->qty_order_2;
+        $data['qty_terima_3'] = (!empty($temp->qty_terima_3)) ? $temp->qty_terima_3 : $temp->qty_order_3;
         $data['ppn'] = $temp->ppn;
-        $data['qty_terima'] = (!empty($temp->qty_terima)) ? $temp->qty_terima : $temp->qty_order;
         return json_encode($data);
     }
 
@@ -309,15 +317,8 @@ class InvoiceOrderController extends Controller
         if($request->isPost){
             $temp = PurchaseOrderInvoiceDetail::findOne(['no_invoice'=>$invoiceOrder['no_invoice'], 'urutan'=>$invoiceOrder['urutan']]);
             $temp->attributes = (array)$invoiceOrder;
-            if($temp->qty_terima <= $temp->qty_order){
-                $temp->harga_beli = str_replace(',','', $temp->harga_beli);
-                $temp->qty_terima = str_replace(',','', $temp->qty_terima);
-                if(!empty($temp->ppn)){
-                    $ppn = $temp->harga_beli * $temp->qty_terima / ($temp->ppn*100);
-                    $temp->total_invoice = ($temp->harga_beli * $temp->qty_terima) + $ppn;
-                }else{
-                    $temp->total_invoice = $temp->harga_beli * $temp->qty_terima;
-                }
+            if(($temp->qty_terima_1 <= $temp->qty_order_1) && ($temp->qty_terima_2 <= $temp->qty_order_2) && ($temp->qty_terima_3 <= $temp->qty_order_3)){
+                $temp->total_invoice = $temp->totalInvoice;
                 if($temp->save()){
                     $message = 'UPDATE TERIMA SUCCESSFULLY';
                 }else{
