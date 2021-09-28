@@ -12,62 +12,184 @@ use yii\widgets\MaskedInput;
 
 <div class="master-material-item-form">
     <?php $form = ActiveForm::begin(); ?>
-        <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
-            <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0">
-                <?= $form->field($model, 'type_code')->widget(Select2::classname(), [
-                        'data' => $type,
-                        'options' => ['placeholder' => 'Type Barang'],
-                    ]) ?>
-                <?= $form->field($model, 'code')->textInput(['maxlength' => true , 'readonly' => true]) ?>
-                <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
-                <?= $form->field($model, 'material_code')->widget(Select2::classname(), [
-                        'data' => [],
-                        'options' => ['placeholder' => 'Material Type'],
-                    ]) ?>
+        <div class="col-lg-12 col-md-12 col-xs-12">
+            <div class="col-lg-6 col-md-6 col-xs-12 padding-left-0">
+                <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
+                    <div class="col-lg-5 col-md-5 col-sm-12 col-xs-12 padding-left-0">
+                        <?= $form->field($model, 'type_code')->widget(Select2::classname(), [
+                                'data' => $type,
+                                'options' => [
+                                    'placeholder' => 'Type Barang',
+                                    'readonly' => true
+                                ],
+                            ]) ?>
+                    </div>
+                    <div class="col-lg-5 col-md-5 col-sm-12 col-xs-12 padding-left-0">
+                        <?= $form->field($model, 'material_code')->widget(Select2::classname(), [
+                                'data' => $material,
+                                'options' => ['placeholder' => 'Material Type'],
+                            ]) ?>
+                    </div>
+                </div>
+                <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 margin-top-30">
+                    <div class="col-lg-5 col-md-5 col-sm-12 col-xs-12 padding-left-0">
+                        <?= $form->field($model, 'satuan_code')->widget(Select2::classname(), [
+                                'data' => $satuan,
+                                'options' => ['placeholder' => 'Satuan'],
+                            ]) ?>    
+                    </div>
+                </div>
+                <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
+                    <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-left-0">
+                        <?= $form->field($model, 'um_1')->textInput(['readonly' => true]) ?>
+                    </div>
+                    <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padding-left-0">
+                        <?= $form->field($model, 'harga_beli_1')->widget(MaskedInput::className(), [
+                            'clientOptions' => [
+                                'alias' =>  'decimal',
+                                'groupSeparator' => ',',
+                                'autoGroup' => true
+                            ],
+                            'options' => [
+                                'data-temp' => 1, 
+                                'data-align' => 'text-right',
+                                'data-name' => 'iconbox',
+                                'data-icons' => 'rupiah',
+                                'readonly' => (!$model->isNewRecord && !empty($model->harga_beli_1)) ? false : true,
+                            ]
+                        ]) ?>
+                    </div>
+                    <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padding-left-0">
+                        <?= $form->field($model, 'harga_jual_1')->widget(MaskedInput::className(), [
+                            'clientOptions' => [
+                                'alias' =>  'decimal',
+                                'groupSeparator' => ',',
+                                'autoGroup' => true
+                            ],
+                            'options' => [
+                                'data-temp' => 1, 
+                                'data-align' => 'text-right',
+                                'data-name' => 'iconbox',
+                                'data-icons' => 'rupiah',
+                                'readonly' => (!$model->isNewRecord && !empty($model->harga_jual_1)) ? false : true,
+                            ]
+                        ]) ?>
+                    </div>
+                </div>
+                <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
+                    <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-left-0">
+                        <?= $form->field($model, 'um_2')->textInput(['readonly' => true]) ?>
+                    </div>
+                    <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padding-left-0">
+                        <?= $form->field($model, 'harga_beli_2')->widget(MaskedInput::className(), [
+                            'clientOptions' => [
+                                'alias' =>  'decimal',
+                                'groupSeparator' => ',',
+                                'autoGroup' => true
+                            ],
+                            'options' => [
+                                'data-temp' => 1, 
+                                'data-align' => 'text-right',
+                                'data-name' => 'iconbox',
+                                'data-icons' => 'rupiah',
+                                'readonly' => (!$model->isNewRecord && !empty($model->harga_beli_2)) ? false : true,
+                            ]
+                        ]) ?>
+                    </div>
+                    <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padding-left-0">
+                        <?= $form->field($model, 'harga_jual_2')->widget(MaskedInput::className(), [
+                            'clientOptions' => [
+                                'alias' =>  'decimal',
+                                'groupSeparator' => ',',
+                                'autoGroup' => true
+                            ],
+                            'options' => [
+                                'data-temp' => 1, 
+                                'data-align' => 'text-right',
+                                'data-name' => 'iconbox',
+                                'data-icons' => 'rupiah',
+                                'readonly' => (!$model->isNewRecord && !empty($model->harga_jual_2)) ? false : true,
+                            ]
+                        ]) ?>
+                    </div>
+                </div>
+                <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
+                    <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-left-0">
+                        <?= $form->field($model, 'um_3')->textInput(['readonly' => true]) ?>
+                    </div>
+                    <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padding-left-0">
+                        <?= $form->field($model, 'harga_beli_3')->widget(MaskedInput::className(), [
+                            'clientOptions' => [
+                                'alias' =>  'decimal',
+                                'groupSeparator' => ',',
+                                'autoGroup' => true
+                            ],
+                            'options' => [
+                                'data-temp' => 1, 
+                                'data-align' => 'text-right',
+                                'data-name' => 'iconbox',
+                                'data-icons' => 'rupiah',
+                                'readonly' => (!$model->isNewRecord && !empty($model->harga_beli_3)) ? false : true,
+                            ]
+                        ]) ?>
+                    </div>
+                    <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padding-left-0">
+                        <?= $form->field($model, 'harga_jual_3')->widget(MaskedInput::className(), [
+                            'clientOptions' => [
+                                'alias' =>  'decimal',
+                                'groupSeparator' => ',',
+                                'autoGroup' => true
+                            ],
+                            'options' => [
+                                'data-temp' => 1, 
+                                'data-align' => 'text-right',
+                                'data-name' => 'iconbox',
+                                'data-icons' => 'rupiah',
+                                'readonly' => (!$model->isNewRecord && !empty($model->harga_jual_3)) ? false : true,
+                            ]
+                        ]) ?>
+                    </div>
+                </div>
             </div>
-            <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0">
-                <?= $form->field($model, 'satuan_code')->widget(Select2::classname(), [
-                        'data' => [],
-                        'options' => ['placeholder' => 'Satuan'],
-                    ]) ?>
-                <?= $form->field($model, 'group_material_code')->widget(Select2::classname(), [
-                        'data' => [],
-                        'options' => ['placeholder' => 'Group Material'],
-                    ]) ?>
-                <?= $form->field($model, 'group_supplier_code')->widget(Select2::classname(), [
-                        'data' => [],
-                        'options' => ['placeholder' => 'Group Supplier'],
-                    ]) ?>
-                <?= $form->field($model, 'panjang')->textInput() ?>
-            </div>
-            <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0">
-                <?= $form->field($model, 'lebar')->textInput() ?>
-                <?= $form->field($model, 'gram')->textInput() ?>
-                <?= $form->field($model, 'harga_beli')->widget(MaskedInput::className(), [
-                    'clientOptions' => [
-                        'alias' =>  'decimal',
-                        'groupSeparator' => ',',
-                        'autoGroup' => true
-                    ],
-                    'options' => [
-                        'data-temp' => 1, 
-                        'data-align' => 'text-right'
-                    ]
-                ]) ?>
-                <?= $form->field($model, 'harga_jual')->widget(MaskedInput::className(), [
-                    'clientOptions' => [
-                        'alias' =>  'decimal',
-                        'groupSeparator' => ',',
-                        'autoGroup' => true
-                    ],
-                    'options' => [
-                        'data-temp' => 1, 
-                        'data-align' => 'text-right'
-                    ]
-                ]) ?>
-            </div>
-            <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0">
-                <?= $form->field($model, 'keterangan')->textarea(['rows' => 6]) ?>
+            <div class="col-lg-6 col-md-6 col-xs-12 padding-left-0">
+                <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
+                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0">
+                        <?= $form->field($model, 'code')->textInput(['maxlength' => true , 'readonly' => true]) ?>
+                    </div>
+                    <div class="col-lg-7 col-md-7 col-sm-12 col-xs-12 padding-left-0">
+                        <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
+                    </div>
+                </div>
+                <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
+                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0">
+                        <?= $form->field($model, 'panjang')->textInput() ?>
+                    </div>
+                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0">
+                        <?= $form->field($model, 'lebar')->textInput() ?>
+                    </div>
+                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0">
+                        <?= $form->field($model, 'gram')->textInput() ?>
+                    </div>
+                </div>
+                <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
+                    <div class="col-lg-5 col-md-5 col-sm-12 col-xs-12 padding-left-0">
+                        <?= $form->field($model, 'group_material_code')->widget(Select2::classname(), [
+                                'data' => $groupMaterial,
+                                'options' => ['placeholder' => 'Group Material'],
+                            ]) ?>
+                    </div>
+                    <div class="col-lg-5 col-md-5 col-sm-12 col-xs-12 padding-left-0">
+                        <?= $form->field($model, 'group_supplier_code')->widget(Select2::classname(), [
+                                'data' => $groupSupplier,
+                                'options' => ['placeholder' => 'Group Supplier'],
+                            ]) ?>
+                    </div>
+                </div>
+                <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
+                    <div class="col-lg-7 col-md-7 col-sm-12 col-xs-12 padding-left-0">
+                        <?= $form->field($model, 'keterangan')->textarea(['rows' => 4]) ?>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="form-group text-right">
@@ -89,6 +211,7 @@ function generateCode(type)
         beforeSend: function(){},
         success: function(data){
             var o = $.parseJSON(data);
+            $("[id^=\"mastermaterialitem-\"]:not(#mastermaterialitem-type_code)").val(null);
             $("#mastermaterialitem-code").val(o.code);
             
             $("#mastermaterialitem-material_code").empty();
@@ -110,11 +233,45 @@ function generateCode(type)
     });
 }
 
+function um(code)
+{
+    $.ajax({
+        url: "<?=Url::to(['material-item/um']) ?>",
+        type: "GET",
+        data: {
+            code: code
+        },
+        dataType: "text",
+        error: function(xhr, status, error) {},
+        beforeSend: function(){},
+        success: function(data){
+            var o = $.parseJSON(data);
+            $("[id^=\"mastermaterialitem-harga_beli_\"]").attr("readonly", true);
+            $("[id^=\"mastermaterialitem-harga_jual_\"]").attr("readonly", true);
+            
+            $("#mastermaterialitem-um_1").val(o.um_1);
+            $("#mastermaterialitem-um_2").val(o.um_2);
+            for(var a=1;a<=o.composite;a++){
+                $("#mastermaterialitem-harga_beli_"+a).attr("readonly", false);
+                $("#mastermaterialitem-harga_jual_"+a).attr("readonly", false);
+            }
+        },
+        error: function(XMLHttpRequest, textStatus, errorThrown){},
+        complete: function(){}
+    });
+}
+
 $(document).ready(function(){
     $("body").off("change","#mastermaterialitem-type_code")
     $("body").on("change","#mastermaterialitem-type_code", function(e){
         e.preventDefault();
         generateCode($(this).val());
+    });
+
+    $("body").off("change","#mastermaterialitem-satuan_code")
+    $("body").on("change","#mastermaterialitem-satuan_code", function(e){
+        e.preventDefault();
+        um($(this).val());
     });
 });
 </script>

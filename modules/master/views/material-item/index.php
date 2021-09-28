@@ -42,36 +42,6 @@ $this->params['breadcrumbs'][] = $this->title;
                     return (isset($model->satuan)) ? $model->satuan->name : '';
                 }
             ],
-            // [
-            //     'attribute' => 'group_material_code',
-            //     'value' => function($model, $index, $key){
-            //         return (isset($model->groupMaterial)) ? $model->groupMaterial->name : '';
-            //     }
-            // ],
-            // [
-            //     'attribute' => 'group_supplier_code',
-            //     'value' => function($model, $index, $key){
-            //         return (isset($model->groupSupplier)) ? $model->groupSupplier->name : '';
-            //     }
-            // ],
-            [
-                'attribute' => 'harga_beli',
-                'contentOptions' => [
-                    'class' => 'text-right',
-                ],
-                'value' => function ($model, $index) { 
-                    return 'Rp.'.number_format($model->harga_beli).'.-';
-                }
-            ],
-            [
-                'attribute' => 'harga_jual',
-                'contentOptions' => [
-                    'class' => 'text-right',
-                ],
-                'value' => function ($model, $index) { 
-                    return 'Rp.'.number_format($model->harga_jual).'.-';
-                }
-            ],
             [
                 'buttons' => [
                     'view' => function ($url, $model) {

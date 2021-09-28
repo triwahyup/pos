@@ -56,12 +56,12 @@ class MasterPerson extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['code', 'name'], 'required'],
+            [['code', 'name', 'contact_person', 'phone_1'], 'required'],
             [['keterangan'], 'string'],
             [['type_user', 'status', 'created_at', 'updated_at'], 'integer'],
             [['tgl_jatuh_tempo'], 'safe'],
             [['code', 'group_supplier_code'], 'string', 'max' => 3],
-            [['name', 'address'], 'string', 'max' => 128],
+            [['name', 'address', 'contact_person'], 'string', 'max' => 128],
             [['provinsi_id'], 'string', 'max' => 2],
             [['kabupaten_id'], 'string', 'max' => 4],
             [['kecamatan_id'], 'string', 'max' => 7],

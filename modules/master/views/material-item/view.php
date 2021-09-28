@@ -64,15 +64,39 @@ $this->params['breadcrumbs'][] = $this->title;
                 'lebar',
                 'gram',
                 [
-                    'attribute' => 'harga_beli',
+                    'attribute' => 'harga_beli_1',
                     'value' => function ($model, $index) { 
-                        return 'Rp.'.number_format($model->harga_beli).'.-';
+                        return 'Rp.'.number_format($model->harga_beli_1).'.-';
                     }
                 ],
                 [
-                    'attribute' => 'harga_jual',
+                    'attribute' => 'harga_beli_2',
                     'value' => function ($model, $index) { 
-                        return 'Rp.'.number_format($model->harga_jual).'.-';
+                        return 'Rp.'.number_format($model->harga_beli_2).'.-';
+                    }
+                ],
+                [
+                    'attribute' => 'harga_beli_3',
+                    'value' => function ($model, $index) { 
+                        return 'Rp.'.number_format($model->harga_beli_3).'.-';
+                    }
+                ],
+                [
+                    'attribute' => 'harga_jual_1',
+                    'value' => function ($model, $index) { 
+                        return 'Rp.'.number_format($model->harga_jual_1).'.-';
+                    }
+                ],
+                [
+                    'attribute' => 'harga_beli_2',
+                    'value' => function ($model, $index) { 
+                        return 'Rp.'.number_format($model->harga_beli_2).'.-';
+                    }
+                ],
+                [
+                    'attribute' => 'harga_beli_3',
+                    'value' => function ($model, $index) { 
+                        return 'Rp.'.number_format($model->harga_beli_3).'.-';
                     }
                 ],
                 'keterangan:ntext',

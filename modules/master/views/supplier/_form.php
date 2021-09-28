@@ -20,6 +20,9 @@ use yii\widgets\MaskedInput;
                 <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
                     <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
                 </div>
+                <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
+                    <?= $form->field($model, 'contact_person')->textInput(['maxlength' => true]) ?>
+                </div>
             </div>
             <div class="col-lg-12 col-md-12 col-xs-12">
                 <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">

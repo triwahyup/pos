@@ -28,6 +28,9 @@ $this->params['breadcrumbs'][] = $this->title;
                     return (isset($model->typeCode)) ? $model->typeCode->name : '';
                 }
             ],
+            'um_1',
+            'um_2',
+            'um_3',
             [
                 'attribute' => 'created_at',
                 'contentOptions' => [

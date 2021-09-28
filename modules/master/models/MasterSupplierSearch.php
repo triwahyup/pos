@@ -17,7 +17,7 @@ class MasterSupplierSearch extends MasterPerson
     public function rules()
     {
         return [
-            [[ 'name', 'address', 'phone_1', 'created_at', 'updated_at', 'tgl_jatuh_tempo', 'group_supplier_code'], 'safe'],
+            [[ 'name', 'address', 'phone_1', 'created_at', 'updated_at', 'tgl_jatuh_tempo', 'group_supplier_code', 'contact_person'], 'safe'],
         ];
     }
 
@@ -78,6 +78,7 @@ class MasterSupplierSearch extends MasterPerson
         ]);
 
         $query->andFilterWhere(['like', 'a.name', $this->name])
+            ->andFilterWhere(['like', 'contact_person', $this->contact_person])
             ->andFilterWhere(['like', 'address', $this->address])
             ->andFilterWhere(['like', 'phone_1', $this->phone_1]);
 

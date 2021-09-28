@@ -54,6 +54,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         return (isset($model->kelurahan)) ? $model->kelurahan->name : '-';
                     }
                 ],
+                'contact_person',
                 'kode_pos',
                 'phone_1',
                 'phone_2',

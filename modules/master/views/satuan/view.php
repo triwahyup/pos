@@ -35,6 +35,10 @@ $this->params['breadcrumbs'][] = $this->title;
                         return (isset($model->typeCode)) ? $model->typeCode->name : '';
                     }
                 ],
+                'composite',
+                'um_1',
+                'um_2',
+                'um_3',
                 'keterangan:ntext',
                 [
                     'attribute' => 'status',

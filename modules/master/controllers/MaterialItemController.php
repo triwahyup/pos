@@ -39,7 +39,7 @@ class MaterialItemController extends Controller
                             'roles' => ['@'],
                         ],
                         [
-                            'actions' => ['index', 'view', 'generate-code'],
+                            'actions' => ['index', 'view', 'generate-code', 'um'],
                             'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('material-item')),
                             'roles' => ['@'],
                         ], 
@@ -105,6 +105,10 @@ class MaterialItemController extends Controller
             ->where(['type'=>\Yii::$app->params['TYPE_MATERIAL'], 'status' => 1])
             ->indexBy('code')
             ->column();
+        $material = [];
+        $satuan = [];
+        $groupMaterial = [];
+        $groupSupplier = [];
 
         $success = true;
         $message = '';
@@ -114,8 +118,6 @@ class MaterialItemController extends Controller
                 $connection = \Yii::$app->db;
 			    $transaction = $connection->beginTransaction();
                 try{
-                    $model->harga_beli = str_replace(',','', $model->harga_beli);
-                    $model->harga_jual = str_replace(',','', $model->harga_jual);
                     if($model->save()){
                         $stockItem = new InventoryStockItem();
                         $stockItem->item_code = $model->code;
@@ -169,6 +171,10 @@ class MaterialItemController extends Controller
         return $this->render('create', [
             'model' => $model,
             'type' => $type,
+            'material' => $material,
+            'satuan' => $satuan,
+            'groupMaterial' => $groupMaterial,
+            'groupSupplier' => $groupSupplier,
         ]);
     }
 
@@ -181,16 +187,30 @@ class MaterialItemController extends Controller
      */
     public function actionUpdate($code)
     {
-        $type = [];
         $success = true;
         $message = '';
         $model = $this->findModel($code);
+        $type = MasterKode::find()
+            ->select(['name'])
+            ->where(['type'=>\Yii::$app->params['TYPE_MATERIAL'], 'status' => 1])
+            ->indexBy('code')
+            ->column();
+        $material = MasterMaterial::find()
+            ->select(['name'])
+            ->where(['type_code'=>$model->type_code, 'status'=>1])
+            ->indexBy('code')
+            ->column();
+        $satuan= MasterSatuan::find()
+            ->select(['name'])
+            ->where(['type_code'=>$model->type_code, 'status'=>1])
+            ->indexBy('code')
+            ->column();
+        $groupMaterial = [];
+        $groupSupplier = [];
         if ($this->request->isPost && $model->load($this->request->post())) {
             $connection = \Yii::$app->db;
             $transaction = $connection->beginTransaction();
             try{
-                $model->harga_beli = str_replace(',','', $model->harga_beli);
-                $model->harga_jual = str_replace(',','', $model->harga_jual);
                 if(!$model->save()){
                     $success = false;
                     $message = (count($model->errors) > 0) ? 'ERROR UPDATE ITEM: ' : '';
@@ -230,6 +250,10 @@ class MaterialItemController extends Controller
         return $this->render('update', [
             'model' => $model,
             'type' => $type,
+            'material' => $material,
+            'satuan' => $satuan,
+            'groupMaterial' => $groupMaterial,
+            'groupSupplier' => $groupSupplier,
         ]);
     }
 
@@ -328,6 +352,15 @@ class MaterialItemController extends Controller
             ->where(['type_code'=>$type, 'status'=>1])
             ->asArray()
             ->all();
+        return json_encode($model);
+    }
+
+    public function actionUm($code)
+    {
+        $model = MasterSatuan::find()
+            ->where(['code'=>$code, 'status'=>1])
+            ->asArray()
+            ->one();
         return json_encode($model);
     }
 }

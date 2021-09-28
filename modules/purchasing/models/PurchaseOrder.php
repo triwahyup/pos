@@ -29,15 +29,6 @@ use yii\behaviors\TimestampBehavior;
  */
 class PurchaseOrder extends \yii\db\ActiveRecord
 {
-    public $item_code;
-    public $satuan;
-    public $qty_order;
-    public $harga_beli;
-    public $harga_jual;
-    public $ppn;
-    public $total;
-    public $id;
-
     /**
      * {@inheritdoc}
      */
@@ -60,13 +51,10 @@ class PurchaseOrder extends \yii\db\ActiveRecord
     {
         return [
             [['no_po', 'tgl_po', 'tgl_kirim', 'term_in', 'supplier_code', 'user_request'], 'required'],
-            [['tgl_po', 'tgl_kirim', 'total_order', 'harga_beli', 'harga_jual', 'qty_order'], 'safe'],
-            [['term_in', 'user_id', 'user_request', 'status', 'status_approval', 'status_terima', 'created_at', 'updated_at', 'id', 'post'], 'integer'],
+            [['tgl_po', 'tgl_kirim', 'total_order'], 'safe'],
+            [['term_in', 'user_id', 'user_request', 'status', 'status_approval', 'status_terima', 'created_at', 'updated_at', 'post'], 'integer'],
             [['keterangan'], 'string'],
-            [['ppn', 'total'], 'number'],
             [['no_po'], 'string', 'max' => 12],
-            [['item_code'], 'string', 'max' => 7],
-            [['satuan'], 'string', 'max' => 5],
             [['supplier_code'], 'string', 'max' => 3],
             [['no_po'], 'unique'],
             [['status_approval', 'status_terima', 'post'], 'default', 'value' => 0],
@@ -94,13 +82,6 @@ class PurchaseOrder extends \yii\db\ActiveRecord
             'status_terima' => 'Status Terima',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
-            'item_code' => 'Item Code',
-            'qty_order' => 'QTY',
-            'ppn' => 'Ppn (%)',
-            'total' => 'Total',
-            'harga_beli' => 'Harga Beli',
-            'satuan' => 'Satuan',
-            'id' => 'id',
         ];
     }
 

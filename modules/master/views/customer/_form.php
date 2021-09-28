@@ -19,6 +19,9 @@ use yii\widgets\MaskedInput;
                 <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
                     <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
                 </div>
+                <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
+                    <?= $form->field($model, 'contact_person')->textInput(['maxlength' => true]) ?>
+                </div>
             </div>
             <div class="col-lg-12 col-md-12 col-xs-12">
                 <div class="margin-top-20"></div>
@@ -32,17 +35,23 @@ use yii\widgets\MaskedInput;
                             'options' => ['placeholder' => 'Provinisi'],
                         ]) ?>
                     <?= $form->field($model, 'kabupaten_id')->widget(Select2::classname(), [
-                            'data' => [],
+                            'data' => (!$model->isNewRecord) ? (isset($model->kabupaten)) ? [
+                                $model->kabupaten->id => $model->kabupaten->name
+                            ] : '' : [],
                             'options' => ['placeholder' => 'Kabupaten'],
                         ]) ?>
                 </div>
                 <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
                     <?= $form->field($model, 'kecamatan_id')->widget(Select2::classname(), [
-                            'data' => [],
+                            'data' => (!$model->isNewRecord) ? (isset($model->kecamatan)) ? [
+                                $model->kecamatan->id => $model->kecamatan->name,
+                            ] : '' : [],
                             'options' => ['placeholder' => 'Kecamatan'],
                         ]) ?>
                     <?= $form->field($model, 'kelurahan_id')->widget(Select2::classname(), [
-                            'data' => [],
+                            'data' => (!$model->isNewRecord) ? (isset($model->kelurahan)) ? [
+                                $model->kelurahan->id => $model->kelurahan->name,
+                            ] : '' : [],
                             'options' => ['placeholder' => 'Kelurahan'],
                         ]) ?>
                 </div>
