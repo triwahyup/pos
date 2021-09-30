@@ -50,10 +50,9 @@ class MasterOrderDetail extends \yii\db\ActiveRecord
     {
         return [
             [['urutan', 'potong', 'objek', 'mesin', 'jumlah_warna', 'lembar_ikat', 'status', 'created_at', 'updated_at'], 'integer'],
-            [['panjang', 'lebar', 'harga_jual', 'harga_cetak', 'harga_beli', 'min_order_ct', 'min_order_lb'], 'number'],
-            [['order_code'], 'string', 'max' => 3],
+            [['panjang', 'lebar', 'harga_cetak', 'harga_beli_1', 'harga_beli_2', 'harga_beli_3', 'harga_jual_1', 'harga_jual_2', 'harga_jual_3', 'qty_order_1', 'qty_order_2', 'qty_order_3'], 'number'],
+            [['order_code', 'satuan_code', 'type_code', 'material_code', 'group_material_code', 'group_supplier_code'], 'string', 'max' => 3],
             [['item_code'], 'string', 'max' => 7],
-            [['satuan'], 'string', 'max' => 5],
             [['order_code', 'urutan'], 'unique', 'targetAttribute' => ['order_code', 'urutan']],
             [['status'], 'default', 'value' => 1],
         ];
@@ -68,7 +67,7 @@ class MasterOrderDetail extends \yii\db\ActiveRecord
             'order_code' => 'Order Code',
             'urutan' => 'Urutan',
             'item_code' => 'Item Code',
-            'satuan' => 'Satuan',
+            'satuan_code' => 'Satuan',
             'panjang' => 'Panjang',
             'lebar' => 'Lebar',
             'potong' => 'Potong',

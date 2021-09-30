@@ -149,9 +149,9 @@ class PurchaseOrder extends \yii\db\ActiveRecord
         if($this->status_approval == 1){
             $message = '<span class="text-label text-primary">Send Approval</span>';
         }else if($this->status_approval == 2){
-            $message = '<span class="text-label text-success">Finish Approved</span>';
+            $message = '<span class="text-label text-success">Finish</span>';
         }else if($this->status_approval == 3){
-            $message = '<span class="text-label text-danger">Rejected Approval</span>';
+            $message = '<span class="text-label text-danger">Rejected</span>';
         }else{
             $message = '<span class="text-label text-default">Not Send</span>';
         }

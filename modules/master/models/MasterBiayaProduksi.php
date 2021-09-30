@@ -3,32 +3,31 @@
 namespace app\modules\master\models;
 
 use Yii;
-use app\modules\master\models\MasterOrderDetail;
-use app\modules\master\models\TempMasterOrderDetail;
 use yii\behaviors\TimestampBehavior;
 
 /**
- * This is the model class for table "master_order".
+ * This is the model class for table "master_biaya_produksi".
  *
  * @property string $code
  * @property string|null $name
- * @property string|null $keterangan
+ * @property float|null $index
+ * @property float|null $harga
  * @property int|null $status
  * @property int|null $created_at
  * @property int|null $updated_at
  */
-class MasterOrder extends \yii\db\ActiveRecord
+class MasterBiayaProduksi extends \yii\db\ActiveRecord
 {
     /**
      * {@inheritdoc}
      */
     public static function tableName()
     {
-        return 'master_order';
+        return 'master_biaya_produksi';
     }
 
     public function behaviors()
-	{
+    {
         return [
             TimestampBehavior::className(),
         ];
@@ -40,8 +39,9 @@ class MasterOrder extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['name'], 'required'],
-            [['status', 'created_at', 'updated_at', 'type_order'], 'integer'],
+            [['name', 'type', 'index'], 'required'],
+            [['index', 'harga'], 'number'],
+            [['status', 'created_at', 'updated_at', 'type'], 'integer'],
             [['code'], 'string', 'max' => 3],
             [['name', 'keterangan'], 'string', 'max' => 128],
             [['code'], 'unique'],
@@ -57,7 +57,8 @@ class MasterOrder extends \yii\db\ActiveRecord
         return [
             'code' => 'Code',
             'name' => 'Name',
-            'keterangan' => 'Keterangan',
+            'index' => 'Index',
+            'harga' => 'Harga',
             'status' => 'Status',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
@@ -66,27 +67,17 @@ class MasterOrder extends \yii\db\ActiveRecord
 
     public function generateCode()
     {
-        $model = MasterOrder::find()->count();
+        $model = MasterBiayaProduksi::find()->count();
         $total=0;
         if($model > 0){
-            $model = MasterOrder::find()->orderBy(['code'=>SORT_DESC])->one();
+            $model = MasterBiayaProduksi::find()->orderBy(['code'=>SORT_DESC])->one();
             $total = (int)substr($model->code, 1);
         }
         return (string)sprintf('%03s', ($total+1));
     }
 
-    public function getDetails()
+    public function getTypeOngkos()
     {
-        return $this->hasMany(MasterOrderDetail::className(), ['order_code' => 'code']);
-    }
-
-    public function getTemps()
-    {
-        return $this->hasMany(TempMasterOrderDetail::className(), ['order_code' => 'code']);
-    }
-
-    public function temps()
-    {
-        return TempMasterOrderDetail::find()->where(['user_id' => \Yii::$app->user->id])->all();
+        return ($this->type == 1) ? 'Cetak' : 'Pond';
     }
 }
