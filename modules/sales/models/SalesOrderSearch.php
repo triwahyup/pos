@@ -1,15 +1,15 @@
 <?php
 
-namespace app\modules\master\models;
+namespace app\modules\sales\models;
 
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use app\modules\master\models\MasterOrder;
+use app\modules\sales\models\SalesOrder;
 
 /**
- * MasterOrderSearch represents the model behind the search form of `app\modules\master\models\MasterOrder`.
+ * SalesOrderSearch represents the model behind the search form of `app\modules\sales\models\SalesOrder`.
  */
-class MasterOrderSearch extends MasterOrder
+class SalesOrderSearch extends SalesOrder
 {
     /**
      * {@inheritdoc}
@@ -17,7 +17,9 @@ class MasterOrderSearch extends MasterOrder
     public function rules()
     {
         return [
-            [['name', 'type_order', 'total_biaya', 'created_at', 'updated_at'], 'safe'],
+            [['no_so', 'tgl_so', 'no_po', 'tgl_po', 'customer_code'], 'safe'],
+            [['ppn', 'total_order'], 'number'],
+            [['status', 'created_at', 'updated_at'], 'integer'],
         ];
     }
 
@@ -39,7 +41,7 @@ class MasterOrderSearch extends MasterOrder
      */
     public function search($params)
     {
-        $query = MasterOrder::find();
+        $query = SalesOrder::find();
 
         // add conditions that should always apply here
 
@@ -56,20 +58,20 @@ class MasterOrderSearch extends MasterOrder
         }
 
         // grid filtering conditions
-        $query->where(['status' => 1]);
-        if(!empty($this->created_at)){
-            $t1 = strtotime($this->created_at);
-			$t2 = strtotime("+1 days", $t1);
-			$query->andWhere('created_at >='.$t1.' and created_at <'.$t2);
-        }
-        if(!empty($this->updated_at)){
-            $t1 = strtotime($this->updated_at);
-			$t2 = strtotime("+1 days", $t1);
-			$query->andWhere('updated_at >='.$t1.' and updated_at <'.$t2);
-        }
+        $query->andFilterWhere([
+            'tgl_so' => $this->tgl_so,
+            'tgl_po' => $this->tgl_po,
+            'ppn' => $this->ppn,
+            'total_order' => $this->total_order,
+            'status' => $this->status,
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
+        ]);
 
-        $query->andFilterWhere(['like', 'name', $this->name])
-            ->andFilterWhere(['like', 'total_biaya', $this->total_biaya]);
+        $query->andFilterWhere(['like', 'no_so', $this->no_so])
+            ->andFilterWhere(['like', 'no_po', $this->no_po])
+            ->andFilterWhere(['like', 'customer_code', $this->customer_code]);
+
         return $dataProvider;
     }
 }

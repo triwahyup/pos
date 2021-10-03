@@ -127,120 +127,6 @@ JS;
                                 ]
                             ])->label(false) ?>
                         </div>
-                        <div class="col-lg-1 col-md-1 col-sm-12 col-xs-12 padding-right-0">
-                            <?= $form->field($temp, 'qty_order_3')->widget(MaskedInput::className(), [
-                                'clientOptions' => [
-                                    'alias' =>  'decimal',
-                                    'groupSeparator' => ',',
-                                    'autoGroup' => true,
-                                ],
-                                'options' => [
-                                    'data-align' => 'text-right',
-                                    'readonly' => true,
-                                    'maxlength' => 3,
-                                ]
-                            ])->label(false) ?>
-                        </div>
-                    </div>
-                    <div class="col-lg-12 col-md-12 col-xs-12">
-                        <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
-                            <label>Harga Beli:</label>
-                        </div>
-                        <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
-                            <?= $form->field($temp, 'harga_beli_1')->widget(MaskedInput::className(), [
-                                'clientOptions' => [
-                                    'alias' =>  'decimal',
-                                    'groupSeparator' => ',',
-                                    'autoGroup' => true
-                                ],
-                                'options' => [
-                                    'data-align' => 'text-right',
-                                    'data-name' => 'iconbox',
-                                    'data-icons' => 'rupiah',
-                                    'readonly' => true,
-                                ]
-                            ])->label(false) ?>
-                        </div>
-                        <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
-                            <?= $form->field($temp, 'harga_beli_2')->widget(MaskedInput::className(), [
-                                'clientOptions' => [
-                                    'alias' =>  'decimal',
-                                    'groupSeparator' => ',',
-                                    'autoGroup' => true
-                                ],
-                                'options' => [
-                                    'data-align' => 'text-right',
-                                    'data-name' => 'iconbox',
-                                    'data-icons' => 'rupiah',
-                                    'readonly' => true,
-                                ]
-                            ])->label(false) ?>
-                        </div>
-                        <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
-                            <?= $form->field($temp, 'harga_beli_3')->widget(MaskedInput::className(), [
-                                'clientOptions' => [
-                                    'alias' =>  'decimal',
-                                    'groupSeparator' => ',',
-                                    'autoGroup' => true
-                                ],
-                                'options' => [
-                                    'data-align' => 'text-right',
-                                    'data-name' => 'iconbox',
-                                    'data-icons' => 'rupiah',
-                                    'readonly' => true,
-                                ]
-                            ])->label(false) ?>
-                        </div>
-                    </div>
-                    <div class="col-lg-12 col-md-12 col-xs-12">
-                        <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
-                            <label>Harga Jual:</label>
-                        </div>
-                        <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
-                            <?= $form->field($temp, 'harga_jual_1')->widget(MaskedInput::className(), [
-                                'clientOptions' => [
-                                    'alias' =>  'decimal',
-                                    'groupSeparator' => ',',
-                                    'autoGroup' => true
-                                ],
-                                'options' => [
-                                    'data-align' => 'text-right',
-                                    'data-name' => 'iconbox',
-                                    'data-icons' => 'rupiah',
-                                    'readonly' => true,
-                                ]
-                            ])->label(false) ?>
-                        </div>
-                        <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
-                            <?= $form->field($temp, 'harga_jual_2')->widget(MaskedInput::className(), [
-                                'clientOptions' => [
-                                    'alias' =>  'decimal',
-                                    'groupSeparator' => ',',
-                                    'autoGroup' => true
-                                ],
-                                'options' => [
-                                    'data-align' => 'text-right',
-                                    'data-name' => 'iconbox',
-                                    'data-icons' => 'rupiah',
-                                    'readonly' => true,
-                                ]
-                            ])->label(false) ?>
-                        </div>
-                        <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
-                            <?= $form->field($temp, 'harga_jual_3')->widget(MaskedInput::className(), [
-                                'clientOptions' => [
-                                    'alias' =>  'decimal',
-                                    'groupSeparator' => ',',
-                                    'autoGroup' => true
-                                ],
-                                'options' => [
-                                    'data-align' => 'text-right',
-                                    'data-name' => 'iconbox',
-                                    'data-icons' => 'rupiah',
-                                    'readonly' => true,
-                                ]
-                            ])->label(false) ?>
-                        </div>
                     </div>
                     <div class="col-lg-12 col-md-12 col-xs-12">
                         <div class="margin-top-20"></div>
@@ -431,7 +317,6 @@ function init_temp()
         success: function(data){
             var o = $.parseJSON(data);
             $("[data-table=\"detail\"] > tbody").html(o.model);
-            console.log(o.total_biaya);
             $("#masterorder-total_biaya").val(o.total_biaya);
         },
         complete: function(){
@@ -464,7 +349,7 @@ function get_temp(id)
                     $("#tempmasterorderdetail-"+index).val(value);
                 }
 
-                if(value == 'qty_order_1' && value == 'qty_order_2' && value == 'qty_order_3'){
+                if(value == 'qty_order_1' && value == 'qty_order_2'){
                     if(value !== null){
                         $("#temppurchaseorderdetail-"+value).attr("readonly", false);
                     }
@@ -558,7 +443,7 @@ function delete_temp(id)
     });
 }
 
-function create_temp_produksi(biaya, item)
+function create_temp_produksi(code, biaya, item)
 {
     $.ajax({
         url: "<?= Url::to(['order/create-temp-produksi']) ?>",
@@ -567,6 +452,7 @@ function create_temp_produksi(biaya, item)
         error: function(xhr, status, error) {},
         beforeSend: function(){},
         data: {
+            code: code,
             biaya: biaya,
             item: item,
         },
@@ -604,7 +490,6 @@ function delete_temp_produksi(id)
                 notification.open("danger", o.message, timeOut);
             }
             init_temp();
-            popup.close();
         },
         complete: function(){
 			loading.close();
@@ -683,15 +568,13 @@ $(document).ready(function(){
         delete_temp($(this).attr("data-target"));
     });
 
-    $("body").off("click","#tambah_proses").on("click","#tambah_proses", function(e){
+    $("body").off("click","[id^=\"tambah_proses_\"]").on("click","[id^=\"tambah_proses_\"]", function(e){
         e.preventDefault();
-        $(".option-custom").show();
+        $(this).next(".option-custom").show();
     });
     $("body").off("click",".option-custom > li:not([data-event])").on("click",".option-custom > li:not([data-event])", function(e){
         e.preventDefault();
-        var biaya = $("#biaya", $(this)).val();
-        var item = $("#item", $(this)).val();
-        create_temp_produksi(biaya, item);
+        create_temp_produksi($("#code", $(this)).val(), $("#biaya", $(this)).val(), $("#item", $(this)).val());
     });
     $("body").off("click","#delete_temp").on("click","#delete_temp", function(e){
         e.preventDefault();

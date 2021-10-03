@@ -42,7 +42,7 @@ class MasterOrder extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['name', 'type', 'total_biaya'], 'required'],
+            [['name', 'type_order', 'total_biaya'], 'required'],
             [['total_biaya'], 'safe'],
             [['status', 'created_at', 'updated_at', 'type_order'], 'integer'],
             [['code'], 'string', 'max' => 3],

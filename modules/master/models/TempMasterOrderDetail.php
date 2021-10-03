@@ -5,6 +5,7 @@ namespace app\modules\master\models;
 use Yii;
 use app\modules\inventory\models\InventoryStockItem;
 use app\modules\master\models\MasterMaterialItem;
+use app\modules\master\models\TempMasterOrderProduksiDetail;
 
 /**
  * This is the model class for table "temp_master_order_detail".
@@ -76,16 +77,9 @@ class TempMasterOrderDetail extends \yii\db\ActiveRecord
 
     public function beforeSave($attribute)
     {
-        $this->harga_beli_1 = str_replace(',', '', $this->harga_beli_1);
-        $this->harga_beli_2 = str_replace(',', '', $this->harga_beli_2);
-        $this->harga_beli_3 = str_replace(',', '', $this->harga_beli_3);
-        $this->harga_jual_1 = str_replace(',', '', $this->harga_jual_1);
-        $this->harga_jual_2 = str_replace(',', '', $this->harga_jual_2);
-        $this->harga_jual_3 = str_replace(',', '', $this->harga_jual_3);
         $this->harga_cetak = str_replace(',', '', $this->harga_cetak);
         $this->qty_order_1 = str_replace(',', '', $this->qty_order_1);
         $this->qty_order_2 = str_replace(',', '', $this->qty_order_2);
-        $this->qty_order_3 = str_replace(',', '', $this->qty_order_3);
         $this->jumlah_warna = str_replace(',', '', $this->jumlah_warna);
         $this->lembar_ikat = str_replace(',', '', $this->lembar_ikat);
         $this->mesin = str_replace(',', '', $this->mesin);
@@ -124,5 +118,14 @@ class TempMasterOrderDetail extends \yii\db\ActiveRecord
         $this->jumlah_objek = $this->jumlah_cetak * $this->objek;
         $this->jumlah_lem = 0;
         return true;
+    }
+
+    public function getDetailsProduksi()
+    {
+        if(!empty($this->order_code)){
+            return $this->hasMany(TempMasterOrderProduksiDetail::className(), ['order_code' => 'order_code', 'item_code' => 'item_code']);
+        }else{
+            return $this->hasMany(TempMasterOrderProduksiDetail::className(), ['item_code' => 'item_code', 'user_id'=> 'user_id']);
+        }
     }
 }

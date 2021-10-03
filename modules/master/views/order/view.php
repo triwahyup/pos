@@ -30,6 +30,20 @@ $this->params['breadcrumbs'][] = $this->title;
             'attributes' => [
                 'code',
                 'name',
+                [
+                    'attribute' => 'type_order',
+                    'value' => function($model, $key)
+                    {
+                        return ($model->type_order == 1) ? 'Produk' : 'Jasa';
+                    }
+                ],
+                [
+                    'attribute' => 'total_biaya',
+                    'value' => function($model, $key)
+                    {
+                        return 'Rp.'.number_format($model->total_biaya).'.-';
+                    }
+                ],
                 'keterangan',
                 [
                     'attribute' => 'status',
@@ -77,7 +91,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         <?php if(count($model->details) > 0): ?>
                             <?php foreach($model->details as $index=>$val): ?>
                                 <tr>
-                                    <td class="text-center"><?=$index+1?></td>
+                                    <td class="text-center" rowspan="2"><?=$index+1?></td>
                                     <td class="font-size-10"><?=(isset($val->item)) ? '<span class="text-success">'.$val->item->code .'</span><br />'. $val->item->name : '' ?></td>
                                     <?php for($a=1;$a<=3;$a++): ?>
                                         <td class="text-right"><?=(!empty($val['qty_order_'.$a])) ? number_format($val['qty_order_'.$a]).'<br /><span class="text-muted font-size-10">'.$val['um_'.$a].'</span>' : null ?></td>
@@ -86,6 +100,71 @@ $this->params['breadcrumbs'][] = $this->title;
                                     <td class="text-right"><?=number_format($val['jumlah_objek']).'.- <br /><span class="text-muted font-size-10">QTY Objek</span>' ?></td>
                                     <td class="text-right"><?=number_format($val['jumlah_lem']).'.- <br /><span class="text-muted font-size-10">QTY Lem</span>' ?></td>
                                     <td class="text-right"><?=number_format($val['harga_cetak']).'.- <br /><span class="text-muted font-size-10">Per Objek</span>' ?></td>
+                                </tr>
+                                <tr>
+                                    <td colspan="10">
+                                        <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
+                                            <div class="col-lg-6 col-md-6 col-xs-12 padding-left-0">
+                                                <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
+                                                    <div class="col-lg-4 col-md-4 col-xs-12 padding-left-0 padding-right-0">
+                                                        <div class="td-desc">
+                                                            <label>Panjang</label>
+                                                            <span><?=$val->panjang ?></span>
+                                                        </div>
+                                                        <div class="td-desc">
+                                                            <label>Lebar</label>
+                                                            <span><?=$val->lebar ?></span>
+                                                        </div>
+                                                        <div class="td-desc">
+                                                            <label>Potong</label>
+                                                            <span><?=$val->potong ?></span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-4 col-md-4 col-xs-12 padding-left-0 padding-right-0">
+                                                        <div class="td-desc">
+                                                            <label>Objek</label>
+                                                            <span><?=$val->objek ?></span>
+                                                        </div>
+                                                        <div class="td-desc">
+                                                            <label>Mesin</label>
+                                                            <span><?=$val->mesin ?></span>
+                                                        </div>
+                                                        <div class="td-desc">
+                                                            <label>Warna</label>
+                                                            <span><?=$val->jumlah_warna ?></span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-4 col-md-4 col-xs-12 padding-left-0 padding-right-0">
+                                                        <div class="td-desc">
+                                                            <label>Lb. Ikat</label>
+                                                            <span><?=$val->lembar_ikat ?></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-6 col-md-6 col-xs-12 padding-left-0">
+                                                <div class="col-lg-12 col-md-12 col-xs-12 text-left padding-left-0">
+                                                    <?php if(count($val->detailsProduksi) > 0):
+                                                        $total_biaya=0;?>
+                                                        <label class="text-left">Detail Proses</label>
+                                                        <ul class="desc-custom padding-left-0">
+                                                            <?php foreach($val->detailsProduksi as $v):
+                                                                $total_biaya += $v->total_biaya; ?>
+                                                                <li>
+                                                                    <span><?=$v->name ?></span>
+                                                                    <span><?='Rp. '.number_format($v->total_biaya).'.-' ?></span>
+                                                                </li>
+                                                            <?php endforeach; ?>
+                                                            <li>
+                                                                <span class="text-right"><strong>Total Biaya:</strong></span>
+                                                                <span><?='Rp. '.number_format($total_biaya).'.-' ?></span>
+                                                            </li>
+                                                        </ul>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
                                 </tr>
                             <?php endforeach; ?>
                         <?php else : ?>

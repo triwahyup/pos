@@ -23,6 +23,23 @@ $this->params['breadcrumbs'][] = $this->title;
             ['class' => 'yii\grid\SerialColumn'],
             'name',
             [
+                'attribute' => 'type_order',
+                'value' => function($model, $index, $key)
+                {
+                    return ($model->type_order == 1) ? 'Produk' : 'Jasa';
+                }
+            ],
+            [
+                'attribute' => 'total_biaya',
+                'contentOptions' => [
+                    'class' => 'text-right',
+                ],
+                'value' => function($model, $index, $key)
+                {
+                    return number_format($model->total_biaya).'.-';
+                }
+            ],
+            [
                 'attribute' => 'created_at',
                 'contentOptions' => [
                     'class' => 'text-center',

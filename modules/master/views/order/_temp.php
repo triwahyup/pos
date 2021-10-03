@@ -58,13 +58,14 @@
                                     <span><?=$val->lembar_ikat ?></span>
                                 </div>
                                 <div class="td-desc">
-                                    <a id="tambah_proses" href="javascript:void(0)">Tambah Proses</a>
+                                    <a id="tambah_proses_<?=$val->item_code ?>" href="javascript:void(0)">Tambah Proses</a>
                                     <ul class="option-custom">
                                         <?php foreach($biaya as $v): ?>
                                             <li>
                                                 <?=$v->name?>
                                                 <input type="hidden" name="biaya" id="biaya" value="<?=$v->code ?>">
                                                 <input type="hidden" name="item" id="item" value="<?=$val->item_code ?>">
+                                                <input type="hidden" name="code" id="code" value="<?=$val->order_code ?>">
                                             </li>
                                         <?php endforeach; ?>
                                         <li data-event="close">
@@ -77,13 +78,13 @@
                     </div>
                     <div class="col-lg-6 col-md-6 col-xs-12 padding-left-0">
                         <div class="col-lg-12 col-md-12 col-xs-12 text-left padding-left-0">
-                            <?php if(count($tempsProduksi) > 0):
+                            <?php if(count($val->detailsProduksi) > 0):
                                 $total_biaya=0;?>
                                 <label class="text-left">Detail Proses</label>
                                 <ul class="desc-custom padding-left-0">
-                                    <?php foreach($tempsProduksi as $v):
+                                    <?php foreach($val->detailsProduksi as $v):
                                         $total_biaya += $v->total_biaya; ?>
-                                        <li class="margin-top-10">
+                                        <li>
                                             <span><?=$v->name ?></span>
                                             <span><?='Rp. '.number_format($v->total_biaya).'.-' ?></span>
                                             <span id="delete_temp" data-id="<?=$v->id ?>">
