@@ -32,11 +32,17 @@
 .padding-20 {
     padding: 20px;
 }
+.margin-bottom-10 {
+    margin-bottom: 10px;
+}
 .margin-bottom-20 {
     margin-bottom: 20px;
 }
 .margin-left-5 {
     margin-left: 5px;
+}
+.margin-top-10 {
+    margin-top: 10px;
 }
 .margin-top-20 {
     margin-top: 20px;
@@ -1072,6 +1078,73 @@ form {
         color: @color_default;
         line-height: 24px;
         margin-left: 15px;
+    }
+}
+.td-desc {
+    text-align: left;
+    label {
+        margin-bottom: 0;
+        position: relative;
+        width: 60px;
+        &:before {
+            content: ":";
+            position: absolute;
+            right: 0;
+        }
+    }
+    a {
+        display: block;
+        margin-top: 5px;
+    }
+    .option-custom {
+        .boxShadow(0 6px 12px rgb(0 0 0 / 18%));
+        background-color: @color_default;
+        bottom: 20px;
+        display: none;
+        margin-bottom: 0;
+        padding: 5px 10px;
+        position: absolute;
+        li {
+            cursor: pointer;
+            display: inline-block;
+            padding: 5px 0;
+            width: 100%;
+            a.close {
+                text-align: right;
+            }
+        }
+    }
+}
+.desc-custom {
+    li {
+        span {
+            display: inline-block;
+            &:nth-child(1) {
+                width: 200px;
+            }
+            &:nth-child(2) {
+                text-align: right;
+                width: 100px;
+            }
+            &:nth-child(3) {
+                cursor: pointer;
+                height: 12px;
+                left: 10px;
+                position: relative;
+                top: 3px;
+                width: 12px;
+                i {
+                    color: @color_danger;
+                    left: 50%;
+                    top: 50%;
+                }
+            }
+        }
+        &:nth-last-child(1){
+            border-top: 1px solid @color_border;
+            margin-top: 10px;
+            padding-top: 5px;
+        }
     }
 }
 /** END CUSTOM TABLE GRIDVIEW **/

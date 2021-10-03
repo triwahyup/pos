@@ -37,7 +37,22 @@ JS;
             <div class="col-lg-4 col-md-4 col-xs-12 padding-left-0">
                 <?= $form->field($model, 'code')->hiddenInput(['maxlength' => true])->label(false) ?>
                 <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
+                <?= $form->field($model, 'type_order')->widget(Select2::classname(), [
+                        'data' => [1=>'Produksi', 2=>'Jasa'],
+                        'options' => [
+                            'placeholder' => 'Pilih Type Order',
+                            'class' => 'select2',
+                        ],
+                    ]) ?>
                 <?= $form->field($model, 'keterangan')->textarea(['rows' => 2]) ?>
+            </div>
+            <div class="col-lg-4 col-md-4 col-xs-12 padding-left-0"></div>
+            <div class="col-lg-4 col-md-4 col-xs-12 padding-right-0">
+                <div class="margin-top-20"></div>
+                <div class="board-container">
+                    <p class="title">Total Biaya</p>
+                    <?= $form->field($model, 'total_biaya')->textInput(['readonly' => true, 'value'=>0])->label(false) ?>
+                </div>
             </div>
         </div>
         <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
@@ -56,11 +71,12 @@ JS;
                                 'options' => [
                                     'placeholder' => 'Pilih Item',
                                     'class' => 'select2',
+                                    'data-temp' => 1,
                                 ],
                                 'pluginOptions' => [
                                     'minimumInputLength' => 2,
                                     'ajax' => [
-                                        'url' => Url::to(['purchase-order/list-item']),
+                                        'url' => Url::to(['order/list-item']),
                                         'dataType' => 'json',
                                         'delay' => 250,
                                         'data' => new JsExpression("function(params) {
@@ -229,6 +245,7 @@ JS;
                     <div class="col-lg-12 col-md-12 col-xs-12">
                         <div class="margin-top-20"></div>
                         <?= $form->field($temp, 'id')->hiddenInput()->label(false) ?>
+                        <?= $form->field($temp, 'order_code')->hiddenInput()->label(false) ?>
                         <div class="col-lg-6 col-md-6 col-xs-12 padding-left-0 padding-right-0">
                             <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
                                 <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padding-right-0">
@@ -241,7 +258,7 @@ JS;
                                                 'groupSeparator' => ',',
                                                 'autoGroup' => true
                                             ],
-                                            'options' => ['data-align' => 'text-right', 'placeholder' => 'Panjang']
+                                            'options' => ['data-align' => 'text-right', 'placeholder' => 'Panjang', 'data-temp' => 1]
                                         ])->label(false) ?>
                                 </div>
                                 <div class="col-lg-4 col-md-2 col-sm-12 col-xs-12 padding-right-0">
@@ -251,7 +268,7 @@ JS;
                                                 'groupSeparator' => ',',
                                                 'autoGroup' => true
                                             ],
-                                            'options' => ['data-align' => 'text-right', 'placeholder' => 'Lebar']
+                                            'options' => ['data-align' => 'text-right', 'placeholder' => 'Lebar', 'data-temp' => 1]
                                         ])->label(false) ?>
                                 </div>
                             </div>
@@ -266,7 +283,7 @@ JS;
                                                 'groupSeparator' => ',',
                                                 'autoGroup' => true
                                             ],
-                                            'options' => ['data-align' => 'text-right', 'placeholder' => 'Mesin']
+                                            'options' => ['data-align' => 'text-right', 'placeholder' => 'Mesin', 'data-temp' => 1]
                                         ])->label(false) ?>
                                 </div>
                                 <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padding-right-0">
@@ -276,7 +293,7 @@ JS;
                                                 'groupSeparator' => ',',
                                                 'autoGroup' => true
                                             ],
-                                            'options' => ['data-align' => 'text-right', 'placeholder' => 'Jumlah Warna']
+                                            'options' => ['data-align' => 'text-right', 'placeholder' => 'Jumlah Warna', 'data-temp' => 1]
                                         ])->label(false) ?>
                                 </div>
                             </div>
@@ -293,7 +310,7 @@ JS;
                                                 'groupSeparator' => ',',
                                                 'autoGroup' => true
                                             ],
-                                            'options' => ['data-align' => 'text-right', 'placeholder' => 'Potong']
+                                            'options' => ['data-align' => 'text-right', 'placeholder' => 'Potong', 'data-temp' => 1]
                                         ])->label(false) ?>
                                 </div>
                                 <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padding-right-0">
@@ -303,7 +320,7 @@ JS;
                                                 'groupSeparator' => ',',
                                                 'autoGroup' => true
                                             ],
-                                            'options' => ['data-align' => 'text-right', 'placeholder' => 'Objek']
+                                            'options' => ['data-align' => 'text-right', 'placeholder' => 'Objek', 'data-temp' => 1]
                                         ])->label(false) ?>
                                 </div>
                             </div>
@@ -323,6 +340,7 @@ JS;
                                                 'data-name' => 'iconbox',
                                                 'data-icons' => 'rupiah',
                                                 'placeholder' => 'Harga Cetak',
+                                                'data-temp' => 1
                                             ]
                                         ])->label(false) ?>
                                 </div>
@@ -333,14 +351,14 @@ JS;
                                                 'groupSeparator' => ',',
                                                 'autoGroup' => true
                                             ],
-                                            'options' => ['data-align' => 'text-right', 'placeholder' => 'Lembar Ikat']
+                                            'options' => ['data-align' => 'text-right', 'placeholder' => 'Lembar Ikat', 'data-temp' => 1]
                                         ])->label(false) ?>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="col-lg-12 col-md-12 col-xs-12 text-right">
-                        <button class="btn btn-success margin-top-20" data-button="create_temp">
+                        <button class="btn btn-success margin-bottom-10 margin-top-10" data-button="create_temp">
                             <i class="fontello icon-plus"></i>
                             <span>Tambah Data Detail</span>
                         </button>
@@ -351,43 +369,17 @@ JS;
                         <thead>
                             <tr>
                                 <th class="text-center">No.</th>
-                                <th class="text-center">Bahan</th>
-                                <th class="text-center">PxL</th>
-                                <th class="text-center">Potong / Objek</th>
-                                <th class="text-center">Mesin / Jml. Warna</th>
-                                <th class="text-center">Harga (Ct/Lb)</th>
-                                <th class="text-center">Lb. Ikat</th>
-                                <th class="text-center">Min. Order (Ct/Lb)</th>
+                                <th class="text-center">Item</th>
+                                <th class="text-center" colspan="3">QTY</th>
+                                <th class="text-center" colspan="3">QTY Detail</th>
+                                <th class="text-center">Harga Cetak</th>
                                 <th class="text-center">Action</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <?php if(count($model->temps) > 0): ?>
-                                <?php foreach($model->temps as $index=>$val): ?>
-                                    <tr>
-                                        <td class="text-center"><?=$index+1?></td>
-                                        <td class="font-size-10"><?=(isset($val->item)) ? '<span class="text-success">'.$val->item->code .'</span><br />'. $val->item->name : '' ?></td>
-                                        <td class="text-center"><?=$val->panjang.'x'.$val->lebar ?></td>
-                                        <td class="text-center"><?=$val->potong.'/'.$val->objek ?></td>
-                                        <td class="text-center"><?=$val->mesin.'/'.$val->jumlah_warna ?></td>
-                                        <td class="text-right"><?='Rp.'.number_format($val->harga_jual) .'.- / Rp. '.number_format($val->harga_cetak).'.-' ?></td>
-                                        <td class="text-center"><?=$val->lembar_ikat ?></td>
-                                        <td class="text-center"><?=$val->min_order_ct.'/'.$val->min_order_lb ?></td>
-                                        <td class="text-center">
-                                            <button class="btn btn-warning btn-xs btn-sm" data-id="<?=$val->id ?>" data-button="update_temp">
-                                                <i class="fontello icon-pencil"></i>
-                                            </button>
-                                            <button class="btn btn-danger btn-xs btn-sm" data-id="<?=$val->id ?>" data-button="delete_temp">
-                                                <i class="fontello icon-trash"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            <?php else : ?>
-                                <tr>
-                                    <td class="text-center text-danger" colspan="10">Data is empty</td>
-                                </tr>
-                            <?php endif; ?>
+                            <tr>
+                                <td class="text-center text-danger" colspan="10">Data is empty</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -418,11 +410,11 @@ function listItem(q)
                     $("#tempmasterorderdetail-"+index).val(value);
                 }
             });
+            for(var a=1;a<=o.results[0].composite;a++){
+                $("#tempmasterorderdetail-qty_order_"+a).attr("readonly", false);
+                if(a==1) $("#tempmasterorderdetail-qty_order_1").val(20);
+            }
         },
-        complete: function(){
-            $("#tempmasterorderdetail-min_order_ct").val(20);
-            $("#tempmasterorderdetail-min_order_lb").val(2000);
-        }
     });
 }
 
@@ -439,9 +431,15 @@ function init_temp()
         success: function(data){
             var o = $.parseJSON(data);
             $("[data-table=\"detail\"] > tbody").html(o.model);
+            console.log(o.total_biaya);
+            $("#masterorder-total_biaya").val(o.total_biaya);
         },
         complete: function(){
             $("#tempmasterorderdetail-item_code").val("").trigger("change");
+            setTimeout(function(){
+                $("[id^=\"tempmasterorderdetail-qty_order_\"]").attr("readonly", true);
+                $("[id^=\"tempmasterorderdetail-\"]").val("");
+            }, 400);
         }
     });
 }
@@ -464,6 +462,12 @@ function get_temp(id)
                     $("#tempmasterorderdetail-"+index).val(value).trigger("change");
                 }else{
                     $("#tempmasterorderdetail-"+index).val(value);
+                }
+
+                if(value == 'qty_order_1' && value == 'qty_order_2' && value == 'qty_order_3'){
+                    if(value !== null){
+                        $("#temppurchaseorderdetail-"+value).attr("readonly", false);
+                    }
                 }
             });
         },
@@ -554,6 +558,60 @@ function delete_temp(id)
     });
 }
 
+function create_temp_produksi(biaya, item)
+{
+    $.ajax({
+        url: "<?= Url::to(['order/create-temp-produksi']) ?>",
+        type: "POST",
+        dataType: "text",
+        error: function(xhr, status, error) {},
+        beforeSend: function(){},
+        data: {
+            biaya: biaya,
+            item: item,
+        },
+        success: function(data){
+            var o = $.parseJSON(data);
+            if(o.success == true){
+                notification.open("success", o.message, timeOut);
+            }else{
+                notification.open("danger", o.message, timeOut);
+            }
+            init_temp();
+        },
+        complete: function(){}
+    });
+}
+
+function delete_temp_produksi(id)
+{
+    $.ajax({
+        url: "<?= Url::to(['order/delete-temp-produksi']) ?>",
+        type: "GET",
+        dataType: "text",
+        error: function(xhr, status, error) {},
+        beforeSend: function(){
+            loading.open("loading bars");
+        },
+        data: {
+            id: id
+        },
+        success: function(data){
+            var o = $.parseJSON(data);
+            if(o.success == true){
+                notification.open("success", o.message, timeOut);
+            }else{
+                notification.open("danger", o.message, timeOut);
+            }
+            init_temp();
+            popup.close();
+        },
+        complete: function(){
+			loading.close();
+        }
+    });
+}
+
 $(function(){
     <?php if(!$model->isNewRecord): ?>
         init_temp();
@@ -567,22 +625,37 @@ $(document).ready(function(){
         listItem($(this).val());
     });
 
+    $("body").off("input","#tempmasterorderdetail-qty_order_2");
+    $("body").on("input","#tempmasterorderdetail-qty_order_2", function(e){
+        e.preventDefault();
+        if($(this).val() >= 500){
+            $(this).val(499);
+        }else{
+            $(this).val();
+        }
+    });
+
     $("body").off("click","[data-button=\"create_temp\"]").on("click","[data-button=\"create_temp\"]", function(e){
         e.preventDefault();
-        var success = true,
-            message = "";
-        $.each($("[id^=\"tempmasterorderdetail-\"]:not([id=\"tempmasterorderdetail-id\"])"), function(index, element){
-            var a = $(element).attr("id").split("-"),
-                b = a[1].replace("_", " ");
-            if(!$(element).val()){
-                success = false;
-                message += parsing.toUpper(b, 2)+', ';
-            }
-        });
-        if(success){
-            create_temp($(this));
+        if(!$("#masterorder-name").val() && !$("#masterorder-type_order").val()){
+            notification.open("danger", 'Nama dan Type Order tidak boleh kosong!', timeOut);
         }else{
-            notification.open("danger", message+' tidak boleh kosong!', timeOut);
+            var success = true,
+               message = "";
+            $.each($("[data-temp]"), function(index, element){
+                var a = $(element).attr("id").split("-"),
+                    b = a[1].replace("_", " ");
+                if(!$(element).val()){
+                    success = false;
+                    message += parsing.toUpper(b, 2)+', ';
+                }
+            });
+
+            if(success){
+                create_temp($(this));
+            }else{
+                notification.open("danger", message+' tidak boleh kosong!', timeOut);
+            }
         }
     });
 
@@ -608,6 +681,25 @@ $(document).ready(function(){
     $("body").off("click","#delete_temporary").on("click","#delete_temporary", function(e){
         e.preventDefault();
         delete_temp($(this).attr("data-target"));
+    });
+
+    $("body").off("click","#tambah_proses").on("click","#tambah_proses", function(e){
+        e.preventDefault();
+        $(".option-custom").show();
+    });
+    $("body").off("click",".option-custom > li:not([data-event])").on("click",".option-custom > li:not([data-event])", function(e){
+        e.preventDefault();
+        var biaya = $("#biaya", $(this)).val();
+        var item = $("#item", $(this)).val();
+        create_temp_produksi(biaya, item);
+    });
+    $("body").off("click","#delete_temp").on("click","#delete_temp", function(e){
+        e.preventDefault();
+        delete_temp_produksi($(this).attr("data-id"));
+    });
+    $("body").off("click","li[data-event=\"close\"]").on("click","li[data-event=\"close\"]", function(e){
+        e.preventDefault();
+        $(".option-custom").hide();
     });
 });
 </script>

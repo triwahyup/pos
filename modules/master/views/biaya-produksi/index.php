@@ -8,7 +8,7 @@ use yii\grid\GridView;
 /* @var $searchModel app\modules\master\models\MasterBiayaProduksiSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Biaya Produksis';
+$this->title = 'Biaya Produksi';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="master-biaya-produksi-index">

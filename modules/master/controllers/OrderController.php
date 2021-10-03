@@ -4,10 +4,13 @@ namespace app\modules\master\controllers;
 
 use app\models\Logs;
 use app\models\User;
+use app\modules\master\models\MasterBiayaProduksi;
 use app\modules\master\models\MasterMaterialItem;
 use app\modules\master\models\MasterOrder;
 use app\modules\master\models\MasterOrderDetail;
+use app\modules\master\models\MasterOrderProduksiDetail;
 use app\modules\master\models\TempMasterOrderDetail;
+use app\modules\master\models\TempMasterOrderProduksiDetail;
 use app\modules\master\models\MasterOrderSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -31,7 +34,7 @@ class OrderController extends Controller
                     'class' => AccessControl::className(),
 				    'rules' => [
                         [
-                            'actions' => ['create', 'create-temp'],
+                            'actions' => ['create', 'create-temp', 'create-temp-produksi'],
                             'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-order')),
                             'roles' => ['@'],
                         ],
@@ -46,7 +49,7 @@ class OrderController extends Controller
                             'roles' => ['@'],
                         ], 
                         [
-                            'actions' => ['delete', 'delete-temp'],
+                            'actions' => ['delete', 'delete-temp', 'delete-temp-produksi'],
                             'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-order')),
                             'roles' => ['@'],
                         ],
@@ -125,6 +128,25 @@ class OrderController extends Controller
                         }else{
                             $success = false;
                             $message = 'ERROR CREATE DATA ORDER: DETAIL IS EMPTY.';
+                        }
+
+                        if(count($model->tempsProduksi()) > 0){
+                            foreach($model->tempsProduksi() as $temp){
+                                $detail = new MasterOrderProduksiDetail();
+                                $detail->attributes = $temp->attributes;
+                                $detail->order_code = $model->code;
+                                if(!$detail->save()){
+                                    $success = false;
+                                    $message = (count($detail->errors) > 0) ? 'ERROR CREATE DATA PRODUKSI DETAIL: ' : '';
+                                    foreach($detail->errors as $error => $value){
+                                        $message .= strtoupper($value[0].', ');
+                                    }
+                                    $message = substr($message, 0, -2);
+                                }
+                            }
+                        }else{
+                            $success = false;
+                            $message = 'ERROR CREATE DATA ORDER: PROSES PRODUKSI IS EMPTY.';
                         }
                     }else{
                         $success = false;
@@ -211,6 +233,26 @@ class OrderController extends Controller
                             $success = false;
                             $message = 'ERROR UPDATE DATA ORDER: DETAIL IS EMPTY.';
                         }
+
+                        if(count($model->tempsProduksi) > 0){
+                            foreach($model->detailsProduksi as $empty)
+                                $empty->delete();
+                            foreach($model->tempsProduksi as $temp){
+                                $detail = new MasterOrderProduksiDetail();
+                                $detail->attributes = $temp->attributes;
+                                if(!$detail->save()){
+                                    $success = false;
+                                    $message = (count($detail->errors) > 0) ? 'ERROR UPDATE DATA PRODUKSI DETAIL: ' : '';
+                                    foreach($detail->errors as $error => $value){
+                                        $message .= strtoupper($value[0].', ');
+                                    }
+                                    $message = substr($message, 0, -2);
+                                }
+                            }
+                        }else{
+                            $success = false;
+                            $message = 'ERROR UPDATE DATA ORDER: PROSES PRODUKSI IS EMPTY.';
+                        }
                     }else{
                         $success = false;
                         $message = (count($model->errors) > 0) ? 'ERROR UPDATE DATA ORDER: ' : '';
@@ -255,6 +297,19 @@ class OrderController extends Controller
                 $temp->user_id = \Yii::$app->user->id;
                 if(!$temp->save()){
                     $message = (count($temp->errors) > 0) ? 'ERROR LOAD DATA ORDER DETAIL: ' : '';
+                    foreach($temp->errors as $error => $value){
+                        $message .= strtoupper($value[0].', ');
+                    }
+                    $message = substr($message, 0, -2);
+                    \Yii::$app->session->setFlash('error', $message);
+                }
+            }
+            foreach($model->detailsProduksi as $detail){
+                $temp = new TempMasterOrderProduksiDetail();
+                $temp->attributes = $detail->attributes;
+                $temp->user_id = \Yii::$app->user->id;
+                if(!$temp->save()){
+                    $message = (count($temp->errors) > 0) ? 'ERROR LOAD DATA PRODUKSI DETAIL: ' : '';
                     foreach($temp->errors as $error => $value){
                         $message .= strtoupper($value[0].', ');
                     }
@@ -351,11 +406,11 @@ class OrderController extends Controller
     {
         $model = MasterMaterialItem::find()
             ->alias('a')
-            ->select(['concat(a.code, "-", a.name) as text', 'a.code id','a.*', 'b.name as satuan'])
+            ->select(['concat(a.code, "-", a.name) as text', 'a.code id','a.*', 'b.composite'])
             ->leftJoin('master_satuan b', 'b.code = a.satuan_code')
             ->where(['a.status'=>1])
             ->andWhere('a.code LIKE "%'.$q.'%" OR a.name LIKE "%'.$q.'%"')
-            ->limit(6)
+            ->limit(10)
             ->asArray()
             ->all();
         return json_encode(['results'=>$model]);
@@ -364,10 +419,18 @@ class OrderController extends Controller
     public function actionTemp()
     {
         $temps = TempMasterOrderDetail::findAll(['user_id'=> \Yii::$app->user->id]);
+        $tempsProduksi = TempMasterOrderProduksiDetail::findAll(['user_id'=> \Yii::$app->user->id]);
+        $total_biaya=0;
+        foreach($tempsProduksi as $temp){
+            $total_biaya += $temp->total_biaya;
+        }
+        $biaya = MasterBiayaProduksi::findAll(['status'=>1]);
         $model =  $this->renderAjax('_temp', [
             'temps'=>$temps,
+            'biaya' => $biaya,
+            'tempsProduksi' => $tempsProduksi,
         ]);
-        return json_encode(['model'=>$model]);
+        return json_encode(['model'=>$model, 'total_biaya'=>number_format($total_biaya)]);
     }
 
     public function actionGetTemp($id)
@@ -385,10 +448,12 @@ class OrderController extends Controller
             $data = $request->post('TempMasterOrderDetail');
             $temp = new TempMasterOrderDetail();
             $temp->attributes = (array)$data;
+            $temp->attributes = ($temp->item) ? $temp->item->attributes : '';
             if(!empty($request->post('MasterOrder')['code'])){
                 $temp->order_code = $request->post('MasterOrder')['code'];
             }
             $temp->urutan = $temp->count +1;
+            $jumlahProses = $temp->jumlahProses();
             if($temp->save()){
                 $message = 'CREATE TEMP SUCCESSFULLY';
             }else{
@@ -413,6 +478,8 @@ class OrderController extends Controller
             $data = $request->post('TempMasterOrderDetail');
             $temp = $this->findTemp($data['id']);
             $temp->attributes = (array)$data;
+            $temp->attributes = ($temp->item) ? $temp->item->attributes : '';
+            $jumlahProses = $temp->jumlahProses();
             if($temp->save()){
                 $message = 'UPDATE TEMP SUCCESSFULLY';
             }else{
@@ -457,9 +524,81 @@ class OrderController extends Controller
         return json_encode(['success'=>$success, 'message'=>$message]);
     }
 
+    public function actionCreateTempProduksi()
+    {
+        $request = \Yii::$app->request;
+        $success = true;
+        $message = '';
+        if($request->isPost){
+            $materialItem = MasterMaterialItem::findOne(['code'=>$request->post('item'), 'status'=>1]);
+            $biayaProduksi = MasterBiayaProduksi::findOne(['code'=>$request->post('biaya'), 'status'=>1]);
+            $temp = new TempMasterOrderProduksiDetail();
+            $temp->attributes = $materialItem->attributes;
+            $temp->attributes = $biayaProduksi->attributes;
+            $temp->biaya_produksi_code = $biayaProduksi->code;
+            $temp->item_code = $materialItem->code;
+            $temp->total_biaya = $temp->totalBiaya();
+            if(!empty($request->post('MasterOrder')['code'])){
+                $temp->order_code = $request->post('MasterOrder')['code'];
+            }
+            $temp->urutan = $temp->count +1;
+            $temp->user_id = \Yii::$app->user->id;
+            if($temp->save()){
+                $message = 'CREATE DETAIL PROSES SUCCESSFULLY';
+            }else{
+                $success = false;
+                foreach($temp->errors as $error => $value){
+                    $message = $value[0].', ';
+                }
+                $message = substr($message, 0, -2);
+            }
+        }else{
+            throw new NotFoundHttpException('The requested data does not exist.');
+        }
+        return json_encode(['success'=>$success, 'message'=>$message]);
+    }
+
+    public function actionDeleteTempProduksi($id)
+    {
+        $success = true;
+        $message = '';
+        $temp = $this->findTempProduksi($id);
+        if(isset($temp)){
+            if($temp->delete()){
+                foreach($temp->tmps as $index=>$val){
+                    $val->urutan = $index +1;
+                    if(!$val->save()){
+                        $success = false;
+                        foreach($val->errors as $error => $value){
+                            $message .= strtoupper($value[0].', ');
+                        }
+                        $message = substr($message, 0, -2);
+                    }
+                }
+                $message = 'DELETE DETAIL PROSES SUCCESSFULLY';
+            }else{
+                $success = false;
+                foreach($temp->errors as $error => $value){
+                    $message = $value[0].', ';
+                }
+                $message = substr($message, 0, -2);
+            }
+        }
+        return json_encode(['success'=>$success, 'message'=>$message]);
+    }
+
     protected function findTemp($id)
     {
         $temp = TempMasterOrderDetail::findOne(['id'=>$id, 'user_id'=>\Yii::$app->user->id]);
+        if(isset($temp)){
+            return $temp;
+        }
+        throw new NotFoundHttpException('The requested page does not exist.');
+    }
+
+    protected function findTempProduksi($id)
+    {
+        $temp = TempMasterOrderProduksiDetail::findOne(['id'=>$id, 'user_id'=>\Yii::$app->user->id]);
         if(isset($temp)){
             return $temp;
         }
@@ -473,6 +612,13 @@ class OrderController extends Controller
         if(empty($temp)){
             $connection = \Yii::$app->db;
 			$connection->createCommand('ALTER TABLE temp_master_order_detail AUTO_INCREMENT=1')->query();
+        }
+
+        TempMasterOrderProduksiDetail::deleteAll('user_id=:user_id', [':user_id'=>\Yii::$app->user->id]);
+        $tempProduksi = TempMasterOrderProduksiDetail::find()->all();
+        if(empty($tempProduksi)){
+            $connection = \Yii::$app->db;
+			$connection->createCommand('ALTER TABLE temp_master_order_produksi_detail AUTO_INCREMENT=1')->query();
         }
     }
 }
