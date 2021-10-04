@@ -5,11 +5,14 @@ namespace app\modules\sales\controllers;
 use app\models\Logs;
 use app\models\User;
 use app\modules\master\models\MasterBiayaProduksi;
+use app\modules\master\models\MasterMaterialItem;
 use app\modules\master\models\MasterOrder;
+use app\modules\master\models\MasterOrderDetail;
+use app\modules\master\models\MasterOrderProduksiDetail;
 use app\modules\master\models\MasterPerson;
 use app\modules\sales\models\SalesOrder;
 use app\modules\sales\models\SalesOrderDetail;
-use app\modules\sales\models\SalesOrderProdukDetail;
+use app\modules\sales\models\SalesOrderProduksiDetail;
 use app\modules\sales\models\TempSalesOrderDetail;
 use app\modules\sales\models\TempSalesOrderProduksiDetail;
 use app\modules\sales\models\SalesOrderSearch;
@@ -35,22 +38,22 @@ class SalesOrderController extends Controller
                     'class' => AccessControl::className(),
 				    'rules' => [
                         [
-                            'actions' => ['create', 'create-temp'],
+                            'actions' => ['create', 'create-temp-produksi'],
                             'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('sales-order')),
                             'roles' => ['@'],
                         ],
                         [
-                            'actions' => ['index', 'view', 'list-order', 'temp'],
+                            'actions' => ['index', 'view', 'list-order', 'load-order', 'temp'],
                             'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('sales-order')),
                             'roles' => ['@'],
                         ], 
                         [
-                            'actions' => ['update', 'update-temp'],
+                            'actions' => ['update'],
                             'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('sales-order')),
                             'roles' => ['@'],
                         ], 
                         [
-                            'actions' => ['delete', 'delete-temp'],
+                            'actions' => ['delete', 'delete-temp-produksi'],
                             'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('sales-order')),
                             'roles' => ['@'],
                         ],
@@ -116,78 +119,90 @@ class SalesOrderController extends Controller
         $message = '';
         $model = new SalesOrder();
         $temp = new TempSalesOrderDetail();
-        if ($this->request->isPost) {
-            if ($model->load($this->request->post())) {
-                $connection = \Yii::$app->db;
-			    $transaction = $connection->beginTransaction();
-                try{
-                    $model->no_so = $model->generateCode();
-                    if($model->save()){
-                        if(count($model->temps()) > 0){
-                            foreach($model->temps() as $temp){
-                                $detail = new SalesOrderDetail();
-                                $detail->attributes = $temp->attributes;
-                                $detail->no_so = $model->no_so;
-                                if(!$detail->save()){
-                                    $success = false;
-                                    $message = (count($detail->errors) > 0) ? 'ERROR CREATE SALES ORDER DETAIL: ' : '';
-                                    foreach($detail->errors as $error => $value){
-                                        $message .= strtoupper($value[0].', ');
-                                    }
-                                    $message = substr($message, 0, -2);
-                                }
-                            }
-                        }else{
+        if($this->request->isPost){
+            if($model->load($this->request->post()) && $temp->load($this->request->post())){
+                if(!empty($temp->nama_order)){
+                    if($temp->type_order == 2){
+                        if(empty($temp->outsource_code)){
                             $success = false;
-                            $message = 'ERROR CREATE SALES ORDER: DETAIL IS EMPTY.';
+                            $message = 'DATA JASA / OUTSOURCING TIDAK BOLEH KOSONG.';
                         }
-
-                        if(count($model->tempsProduksi()) > 0){
-                            foreach($model->tempsProduksi() as $temp){
-                                $detail = new SalesOrderProduksiDetail();
-                                $detail->attributes = $temp->attributes;
-                                $detail->no_so = $model->no_so;
-                                if(!$detail->save()){
-                                    $success = false;
-                                    $message = (count($detail->errors) > 0) ? 'ERROR CREATE SALES ORDER PRODUKSI DETAIL: ' : '';
-                                    foreach($detail->errors as $error => $value){
-                                        $message .= strtoupper($value[0].', ');
-                                    }
-                                    $message = substr($message, 0, -2);
-                                }
-                            }
-                        }else{
-                            $success = false;
-                            $message = 'ERROR CREATE SALES ORDER: PROSES PRODUKSI IS EMPTY.';
-                        }
-                    }else{
-                        $success = false;
-                        $message = (count($model->errors) > 0) ? 'ERROR CREATE SALES ORDER: ' : '';
-                        foreach($model->errors as $error => $value){
-                            $message .= $value[0].', ';
-                        }
-                        $message = substr($message, 0, -2);
                     }
 
-                    if($success){
-                        $this->emptyTemp();
-                        $transaction->commit();
-                        $message = '['.$model->no_so.'] SUCCESS CREATE SALES ORDER.';
-                        $logs =	[
-                            'type' => Logs::TYPE_USER,
-                            'description' => $message,
-                        ];
-                        Logs::addLog($logs);
-
-                        \Yii::$app->session->setFlash('success', $message);
-                        return $this->redirect(['view', 'no_so' => $model->no_so]);
-                    }else{
+                    $connection = \Yii::$app->db;
+                    $transaction = $connection->beginTransaction();
+                    try{
+                        $model->no_so = $model->generateCode();
+                        if($model->save()){
+                            if(count($model->temps()) > 0){
+                                foreach($model->temps() as $temp){
+                                    $detail = new SalesOrderDetail();
+                                    $detail->attributes = $temp->attributes;
+                                    $detail->no_so = $model->no_so;
+                                    if(!$detail->save()){
+                                        $success = false;
+                                        $message = (count($detail->errors) > 0) ? 'ERROR CREATE SALES ORDER DETAIL: ' : '';
+                                        foreach($detail->errors as $error => $value){
+                                            $message .= strtoupper($value[0].', ');
+                                        }
+                                        $message = substr($message, 0, -2);
+                                    }
+                                }
+                            }else{
+                                $success = false;
+                                $message = 'ERROR CREATE SALES ORDER: DETAIL IS EMPTY.';
+                            }
+    
+                            if(count($model->tempsProduksi()) > 0){
+                                foreach($model->tempsProduksi() as $tempProduksi){
+                                    $detailProduksi = new SalesOrderProduksiDetail();
+                                    $detailProduksi->attributes = $tempProduksi->attributes;
+                                    $detailProduksi->no_so = $model->no_so;
+                                    if(!$detailProduksi->save()){
+                                        $success = false;
+                                        $message = (count($detailProduksi->errors) > 0) ? 'ERROR CREATE SALES ORDER PRODUKSI DETAIL: ' : '';
+                                        foreach($detailProduksi->errors as $error => $value){
+                                            $message .= strtoupper($value[0].', ');
+                                        }
+                                        $message = substr($message, 0, -2);
+                                    }
+                                }
+                            }else{
+                                $success = false;
+                                $message = 'ERROR CREATE SALES ORDER: PROSES PRODUKSI IS EMPTY.';
+                            }
+                        }else{
+                            $success = false;
+                            $message = (count($model->errors) > 0) ? 'ERROR CREATE SALES ORDER: ' : '';
+                            foreach($model->errors as $error => $value){
+                                $message .= $value[0].', ';
+                            }
+                            $message = substr($message, 0, -2);
+                        }
+    
+                        if($success){
+                            $this->emptyTemp();
+                            $transaction->commit();
+                            $message = '['.$model->no_so.'] SUCCESS CREATE SALES ORDER.';
+                            $logs =	[
+                                'type' => Logs::TYPE_USER,
+                                'description' => $message,
+                            ];
+                            Logs::addLog($logs);
+    
+                            \Yii::$app->session->setFlash('success', $message);
+                            return $this->redirect(['view', 'no_so' => $model->no_so]);
+                        }else{
+                            $transaction->rollBack();
+                        }
+                    }catch(\Exception $e){
+                        $success = false;
+                        $message = $e->getMessage();
                         $transaction->rollBack();
                     }
-                }catch(\Exception $e){
+                }else{
                     $success = false;
-                    $message = $e->getMessage();
-				    $transaction->rollBack();
+                    $message = 'DATA ORDER KOSONG. PILIH SALAH SATU DATA ORDER.';
                 }
                 $logs =	[
                     'type' => Logs::TYPE_USER,
@@ -196,7 +211,7 @@ class SalesOrderController extends Controller
                 Logs::addLog($logs);
                 \Yii::$app->session->setFlash('error', $message);
             }
-        } else {
+        }else{
             $model->loadDefaultValues();
             $this->emptyTemp();
         }
@@ -262,13 +277,13 @@ class SalesOrderController extends Controller
                         if(count($model->tempsProduksi) > 0){
                             foreach($model->detailsProduksi as $empty)
                                 $empty->delete();
-                            foreach($model->tempsProduksi as $temp){
-                                $detail = new SalesOrderProduksiDetail();
-                                $detail->attributes = $temp->attributes;
-                                if(!$detail->save()){
+                            foreach($model->tempsProduksi as $tempProduksi){
+                                $detailProduksi = new SalesOrderProduksiDetail();
+                                $detailProduksi->attributes = $tempProduksi->attributes;
+                                if(!$detailProduksi->save()){
                                     $success = false;
-                                    $message = (count($detail->errors) > 0) ? 'ERROR UPDATE SALES ORDER PRODUKSI DETAIL: ' : '';
-                                    foreach($detail->errors as $error => $value){
+                                    $message = (count($detailProduksi->errors) > 0) ? 'ERROR UPDATE SALES ORDER PRODUKSI DETAIL: ' : '';
+                                    foreach($detailProduksi->errors as $error => $value){
                                         $message .= strtoupper($value[0].', ');
                                     }
                                     $message = substr($message, 0, -2);
@@ -436,13 +451,76 @@ class SalesOrderController extends Controller
         return json_encode(['results'=>$model]);
     }
 
+    public function actionLoadOrder($code)
+    {
+        $success = true;
+        $message = '';
+        $typeOrder = 1;
+        $model = MasterOrder::findOne(['code'=>$code, 'status'=>1]);
+        if(isset($model)){
+            $connection = \Yii::$app->db;
+            $transaction = $connection->beginTransaction();
+            try{
+                if($model->type_order != 1)
+                    $typeOrder = 2;
+                
+                TempSalesOrderDetail::deleteAll('user_id=:user', [':user'=>\Yii::$app->user->id]);
+                foreach($model->details as $detail){
+                    $tempDetails = new TempSalesOrderDetail();
+                    $tempDetails->attributes = $detail->attributes;
+                    $tempDetails->user_id = \Yii::$app->user->id;
+                    if(!$tempDetails->save()){
+                        $success = false;
+                        $message = (count($tempDetails->errors) > 0) ? 'ERROR CREATE SALES ORDER DETAIL: ' : '';
+                        foreach($tempDetails->errors as $error => $value){
+                            $message .= strtoupper($value[0].', ');
+                        }
+                        $message = substr($message, 0, -2);
+                    }
+                }
+
+                TempSalesOrderProduksiDetail::deleteAll('user_id=:user', [':user'=>\Yii::$app->user->id]);
+                foreach($model->detailsProduksi as $detail){
+                    $tempProduksi = new TempSalesOrderProduksiDetail();
+                    $tempProduksi->attributes = $detail->attributes;
+                    $tempProduksi->user_id = \Yii::$app->user->id;
+                    if(!$tempProduksi->save()){
+                        $success = false;
+                        $message = (count($tempProduksi->errors) > 0) ? 'ERROR CREATE SALES ORDER PRODUKSI DETAIL: ' : '';
+                        foreach($tempProduksi->errors as $error => $value){
+                            $message .= strtoupper($value[0].', ');
+                        }
+                        $message = substr($message, 0, -2);
+                    }
+                }
+
+                if($success){
+                    $transaction->commit();
+                    $message = 'DATA ORDER LOADED.';
+                }else{
+                    $transaction->rollBack();
+                    $this->emptyTemp();
+                }
+            }catch(\Exception $e){
+                $success = false;
+                $message = $e->getMessage();
+                $transaction->rollBack();
+            }
+        }else{
+            $this->emptyTemp();
+            $success = false;
+            $message = 'DATA ORDER NOT FOUND.';
+        }
+        return json_encode(['success'=>$success, 'message'=>$message, 'type_order'=>$typeOrder]);
+    }
+
     public function actionTemp()
     {
         $temps = TempSalesOrderDetail::findAll(['user_id'=> \Yii::$app->user->id]);
-        $total_order=0;
+        $total_biaya=0;
         foreach($temps as $temp){
             foreach($temp->detailsProduksi as $val){
-                $total_order += $val->total_order;
+                $total_biaya += $val->total_biaya;
             }
         }
         $biaya = MasterBiayaProduksi::findAll(['status'=>1]);
@@ -450,9 +528,43 @@ class SalesOrderController extends Controller
             'temps'=>$temps,
             'biaya' => $biaya,
         ]);
-        return json_encode(['model'=>$model, 'total_order'=>number_format($total_order)]);
+        return json_encode(['model'=>$model, 'total_biaya'=>number_format($total_biaya)]);
     }
 
+    public function actionCreateTempProduksi()
+    {
+        $request = \Yii::$app->request;
+        $success = true;
+        $message = '';
+        if($request->isPost){
+            $materialItem = MasterMaterialItem::findOne(['code'=>$request->post('item'), 'status'=>1]);
+            $biayaProduksi = MasterBiayaProduksi::findOne(['code'=>$request->post('biaya'), 'status'=>1]);
+            $temp = new TempSalesOrderProduksiDetail();
+            $temp->attributes = $materialItem->attributes;
+            $temp->attributes = $biayaProduksi->attributes;
+            $temp->biaya_produksi_code = $biayaProduksi->code;
+            $temp->item_code = $materialItem->code;
+            $temp->total_biaya = $temp->totalBiaya();
+            if(!empty($request->post('code'))){
+                $temp->order_code = $request->post('code');
+            }
+            $temp->urutan = $temp->count +1;
+            $temp->user_id = \Yii::$app->user->id;
+            if($temp->save()){
+                $message = 'CREATE DETAIL PROSES SUCCESSFULLY';
+            }else{
+                $success = false;
+                foreach($temp->errors as $error => $value){
+                    $message = $value[0].', ';
+                }
+                $message = substr($message, 0, -2);
+            }
+        }else{
+            throw new NotFoundHttpException('The requested data does not exist.');
+        }
+        return json_encode(['success'=>$success, 'message'=>$message]);
+    }
+    
     public function actionDeleteTempProduksi($id)
     {
         $success = true;

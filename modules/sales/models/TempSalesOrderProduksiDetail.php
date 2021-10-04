@@ -69,8 +69,24 @@ class TempSalesOrderProduksiDetail extends \yii\db\ActiveRecord
         ];
     }
 
+    public function getCount()
+    {
+        return TempSalesOrderProduksiDetail::find()->where(['user_id'=> \Yii::$app->user->id])->count();
+    }
+
+    public function getTmps()
+    {
+        return TempSalesOrderProduksiDetail::find()->where(['user_id'=> \Yii::$app->user->id])->all();
+    }
+    
     public function getItem()
     {
         return $this->hasOne(MasterMaterialItem::className(), ['code' => 'item_code']);
+    }
+
+    public function totalBiaya()
+    {
+        $total = $this->item->panjang * $this->item->lebar * $this->index * 500;
+        return ceil($total);
     }
 }

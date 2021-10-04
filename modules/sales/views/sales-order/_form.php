@@ -101,6 +101,7 @@ JS;
                         'data-temp' => 1,
                     ],
                     'pluginOptions' => [
+                        'allowClear' => true,
                         'minimumInputLength' => 2,
                         'ajax' => [
                             'url' => Url::to(['sales-order/list-order']),
@@ -118,7 +119,7 @@ JS;
                         'templateSelection' => new JsExpression($format1line),
                         'escapeMarkup' => new JsExpression("function(markup) { return markup; }")
                     ],
-                ])->label(false) ?>
+                ]) ?>
             </div>
             <div class="col-lg-3 col-md-3 col-xs-12 padding-left-0">
                 <?= $form->field($temp, 'outsource_code')->widget(Select2::classname(), [
@@ -129,8 +130,9 @@ JS;
                             'data-temp' => 1,
                             'readonly' => true,
                         ],
-                    ])->label(false) ?>
+                    ]) ?>
             </div>
+            <?= $form->field($temp, 'type_order')->hiddenInput()->label(false) ?>
         </div>
         <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
             <div class="margin-top-20"></div>
@@ -145,7 +147,6 @@ JS;
                                 <th class="text-center" colspan="3">QTY</th>
                                 <th class="text-center" colspan="3">QTY Detail</th>
                                 <th class="text-center">Harga Cetak</th>
-                                <th class="text-center">Action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -166,6 +167,37 @@ JS;
     <?php ActiveForm::end(); ?>
 </div>
 <script>
+function load_data_order(el)
+{
+    $.ajax({
+        url: "<?= Url::to(['sales-order/load-order']) ?>",
+        type: "GET",
+        dataType: "text",
+        error: function(xhr, status, error) {},
+        beforeSend: function(){
+            el.loader("load");
+        },
+        data: {
+            code: el.val(),
+        },
+        success: function(data){
+            var o = $.parseJSON(data);
+            if(o.success == true){
+                if(o.type_order == 1){
+                    $("#tempsalesorderdetail-outsource_code").attr("readonly", true);
+                }else{
+                    $("#tempsalesorderdetail-outsource_code").attr("readonly", false);
+                }
+                $("#tempsalesorderdetail-type_order").val(o.type_order);
+            }
+            init_temp();
+        },
+        complete: function(){
+            el.loader("destroy");
+        }
+    });
+}
+
 function init_temp()
 {
     $.ajax({
@@ -179,64 +211,9 @@ function init_temp()
         success: function(data){
             var o = $.parseJSON(data);
             $("[data-table=\"detail\"] > tbody").html(o.model);
-            $("#salesorder-total_order").val(o.total_order);
+            $("#salesorder-total_order").val(o.total_biaya);
         },
         complete: function(){}
-    });
-}
-
-function create_temp(el)
-{
-    $.ajax({
-        url: "<?= Url::to(['sales-order/create-temp']) ?>",
-        type: "POST",
-        dataType: "text",
-        error: function(xhr, status, error) {},
-        beforeSend: function(){
-            el.loader("load");
-        },
-        data: $("#form").serialize(),
-        success: function(data){
-            var o = $.parseJSON(data);
-            if(o.success == true){
-                notification.open("success", o.message, timeOut);
-            }else{
-                notification.open("danger", o.message, timeOut);
-            }
-            init_temp();
-        },
-        complete: function(){
-            el.loader("destroy");
-        }
-    });
-}
-
-function delete_temp(id)
-{
-    $.ajax({
-        url: "<?= Url::to(['sales-order/delete-temp']) ?>",
-        type: "GET",
-        dataType: "text",
-        error: function(xhr, status, error) {},
-        beforeSend: function(){
-            loading.open("loading bars");
-        },
-        data: {
-            id: id
-        },
-        success: function(data){
-            var o = $.parseJSON(data);
-            if(o.success == true){
-                notification.open("success", o.message, timeOut);
-            }else{
-                notification.open("danger", o.message, timeOut);
-            }
-            init_temp();
-            popup.close();
-        },
-        complete: function(){
-			loading.close();
-        }
     });
 }
 
@@ -302,18 +279,9 @@ $(function(){
 
 var timeOut = 3000;
 $(document).ready(function(){
-    $("body").off("click","[data-button=\"delete_temp\"]").on("click","[data-button=\"delete_temp\"]", function(e){
+    $("body").off("change","#tempsalesorderdetail-nama_order").on("change","#tempsalesorderdetail-nama_order", function(e){
         e.preventDefault();
-        var data = $(this).data();
-        popup.open("confirm", {
-			message: "Apakah anda yakin ingin menghapus data ini ?",
-			selector: "delete_temporary",
-			target: data.id,
-		});
-    });
-    $("body").off("click","#delete_temporary").on("click","#delete_temporary", function(e){
-        e.preventDefault();
-        delete_temp($(this).attr("data-target"));
+        load_data_order($(this));
     });
 
     $("body").off("click","[id^=\"tambah_proses_\"]").on("click","[id^=\"tambah_proses_\"]", function(e){

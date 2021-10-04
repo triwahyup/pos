@@ -47,8 +47,8 @@ class SalesOrder extends \yii\db\ActiveRecord
     {
         return [
             [['tgl_so', 'customer_code'], 'required'],
-            [['tgl_so', 'tgl_po'], 'safe'],
-            [['ppn', 'total_order'], 'number'],
+            [['tgl_so', 'tgl_po', 'total_order'], 'safe'],
+            [['ppn'], 'number'],
             [['status', 'created_at', 'updated_at'], 'integer'],
             [['no_so', 'no_po'], 'string', 'max' => 12],
             [['customer_code'], 'string', 'max' => 3],
@@ -83,9 +83,9 @@ class SalesOrder extends \yii\db\ActiveRecord
         $total=0;
         if($model > 0){
             $model = SalesOrder::find()->orderBy(['no_so'=>SORT_DESC])->one();
-            $total = (int)substr($model->no_so, 1);
+            $total = (int)substr($model->no_so, 4);
         }
-        return (string)sprintf('%03s', ($total+1));
+        return (string)date('Ymd').sprintf('%04s', ($total+1));
     }
 
     public function beforeSave($attribute)

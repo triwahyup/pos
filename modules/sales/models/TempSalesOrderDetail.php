@@ -3,6 +3,8 @@
 namespace app\modules\sales\models;
 
 use Yii;
+use app\modules\master\models\MasterMaterialItem;
+use app\modules\sales\models\TempSalesOrderProduksiDetail;
 
 /**
  * This is the model class for table "temp_sales_order_detail".
@@ -46,6 +48,7 @@ use Yii;
 class TempSalesOrderDetail extends \yii\db\ActiveRecord
 {
     public $nama_order;
+    public $type_order;
     
     /**
      * {@inheritdoc}
@@ -61,9 +64,10 @@ class TempSalesOrderDetail extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['urutan', 'potong', 'objek', 'mesin', 'jumlah_warna', 'lembar_ikat', 'user_id'], 'integer'],
+            [['urutan', 'potong', 'objek', 'mesin', 'jumlah_warna', 'lembar_ikat', 'user_id', 'type_order'], 'integer'],
             [['panjang', 'lebar', 'harga_beli_1', 'harga_beli_2', 'harga_beli_3', 'harga_jual_1', 'harga_jual_2', 'harga_jual_3', 'harga_cetak', 'qty_order_1', 'qty_order_2', 'qty_order_3', 'jumlah_cetak', 'jumlah_objek', 'jumlah_lem'], 'number'],
             [['order_code', 'outsource_code', 'satuan_code', 'material_code', 'type_code', 'group_supplier_code', 'group_material_code'], 'string', 'max' => 3],
+            [['nama_order'], 'string', 'max' => 128],
             [['no_so'], 'string', 'max' => 12],
             [['item_code'], 'string', 'max' => 7],
             [['um_1', 'um_2', 'um_3'], 'string', 'max' => 5],
@@ -80,7 +84,7 @@ class TempSalesOrderDetail extends \yii\db\ActiveRecord
             'order_code' => 'Order Code',
             'urutan' => 'Urutan',
             'no_so' => 'No So',
-            'outsource_code' => 'Outsource Code',
+            'outsource_code' => 'Jasa / Outsourcing',
             'item_code' => 'Item Code',
             'satuan_code' => 'Satuan Code',
             'material_code' => 'Material Code',
@@ -112,5 +116,19 @@ class TempSalesOrderDetail extends \yii\db\ActiveRecord
             'jumlah_lem' => 'Jumlah Lem',
             'user_id' => 'User ID',
         ];
+    }
+
+    public function getItem()
+    {
+        return $this->hasOne(MasterMaterialItem::className(), ['code' => 'item_code']);
+    }
+
+    public function getDetailsProduksi()
+    {
+        if(!empty($this->no_so)){
+            return $this->hasMany(TempSalesOrderProduksiDetail::className(), ['no_so' => 'no_so', 'item_code' => 'item_code']);
+        }else{
+            return $this->hasMany(TempSalesOrderProduksiDetail::className(), ['item_code' => 'item_code', 'user_id'=> 'user_id']);
+        }
     }
 }

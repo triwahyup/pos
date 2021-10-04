@@ -828,6 +828,24 @@ form {
     padding: 20px;
     width: 100%;
 }
+select {
+    &[readonly] {
+        touch-action: none;
+        pointer-events: none;
+        + .select2-container{
+            pointer-events: none;
+            touch-action: none;
+            .select2-selection {
+                background-color: #eee;
+                box-shadow: none;
+            }
+            .select2-selection__arrow,
+            .select2-selection__clear {
+                display: none;
+            }
+        }
+    }
+}
 .select2-container--krajee {
     .select2-selection--single {
         .borderRadius(0);
