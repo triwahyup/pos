@@ -17,9 +17,7 @@ class SalesOrderSearch extends SalesOrder
     public function rules()
     {
         return [
-            [['no_so', 'tgl_so', 'no_po', 'tgl_po', 'customer_code'], 'safe'],
-            [['ppn', 'total_order'], 'number'],
-            [['status', 'created_at', 'updated_at'], 'integer'],
+            [['no_so', 'tgl_so', 'no_po', 'tgl_po', 'customer_code', 'total_order'], 'safe'],
         ];
     }
 
@@ -41,7 +39,9 @@ class SalesOrderSearch extends SalesOrder
      */
     public function search($params)
     {
-        $query = SalesOrder::find();
+        $query = SalesOrder::find()
+            ->alias('a')
+            ->leftJoin('master_person b', 'b.code = a.customer_code');
 
         // add conditions that should always apply here
 
@@ -58,19 +58,21 @@ class SalesOrderSearch extends SalesOrder
         }
 
         // grid filtering conditions
+        $query->where(['a.status'=>1]);
         $query->andFilterWhere([
             'tgl_so' => $this->tgl_so,
             'tgl_po' => $this->tgl_po,
-            'ppn' => $this->ppn,
-            'total_order' => $this->total_order,
-            'status' => $this->status,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
         ]);
 
+        if(!empty($this->customer_code)){
+            $query->andWhere('b.code LIKE "%'.$this->customer_code.'%" OR b.name LIKE "%'.$this->customer_code.'%"');
+        }
+        if(!empty($this->total_order)){
+            $query->andWhere('total_order LIKE "%'.str_replace(',','', $this->total_order).'%"');
+        }
+
         $query->andFilterWhere(['like', 'no_so', $this->no_so])
-            ->andFilterWhere(['like', 'no_po', $this->no_po])
-            ->andFilterWhere(['like', 'customer_code', $this->customer_code]);
+            ->andFilterWhere(['like', 'no_po', $this->no_po]);
 
         return $dataProvider;
     }

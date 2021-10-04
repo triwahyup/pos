@@ -6,7 +6,7 @@ use yii\widgets\DetailView;
 /* @var $this yii\web\View */
 /* @var $model app\modules\sales\models\SalesOrder */
 
-$this->title = $model->no_so;
+$this->title = 'No. Sales Order: '.$model->no_so;
 $this->params['breadcrumbs'][] = ['label' => 'Sales Order', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
@@ -32,8 +32,19 @@ $this->params['breadcrumbs'][] = $this->title;
                 'tgl_so',
                 'no_po',
                 'tgl_po',
-                'customer_code',
-                'ppn',
+                [
+                    'attribute' => 'customer_code',
+                    'value' => function($model, $key)
+                    {
+                        return (isset($model->customer)) ? $model->customer->name : '';
+                    }
+                ],
+                [
+                    'attribute' => 'ppn',
+                    'value'=> function ($model, $index) { 
+                        return (!empty($model->ppn)) ? $model->ppn.' %' : '';
+                    }
+                ],
                 [
                     'attribute' => 'total_order',
                     'value' => function($model, $key)
@@ -72,7 +83,24 @@ $this->params['breadcrumbs'][] = $this->title;
         <div class="margin-top-20"></div>
         <fieldset class="fieldset-box">
             <legend>Data Detail</legend>
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <div class="col-lg-2 col-md-2 col-sm-4 col-xs-12 padding-left-0">
+                    <span>Nama Order (Job)</span>
+                </div>
+                <div class="col-lg-10 col-md-10 col-sm-8 col-xs-12 padding-left-0">
+                    <span>: <?=(isset($model->order)) ? $model->order->name : '' ?></span>
+                </div>
+            </div>
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <div class="col-lg-2 col-md-2 col-sm-4 col-xs-12 padding-left-0">
+                    <span>Type Order</span>
+                </div>
+                <div class="col-lg-10 col-md-10 col-sm-8 col-xs-12 padding-left-0">
+                    <span>: <?=($model->type_order==1) ? 'Produk' : 'Jasa / Outsourcing' ?></span>
+                </div>
+            </div>
             <div class="col-lg-12 col-md-12 col-xs-12">
+            <div class="margin-top-20"></div>
                 <table class="table table-bordered table-custom" data-table="detail">
                     <thead>
                         <tr>

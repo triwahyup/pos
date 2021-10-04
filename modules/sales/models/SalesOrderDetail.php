@@ -12,7 +12,6 @@ use Yii;
  *
  * @property string $no_so
  * @property int $urutan
- * @property string|null $outsource_code
  * @property string $order_code
  * @property string|null $item_code
  * @property string|null $satuan_code
@@ -67,7 +66,7 @@ class SalesOrderDetail extends \yii\db\ActiveRecord
             [['urutan', 'potong', 'objek', 'mesin', 'jumlah_warna', 'lembar_ikat', 'status', 'created_at', 'updated_at'], 'integer'],
             [['panjang', 'lebar', 'harga_beli_1', 'harga_beli_2', 'harga_beli_3', 'harga_jual_1', 'harga_jual_2', 'harga_jual_3', 'harga_cetak', 'qty_order_1', 'qty_order_2', 'qty_order_3', 'jumlah_cetak', 'jumlah_objek', 'jumlah_lem'], 'number'],
             [['no_so'], 'string', 'max' => 12],
-            [['outsource_code', 'order_code', 'satuan_code', 'material_code', 'type_code', 'group_supplier_code', 'group_material_code'], 'string', 'max' => 3],
+            [['order_code', 'satuan_code', 'material_code', 'type_code', 'group_supplier_code', 'group_material_code'], 'string', 'max' => 3],
             [['item_code'], 'string', 'max' => 7],
             [['um_1', 'um_2', 'um_3'], 'string', 'max' => 5],
             [['no_so', 'urutan'], 'unique', 'targetAttribute' => ['no_so', 'urutan']],
@@ -82,7 +81,6 @@ class SalesOrderDetail extends \yii\db\ActiveRecord
         return [
             'no_so' => 'No So',
             'urutan' => 'Urutan',
-            'outsource_code' => 'Outsource Code',
             'order_code' => 'Order Code',
             'item_code' => 'Item Code',
             'satuan_code' => 'Satuan Code',

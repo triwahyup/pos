@@ -93,12 +93,12 @@ JS;
         <div class="col-lg-12 col-md-12 col-xs-12 margin-top-20 padding-left-0">
             <div class="margin-top-20"></div>
             <div class="col-lg-3 col-md-3 col-xs-12 padding-left-0">
-                <?= $form->field($temp, 'nama_order')->widget(Select2::classname(), [
+                <?= $form->field($model, 'nama_order')->widget(Select2::classname(), [
                     'data' => [],
                     'options' => [
                         'placeholder' => 'Pilih Order',
                         'class' => 'select2',
-                        'data-temp' => 1,
+                        'value' => (!$model->isNewRecord) ? $model->order->name : '',
                     ],
                     'pluginOptions' => [
                         'allowClear' => true,
@@ -122,17 +122,17 @@ JS;
                 ]) ?>
             </div>
             <div class="col-lg-3 col-md-3 col-xs-12 padding-left-0">
-                <?= $form->field($temp, 'outsource_code')->widget(Select2::classname(), [
+                <?= $form->field($model, 'outsource_code')->widget(Select2::classname(), [
                         'data' => $outsourcing,
                         'options' => [
                             'placeholder' => 'Pilih Jasa',
                             'class' => 'select2',
-                            'data-temp' => 1,
                             'readonly' => true,
                         ],
                     ]) ?>
             </div>
-            <?= $form->field($temp, 'type_order')->hiddenInput()->label(false) ?>
+            <?= $form->field($model, 'order_code')->hiddenInput()->label(false) ?>
+            <?= $form->field($model, 'type_order')->hiddenInput()->label(false) ?>
         </div>
         <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
             <div class="margin-top-20"></div>
@@ -184,11 +184,13 @@ function load_data_order(el)
             var o = $.parseJSON(data);
             if(o.success == true){
                 if(o.type_order == 1){
-                    $("#tempsalesorderdetail-outsource_code").attr("readonly", true);
+                    $("#salesorder-outsource_code").attr("readonly", true);
                 }else{
-                    $("#tempsalesorderdetail-outsource_code").attr("readonly", false);
+                    $("#salesorder-outsource_code").attr("readonly", false);
                 }
-                $("#tempsalesorderdetail-type_order").val(o.type_order);
+                console.log(o);
+                $("#salesorder-order_code").val(o.order_code);
+                $("#salesorder-type_order").val(o.type_order);
             }
             init_temp();
         },
@@ -279,7 +281,7 @@ $(function(){
 
 var timeOut = 3000;
 $(document).ready(function(){
-    $("body").off("change","#tempsalesorderdetail-nama_order").on("change","#tempsalesorderdetail-nama_order", function(e){
+    $("body").off("change","#salesorder-nama_order").on("change","#salesorder-nama_order", function(e){
         e.preventDefault();
         load_data_order($(this));
     });

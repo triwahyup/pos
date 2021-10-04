@@ -13,7 +13,6 @@ use app\modules\sales\models\TempSalesOrderProduksiDetail;
  * @property string|null $order_code
  * @property int|null $urutan
  * @property string|null $no_so
- * @property string|null $outsource_code
  * @property string|null $item_code
  * @property string|null $satuan_code
  * @property string|null $material_code
@@ -47,9 +46,6 @@ use app\modules\sales\models\TempSalesOrderProduksiDetail;
  */
 class TempSalesOrderDetail extends \yii\db\ActiveRecord
 {
-    public $nama_order;
-    public $type_order;
-    
     /**
      * {@inheritdoc}
      */
@@ -64,10 +60,9 @@ class TempSalesOrderDetail extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['urutan', 'potong', 'objek', 'mesin', 'jumlah_warna', 'lembar_ikat', 'user_id', 'type_order'], 'integer'],
+            [['urutan', 'potong', 'objek', 'mesin', 'jumlah_warna', 'lembar_ikat', 'user_id'], 'integer'],
             [['panjang', 'lebar', 'harga_beli_1', 'harga_beli_2', 'harga_beli_3', 'harga_jual_1', 'harga_jual_2', 'harga_jual_3', 'harga_cetak', 'qty_order_1', 'qty_order_2', 'qty_order_3', 'jumlah_cetak', 'jumlah_objek', 'jumlah_lem'], 'number'],
-            [['order_code', 'outsource_code', 'satuan_code', 'material_code', 'type_code', 'group_supplier_code', 'group_material_code'], 'string', 'max' => 3],
-            [['nama_order'], 'string', 'max' => 128],
+            [['order_code', 'satuan_code', 'material_code', 'type_code', 'group_supplier_code', 'group_material_code'], 'string', 'max' => 3],
             [['no_so'], 'string', 'max' => 12],
             [['item_code'], 'string', 'max' => 7],
             [['um_1', 'um_2', 'um_3'], 'string', 'max' => 5],
@@ -84,7 +79,6 @@ class TempSalesOrderDetail extends \yii\db\ActiveRecord
             'order_code' => 'Order Code',
             'urutan' => 'Urutan',
             'no_so' => 'No So',
-            'outsource_code' => 'Jasa / Outsourcing',
             'item_code' => 'Item Code',
             'satuan_code' => 'Satuan Code',
             'material_code' => 'Material Code',

@@ -92,8 +92,9 @@ class SalesOrderController extends Controller
      */
     public function actionView($no_so)
     {
+        $model = $this->findModel($no_so);
         return $this->render('view', [
-            'model' => $this->findModel($no_so),
+            'model' => $model
         ]);
     }
 
@@ -120,89 +121,85 @@ class SalesOrderController extends Controller
         $model = new SalesOrder();
         $temp = new TempSalesOrderDetail();
         if($this->request->isPost){
-            if($model->load($this->request->post()) && $temp->load($this->request->post())){
-                if(!empty($temp->nama_order)){
-                    if($temp->type_order == 2){
-                        if(empty($temp->outsource_code)){
+            if($model->load($this->request->post())){
+                if($model->type_order == 2){
+                    if(empty($model->outsource_code)){
+                        $success = false;
+                        $message = 'DATA JASA / OUTSOURCING TIDAK BOLEH KOSONG.';
+                    }
+                }
+
+                $connection = \Yii::$app->db;
+                $transaction = $connection->beginTransaction();
+                try{
+                    $model->no_so = $model->generateCode();
+                    $model->total_order = $model->total_order();
+                    if($model->save()){
+                        if(count($model->temps()) > 0){
+                            foreach($model->temps() as $temp){
+                                $detail = new SalesOrderDetail();
+                                $detail->attributes = $temp->attributes;
+                                $detail->no_so = $model->no_so;
+                                if(!$detail->save()){
+                                    $success = false;
+                                    $message = (count($detail->errors) > 0) ? 'ERROR CREATE SALES ORDER DETAIL: ' : '';
+                                    foreach($detail->errors as $error => $value){
+                                        $message .= strtoupper($value[0].', ');
+                                    }
+                                    $message = substr($message, 0, -2);
+                                }
+                            }
+                        }else{
                             $success = false;
-                            $message = 'DATA JASA / OUTSOURCING TIDAK BOLEH KOSONG.';
+                            $message = 'ERROR CREATE SALES ORDER: DETAIL IS EMPTY.';
                         }
+
+                        if(count($model->tempsProduksi()) > 0){
+                            foreach($model->tempsProduksi() as $tempProduksi){
+                                $detailProduksi = new SalesOrderProduksiDetail();
+                                $detailProduksi->attributes = $tempProduksi->attributes;
+                                $detailProduksi->no_so = $model->no_so;
+                                if(!$detailProduksi->save()){
+                                    $success = false;
+                                    $message = (count($detailProduksi->errors) > 0) ? 'ERROR CREATE SALES ORDER PRODUKSI DETAIL: ' : '';
+                                    foreach($detailProduksi->errors as $error => $value){
+                                        $message .= strtoupper($value[0].', ');
+                                    }
+                                    $message = substr($message, 0, -2);
+                                }
+                            }
+                        }else{
+                            $success = false;
+                            $message = 'ERROR CREATE SALES ORDER: PROSES PRODUKSI IS EMPTY.';
+                        }
+                    }else{
+                        $success = false;
+                        $message = (count($model->errors) > 0) ? 'ERROR CREATE SALES ORDER: ' : '';
+                        foreach($model->errors as $error => $value){
+                            $message .= $value[0].', ';
+                        }
+                        $message = substr($message, 0, -2);
                     }
 
-                    $connection = \Yii::$app->db;
-                    $transaction = $connection->beginTransaction();
-                    try{
-                        $model->no_so = $model->generateCode();
-                        if($model->save()){
-                            if(count($model->temps()) > 0){
-                                foreach($model->temps() as $temp){
-                                    $detail = new SalesOrderDetail();
-                                    $detail->attributes = $temp->attributes;
-                                    $detail->no_so = $model->no_so;
-                                    if(!$detail->save()){
-                                        $success = false;
-                                        $message = (count($detail->errors) > 0) ? 'ERROR CREATE SALES ORDER DETAIL: ' : '';
-                                        foreach($detail->errors as $error => $value){
-                                            $message .= strtoupper($value[0].', ');
-                                        }
-                                        $message = substr($message, 0, -2);
-                                    }
-                                }
-                            }else{
-                                $success = false;
-                                $message = 'ERROR CREATE SALES ORDER: DETAIL IS EMPTY.';
-                            }
-    
-                            if(count($model->tempsProduksi()) > 0){
-                                foreach($model->tempsProduksi() as $tempProduksi){
-                                    $detailProduksi = new SalesOrderProduksiDetail();
-                                    $detailProduksi->attributes = $tempProduksi->attributes;
-                                    $detailProduksi->no_so = $model->no_so;
-                                    if(!$detailProduksi->save()){
-                                        $success = false;
-                                        $message = (count($detailProduksi->errors) > 0) ? 'ERROR CREATE SALES ORDER PRODUKSI DETAIL: ' : '';
-                                        foreach($detailProduksi->errors as $error => $value){
-                                            $message .= strtoupper($value[0].', ');
-                                        }
-                                        $message = substr($message, 0, -2);
-                                    }
-                                }
-                            }else{
-                                $success = false;
-                                $message = 'ERROR CREATE SALES ORDER: PROSES PRODUKSI IS EMPTY.';
-                            }
-                        }else{
-                            $success = false;
-                            $message = (count($model->errors) > 0) ? 'ERROR CREATE SALES ORDER: ' : '';
-                            foreach($model->errors as $error => $value){
-                                $message .= $value[0].', ';
-                            }
-                            $message = substr($message, 0, -2);
-                        }
-    
-                        if($success){
-                            $this->emptyTemp();
-                            $transaction->commit();
-                            $message = '['.$model->no_so.'] SUCCESS CREATE SALES ORDER.';
-                            $logs =	[
-                                'type' => Logs::TYPE_USER,
-                                'description' => $message,
-                            ];
-                            Logs::addLog($logs);
-    
-                            \Yii::$app->session->setFlash('success', $message);
-                            return $this->redirect(['view', 'no_so' => $model->no_so]);
-                        }else{
-                            $transaction->rollBack();
-                        }
-                    }catch(\Exception $e){
-                        $success = false;
-                        $message = $e->getMessage();
+                    if($success){
+                        $this->emptyTemp();
+                        $transaction->commit();
+                        $message = '['.$model->no_so.'] SUCCESS CREATE SALES ORDER.';
+                        $logs =	[
+                            'type' => Logs::TYPE_USER,
+                            'description' => $message,
+                        ];
+                        Logs::addLog($logs);
+
+                        \Yii::$app->session->setFlash('success', $message);
+                        return $this->redirect(['view', 'no_so' => $model->no_so]);
+                    }else{
                         $transaction->rollBack();
                     }
-                }else{
+                }catch(\Exception $e){
                     $success = false;
-                    $message = 'DATA ORDER KOSONG. PILIH SALAH SATU DATA ORDER.';
+                    $message = $e->getMessage();
+                    $transaction->rollBack();
                 }
                 $logs =	[
                     'type' => Logs::TYPE_USER,
@@ -246,13 +243,21 @@ class SalesOrderController extends Controller
 
         $success = true;
         $message = '';
-        $model = $this->findModel($code);
+        $model = $this->findModel($no_so);
         $temp = new TempSalesOrderDetail();
         if ($this->request->isPost) {
             if ($model->load($this->request->post())){
+                if($model->type_order == 2){
+                    if(empty($model->outsource_code)){
+                        $success = false;
+                        $message = 'DATA JASA / OUTSOURCING TIDAK BOLEH KOSONG.';
+                    }
+                }
+                
                 $connection = \Yii::$app->db;
                 $transaction = $connection->beginTransaction();
                 try{
+                    $model->total_order = $model->total_order();
                     if($model->save()){
                         if(count($model->temps) > 0){
                             foreach($model->details as $empty)
@@ -305,7 +310,7 @@ class SalesOrderController extends Controller
                     if($success){
                         $this->emptyTemp();
                         $transaction->commit();
-                        $message = '['.$model->code.'] SUCCESS UPDATE SALES ORDER.';
+                        $message = '['.$model->no_so.'] SUCCESS UPDATE SALES ORDER.';
                         $logs =	[
                             'type' => Logs::TYPE_USER,
                             'description' => $message,
@@ -313,7 +318,7 @@ class SalesOrderController extends Controller
                         Logs::addLog($logs);
 
                         \Yii::$app->session->setFlash('success', $message);
-                        return $this->redirect(['view', 'code' => $model->code]);
+                        return $this->redirect(['view', 'no_so' => $model->no_so]);
                     }else{
                         $transaction->rollBack();
                     }
@@ -378,7 +383,7 @@ class SalesOrderController extends Controller
     {
         $success = true;
 		$message = '';
-        $model = $this->findModel($code);
+        $model = $this->findModel($no_so);
         if(isset($model)){
             $connection = \Yii::$app->db;
 			$transaction = $connection->beginTransaction();
@@ -418,7 +423,7 @@ class SalesOrderController extends Controller
 
                 if($success){
                     $transaction->commit();
-                    $message = '['.$model->code.'] SUCCESS DELETE SALES ORDER.';
+                    $message = '['.$model->no_so.'] SUCCESS DELETE SALES ORDER.';
                     \Yii::$app->session->setFlash('success', $message);
                 }else{
                     $transaction->rollBack();
@@ -455,15 +460,13 @@ class SalesOrderController extends Controller
     {
         $success = true;
         $message = '';
-        $typeOrder = 1;
         $model = MasterOrder::findOne(['code'=>$code, 'status'=>1]);
+        $type_order = $model->type_order;
+        $order_code = $model->code;
         if(isset($model)){
             $connection = \Yii::$app->db;
             $transaction = $connection->beginTransaction();
             try{
-                if($model->type_order != 1)
-                    $typeOrder = 2;
-                
                 TempSalesOrderDetail::deleteAll('user_id=:user', [':user'=>\Yii::$app->user->id]);
                 foreach($model->details as $detail){
                     $tempDetails = new TempSalesOrderDetail();
@@ -511,7 +514,7 @@ class SalesOrderController extends Controller
             $success = false;
             $message = 'DATA ORDER NOT FOUND.';
         }
-        return json_encode(['success'=>$success, 'message'=>$message, 'type_order'=>$typeOrder]);
+        return json_encode(['success'=>$success, 'message'=>$message, 'type_order'=>$type_order, 'order_code'=>$order_code]);
     }
 
     public function actionTemp()
