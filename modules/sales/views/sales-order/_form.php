@@ -219,8 +219,9 @@ function init_temp()
     });
 }
 
-function create_temp_produksi(code, biaya, item)
+function create_temp_produksi(el)
 {
+    var no_so = "<?=(isset($_GET['no_so'])) ? $_GET['no_so'] : '' ?>"
     $.ajax({
         url: "<?= Url::to(['sales-order/create-temp-produksi']) ?>",
         type: "POST",
@@ -228,9 +229,10 @@ function create_temp_produksi(code, biaya, item)
         error: function(xhr, status, error) {},
         beforeSend: function(){},
         data: {
-            code: code,
-            biaya: biaya,
-            item: item,
+            code: $("#code", el).val(),
+            biaya: $("#biaya", el).val(),
+            item: $("#item", el).val(),
+            no_so: no_so,
         },
         success: function(data){
             var o = $.parseJSON(data);
@@ -292,7 +294,7 @@ $(document).ready(function(){
     });
     $("body").off("click",".option-custom > li:not([data-event])").on("click",".option-custom > li:not([data-event])", function(e){
         e.preventDefault();
-        create_temp_produksi($("#code", $(this)).val(), $("#biaya", $(this)).val(), $("#item", $(this)).val());
+        create_temp_produksi($(this));
     });
     $("body").off("click","#delete_temp").on("click","#delete_temp", function(e){
         e.preventDefault();

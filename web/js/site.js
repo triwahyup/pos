@@ -164,9 +164,11 @@ var temp = {
 		// enable button update dan delete
 		$("[data-button=\"update_temp\"]").prop("disabled", false);
 		$("[data-button=\"delete_temp\"]").prop("disabled", false);
+		// clear data temp
+		$("[data-temp]").val(null);
 	},
 	event: function() {
-		$("body").off("[data-button=\"cancel\"]").on("[data-button=\"cancel\"]", function(e){
+		$("body").off("click", "[data-button=\"cancel\"]").on("click", "[data-button=\"cancel\"]", function(e){
 			e.preventDefault();
 			temp.destroy();
 		});

@@ -547,6 +547,7 @@ class SalesOrderController extends Controller
             $temp->attributes = $biayaProduksi->attributes;
             $temp->biaya_produksi_code = $biayaProduksi->code;
             $temp->item_code = $materialItem->code;
+            $temp->no_so = $request->post('no_so');
             $temp->total_biaya = $temp->totalBiaya();
             if(!empty($request->post('code'))){
                 $temp->order_code = $request->post('code');
