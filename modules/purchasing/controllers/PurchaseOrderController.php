@@ -458,7 +458,6 @@ class PurchaseOrderController extends Controller
                     OR c.name  LIKE "%'.$_POST['search'].'%"')
                 ->orderBy(['a.code'=>SORT_ASC])
                 ->limit(10)
-                // ->asArray()
                 ->all();
         }
         return json_encode(['data'=>$this->renderPartial('_list_item', ['model'=>$model])]);

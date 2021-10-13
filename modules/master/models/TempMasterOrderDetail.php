@@ -28,6 +28,8 @@ use app\modules\master\models\TempMasterOrderProduksiDetail;
  */
 class TempMasterOrderDetail extends \yii\db\ActiveRecord
 {
+    public $item_name;
+    
     /**
      * {@inheritdoc}
      */
@@ -43,7 +45,7 @@ class TempMasterOrderDetail extends \yii\db\ActiveRecord
     {
         return [
             [['urutan', 'user_id'], 'integer'],
-            [['panjang', 'lebar', 'harga_cetak', 'harga_beli_1', 'harga_beli_2', 'harga_beli_3', 'harga_jual_1', 'harga_jual_2', 'harga_jual_3', 'potong', 'objek', 'mesin', 'jumlah_warna', 'lembar_ikat', 'qty_order_1', 'qty_order_2', 'qty_order_3'], 'safe'],
+            [['panjang', 'lebar', 'harga_cetak', 'harga_beli_1', 'harga_beli_2', 'harga_beli_3', 'harga_jual_1', 'harga_jual_2', 'harga_jual_3', 'potong', 'objek', 'mesin', 'jumlah_warna', 'lembar_ikat', 'qty_order_1', 'qty_order_2', 'qty_order_3', 'total_order'], 'safe'],
             [['order_code', 'satuan_code', 'type_code', 'material_code', 'group_material_code', 'group_supplier_code'], 'string', 'max' => 3],
             [['jumlah_cetak', 'jumlah_objek', 'jumlah_lem'], 'number'],
             [['um_1', 'um_2', 'um_3'], 'string', 'max' => 5],
@@ -85,7 +87,26 @@ class TempMasterOrderDetail extends \yii\db\ActiveRecord
         $this->mesin = str_replace(',', '', $this->mesin);
         $this->potong = str_replace(',', '', $this->potong);
         $this->objek = str_replace(',', '', $this->objek);
+        $this->total_order = str_replace(',', '', $this->total_order);
         return parent::beforeSave($attribute);
+    }
+
+    public function getTotalOrder()
+    {
+        $total_order=0;
+        if(!empty($this->qty_order_1)){
+            $harga_jual_1 = str_replace(',', '', $this->harga_jual_1);
+            $total_order += $this->qty_order_1 * $harga_jual_1;
+        }
+        if(!empty($this->qty_order_2)){
+            $harga_jual_2 = str_replace(',', '', $this->harga_jual_2);
+            $total_order += $this->qty_order_2 * $harga_jual_2;
+        }
+        if(!empty($this->qty_order_3)){
+            $harga_jual_3 = str_replace(',', '', $this->harga_jual_3);
+            $total_order += $this->qty_order_3 * $harga_jual_3;
+        }
+        return $total_order;
     }
 
     public function getCount()

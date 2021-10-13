@@ -1,9 +1,12 @@
-<?php if(count($temps) > 0): ?>
-    <?php foreach($temps as $index=>$val): ?>
+<?php if(count($temps) > 0):
+    $totalOrder = 0;
+    $totalBiaya = 0; ?>
+    <?php foreach($temps as $index=>$val):
+        $totalOrder += $val->total_order; ?>
         <tr>
             <td class="text-center" rowspan="2"><?=$index+1?></td>
             <td class="font-size-10"><?=(isset($val->item)) ? '<span class="text-success">'.$val->item->code .'</span><br />'. $val->item->name : '' ?></td>
-            <?php for($a=1;$a<=3;$a++): ?>
+            <?php for($a=1;$a<3;$a++): ?>
                 <td class="text-right"><?=(!empty($val['qty_order_'.$a])) ? number_format($val['qty_order_'.$a]).'<br /><span class="text-muted font-size-10">'.$val['um_'.$a].'</span>' : null ?></td>
             <?php endfor; ?>
             <td class="text-right"><?=number_format($val['jumlah_cetak']).'.- <br /><span class="text-muted font-size-10">QTY Cetak</span>' ?></td>
@@ -75,7 +78,8 @@
                                 <label class="text-left">Detail Proses</label>
                                 <ul class="desc-custom padding-left-0">
                                     <?php foreach($val->detailsProduksi as $v):
-                                        $total_biaya += $v->total_biaya; ?>
+                                        $total_biaya += $v->total_biaya;
+                                        $totalBiaya += $v->total_biaya; ?>
                                         <li>
                                             <span><?=$v->name ?></span>
                                             <span><?='Rp. '.number_format($v->total_biaya).'.-' ?></span>
@@ -96,6 +100,12 @@
             </td>
         </tr>
     <?php endforeach; ?>
+    <tr>
+        <td class="summary" colspan="3"></td>
+        <td class="summary" colspan="2"><strong><?='Total Order: Rp. '.number_format($totalOrder).'.-' ?></strong></td>
+        <td class="summary" colspan="2"><strong><?='Total Biaya: Rp. '.number_format($totalBiaya).'.-' ?></strong></td>
+        <td class="summary"><strong><?='Grand Total: Rp. '.number_format($totalOrder+$totalBiaya).'.-' ?></strong></td>
+    </tr>
 <?php else : ?>
     <tr>
         <td class="text-center text-danger" colspan="10">Data is empty</td>

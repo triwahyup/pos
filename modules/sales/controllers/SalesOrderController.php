@@ -44,7 +44,7 @@ class SalesOrderController extends Controller
                             'roles' => ['@'],
                         ],
                         [
-                            'actions' => ['index', 'view', 'list-order', 'load-order', 'temp'],
+                            'actions' => ['index', 'view', 'list-order', 'load-order', 'temp', 'search', 'select-order'],
                             'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('sales-order')),
                             'roles' => ['@'],
                         ], 
@@ -134,7 +134,7 @@ class SalesOrderController extends Controller
                 $transaction = $connection->beginTransaction();
                 try{
                     $model->no_so = $model->generateCode();
-                    $model->total_order = $model->total_order();
+                    $model->grand_total = $model->grand_total();
                     if($model->save()){
                         if(count($model->temps()) > 0){
                             foreach($model->temps() as $temp){
@@ -258,7 +258,7 @@ class SalesOrderController extends Controller
                 $connection = \Yii::$app->db;
                 $transaction = $connection->beginTransaction();
                 try{
-                    $model->total_order = $model->total_order();
+                    $model->grand_total = $model->grand_total();
                     if($model->save()){
                         if(count($model->temps) > 0){
                             foreach($model->details as $empty)
@@ -530,16 +530,39 @@ class SalesOrderController extends Controller
         return $this->redirect(['view', 'no_so' => $model->no_so]);
     }
 
-    public function actionListOrder($q)
+    public function actionListOrder()
     {
         $model = MasterOrder::find()
-            ->select(['*', 'name as text', 'code id'])
             ->where(['status'=>1])
-            ->andWhere('code LIKE "%'.$q.'%" OR name LIKE "%'.$q.'%"')
+            ->orderBy(['code'=>SORT_ASC])
             ->limit(10)
-            ->asArray()
             ->all();
-        return json_encode(['results'=>$model]);
+        return json_encode(['data'=>$this->renderPartial('_list_item', ['model'=>$model])]);
+    }
+
+    public function actionSearch()
+    {
+        $model = [];
+        if(isset($_POST['search'])){
+            $model = MasterOrder::find()
+                ->where(['status'=>1])
+                ->andWhere('code LIKE "%'.$_POST['search'].'%" 
+                    OR name LIKE "%'.$_POST['search'].'%"')
+                ->orderBy(['code'=>SORT_ASC])
+                ->limit(10)
+                ->all();
+        }
+        return json_encode(['data'=>$this->renderPartial('_list_item', ['model'=>$model])]);
+    }
+
+    public function actionSelectOrder()
+    {
+        $model = MasterOrder::find()
+            ->select(['*', 'code as order_code', 'name as nama_order'])
+            ->where(['code'=>$_POST['code'], 'status'=>1])
+            ->asArray()
+            ->one();
+        return json_encode($model);
     }
 
     public function actionLoadOrder($code)
@@ -606,18 +629,24 @@ class SalesOrderController extends Controller
     public function actionTemp()
     {
         $temps = TempSalesOrderDetail::findAll(['user_id'=> \Yii::$app->user->id]);
+        $total_order=0;
         $total_biaya=0;
         foreach($temps as $temp){
+            $total_order += $temp->total_order;
             foreach($temp->detailsProduksi as $val){
                 $total_biaya += $val->total_biaya;
             }
         }
+        $grand_total = $total_order+$total_biaya;
+        
         $biaya = MasterBiayaProduksi::findAll(['status'=>1]);
-        $model =  $this->renderAjax('_temp', [
-            'temps'=>$temps,
-            'biaya' => $biaya,
+        $model =  $this->renderAjax('_temp', ['temps'=>$temps, 'biaya' => $biaya]);
+        return json_encode([
+            'model'=>$model,
+            'total_order'=>number_format($total_order),
+            'total_biaya'=>number_format($total_biaya),
+            'grand_total'=>number_format($grand_total)
         ]);
-        return json_encode(['model'=>$model, 'total_biaya'=>number_format($total_biaya)]);
     }
 
     public function actionCreateTempProduksi()
@@ -628,26 +657,34 @@ class SalesOrderController extends Controller
         if($request->isPost){
             $materialItem = MasterMaterialItem::findOne(['code'=>$request->post('item'), 'status'=>1]);
             $biayaProduksi = MasterBiayaProduksi::findOne(['code'=>$request->post('biaya'), 'status'=>1]);
-            $temp = new TempSalesOrderProduksiDetail();
-            $temp->attributes = $materialItem->attributes;
-            $temp->attributes = $biayaProduksi->attributes;
-            $temp->biaya_produksi_code = $biayaProduksi->code;
-            $temp->item_code = $materialItem->code;
-            $temp->no_so = $request->post('no_so');
-            $temp->total_biaya = $temp->totalBiaya();
-            if(!empty($request->post('code'))){
-                $temp->order_code = $request->post('code');
-            }
-            $temp->urutan = $temp->count +1;
-            $temp->user_id = \Yii::$app->user->id;
-            if($temp->save()){
-                $message = 'CREATE DETAIL PROSES SUCCESSFULLY';
+            $checkTemp = $model = TempSalesOrderProduksiDetail::find()
+                ->where(['biaya_produksi_code'=>$biayaProduksi->code, 'item_code'=>$materialItem->code, 'user_id'=> \Yii::$app->user->id])
+                ->one();
+            if(empty($checkTemp)){
+                $temp = new TempSalesOrderProduksiDetail();
+                $temp->attributes = $materialItem->attributes;
+                $temp->attributes = $biayaProduksi->attributes;
+                $temp->biaya_produksi_code = $biayaProduksi->code;
+                $temp->item_code = $materialItem->code;
+                $temp->no_so = $request->post('no_so');
+                $temp->total_biaya = $temp->totalBiaya();
+                if(!empty($request->post('code'))){
+                    $temp->order_code = $request->post('code');
+                }
+                $temp->urutan = $temp->count +1;
+                $temp->user_id = \Yii::$app->user->id;
+                if($temp->save()){
+                    $message = 'CREATE DETAIL PROSES SUCCESSFULLY';
+                }else{
+                    $success = false;
+                    foreach($temp->errors as $error => $value){
+                        $message = $value[0].', ';
+                    }
+                    $message = substr($message, 0, -2);
+                }
             }else{
                 $success = false;
-                foreach($temp->errors as $error => $value){
-                    $message = $value[0].', ';
-                }
-                $message = substr($message, 0, -2);
+                $message = 'Proses sudah ada.';
             }
         }else{
             throw new NotFoundHttpException('The requested data does not exist.');

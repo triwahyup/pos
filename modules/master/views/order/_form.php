@@ -2,29 +2,8 @@
 use kartik\widgets\Select2;
 use yii\helpers\Html;
 use yii\helpers\Url;
-use yii\web\JsExpression;
 use yii\widgets\ActiveForm;
 use yii\widgets\MaskedInput;
-
-$resultsJs = <<< JS
-    function (data, params) {
-       params.page = params.page || 1;
-        return {
-            // Change `data.items` to `data.results`.
-            // `results` is the key that you have been selected on
-            // `actionJsonlist`.
-            results: data.results
-        };
-    }
-JS;
-
-$format1line = <<< JS
-	function (item) {
-		var selectionText = item.text;
-		var returnString = '<span class>'+selectionText+'</span>';
-		return returnString; 
-	}
-JS;
 
 /* @var $this yii\web\View */
 /* @var $model app\modules\master\models\MasterOrder */
@@ -33,7 +12,7 @@ JS;
 
 <div class="master-order-form">
     <?php $form = ActiveForm::begin(['id'=>'form']); ?>
-        <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">    
+        <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
             <div class="col-lg-4 col-md-4 col-xs-12 padding-left-0">
                 <?= $form->field($model, 'code')->hiddenInput(['maxlength' => true])->label(false) ?>
                 <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
@@ -46,12 +25,25 @@ JS;
                     ]) ?>
                 <?= $form->field($model, 'keterangan')->textarea(['rows' => 2]) ?>
             </div>
-            <div class="col-lg-4 col-md-4 col-xs-12 padding-left-0"></div>
-            <div class="col-lg-4 col-md-4 col-xs-12 padding-right-0">
+            <div class="col-lg-1 col-md-1 col-xs-12 padding-left-0"></div>
+            <div class="col-lg-7 col-md-7 col-xs-12 padding-right-0">
                 <div class="margin-top-20"></div>
                 <div class="board-container">
-                    <p class="title">Total Biaya</p>
-                    <?= $form->field($model, 'total_biaya')->textInput(['readonly' => true, 'value'=>0])->label(false) ?>
+                    <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
+                        <div class="col-lg-6 col-md-6 col-xs-12 padding-left-0 padding-right-0">
+                            <p class="title">Total Order Material</p>
+                            <?= $form->field($model, 'total_order')->textInput(['readonly' => true, 'value'=>0])->label(false) ?>
+                        </div>
+                        <div class="col-lg-6 col-md-6 col-xs-12 padding-left-0 padding-right-0">
+                            <p class="title">Total Biaya Produksi</p>
+                            <?= $form->field($model, 'total_biaya')->textInput(['readonly' => true, 'value'=>0])->label(false) ?>
+                        </div>
+                    </div>
+                    <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
+                        <div class="margin-top-20"></div>
+                        <p class="title">Grand Total</p>
+                        <?= $form->field($model, 'grand_total')->textInput(['readonly' => true, 'value'=>0])->label(false) ?>
+                    </div>
                 </div>
             </div>
         </div>
@@ -66,39 +58,15 @@ JS;
                             <label>Pilih Material:</label>
                         </div>
                         <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padding-right-0">
-                            <?= $form->field($temp, 'item_code')->widget(Select2::classname(), [
-                                'data' => [],
-                                'options' => [
-                                    'placeholder' => 'Pilih Item',
-                                    'class' => 'select2',
-                                    'data-temp' => 1,
-                                ],
-                                'pluginOptions' => [
-                                    'minimumInputLength' => 2,
-                                    'ajax' => [
-                                        'url' => Url::to(['order/list-item']),
-                                        'dataType' => 'json',
-                                        'delay' => 250,
-                                        'data' => new JsExpression("function(params) {
-                                            return {
-                                                q:params.term,
-                                            }
-                                        }"),
-                                        'cache' => true,
-                                        'processResults' => new JsExpression($resultsJs),
-                                    ],
-                                    'templateResult' => new JsExpression($format1line),
-                                    'templateSelection' => new JsExpression($format1line),
-                                    'escapeMarkup' => new JsExpression("function(markup) { return markup; }")
-                                ],
-                            ])->label(false) ?>
+                            <?= $form->field($temp, 'item_name')->textInput(['placeholder' => 'Pilih material tekan F4', 'data-temp' => true])->label(false) ?>
+                            <?= $form->field($temp, 'item_code')->hiddenInput(['data-temp' => true])->label(false) ?>
                         </div>
                     </div>
                     <div class="col-lg-12 col-md-12 col-xs-12">
                         <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
                             <label>Min Order:</label>
                         </div>
-                        <div class="col-lg-1 col-md-1 col-sm-12 col-xs-12 padding-right-0">
+                        <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
                             <?= $form->field($temp, 'qty_order_1')->widget(MaskedInput::className(), [
                                     'clientOptions' => [
                                         'alias' => 'decimal',
@@ -107,12 +75,13 @@ JS;
                                     ],
                                     'options' => [
                                         'data-align' => 'text-right',
+                                        'data-temp' => true,
                                         'readonly' => true,
                                         'placeholder' => 'RIM',
                                     ]
                                 ])->label(false) ?>
                         </div>
-                        <div class="col-lg-1 col-md-1 col-sm-12 col-xs-12 padding-right-0">
+                        <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
                             <?= $form->field($temp, 'qty_order_2')->widget(MaskedInput::className(), [
                                 'clientOptions' => [
                                     'alias' =>  'decimal',
@@ -121,6 +90,7 @@ JS;
                                 ],
                                 'options' => [
                                     'data-align' => 'text-right',
+                                    'data-temp' => true,
                                     'readonly' => true,
                                     'maxlength' => 3,
                                     'placeholder' => 'LB',
@@ -130,8 +100,8 @@ JS;
                     </div>
                     <div class="col-lg-12 col-md-12 col-xs-12">
                         <div class="margin-top-20"></div>
-                        <?= $form->field($temp, 'id')->hiddenInput()->label(false) ?>
-                        <?= $form->field($temp, 'order_code')->hiddenInput()->label(false) ?>
+                        <?= $form->field($temp, 'id')->hiddenInput(['data-temp' => true])->label(false) ?>
+                        <?= $form->field($temp, 'order_code')->hiddenInput(['data-temp' => true])->label(false) ?>
                         <div class="col-lg-6 col-md-6 col-xs-12 padding-left-0 padding-right-0">
                             <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
                                 <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padding-right-0">
@@ -144,7 +114,11 @@ JS;
                                                 'groupSeparator' => ',',
                                                 'autoGroup' => true
                                             ],
-                                            'options' => ['data-align' => 'text-right', 'placeholder' => 'Panjang', 'data-temp' => 1]
+                                            'options' => [
+                                                'data-align' => 'text-right',
+                                                'data-temp' => true,
+                                                'placeholder' => 'Panjang'
+                                            ]
                                         ])->label(false) ?>
                                 </div>
                                 <div class="col-lg-4 col-md-2 col-sm-12 col-xs-12 padding-right-0">
@@ -154,7 +128,11 @@ JS;
                                                 'groupSeparator' => ',',
                                                 'autoGroup' => true
                                             ],
-                                            'options' => ['data-align' => 'text-right', 'placeholder' => 'Lebar', 'data-temp' => 1]
+                                            'options' => [
+                                                'data-align' => 'text-right',
+                                                'data-temp' => true, 
+                                                'placeholder' => 'Lebar'
+                                            ]
                                         ])->label(false) ?>
                                 </div>
                             </div>
@@ -169,7 +147,11 @@ JS;
                                                 'groupSeparator' => ',',
                                                 'autoGroup' => true
                                             ],
-                                            'options' => ['data-align' => 'text-right', 'placeholder' => 'Mesin', 'data-temp' => 1]
+                                            'options' => [
+                                                'data-align' => 'text-right',
+                                                'data-temp' => true,
+                                                'placeholder' => 'Mesin'
+                                            ]
                                         ])->label(false) ?>
                                 </div>
                                 <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padding-right-0">
@@ -179,7 +161,11 @@ JS;
                                                 'groupSeparator' => ',',
                                                 'autoGroup' => true
                                             ],
-                                            'options' => ['data-align' => 'text-right', 'placeholder' => 'Jumlah Warna', 'data-temp' => 1]
+                                            'options' => [
+                                                'data-align' => 'text-right', 
+                                                'data-temp' => true,
+                                                'placeholder' => 'Jumlah Warna'
+                                            ]
                                         ])->label(false) ?>
                                 </div>
                             </div>
@@ -196,7 +182,11 @@ JS;
                                                 'groupSeparator' => ',',
                                                 'autoGroup' => true
                                             ],
-                                            'options' => ['data-align' => 'text-right', 'placeholder' => 'Potong', 'data-temp' => 1]
+                                            'options' => [
+                                                'data-align' => 'text-right',
+                                                'data-temp' => true, 
+                                                'placeholder' => 'Potong'
+                                            ]
                                         ])->label(false) ?>
                                 </div>
                                 <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padding-right-0">
@@ -206,7 +196,11 @@ JS;
                                                 'groupSeparator' => ',',
                                                 'autoGroup' => true
                                             ],
-                                            'options' => ['data-align' => 'text-right', 'placeholder' => 'Objek', 'data-temp' => 1]
+                                            'options' => [
+                                                'data-align' => 'text-right',
+                                                'data-temp' => true, 
+                                                'placeholder' => 'Objek'
+                                            ]
                                         ])->label(false) ?>
                                 </div>
                             </div>
@@ -226,7 +220,7 @@ JS;
                                                 'data-name' => 'iconbox',
                                                 'data-icons' => 'rupiah',
                                                 'placeholder' => 'Harga Cetak',
-                                                'data-temp' => 1
+                                                'data-temp' => true
                                             ]
                                         ])->label(false) ?>
                                 </div>
@@ -237,7 +231,11 @@ JS;
                                                 'groupSeparator' => ',',
                                                 'autoGroup' => true
                                             ],
-                                            'options' => ['data-align' => 'text-right', 'placeholder' => 'Lembar Ikat', 'data-temp' => 1]
+                                            'options' => [
+                                                'data-align' => 'text-right',
+                                                'placeholder' => 'Lembar Ikat',
+                                                'data-temp' => true
+                                            ]
                                         ])->label(false) ?>
                                 </div>
                             </div>
@@ -256,7 +254,7 @@ JS;
                             <tr>
                                 <th class="text-center">No.</th>
                                 <th class="text-center">Item</th>
-                                <th class="text-center" colspan="3">QTY</th>
+                                <th class="text-center" colspan="2">QTY</th>
                                 <th class="text-center" colspan="3">QTY Detail</th>
                                 <th class="text-center">Harga Cetak</th>
                                 <th class="text-center">Action</th>
@@ -279,28 +277,87 @@ JS;
         </div>
     <?php ActiveForm::end(); ?>
 </div>
+<div data-popup="popup"></div>
 <script>
-function listItem(q)
+function load_item()
 {
     $.ajax({
         url: "<?=Url::to(['order/list-item'])?>",
 		type: "GET",
-		data: { q: q },
 		dataType: "text",
         error: function(xhr, status, error) {},
 		beforeSend: function (data){},
         success: function(data){
             var o = $.parseJSON(data);
-            $.each(o.results[0], function(index, value){
-                if(index!="id"){
-                    $("#tempmasterorderdetail-"+index).val(value);
-                }
-            });
-            for(var a=1;a<=o.results[0].composite;a++){
-                $("#tempmasterorderdetail-qty_order_"+a).attr("readonly", false);
-                if(a==1) $("#tempmasterorderdetail-qty_order_1").val(20);
-            }
+            $("[data-popup=\"popup\"]").html(o.data);
+            $("[data-popup=\"popup\"]").popup("open", {
+				container: "popup",
+				title: 'List Data Material',
+				styleOptions: {
+					width: 600
+				}
+			});
         },
+        complete: function(){}
+    });
+}
+
+function search_item(el)
+{
+    search = el.val();
+    $.ajax({
+        url: "<?=Url::to(['order/search'])?>",
+		type: "POST",
+        data: {
+            search: search,
+        },
+		dataType: "text",
+        error: function(xhr, status, error) {},
+		beforeSend: function(){
+			el.loader("load");
+		},
+        success: function(data){
+            popup.close();
+            var o = $.parseJSON(data);
+            $("[data-popup=\"popup\"]").html(o.data);
+            $("[data-popup=\"popup\"]").popup("open", {
+				container: "popup",
+				title: 'List Data Material',
+				styleOptions: {
+					width: 600
+				}
+			});
+        },
+        complete: function(){
+			el.loader("destroy");
+		}
+    });
+}
+
+function select_item(code)
+{
+    $.ajax({
+        url: "<?=Url::to(['order/item'])?>",
+		type: "POST",
+        data: {
+            code: code,
+        },
+		dataType: "text",
+        error: function(xhr, status, error) {},
+		beforeSend: function(){},
+        success: function(data){
+            var o = $.parseJSON(data);
+            $.each(o, function(index, value){
+                $("#tempmasterorderdetail-"+index).val(value);
+            });
+            for(var a=1;a<=o.composite;a++){
+                $("#tempmasterorderdetail-qty_order_"+a).attr("readonly", false);
+            }
+            $("#tempmasterorderdetail-qty_order_1").val(20);
+        },
+        complete: function(){
+            popup.close();
+        }
     });
 }
 
@@ -317,14 +374,13 @@ function init_temp()
         success: function(data){
             var o = $.parseJSON(data);
             $("[data-table=\"detail\"] > tbody").html(o.model);
+            $("#masterorder-total_order").val(o.total_order);
             $("#masterorder-total_biaya").val(o.total_biaya);
+            $("#masterorder-grand_total").val(o.grand_total);
+            $("[id^=\"tempmasterorderdetail-qty_order_\"]").attr("readonly", true);
         },
         complete: function(){
-            $("#tempmasterorderdetail-item_code").val("").trigger("change");
-            setTimeout(function(){
-                $("[id^=\"tempmasterorderdetail-qty_order_\"]").attr("readonly", true);
-                $("[id^=\"tempmasterorderdetail-\"]").val("");
-            }, 400);
+            temp.destroy();
         }
     });
 }
@@ -343,18 +399,10 @@ function get_temp(id)
         success: function(data){
             var o = $.parseJSON(data);
             $.each(o, function(index, value){
-                if(value=='item_code'){
-                    $("#tempmasterorderdetail-"+index).val(value).trigger("change");
-                }else{
-                    $("#tempmasterorderdetail-"+index).val(value);
-                }
-
-                if(value == 'qty_order_1' && value == 'qty_order_2'){
-                    if(value !== null){
-                        $("#temppurchaseorderdetail-"+value).attr("readonly", false);
-                    }
-                }
+                $("#tempmasterorderdetail-"+index).val(value);
             });
+            if(o.um_1 != "") $("#tempmasterorderdetail-qty_order_1").attr("readonly", false);
+            if(o.um_2 != "") $("#tempmasterorderdetail-qty_order_2").attr("readonly", false);
         },
         complete: function(){
             temp.init();
@@ -505,9 +553,25 @@ $(function(){
 
 var timeOut = 3000;
 $(document).ready(function(){
-    $("body").off("change","#tempmasterorderdetail-item_code").on("change","#tempmasterorderdetail-item_code", function(e){
+    $("body").off("keydown","#tempmasterorderdetail-item_name")
+    $("body").on("keydown","#tempmasterorderdetail-item_name", function(e){
+        var key = e.charCode ? e.charCode : e.keyCode ? e.keyCode : 0;
+        if(key == KEY.F4){
+            load_item();
+        }
+    });
+
+    $("body").off("keypress","#search").on("keypress","#search", function(e){
+		var key = e.charCode ? e.charCode : e.keyCode ? e.keyCode : 0;
+		if(key == KEY.ENTER){
+            search_item($(this));
+		}
+	});
+
+    $("body").off("click","[data-id=\"popup\"] table > tbody tr").on("click","[data-id=\"popup\"] table > tbody tr", function(e){
         e.preventDefault();
-        listItem($(this).val());
+        var data = $(this).data();
+        select_item(data.code);
     });
 
     $("body").off("input","#tempmasterorderdetail-qty_order_2");
@@ -522,25 +586,31 @@ $(document).ready(function(){
 
     $("body").off("click","[data-button=\"create_temp\"]").on("click","[data-button=\"create_temp\"]", function(e){
         e.preventDefault();
+        var success = true,
+            message = "";
+        
         if(!$("#masterorder-name").val() && !$("#masterorder-type_order").val()){
-            notification.open("danger", 'Nama dan Type Order tidak boleh kosong!', timeOut);
-        }else{
-            var success = true,
-               message = "";
-            $.each($("[data-temp]"), function(index, element){
-                var a = $(element).attr("id").split("-"),
-                    b = a[1].replace("_", " ");
-                if(!$(element).val()){
-                    success = false;
-                    message += parsing.toUpper(b, 2)+', ';
-                }
-            });
-
-            if(success){
-                create_temp($(this));
-            }else{
-                notification.open("danger", message+' tidak boleh kosong!', timeOut);
+            success = false;
+            message += 'Nama dan Type Order, ';
+        }
+        if(!$("#tempmasterorderdetail-qty_order_1").val() && !$("#tempmasterorderdetail-qty_order_2").val()){
+            success = false;
+            message += 'QTY Order, ';
+        }
+        
+        $.each($("[data-temp]:not(#tempmasterorderdetail-id):not(#tempmasterorderdetail-order_code):not([id^=\"tempmasterorderdetail-qty_order_\"])"), function(index, element){
+            var a = $(element).attr("id").split("-"),
+                b = a[1].replace("_", " ");
+            if(!$(element).val()){
+                success = false;
+                message += parsing.toUpper(b, 2)+', ';
             }
+        });
+        
+        if(success){
+            create_temp($(this));
+        }else{
+            notification.open("danger", message +' tidak boleh kosong!', timeOut);
         }
     });
 

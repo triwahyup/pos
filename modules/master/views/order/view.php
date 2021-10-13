@@ -25,52 +25,77 @@ $this->params['breadcrumbs'][] = $this->title;
     </p>
 
     <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 pading-right-0">
-        <?= DetailView::widget([
-            'model' => $model,
-            'attributes' => [
-                'code',
-                'name',
-                [
-                    'attribute' => 'type_order',
-                    'value' => function($model, $key)
-                    {
-                        return ($model->type_order == 1) ? 'Produk' : 'Jasa';
-                    }
-                ],
-                [
-                    'attribute' => 'total_biaya',
-                    'value' => function($model, $key)
-                    {
-                        return 'Rp.'.number_format($model->total_biaya).'.-';
-                    }
-                ],
-                'keterangan',
-                [
-                    'attribute' => 'status',
-                    'value'=> function ($model, $index) { 
-                        return ($model->status == 1) ? 'Active' : 'Delete';
-                    }
-                ],
-                [
-                    'attribute'=>'created_at',
-                    'value'=> function ($model, $index) { 
-                        if(!empty($model->created_at))
+        <div class="col-lg-6 col-md-6 col-xs-12 padding-left-0">
+            <?= DetailView::widget([
+                'model' => $model,
+                'attributes' => [
+                    'name',
+                    [
+                        'attribute' => 'type_order',
+                        'value' => function($model, $key)
                         {
-                            return date('d-m-Y H:i:s',$model->created_at);
+                            return ($model->type_order == 1) ? 'Produk' : 'Jasa';
                         }
-                    }
+                    ],
+                    'keterangan',
+                    [
+                        'attribute' => 'status',
+                        'value'=> function ($model, $index) { 
+                            return ($model->status == 1) ? 'Active' : 'Delete';
+                        }
+                    ],
+                    [
+                        'attribute'=>'created_at',
+                        'value'=> function ($model, $index) { 
+                            if(!empty($model->created_at))
+                            {
+                                return date('d-m-Y H:i:s',$model->created_at);
+                            }
+                        }
+                    ],
+                    [
+                        'attribute'=>'updated_at',
+                        'value'=> function ($model, $index) { 
+                            if(!empty($model->updated_at))
+                            {
+                                return date('d-m-Y H:i:s',$model->updated_at);
+                            }
+                        }
+                    ],
                 ],
-                [
-                    'attribute'=>'updated_at',
-                    'value'=> function ($model, $index) { 
-                        if(!empty($model->updated_at))
+            ]) ?>
+        </div>
+        <div class="col-lg-6 col-md-6 col-xs-12 pading-right-0">
+            <?= DetailView::widget([
+                'model' => $model,
+                'attributes' => [
+                    [
+                        'attribute' => 'total_order',
+                        'format' => 'raw',
+                        'value' => function($model, $key)
                         {
-                            return date('d-m-Y H:i:s',$model->updated_at);
+                            return '<strong>Rp. '.number_format($model->total_order).'</strong>';
                         }
-                    }
-                ],
-            ],
-        ]) ?>
+                    ],
+                    [
+                        'attribute' => 'total_biaya',
+                        'format' => 'raw',
+                        'value' => function($model, $key)
+                        {
+                            return '<strong>Rp. '.number_format($model->total_biaya).'</strong>';
+                        }
+                    ],
+                    [
+                        'attribute' => 'grand_total',
+                        'format' => 'raw',
+                        'value' => function($model, $key)
+                        {
+                            return '<strong>Rp. '.number_format($model->grand_total).'</strong>';
+                        }
+                    ],
+                ]
+            ]) ?>
+        </div>
     </div>
     <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
         <div class="margin-top-20"></div>
@@ -82,18 +107,21 @@ $this->params['breadcrumbs'][] = $this->title;
                         <tr>
                             <th class="text-center">No.</th>
                             <th class="text-center">Item</th>
-                            <th class="text-center" colspan="3">QTY</th>
+                            <th class="text-center" colspan="2">QTY</th>
                             <th class="text-center" colspan="3">QTY Detail</th>
                             <th class="text-center">Harga Cetak</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <?php if(count($model->details) > 0): ?>
-                            <?php foreach($model->details as $index=>$val): ?>
+                        <?php if(count($model->details) > 0): 
+                            $totalOrder = 0;
+                            $totalBiaya = 0; ?>
+                            <?php foreach($model->details as $index=>$val):
+                                $totalOrder += $val->total_order; ?>
                                 <tr>
                                     <td class="text-center" rowspan="2"><?=$index+1?></td>
                                     <td class="font-size-10"><?=(isset($val->item)) ? '<span class="text-success">'.$val->item->code .'</span><br />'. $val->item->name : '' ?></td>
-                                    <?php for($a=1;$a<=3;$a++): ?>
+                                    <?php for($a=1;$a<3;$a++): ?>
                                         <td class="text-right"><?=(!empty($val['qty_order_'.$a])) ? number_format($val['qty_order_'.$a]).'<br /><span class="text-muted font-size-10">'.$val['um_'.$a].'</span>' : null ?></td>
                                     <?php endfor; ?>
                                     <td class="text-right"><?=number_format($val['jumlah_cetak']).'.- <br /><span class="text-muted font-size-10">QTY Cetak</span>' ?></td>
@@ -149,7 +177,8 @@ $this->params['breadcrumbs'][] = $this->title;
                                                         <label class="text-left">Detail Proses</label>
                                                         <ul class="desc-custom padding-left-0">
                                                             <?php foreach($val->detailsProduksi as $v):
-                                                                $total_biaya += $v->total_biaya; ?>
+                                                                $total_biaya += $v->total_biaya;
+                                                                $totalBiaya += $v->total_biaya; ?>
                                                                 <li>
                                                                     <span><?=$v->name ?></span>
                                                                     <span><?='Rp. '.number_format($v->total_biaya).'.-' ?></span>
@@ -167,6 +196,12 @@ $this->params['breadcrumbs'][] = $this->title;
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
+                            <tr>
+                                <td class="summary" colspan="3"></td>
+                                <td class="summary" colspan="2"><strong><?='Total Order: Rp. '.number_format($totalOrder).'.-' ?></strong></td>
+                                <td class="summary" colspan="2"><strong><?='Total Biaya: Rp. '.number_format($totalBiaya).'.-' ?></strong></td>
+                                <td class="summary"><strong><?='Grand Total: Rp. '.number_format($totalOrder+$totalBiaya).'.-' ?></strong></td>
+                            </tr>
                         <?php else : ?>
                             <tr>
                                 <td class="text-center text-danger" colspan="10">Data is empty</td>

@@ -42,8 +42,8 @@ class MasterOrder extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['name', 'type_order', 'total_biaya'], 'required'],
-            [['total_biaya'], 'safe'],
+            [['name', 'type_order', 'total_order', 'total_biaya', 'grand_total'], 'required'],
+            [['total_order', 'total_biaya', 'grand_total'], 'safe'],
             [['status', 'created_at', 'updated_at', 'type_order'], 'integer'],
             [['code'], 'string', 'max' => 3],
             [['name', 'keterangan'], 'string', 'max' => 128],
@@ -80,7 +80,9 @@ class MasterOrder extends \yii\db\ActiveRecord
 
     public function beforeSave($attribute)
     {
+        $this->total_order = str_replace(',', '', $this->total_order);
         $this->total_biaya = str_replace(',', '', $this->total_biaya);
+        $this->grand_total = str_replace(',', '', $this->grand_total);
         return parent::beforeSave($attribute);
     }
 

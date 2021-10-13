@@ -17,7 +17,7 @@ class MasterOrderSearch extends MasterOrder
     public function rules()
     {
         return [
-            [['name', 'type_order', 'total_biaya', 'created_at', 'updated_at'], 'safe'],
+            [['name', 'type_order', 'total_biaya', 'total_order', 'grand_total'], 'safe'],
         ];
     }
 
@@ -57,19 +57,10 @@ class MasterOrderSearch extends MasterOrder
 
         // grid filtering conditions
         $query->where(['status' => 1]);
-        if(!empty($this->created_at)){
-            $t1 = strtotime($this->created_at);
-			$t2 = strtotime("+1 days", $t1);
-			$query->andWhere('created_at >='.$t1.' and created_at <'.$t2);
-        }
-        if(!empty($this->updated_at)){
-            $t1 = strtotime($this->updated_at);
-			$t2 = strtotime("+1 days", $t1);
-			$query->andWhere('updated_at >='.$t1.' and updated_at <'.$t2);
-        }
-
         $query->andFilterWhere(['like', 'name', $this->name])
-            ->andFilterWhere(['like', 'total_biaya', $this->total_biaya]);
+            ->andFilterWhere(['like', 'total_order', $this->total_order])
+            ->andFilterWhere(['like', 'total_biaya', $this->total_biaya])
+            ->andFilterWhere(['like', 'grand_total', $this->grand_total]);
         return $dataProvider;
     }
 }

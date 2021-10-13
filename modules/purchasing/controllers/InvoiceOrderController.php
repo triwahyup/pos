@@ -200,7 +200,6 @@ class InvoiceOrderController extends Controller
                                         0 => $val->qty_terima_1,
                                         1 => $val->qty_terima_2
                                     ]);
-                                    $stockItem->qty_in = $stockItem->qty_in+$konversi;
                                     $stockItem->onhand = $stockItem->onhand+$konversi;
                                     if(!$stockItem->save()){
                                         $success = false;

@@ -30,55 +30,33 @@ $this->params['breadcrumbs'][] = $this->title;
                 }
             ],
             [
+                'attribute' => 'total_order',
+                'contentOptions' => [
+                    'class' => 'text-right',
+                ],
+                'value' => function($model, $index, $key)
+                {
+                    return 'Rp. '.number_format($model->total_order).'.-';
+                }
+            ],
+            [
                 'attribute' => 'total_biaya',
                 'contentOptions' => [
                     'class' => 'text-right',
                 ],
                 'value' => function($model, $index, $key)
                 {
-                    return number_format($model->total_biaya).'.-';
+                    return 'Rp. '.number_format($model->total_biaya).'.-';
                 }
             ],
             [
-                'attribute' => 'created_at',
+                'attribute' => 'grand_total',
                 'contentOptions' => [
-                    'class' => 'text-center',
+                    'class' => 'text-right',
                 ],
-                'filter' => DatePicker::widget([
-                    'model' => $searchModel, 
-                    'name' => 'created_at', 
-                    'type' => DatePicker::TYPE_COMPONENT_APPEND,
-                    'pickerButton' => false,
-                    'attribute' => 'created_at',
-                    'pluginOptions' => [
-                        'format' => 'yyyy-mm-dd',
-                        'autoclose' => true,
-                    ],
-                ]),
                 'value' => function($model, $index, $key)
                 {
-                    return date('Y-m-d', $model->created_at);
-                }
-            ],
-            [
-                'attribute' => 'updated_at',
-                'contentOptions' => [
-                    'class' => 'text-center',
-                ],
-                'filter' => DatePicker::widget([
-                    'model' => $searchModel, 
-                    'name' => 'updated_at', 
-                    'type' => DatePicker::TYPE_COMPONENT_APPEND,
-                    'pickerButton' => false,
-                    'attribute' => 'updated_at',
-                    'pluginOptions' => [
-                        'format' => 'yyyy-mm-dd',
-                        'autoclose' => true,
-                    ],
-                ]),
-                'value' => function($model, $index, $key)
-                {
-                    return date('Y-m-d', $model->updated_at);
+                    return 'Rp. '.number_format($model->grand_total).'.-';
                 }
             ],
             [

@@ -3,28 +3,7 @@ use kartik\date\DatePicker;
 use kartik\widgets\Select2;
 use yii\helpers\Html;
 use yii\helpers\Url;
-use yii\web\JsExpression;
 use yii\widgets\ActiveForm;
-
-$resultsJs = <<< JS
-    function (data, params) {
-       params.page = params.page || 1;
-        return {
-            // Change `data.items` to `data.results`.
-            // `results` is the key that you have been selected on
-            // `actionJsonlist`.
-            results: data.results
-        };
-    }
-JS;
-
-$format1line = <<< JS
-	function (item) {
-		var selectionText = item.text;
-		var returnString = '<span class>'+selectionText+'</span>';
-		return returnString; 
-	}
-JS;
 
 /* @var $this yii\web\View */
 /* @var $model app\modules\sales\models\SalesOrder */
@@ -39,7 +18,7 @@ JS;
                     <?= $form->field($model, 'customer_code')->widget(Select2::classname(), [
                             'data' => $customer,
                             'options' => [
-                                'placeholder' => 'Pilih Type Order',
+                                'placeholder' => 'Pilih Customer',
                                 'class' => 'select2',
                             ],
                         ]) ?>
@@ -85,41 +64,30 @@ JS;
             <div class="col-lg-12 col-md-12 col-xs-12 padding-right-0">
                 <div class="margin-top-20"></div>
                 <div class="board-container">
-                    <p class="title">Total Order</p>
-                    <?= $form->field($model, 'total_order')->textInput(['readonly' => true, 'value'=>0])->label(false) ?>
+                    <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
+                        <div class="col-lg-6 col-md-6 col-xs-12 padding-left-0 padding-right-0">
+                            <p class="title">Total Order Material</p>
+                            <?= $form->field($model, 'total_order')->textInput(['readonly' => true, 'value'=>0])->label(false) ?>
+                        </div>
+                        <div class="col-lg-6 col-md-6 col-xs-12 padding-left-0 padding-right-0">
+                            <p class="title">Total Biaya Produksi</p>
+                            <?= $form->field($model, 'total_biaya')->textInput(['readonly' => true, 'value'=>0])->label(false) ?>
+                        </div>
+                    </div>
+                    <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
+                        <div class="margin-top-20"></div>
+                        <p class="title">Grand Total</p>
+                        <?= $form->field($model, 'grand_total')->textInput(['readonly' => true, 'value'=>0])->label(false) ?>
+                    </div>
                 </div>
             </div>
         </div>
         <div class="col-lg-12 col-md-12 col-xs-12 margin-top-20 padding-left-0">
             <div class="margin-top-20"></div>
             <div class="col-lg-3 col-md-3 col-xs-12 padding-left-0">
-                <?= $form->field($model, 'nama_order')->widget(Select2::classname(), [
-                    'data' => [],
-                    'options' => [
-                        'placeholder' => 'Pilih Order',
-                        'class' => 'select2',
-                        'value' => (!$model->isNewRecord) ? $model->order->name : '',
-                    ],
-                    'pluginOptions' => [
-                        'allowClear' => true,
-                        'minimumInputLength' => 2,
-                        'ajax' => [
-                            'url' => Url::to(['sales-order/list-order']),
-                            'dataType' => 'json',
-                            'delay' => 250,
-                            'data' => new JsExpression("function(params) {
-                                return {
-                                    q:params.term,
-                                }
-                            }"),
-                            'cache' => true,
-                            'processResults' => new JsExpression($resultsJs),
-                        ],
-                        'templateResult' => new JsExpression($format1line),
-                        'templateSelection' => new JsExpression($format1line),
-                        'escapeMarkup' => new JsExpression("function(markup) { return markup; }")
-                    ],
-                ]) ?>
+                <?= $form->field($model, 'nama_order')->textInput(['placeholder' => 'Pilih data job tekan F4']) ?>
+                <?= $form->field($model, 'order_code')->hiddenInput()->label(false) ?>
+                <?= $form->field($model, 'type_order')->hiddenInput()->label(false) ?>
             </div>
             <div class="col-lg-3 col-md-3 col-xs-12 padding-left-0">
                 <?= $form->field($model, 'outsource_code')->widget(Select2::classname(), [
@@ -131,8 +99,6 @@ JS;
                         ],
                     ]) ?>
             </div>
-            <?= $form->field($model, 'order_code')->hiddenInput()->label(false) ?>
-            <?= $form->field($model, 'type_order')->hiddenInput()->label(false) ?>
         </div>
         <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
             <div class="margin-top-20"></div>
@@ -144,7 +110,7 @@ JS;
                             <tr>
                                 <th class="text-center">No.</th>
                                 <th class="text-center">Item</th>
-                                <th class="text-center" colspan="3">QTY</th>
+                                <th class="text-center" colspan="2">QTY</th>
                                 <th class="text-center" colspan="3">QTY Detail</th>
                                 <th class="text-center">Harga Cetak</th>
                             </tr>
@@ -166,36 +132,106 @@ JS;
         </div>
     <?php ActiveForm::end(); ?>
 </div>
+<div data-popup="popup"></div>
 <script>
-function load_data_order(el)
+function load_data_order(code)
 {
     $.ajax({
         url: "<?= Url::to(['sales-order/load-order']) ?>",
         type: "GET",
         dataType: "text",
         error: function(xhr, status, error) {},
-        beforeSend: function(){
-            el.loader("load");
-        },
+        beforeSend: function(){},
         data: {
-            code: el.val(),
+            code: code,
         },
         success: function(data){
-            var o = $.parseJSON(data);
-            if(o.success == true){
-                if(o.type_order == 1){
-                    $("#salesorder-outsource_code").attr("readonly", true);
-                }else{
-                    $("#salesorder-outsource_code").attr("readonly", false);
-                }
-                console.log(o);
-                $("#salesorder-order_code").val(o.order_code);
-                $("#salesorder-type_order").val(o.type_order);
-            }
             init_temp();
         },
+        complete: function(){}
+    });
+}
+
+function load_list_order()
+{
+    $.ajax({
+        url: "<?= Url::to(['sales-order/list-order']) ?>",
+        type: "GET",
+        dataType: "text",
+        error: function(xhr, status, error) {},
+        beforeSend: function(){},
+        success: function(data){
+            var o = $.parseJSON(data);
+            $("[data-popup=\"popup\"]").html(o.data);
+            $("[data-popup=\"popup\"]").popup("open", {
+				container: "popup",
+				title: 'List Data Job (Order)',
+				styleOptions: {
+					width: 600
+				}
+			});
+        },
+        complete: function(){}
+    });
+}
+
+function search_item(el)
+{
+    search = el.val();
+    $.ajax({
+        url: "<?=Url::to(['sales-order/search'])?>",
+		type: "POST",
+        data: {
+            search: search,
+        },
+		dataType: "text",
+        error: function(xhr, status, error) {},
+		beforeSend: function(){
+			el.loader("load");
+		},
+        success: function(data){
+            popup.close();
+            var o = $.parseJSON(data);
+            $("[data-popup=\"popup\"]").html(o.data);
+            $("[data-popup=\"popup\"]").popup("open", {
+				container: "popup",
+				title: 'List Data Job (Order)',
+				styleOptions: {
+					width: 600
+				}
+			});
+        },
         complete: function(){
-            el.loader("destroy");
+			el.loader("destroy");
+		}
+    });
+}
+
+function select_order(code)
+{
+    $.ajax({
+        url: "<?=Url::to(['sales-order/select-order'])?>",
+		type: "POST",
+        data: {
+            code: code,
+        },
+		dataType: "text",
+        error: function(xhr, status, error) {},
+		beforeSend: function(){},
+        success: function(data){
+            var o = $.parseJSON(data);
+            $.each(o, function(index, value){
+                $("#salesorder-"+index).val(value);
+            });
+            if(o.type_order == 1){
+                $("#salesorder-outsource_code").attr("readonly", true);
+            }else{
+                $("#salesorder-outsource_code").attr("readonly", false);
+            }
+            load_data_order(code);
+        },
+        complete: function(){
+            popup.close();
         }
     });
 }
@@ -213,7 +249,9 @@ function init_temp()
         success: function(data){
             var o = $.parseJSON(data);
             $("[data-table=\"detail\"] > tbody").html(o.model);
-            $("#salesorder-total_order").val(o.total_biaya);
+            $("#salesorder-total_order").val(o.total_order);
+            $("#salesorder-total_biaya").val(o.total_biaya);
+            $("#salesorder-grand_total").val(o.grand_total);
         },
         complete: function(){}
     });
@@ -283,9 +321,24 @@ $(function(){
 
 var timeOut = 3000;
 $(document).ready(function(){
-    $("body").off("change","#salesorder-nama_order").on("change","#salesorder-nama_order", function(e){
+    $("body").off("keydown","#salesorder-nama_order").on("keydown","#salesorder-nama_order", function(e){
+        var key = e.charCode ? e.charCode : e.keyCode ? e.keyCode : 0;
+        if(key == KEY.F4){
+            load_list_order();
+        }
+    });
+
+    $("body").off("keypress","#search").on("keypress","#search", function(e){
+		var key = e.charCode ? e.charCode : e.keyCode ? e.keyCode : 0;
+		if(key == KEY.ENTER){
+            search_item($(this));
+		}
+	});
+
+    $("body").off("click","[data-id=\"popup\"] table > tbody tr").on("click","[data-id=\"popup\"] table > tbody tr", function(e){
         e.preventDefault();
-        load_data_order($(this));
+        var data = $(this).data();
+        select_order(data.code);
     });
 
     $("body").off("click","[id^=\"tambah_proses_\"]").on("click","[id^=\"tambah_proses_\"]", function(e){

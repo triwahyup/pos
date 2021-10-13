@@ -61,7 +61,7 @@ use yii\widgets\MaskedInput;
                         <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
                             <label>QTY Terima:</label>
                         </div>
-                        <div class="col-lg-1 col-md-1 col-sm-12 col-xs-12 padding-right-0">
+                        <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
                             <?= $form->field($model, 'qty_terima_1')->widget(MaskedInput::className(), [
                                 'clientOptions' => [
                                     'alias' =>  'decimal',
@@ -74,7 +74,7 @@ use yii\widgets\MaskedInput;
                                 ]
                             ])->label(false) ?>
                         </div>
-                        <div class="col-lg-1 col-md-1 col-sm-12 col-xs-12 padding-right-0">
+                        <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
                             <?= $form->field($model, 'qty_terima_2')->widget(MaskedInput::className(), [
                                 'clientOptions' => [
                                     'alias' =>  'decimal',
@@ -87,7 +87,7 @@ use yii\widgets\MaskedInput;
                                 ]
                             ])->label(false) ?>
                         </div>
-                        <div class="col-lg-1 col-md-1 col-sm-12 col-xs-12 padding-right-0">
+                        <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0 hidden">
                             <?= $form->field($model, 'qty_terima_3')->widget(MaskedInput::className(), [
                                 'clientOptions' => [
                                     'alias' =>  'decimal',
@@ -137,7 +137,7 @@ use yii\widgets\MaskedInput;
                                     ]
                                 ])->label(false) ?>
                         </div>
-                        <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
+                        <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0 hidden">
                             <?= $form->field($model, 'harga_beli_3')->widget(MaskedInput::className(), [
                                     'clientOptions' => [
                                         'alias' =>  'decimal',
@@ -158,7 +158,7 @@ use yii\widgets\MaskedInput;
                         <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
                             <label>PPN (%):</label>
                         </div>
-                        <div class="col-lg-1 col-md-1 col-sm-12 col-xs-12 padding-right-0">
+                        <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
                             <?= $form->field($model, 'ppn')->textInput(['data-temp' => 1, 'data-align' => 'text-right'])->label(false) ?>
                         </div>
                         <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">

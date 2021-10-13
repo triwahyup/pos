@@ -93,11 +93,7 @@ class InventoryStockItem extends \yii\db\ActiveRecord
             $result[1] = $sisa;
         }
         foreach($result as $index=>$val){
-            if(!empty($val)){
-                $desc .= $val .((!empty($val)) ? ' '.$item['um_'.($index+1)] : '').' / ';
-            }else{
-                $desc = '';
-            }
+            $desc .= $val .' '.$item['um_'.($index+1)].' / ';
         }
         return substr($desc, 0, -2);
     }

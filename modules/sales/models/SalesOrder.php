@@ -51,7 +51,7 @@ class SalesOrder extends \yii\db\ActiveRecord
     {
         return [
             [['tgl_so', 'customer_code', 'nama_order'], 'required'],
-            [['tgl_so', 'tgl_po', 'total_order'], 'safe'],
+            [['tgl_so', 'tgl_po', 'total_order', 'total_biaya', 'grand_total'], 'safe'],
             [['ppn'], 'number'],
             [['status', 'created_at', 'updated_at', 'type_order', 'post'], 'integer'],
             [['no_so', 'no_po'], 'string', 'max' => 12],
@@ -68,17 +68,19 @@ class SalesOrder extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'no_so' => 'No So',
-            'tgl_so' => 'Tgl So',
-            'no_po' => 'No Po',
-            'tgl_po' => 'Tgl Po',
+            'no_so' => 'No. So',
+            'tgl_so' => 'Tgl. So',
+            'no_po' => 'No. Po',
+            'tgl_po' => 'Tgl. Po',
             'customer_code' => 'Customer',
             'ppn' => 'Ppn (%)',
             'total_order' => 'Total Order',
+            'grand_total' => 'Total Order',
             'status' => 'Status',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
             'outsource_code' => 'Jasa / Outsourcing',
+            'nama_order' => 'Nama Job (Order)',
         ];
     }
 
@@ -93,14 +95,22 @@ class SalesOrder extends \yii\db\ActiveRecord
         return (string)date('Ymd').sprintf('%04s', ($total+1));
     }
 
-    public function total_order()
+    public function beforeSave($attribute)
     {
-        $total_order = str_replace(',', '', $this->total_order);
+        $this->total_order = str_replace(',', '', $this->total_order);
+        $this->total_biaya = str_replace(',', '', $this->total_biaya);
+        $this->grand_total = str_replace(',', '', $this->grand_total);
+        return parent::beforeSave($attribute);
+    }
+
+    public function grand_total()
+    {
+        $grand_total = str_replace(',', '', $this->grand_total);
         if(!empty($this->ppn)){
-            $ppn = $total_order / ($this->ppn*100);
-            $total_order += $ppn;
+            $ppn = $grand_total / ($this->ppn*100);
+            $grand_total += $ppn;
         }
-        return $total_order;
+        return $grand_total;
     }
 
     public function getDetails()
