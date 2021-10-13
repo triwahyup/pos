@@ -5,10 +5,10 @@
         <tr>
             <td class="text-center"><?=$index+1?></td>
             <td class="font-size-10"><?=(isset($val->item)) ? '<span class="text-success">'.$val->item->code .'</span><br />'. $val->item->name : '' ?></td>
-            <?php for($a=1;$a<=3;$a++): ?>
+            <?php for($a=1;$a<3;$a++): ?>
                 <td class="text-right"><?=(!empty($val['qty_order_'.$a])) ? number_format($val['qty_order_'.$a]).'<br /><span class="text-muted font-size-10">'.$val['um_'.$a].'</span>' : null ?></td>
             <?php endfor; ?>
-            <?php for($a=1;$a<=3;$a++): ?>
+            <?php for($a=1;$a<3;$a++): ?>
                 <td class="text-right"><?=(!empty($val['qty_order_'.$a])) ? number_format($val['harga_beli_'.$a]).'.- <br /><span class="text-muted font-size-10">Per '.$val['um_'.$a].'</span>' : null ?></td>
             <?php endfor; ?>
             <td class="text-right"><?=(!empty($val->ppn)) ? $val->ppn.'%' : '' ?></td>
@@ -24,8 +24,8 @@
         </tr>
     <?php endforeach; ?>
     <tr>
-        <td class="text-right" colspan="9"><strong>Total Order:</strong></td>
-        <td class="text-right"><strong><?=number_format($totalOrder).'.-' ?></strong></td>
+        <td class="summary" colspan="7"><strong>Total Order:</strong></td>
+        <td class="summary"><strong><?=number_format($totalOrder).'.-' ?></strong></td>
     </tr>
 <?php else : ?>
     <tr>

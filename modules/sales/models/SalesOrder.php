@@ -53,7 +53,7 @@ class SalesOrder extends \yii\db\ActiveRecord
             [['tgl_so', 'customer_code', 'nama_order'], 'required'],
             [['tgl_so', 'tgl_po', 'total_order'], 'safe'],
             [['ppn'], 'number'],
-            [['status', 'created_at', 'updated_at', 'type_order'], 'integer'],
+            [['status', 'created_at', 'updated_at', 'type_order', 'post'], 'integer'],
             [['no_so', 'no_po'], 'string', 'max' => 12],
             [['customer_code', 'outsource_code', 'order_code'], 'string', 'max' => 3],
             [['keterangan', 'nama_order'], 'string', 'max' => 128],
@@ -151,5 +151,16 @@ class SalesOrder extends \yii\db\ActiveRecord
     public function getOrder()
     {
         return $this->hasOne(MasterOrder::className(), ['code' => 'order_code']);
+    }
+
+    public function getStatusPost()
+    {
+        $message = '';
+        if($this->post == 1){
+            $message = '<span class="text-label text-success">Sudah Post</span>';
+        }else{
+            $message = '<span class="text-label text-default">Belum Post</span>';
+        }
+        return $message;
     }
 }

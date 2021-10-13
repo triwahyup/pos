@@ -14,6 +14,7 @@ $data = [
     'TYPE_MENU' => 'MENU',
     'TYPE_USER' => 'USER',
     'TYPE_MATERIAL' => 'MATERIAL',
+    'TYPE_MESIN' => 'MESIN',
     'NAVBAR_TOP' => '001',
     'NAVBAR_LEFT' => '002',
     'URL' => ((getenv('APP_ENV') != 'production') ? (getenv('APP_ENV') != 'beta') ? 'http://localhost/pos/web/index.php?r=' : '' : ''),

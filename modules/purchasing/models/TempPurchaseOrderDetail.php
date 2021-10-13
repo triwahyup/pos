@@ -23,6 +23,8 @@ use app\modules\master\models\MasterMaterialItem;
  */
 class TempPurchaseOrderDetail extends \yii\db\ActiveRecord
 {
+    public $item_name;
+    
     /**
      * {@inheritdoc}
      */

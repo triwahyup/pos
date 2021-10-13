@@ -14,14 +14,16 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="sales-order-view">
     <p class="text-right">
         <?= Html::a('<i class="fontello icon-plus"></i><span>Create</span>', ['create'], ['class' => 'btn btn-success btn-flat btn-sm']) ?>
-        <?= Html::a('<i class="fontello icon-pencil"></i><span>Update</span>', ['update', 'no_so' => $model->no_so], ['class' => 'btn btn-warning btn-flat btn-sm']) ?>
-        <?= Html::a('<i class="fontello icon-trash"></i><span>Delete</span>', ['delete', 'no_so' => $model->no_so], [
-            'class' => 'btn btn-danger btn-flat btn-sm',
-            'data' => [
-                'confirm' => 'Are you sure you want to delete this item?',
-                'method' => 'post',
-            ],
-        ]) ?>
+        <?php if($model->post == 0): ?>
+            <?= Html::a('<i class="fontello icon-pencil"></i><span>Update</span>', ['update', 'no_so' => $model->no_so], ['class' => 'btn btn-warning btn-flat btn-sm']) ?>
+            <?= Html::a('<i class="fontello icon-trash"></i><span>Delete</span>', ['delete', 'no_so' => $model->no_so], [
+                'class' => 'btn btn-danger btn-flat btn-sm',
+                'data' => [
+                    'confirm' => 'Are you sure you want to delete this item?',
+                    'method' => 'post',
+                ],
+            ]) ?>
+        <?php endif; ?>
     </p>
 
     <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 pading-right-0">
@@ -50,6 +52,13 @@ $this->params['breadcrumbs'][] = $this->title;
                     'value' => function($model, $key)
                     {
                         return 'Rp.'.number_format($model->total_order).'.-';
+                    }
+                ],
+                [
+                    'attribute' => 'post',
+                    'format' => 'raw',
+                    'value' => function ($model, $index) { 
+                        return $model->statusPost;
                     }
                 ],
                 [
@@ -100,7 +109,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 </div>
             </div>
             <div class="col-lg-12 col-md-12 col-xs-12">
-            <div class="margin-top-20"></div>
+                <div class="margin-top-20"></div>
                 <table class="table table-bordered table-custom" data-table="detail">
                     <thead>
                         <tr>
@@ -201,4 +210,10 @@ $this->params['breadcrumbs'][] = $this->title;
             </div>
         </fieldset>
     </div>
+    <?php if($model->post==0): ?>
+        <div class="col-lg-12 col-md-12 col-xs-12 text-right">
+            <div class="margin-top-20"></div>
+            <?= Html::a('<i class="fontello icon-ok"></i><span>Post to SPK</span>', ['post', 'no_so'=>$model->no_so], ['class' => 'btn btn-info btn-flat btn-sm']) ?>
+        </div>
+    <?php endif; ?>
 </div>

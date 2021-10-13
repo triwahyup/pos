@@ -4,6 +4,7 @@ namespace app\modules\sales\controllers;
 
 use app\models\Logs;
 use app\models\User;
+use app\modules\inventory\models\InventoryStockItem;
 use app\modules\master\models\MasterBiayaProduksi;
 use app\modules\master\models\MasterMaterialItem;
 use app\modules\master\models\MasterOrder;
@@ -48,7 +49,7 @@ class SalesOrderController extends Controller
                             'roles' => ['@'],
                         ], 
                         [
-                            'actions' => ['update'],
+                            'actions' => ['update', 'post'],
                             'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('sales-order')),
                             'roles' => ['@'],
                         ], 
@@ -335,31 +336,36 @@ class SalesOrderController extends Controller
                 \Yii::$app->session->setFlash('error', $message);
             }
         }else{
-            $this->emptyTemp();
-            foreach($model->details as $detail){
-                $temp = new TempSalesOrderDetail();
-                $temp->attributes = $detail->attributes;
-                $temp->user_id = \Yii::$app->user->id;
-                if(!$temp->save()){
-                    $message = (count($temp->errors) > 0) ? 'ERROR LOAD SALES ORDER DETAIL: ' : '';
-                    foreach($temp->errors as $error => $value){
-                        $message .= strtoupper($value[0].', ');
+            if($model->post == 1){
+                \Yii::$app->session->setFlash('error', 'Dokumen ini sudah di Proses SPK.');
+                return $this->redirect(['index']);
+            }else{
+                $this->emptyTemp();
+                foreach($model->details as $detail){
+                    $temp = new TempSalesOrderDetail();
+                    $temp->attributes = $detail->attributes;
+                    $temp->user_id = \Yii::$app->user->id;
+                    if(!$temp->save()){
+                        $message = (count($temp->errors) > 0) ? 'ERROR LOAD SALES ORDER DETAIL: ' : '';
+                        foreach($temp->errors as $error => $value){
+                            $message .= strtoupper($value[0].', ');
+                        }
+                        $message = substr($message, 0, -2);
+                        \Yii::$app->session->setFlash('error', $message);
                     }
-                    $message = substr($message, 0, -2);
-                    \Yii::$app->session->setFlash('error', $message);
                 }
-            }
-            foreach($model->detailsProduksi as $detail){
-                $tempProduksi = new TempSalesOrderProduksiDetail();
-                $tempProduksi->attributes = $detail->attributes;
-                $tempProduksi->user_id = \Yii::$app->user->id;
-                if(!$tempProduksi->save()){
-                    $message = (count($tempProduksi->errors) > 0) ? 'ERROR LOAD SALES ORDER PRODUKSI DETAIL: ' : '';
-                    foreach($tempProduksi->errors as $error => $value){
-                        $message .= strtoupper($value[0].', ');
+                foreach($model->detailsProduksi as $detail){
+                    $tempProduksi = new TempSalesOrderProduksiDetail();
+                    $tempProduksi->attributes = $detail->attributes;
+                    $tempProduksi->user_id = \Yii::$app->user->id;
+                    if(!$tempProduksi->save()){
+                        $message = (count($tempProduksi->errors) > 0) ? 'ERROR LOAD SALES ORDER PRODUKSI DETAIL: ' : '';
+                        foreach($tempProduksi->errors as $error => $value){
+                            $message .= strtoupper($value[0].', ');
+                        }
+                        $message = substr($message, 0, -2);
+                        \Yii::$app->session->setFlash('error', $message);
                     }
-                    $message = substr($message, 0, -2);
-                    \Yii::$app->session->setFlash('error', $message);
                 }
             }
         }
@@ -385,63 +391,143 @@ class SalesOrderController extends Controller
 		$message = '';
         $model = $this->findModel($no_so);
         if(isset($model)){
+            if($model->post == 1){
+                \Yii::$app->session->setFlash('error', 'Dokumen ini sudah di Proses SPK.');
+                return $this->redirect(['index']);
+            }else{
+                $connection = \Yii::$app->db;
+                $transaction = $connection->beginTransaction();
+                try{
+                    $model->nama_order = (isset($model->order)) ? $model->order->name : '';
+                    $model->status = 0;
+                    if($model->save()){
+                        foreach($model->details as $detail){
+                            $detail->status = 0;
+                            if(!$detail->save()){
+                                $success = false;
+                                $message = (count($detail->errors) > 0) ? 'ERROR DELETE DETAIL SALES ORDER: ' : '';
+                                foreach($detail->errors as $error => $value){
+                                    $message .= $value[0].', ';
+                                }
+                                $message = substr($message, 0, -2);
+                            }
+                        }
+                        foreach($model->detailsProduksi as $detailProduksi){
+                            $detailProduksi->status = 0;
+                            if(!$detailProduksi->save()){
+                                $success = false;
+                                $message = (count($detailProduksi->errors) > 0) ? 'ERROR DELETE DETAIL PRODUKSI SALES ORDER: ' : '';
+                                foreach($detailProduksi->errors as $error => $value){
+                                    $message .= $value[0].', ';
+                                }
+                                $message = substr($message, 0, -2);
+                            }
+                        }
+                    }else{
+                        $success = false;
+                        $message = (count($model->errors) > 0) ? 'ERROR DELETE SALES ORDER: ' : '';
+                        foreach($model->errors as $error => $value){
+                            $message .= $value[0].', ';
+                        }
+                        $message = substr($message, 0, -2);
+                    }
+    
+                    if($success){
+                        $transaction->commit();
+                        $message = '['.$model->no_so.'] SUCCESS DELETE SALES ORDER.';
+                        \Yii::$app->session->setFlash('success', $message);
+                    }else{
+                        $transaction->rollBack();
+                        \Yii::$app->session->setFlash('error', $message);
+                    }
+                }catch(\Exception $e){
+                    $success = false;
+                    $message = $e->getMessage();
+                    $transaction->rollBack();
+                    \Yii::$app->session->setFlash('error', $message);
+                }
+                $logs =	[
+                    'type' => Logs::TYPE_USER,
+                    'description' => $message,
+                ];
+                Logs::addLog($logs);
+            }
+        }
+        return $this->redirect(['index']);
+    }
+
+    public function actionPost($no_so)
+    {
+        $success = true;
+		$message = '';
+        $model = $this->findModel($no_so);
+        if(isset($model)){
             $connection = \Yii::$app->db;
-			$transaction = $connection->beginTransaction();
+            $transaction = $connection->beginTransaction();
             try{
-                $model->status = 0;
+                $model->nama_order = (isset($model->order)) ? $model->order->name : '';
+                $model->post=1;
                 if($model->save()){
-                    foreach($model->details as $detail){
-                        $detail->status = 0;
-                        if(!$detail->save()){
-                            $success = false;
-                            $message = (count($detail->errors) > 0) ? 'ERROR DELETE DETAIL SALES ORDER: ' : '';
-                            foreach($detail->errors as $error => $value){
-                                $message .= $value[0].', ';
+                    // PROSES KURANG STOK
+                    foreach($model->details as $val){
+                        if(isset($val->stock)){
+                            $stock = $val->stock->satuanTerkecil($val->item_code, [
+                                0=>$val->qty_order_1,
+                                1=>$val->qty_order_2
+                            ]);
+                            if($val->stock->onhand > $stock){
+
+                            }else{
+                                $success = false;
+                                $message = 'SISA STOCK ITEM '.$val->item_code.' TIDAK MENCUKUPI. SISA '.$val->stock->onhand;
                             }
-                            $message = substr($message, 0, -2);
+                        }else{
+                            $success = false;
+                            $message = 'STOCK ITEM '.$val->item_code.' TIDAK DITEMUKAN.';
                         }
                     }
-                    foreach($model->detailsProduksi as $detailProduksi){
-                        $detailProduksi->status = 0;
-                        if(!$detailProduksi->save()){
-                            $success = false;
-                            $message = (count($detailProduksi->errors) > 0) ? 'ERROR DELETE DETAIL PRODUKSI SALES ORDER: ' : '';
-                            foreach($detailProduksi->errors as $error => $value){
-                                $message .= $value[0].', ';
-                            }
-                            $message = substr($message, 0, -2);
-                        }
-                    }
+                    // print_r();die;
+                    // PROSES SIMPAN SPK
                 }else{
                     $success = false;
-                    $message = (count($model->errors) > 0) ? 'ERROR DELETE SALES ORDER: ' : '';
+                    $message = (count($model->errors) > 0) ? 'ERROR POST SALES ORDER TO SPK: ' : '';
                     foreach($model->errors as $error => $value){
-                        $message .= $value[0].', ';
+                        $message .= strtoupper($value[0].', ');
                     }
                     $message = substr($message, 0, -2);
                 }
 
                 if($success){
-                    $transaction->commit();
-                    $message = '['.$model->no_so.'] SUCCESS DELETE SALES ORDER.';
+                    $message = '['.$model->no_so.'] SUCCESS POST SALES ORDER TO SPK.';
+                    // $transaction->commit();
+                    $logs =	[
+                        'type' => Logs::TYPE_USER,
+                        'description' => $message,
+                    ];
+                    Logs::addLog($logs);
                     \Yii::$app->session->setFlash('success', $message);
+                    return $this->redirect(['view', 'no_so' => $model->no_so]);
                 }else{
                     $transaction->rollBack();
-                    \Yii::$app->session->setFlash('error', $message);
                 }
-            }catch(\Exception $e){
-				$success = false;
-				$message = $e->getMessage();
-				$transaction->rollBack();
-                \Yii::$app->session->setFlash('error', $message);
+            }catch(Exception $e){
+                $success = false;
+                $message = $e->getMessage();
+                $transaction->rollBack();
             }
             $logs =	[
                 'type' => Logs::TYPE_USER,
                 'description' => $message,
             ];
             Logs::addLog($logs);
+        }else{
+            $success = false;
+            $message = 'Data Sales Order not valid.';
         }
-        return $this->redirect(['index']);
+        if(!$success){
+            \Yii::$app->session->setFlash('error', $message);
+        }
+        return $this->redirect(['view', 'no_so' => $model->no_so]);
     }
 
     public function actionListOrder($q)

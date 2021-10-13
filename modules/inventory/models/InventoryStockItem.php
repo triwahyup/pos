@@ -10,9 +10,6 @@ use yii\behaviors\TimestampBehavior;
  * This is the model class for table "inventory_stock_item".
  *
  * @property string $item_code
- * @property float|null $qty_in
- * @property float|null $qty_out
- * @property float|null $qty_retur
  * @property float|null $onhand
  * @property float|null $onsales
  * @property int|null $status
@@ -43,11 +40,11 @@ class InventoryStockItem extends \yii\db\ActiveRecord
     {
         return [
             [['item_code'], 'required'],
-            [['qty_in', 'qty_out', 'qty_retur', 'onhand', 'onsales'], 'number'],
+            [['onhand', 'onsales'], 'number'],
             [['status', 'created_at', 'updated_at'], 'integer'],
             [['item_code'], 'string', 'max' => 7],
             [['item_code'], 'unique'],
-            [['qty_in', 'qty_out', 'qty_retur', 'onhand', 'onsales'], 'default', 'value' => 0],
+            [['onhand', 'onsales'], 'default', 'value' => 0],
             [['status'], 'default', 'value' => 1],
         ];
     }
@@ -59,9 +56,6 @@ class InventoryStockItem extends \yii\db\ActiveRecord
     {
         return [
             'item_code' => 'Item Code',
-            'qty_in' => 'Qty In',
-            'qty_out' => 'Qty Out',
-            'qty_retur' => 'Qty Retur',
             'onhand' => 'Onhand',
             'onsales' => 'Onsales',
             'status' => 'Status',
@@ -75,14 +69,14 @@ class InventoryStockItem extends \yii\db\ActiveRecord
         return $this->hasOne(MasterMaterialItem::className(), ['code' => 'item_code']);
     }
 
-    public function satuanTerkecil($item_code, $qty_terima)
+    public function satuanTerkecil($item_code, $qty)
     {
         $item = MasterMaterialItem::findOne($item_code);
         $total_material = 0;
         if(isset($item->typeCode)){
             $type = $item->typeCode->value;
             if($type == 'KERTAS'){
-                $total_material = ($qty_terima[0] * 500) + $qty_terima[1];
+                $total_material = ($qty[0] * 500) + $qty[1];
             }
         }
         return $total_material;

@@ -3,29 +3,9 @@ use kartik\date\DatePicker;
 use kartik\widgets\Select2;
 use yii\helpers\Html;
 use yii\helpers\Url;
-use yii\web\JsExpression;
 use yii\widgets\ActiveForm;
 use yii\widgets\MaskedInput;
 
-$resultsJs = <<< JS
-    function (data, params) {
-       params.page = params.page || 1;
-        return {
-            // Change `data.items` to `data.results`.
-            // `results` is the key that you have been selected on
-            // `actionJsonlist`.
-            results: data.results
-        };
-    }
-JS;
-
-$format1line = <<< JS
-    function (item) {
-        var selectionText = item.text;
-        var returnString = '<span class>'+selectionText+'</span>';
-        return returnString; 
-    }
-JS;
 /* @var $this yii\web\View */
 /* @var $model app\modules\purchasing\models\PurchaseOrder */
 /* @var $form yii\widgets\ActiveForm */
@@ -105,91 +85,52 @@ JS;
                             <label>Pilih Material:</label>
                         </div>
                         <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padding-right-0">
-                            <?= $form->field($temp, 'item_code')->widget(Select2::classname(), [
-                                'data' => [],
-                                'options' => [
-                                    'placeholder' => 'Pilih Item',
-                                    'class' => 'select2',
-                                ],
-                                'pluginOptions' => [
-                                    'minimumInputLength' => 2,
-                                    'ajax' => [
-                                        'url' => Url::to(['purchase-order/list-item']),
-                                        'dataType' => 'json',
-                                        'delay' => 250,
-                                        'data' => new JsExpression("function(params) {
-                                            return {
-                                                q:params.term,
-                                            }
-                                        }"),
-                                        'cache' => true,
-                                        'processResults' => new JsExpression($resultsJs),
-                                    ],
-                                    'templateResult' => new JsExpression($format1line),
-                                    'templateSelection' => new JsExpression($format1line),
-                                    'escapeMarkup' => new JsExpression("function(markup) { return markup; }")
-                                ],
-                            ])->label(false) ?>
+                            <?= $form->field($temp, 'item_name')->textInput(['placeholder' => 'Pilih material tekan F4', 'data-temp' => true])->label(false) ?>
+                            <?= $form->field($temp, 'item_code')->hiddenInput(['data-temp' => true])->label(false) ?>
                         </div>
                     </div>
                     <div class="col-lg-12 col-md-12 col-xs-12">
                         <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
                             <label>QTY Order:</label>
                         </div>
-                        <div class="col-lg-1 col-md-1 col-sm-12 col-xs-12 padding-right-0">
-                            <?= $form->field($temp, 'qty_order_1')->widget(MaskedInput::className(), [
-                                'clientOptions' => [
-                                    'alias' => 'decimal',
-                                    'groupSeparator' => ',',
-                                    'autoGroup' => true
-                                ],
-                                'options' => [
-                                    'data-align' => 'text-right',
-                                    'readonly' => true,
-                                ]
-                            ])->label(false) ?>
+                        <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-right-0">
+                            <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 padding-left-0 padding-right-0">
+                                <?= $form->field($temp, 'qty_order_1')->widget(MaskedInput::className(), [
+                                    'clientOptions' => [
+                                        'alias' => 'decimal',
+                                        'groupSeparator' => ',',
+                                        'autoGroup' => true
+                                    ],
+                                    'options' => [
+                                        'data-align' => 'text-right',
+                                        'readonly' => true,
+                                        'data-temp' => true
+                                    ]
+                                ])->label(false) ?>
+                            </div>
+                            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 padding-left-0 padding-right-0">
+                                <?= $form->field($temp, 'um_1')->textInput(['readonly' => true, 'data-align' => 'text-right', 'data-temp' => true])->label(false) ?>
+                            </div>
                         </div>
-                        <div class="col-lg-1 col-md-1 col-sm-12 col-xs-12 padding-right-0">
-                            <?= $form->field($temp, 'qty_order_2')->widget(MaskedInput::className(), [
-                                'clientOptions' => [
-                                    'alias' =>  'decimal',
-                                    'groupSeparator' => ',',
-                                    'autoGroup' => true,
-                                ],
-                                'options' => [
-                                    'data-align' => 'text-right',
-                                    'readonly' => true,
-                                    'maxlength' => 3,
-                                ]
-                            ])->label(false) ?>
-                        </div>
-                        <div class="col-lg-1 col-md-1 col-sm-12 col-xs-12 padding-right-0">
-                            <?= $form->field($temp, 'qty_order_3')->widget(MaskedInput::className(), [
-                                'clientOptions' => [
-                                    'alias' =>  'decimal',
-                                    'groupSeparator' => ',',
-                                    'autoGroup' => true,
-                                ],
-                                'options' => [
-                                    'data-align' => 'text-right',
-                                    'readonly' => true,
-                                    'maxlength' => 3,
-                                ]
-                            ])->label(false) ?>
-                        </div>
-                    </div>
-                    <div class="col-lg-12 col-md-12 col-xs-12">
-                        <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
-                            <label>UM:</label>
-                        </div>
-                        <div class="col-lg-1 col-md-1 col-sm-12 col-xs-12 padding-right-0">
-                            <?= $form->field($temp, 'um_1')->textInput(['readonly' => true])->label(false) ?>
-                        </div>
-                        <div class="col-lg-1 col-md-1 col-sm-12 col-xs-12 padding-right-0">
-                            <?= $form->field($temp, 'um_2')->textInput(['readonly' => true])->label(false) ?>
-                        </div>
-                        <div class="col-lg-1 col-md-1 col-sm-12 col-xs-12 padding-right-0">
-                            <?= $form->field($temp, 'um_3')->textInput(['readonly' => true])->label(false) ?>
+                        <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-right-0">
+                            <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 padding-left-0 padding-right-0">
+                                <?= $form->field($temp, 'qty_order_2')->widget(MaskedInput::className(), [
+                                    'clientOptions' => [
+                                        'alias' =>  'decimal',
+                                        'groupSeparator' => ',',
+                                        'autoGroup' => true,
+                                    ],
+                                    'options' => [
+                                        'data-align' => 'text-right',
+                                        'data-temp' => true,
+                                        'readonly' => true,
+                                        'maxlength' => 3,
+                                    ]
+                                ])->label(false) ?>
+                            </div>
+                            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 padding-left-0 padding-right-0">
+                                <?= $form->field($temp, 'um_2')->textInput(['readonly' => true, 'data-align' => 'text-right', 'data-temp' => true])->label(false) ?>
+                            </div>
                         </div>
                     </div>
                     <div class="col-lg-12 col-md-12 col-xs-12">
@@ -205,6 +146,7 @@ JS;
                                 ],
                                 'options' => [
                                     'data-align' => 'text-right',
+                                    'data-temp' => true,
                                     'data-name' => 'iconbox',
                                     'data-icons' => 'rupiah',
                                     'readonly' => true,
@@ -220,13 +162,14 @@ JS;
                                 ],
                                 'options' => [
                                     'data-align' => 'text-right',
+                                    'data-temp' => true,
                                     'data-name' => 'iconbox',
                                     'data-icons' => 'rupiah',
                                     'readonly' => true,
                                 ]
                             ])->label(false) ?>
                         </div>
-                        <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
+                        <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0 hidden">
                             <?= $form->field($temp, 'harga_beli_3')->widget(MaskedInput::className(), [
                                 'clientOptions' => [
                                     'alias' =>  'decimal',
@@ -235,6 +178,7 @@ JS;
                                 ],
                                 'options' => [
                                     'data-align' => 'text-right',
+                                    'data-temp' => true,
                                     'data-name' => 'iconbox',
                                     'data-icons' => 'rupiah',
                                     'readonly' => true,
@@ -255,6 +199,7 @@ JS;
                                 ],
                                 'options' => [
                                     'data-align' => 'text-right',
+                                    'data-temp' => true,
                                     'data-name' => 'iconbox',
                                     'data-icons' => 'rupiah',
                                     'readonly' => true,
@@ -270,13 +215,14 @@ JS;
                                 ],
                                 'options' => [
                                     'data-align' => 'text-right',
+                                    'data-temp' => true,
                                     'data-name' => 'iconbox',
                                     'data-icons' => 'rupiah',
                                     'readonly' => true,
                                 ]
                             ])->label(false) ?>
                         </div>
-                        <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
+                        <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0 hidden">
                             <?= $form->field($temp, 'harga_jual_3')->widget(MaskedInput::className(), [
                                 'clientOptions' => [
                                     'alias' =>  'decimal',
@@ -285,6 +231,7 @@ JS;
                                 ],
                                 'options' => [
                                     'data-align' => 'text-right',
+                                    'data-temp' => true,
                                     'data-name' => 'iconbox',
                                     'data-icons' => 'rupiah',
                                     'readonly' => true,
@@ -296,11 +243,11 @@ JS;
                         <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
                             <label>PPN (%):</label>
                         </div>
-                        <div class="col-lg-1 col-md-1 col-sm-12 col-xs-12 padding-right-0">
-                            <?= $form->field($temp, 'ppn')->textInput(['data-align' => 'text-right'])->label(false) ?>
+                        <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
+                            <?= $form->field($temp, 'ppn')->textInput(['data-align' => 'text-right', 'data-temp' => true])->label(false) ?>
                         </div>
                         <div class="col-lg-1 col-md-1 col-sm-12 col-xs-12 padding-right-0 hidden">
-                            <?= $form->field($temp, 'id')->textInput() ?>
+                            <?= $form->field($temp, 'id')->hiddenInput(['data-temp' => true])->label(false) ?>
                         </div>
                     </div>
                     <div class="col-lg-12 col-md-12 col-xs-12 text-right padding-right-0">
@@ -317,10 +264,10 @@ JS;
                                 <tr>
                                     <th class="text-center">No.</th>
                                     <th class="text-center">Item</th>
-                                    <th class="text-center" colspan="3">QTY</th>
-                                    <th class="text-center" colspan="3">Harga Beli</th>
+                                    <th class="text-center" colspan="2">QTY</th>
+                                    <th class="text-center" colspan="2">Harga Beli</th>
                                     <th class="text-center">Ppn (%)</th>
-                                    <th class="text-center">Total</th>
+                                    <th class="text-center">Total (Rp)</th>
                                     <th class="text-center">Action</th>
                                 </tr>
                             </thead>
@@ -342,28 +289,86 @@ JS;
         </div>
     <?php ActiveForm::end(); ?>
 </div>
+<div data-popup="popup"></div>
 <script>
-function listItem(q)
+function load_item()
 {
     $.ajax({
         url: "<?=Url::to(['purchase-order/list-item'])?>",
 		type: "GET",
-		data: { q: q },
 		dataType: "text",
         error: function(xhr, status, error) {},
 		beforeSend: function (data){},
         success: function(data){
             var o = $.parseJSON(data);
-            $.each(o.results[0], function(index, value){
-                if(index != 'id'){
-                    $("#temppurchaseorderdetail-"+index).val(value);
-                }
+            $("[data-popup=\"popup\"]").html(o.data);
+            $("[data-popup=\"popup\"]").popup("open", {
+				container: "popup",
+				title: 'List Data Material',
+				styleOptions: {
+					width: 600
+				}
+			});
+        },
+        complete: function(){}
+    });
+}
+
+function search_item(el)
+{
+    search = el.val();
+    $.ajax({
+        url: "<?=Url::to(['purchase-order/search'])?>",
+		type: "POST",
+        data: {
+            search: search,
+        },
+		dataType: "text",
+        error: function(xhr, status, error) {},
+		beforeSend: function(){
+			el.loader("load");
+		},
+        success: function(data){
+            popup.close();
+            var o = $.parseJSON(data);
+            $("[data-popup=\"popup\"]").html(o.data);
+            $("[data-popup=\"popup\"]").popup("open", {
+				container: "popup",
+				title: 'List Data Material',
+				styleOptions: {
+					width: 600
+				}
+			});
+        },
+        complete: function(){
+			el.loader("destroy");
+		}
+    });
+}
+
+function select_item(code)
+{
+    $.ajax({
+        url: "<?=Url::to(['purchase-order/item'])?>",
+		type: "POST",
+        data: {
+            code: code,
+        },
+		dataType: "text",
+        error: function(xhr, status, error) {},
+		beforeSend: function(){},
+        success: function(data){
+            var o = $.parseJSON(data);
+            $.each(o, function(index, value){
+                $("#temppurchaseorderdetail-"+index).val(value);
             });
-            for(var a=1;a<=o.results[0].composite;a++){
+            for(var a=1;a<=o.composite;a++){
                 $("#temppurchaseorderdetail-qty_order_"+a).attr("readonly", false);
             }
         },
-        complete: function(){}
+        complete: function(){
+            popup.close();
+        }
     });
 }
 
@@ -374,20 +379,14 @@ function init_temp()
         type: "POST",
         dataType: "text",
         error: function(xhr, status, error) {},
-        beforeSend: function() {
-            temp.destroy();
-        },
+        beforeSend: function(){},
         success: function(data){
             var o = $.parseJSON(data);
             $("[data-table=\"detail\"] > tbody").html(o.model);
             $("#purchaseorder-total_order").val(o.total_order);
         },
         complete: function(){
-            $("#temppurchaseorderdetail-item_code").val("").trigger("change");
-            setTimeout(function(){
-                $("[id^=\"temppurchaseorderdetail-qty_order_\"]").attr("readonly", true);
-                $("[id^=\"temppurchaseorderdetail-\"]").val("");
-            }, 400);
+            temp.destroy();
         }
     });
 }
@@ -406,12 +405,10 @@ function get_temp(id)
         success: function(data){
             var o = $.parseJSON(data);
             $.each(o, function(index, value){
-                if(index=='item_code'){
-                    $("#temppurchaseorderdetail-"+index).val(value).trigger("change");
-                }else{
-                    $("#temppurchaseorderdetail-"+index).val(value);
-                }
+                $("#temppurchaseorderdetail-"+index).val(value);
             });
+            if(o.um_1 != "") $("#temppurchaseorderdetail-qty_order_1").attr("readonly", false);
+            if(o.um_2 != "") $("#temppurchaseorderdetail-qty_order_2").attr("readonly", false);
         },
         complete: function(){
             temp.init();
@@ -508,12 +505,27 @@ $(function(){
 
 var timeOut = 3000;
 $(document).ready(function(){
-    $("body").off("change","#temppurchaseorderdetail-item_code");
-    $("body").on("change","#temppurchaseorderdetail-item_code", function(e){
-        e.preventDefault();
-        listItem($(this).val());
+    $("body").off("keydown","#temppurchaseorderdetail-item_name")
+    $("body").on("keydown","#temppurchaseorderdetail-item_name", function(e){
+        var key = e.charCode ? e.charCode : e.keyCode ? e.keyCode : 0;
+        if(key == KEY.F4){
+            load_item();
+        }
     });
 
+    $("body").off("keypress","#search").on("keypress","#search", function(e){
+		var key = e.charCode ? e.charCode : e.keyCode ? e.keyCode : 0;
+		if(key == KEY.ENTER){
+            search_item($(this));
+		}
+	});
+
+    $("body").off("click","[data-id=\"popup\"] table > tbody tr").on("click","[data-id=\"popup\"] table > tbody tr", function(e){
+        e.preventDefault();
+        var data = $(this).data();
+        select_item(data.code);
+    });
+    
     $("body").off("input","#temppurchaseorderdetail-qty_order_2");
     $("body").on("input","#temppurchaseorderdetail-qty_order_2", function(e){
         e.preventDefault();
@@ -536,9 +548,9 @@ $(document).ready(function(){
                 message += parsing.toUpper(b, 2)+', ';
             }
         });
-        if(!$("#temppurchaseorderdetail-qty_order_1").val() || $("#temppurchaseorderdetail-qty_order_1").val() == ""){
+        if(!$("#temppurchaseorderdetail-qty_order_1").val() && !$("#temppurchaseorderdetail-qty_order_2").val()){
             success = false;
-            message = 'QTY Order 1';
+            message = 'QTY Order wajib diisi.';
         }
         if(success){
             create_temp($(this));

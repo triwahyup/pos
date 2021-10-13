@@ -1,18 +1,19 @@
 <?php
 use app\commands\Helper;
+use kartik\date\DatePicker;
 use yii\helpers\Html;
 use yii\grid\GridView;
 
 /* @var $this yii\web\View */
-/* @var $searchModel app\modules\pengaturan\models\PengaturanMenuSearch */
+/* @var $searchModel app\modules\master\models\MasterMesinSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Pengaturan Menu';
+$this->title = 'Master Mesin';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="pengaturan-menu-index">
+<div class="master-mesin-index">
     <p class="text-right">
-        <?= Html::a('<i class="fontello icon-plus"></i><span>Create Menu</span>', ['create'], ['class' => 'btn btn-success btn-flat btn-sm']) ?>
+        <?= Html::a('<i class="fontello icon-plus"></i><span>Create Data Mesin</span>', ['create'], ['class' => 'btn btn-success btn-flat btn-sm']) ?>
     </p>
 
     <?= GridView::widget([
@@ -21,33 +22,53 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
             'name',
-            'link',
             [
                 'attribute' => 'type_code',
-                'contentOptions' => [
-                    'class' => 'text-center'
-                ],
-                'value' => function ($model, $key, $index) {
-                    return (isset($model->typeKode)) ? strtolower($model->typeKode->name) : '-';
+                'value' => function($model, $index, $key){
+                    return (isset($model->typeCode)) ? $model->typeCode->name : '';
                 }
             ],
             [
-                'attribute' => 'parent_code',
-                'value' => function ($model, $key, $index) {
-                    return (isset($model->parent)) ? $model->parent->name : '-';
+                'attribute' => 'created_at',
+                'contentOptions' => [
+                    'class' => 'text-center',
+                ],
+                'filter' => DatePicker::widget([
+                    'model' => $searchModel, 
+                    'name' => 'created_at', 
+                    'type' => DatePicker::TYPE_COMPONENT_APPEND,
+                    'pickerButton' => false,
+                    'attribute' => 'created_at',
+                    'pluginOptions' => [
+                        'format' => 'yyyy-mm-dd',
+                        'autoclose' => true,
+                    ],
+                ]),
+                'value' => function($model, $index, $key)
+                {
+                    return date('Y-m-d', $model->created_at);
                 }
             ],
             [
-                'attribute' => 'level',
+                'attribute' => 'updated_at',
                 'contentOptions' => [
-                    'class' => 'text-center'
+                    'class' => 'text-center',
                 ],
-            ],
-            [
-                'attribute' => 'urutan',
-                'contentOptions' => [
-                    'class' => 'text-center'
-                ],
+                'filter' => DatePicker::widget([
+                    'model' => $searchModel, 
+                    'name' => 'updated_at', 
+                    'type' => DatePicker::TYPE_COMPONENT_APPEND,
+                    'pickerButton' => false,
+                    'attribute' => 'updated_at',
+                    'pluginOptions' => [
+                        'format' => 'yyyy-mm-dd',
+                        'autoclose' => true,
+                    ],
+                ]),
+                'value' => function($model, $index, $key)
+                {
+                    return date('Y-m-d', $model->updated_at);
+                }
             ],
             [
                 'buttons' => [
@@ -83,4 +104,6 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
         ],
     ]); ?>
+
+
 </div>

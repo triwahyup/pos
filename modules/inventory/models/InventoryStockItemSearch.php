@@ -15,7 +15,7 @@ class InventoryStockItemSearch extends InventoryStockItem
     {
         return [
             [['item_code'], 'safe'],
-            [['qty_in', 'qty_out', 'qty_retur', 'onhand', 'onsales'], 'integer'],
+            [['onhand', 'onsales'], 'integer'],
         ];
     }
 
@@ -58,11 +58,8 @@ class InventoryStockItemSearch extends InventoryStockItem
         if(!empty($this->item_code)){
             $query->andWhere('code LIKE "%'.$this->item_code.'%" OR name LIKE "%'.$this->item_code.'%"');
         }
-        $query->andFilterWhere(['like', 'qty_in', $this->qty_in])
-            ->andFilterWhere(['like', 'qty_out', $this->qty_out])
-            ->andFilterWhere(['like', 'qty_retur', $this->qty_retur])
-            ->andFilterWhere(['like', 'onhand', $this->onhand])
-            ->andFilterWhere(['like', 'onsales', $this->onsales]);
+        $query->andFilterWhere(['like', 'onhand', $this->onhand])
+        ->andFilterWhere(['like', 'onsales', $this->onsales]);
 
         return $dataProvider;
     }

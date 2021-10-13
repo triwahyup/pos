@@ -49,7 +49,7 @@ class InventoryStockTransaction extends \yii\db\ActiveRecord
     {
         return [
             [['tgl_document'], 'safe'],
-            [['qty_in', 'qty_out', 'qty_retur', 'onhand', 'onsales'], 'number'],
+            [['qty_in', 'qty_out', 'qty_retur', 'qty_bad', 'onhand', 'onsales'], 'number'],
             [['status', 'created_at', 'updated_at'], 'integer'],
             [['item_code'], 'string', 'max' => 7],
             [['supplier_code'], 'string', 'max' => 3],

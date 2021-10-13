@@ -115,7 +115,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ]) ?>
         </div>
     </div>
-    <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
+    <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
         <div class="margin-top-20"></div>
         <fieldset class="fieldset-box">
             <legend>Detail Item</legend>
@@ -127,10 +127,10 @@ $this->params['breadcrumbs'][] = $this->title;
                             <tr>
                                 <th class="text-center">No.</th>
                                 <th class="text-center">Item</th>
-                                <th class="text-center" colspan="3">QTY</th>
-                                <th class="text-center" colspan="3">Harga Beli</th>
+                                <th class="text-center" colspan="2">QTY</th>
+                                <th class="text-center" colspan="2">Harga Beli</th>
                                 <th class="text-center">Ppn (%)</th>
-                                <th class="text-center">Total</th>
+                                <th class="text-center">Total (Rp)</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -141,10 +141,10 @@ $this->params['breadcrumbs'][] = $this->title;
                                     <tr>
                                         <td class="text-center"><?=$index+1?></td>
                                         <td class="font-size-10"><?=(isset($val->item)) ? '<span class="text-success">'.$val->item->code .'</span><br />'. $val->item->name : '' ?></td>
-                                        <?php for($a=1;$a<=3;$a++): ?>
+                                        <?php for($a=1;$a<3;$a++): ?>
                                             <td class="text-right"><?=(!empty($val['qty_order_'.$a])) ? number_format($val['qty_order_'.$a]).'<br /><span class="text-muted font-size-10">'.$val['um_'.$a].'</span>' : null ?></td>
                                         <?php endfor; ?>
-                                        <?php for($a=1;$a<=3;$a++): ?>
+                                        <?php for($a=1;$a<3;$a++): ?>
                                             <td class="text-right"><?=(!empty($val['qty_order_'.$a])) ? number_format($val['harga_beli_'.$a]).'.- <br /><span class="text-muted font-size-10">Per '.$val['um_'.$a].'</span>' : null ?></td>
                                         <?php endfor; ?>
                                         <td class="text-right"><?=(!empty($val->ppn)) ? $val->ppn.'%' : '' ?></td>
@@ -152,8 +152,8 @@ $this->params['breadcrumbs'][] = $this->title;
                                     </tr>
                                 <?php endforeach; ?>
                                 <tr>
-                                    <td class="text-right" colspan="9"><strong>Total Order:</strong></td>
-                                    <td class="text-right"><strong><?=number_format($totalOrder).'.-' ?></strong></td>
+                                    <td class="summary" colspan="7"><strong>Total Order:</strong></td>
+                                    <td class="summary"><strong><?=number_format($totalOrder).'.-' ?></strong></td>
                                 </tr>
                             <?php else : ?>
                                 <tr>
@@ -168,7 +168,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <div class="margin-bottom-20"></div>
     </div>
     <?php if(count($model->approvals) > 0): ?>
-        <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
+        <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
             <div class="margin-top-20"></div>
             <fieldset class="fieldset-box">
                 <legend>Detail Approval</legend>

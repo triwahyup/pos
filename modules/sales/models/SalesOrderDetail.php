@@ -1,6 +1,7 @@
 <?php
 
 namespace app\modules\sales\models;
+use app\modules\inventory\models\InventoryStockItem;
 use app\modules\master\models\MasterMaterialItem;
 use app\modules\sales\models\SalesOrderProduksiDetail;
 use yii\behaviors\TimestampBehavior;
@@ -125,5 +126,10 @@ class SalesOrderDetail extends \yii\db\ActiveRecord
     public function getDetailsProduksi()
     {
         return $this->hasMany(SalesOrderProduksiDetail::className(), ['no_so' => 'no_so', 'item_code' => 'item_code']);
+    }
+
+    public function getStock()
+    {
+        return $this->hasOne(InventoryStockItem::className(), ['item_code' => 'item_code']);
     }
 }

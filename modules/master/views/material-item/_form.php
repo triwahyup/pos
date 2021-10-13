@@ -20,14 +20,17 @@ use yii\widgets\MaskedInput;
                                 'data' => $type,
                                 'options' => [
                                     'placeholder' => 'Type Barang',
-                                    'readonly' => true
+                                    'readonly' => (!$model->isNewRecord) ? true : false,
                                 ],
                             ]) ?>
                     </div>
                     <div class="col-lg-5 col-md-5 col-sm-12 col-xs-12 padding-left-0">
                         <?= $form->field($model, 'material_code')->widget(Select2::classname(), [
                                 'data' => $material,
-                                'options' => ['placeholder' => 'Material Type'],
+                                'options' => [
+                                    'placeholder' => 'Material Type',
+                                    'readonly' => (!$model->isNewRecord) ? true : false,
+                                ],
                             ]) ?>
                     </div>
                 </div>

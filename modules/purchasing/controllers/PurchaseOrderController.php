@@ -43,7 +43,7 @@ class PurchaseOrderController extends Controller
                             'roles' => ['@'],
                         ],
                         [
-                            'actions' => ['index', 'view', 'list-item', 'temp', 'get-temp', 'popup'],
+                            'actions' => ['index', 'view', 'list-item', 'temp', 'get-temp', 'popup', 'search', 'item'],
                             'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('purchase-order')),
                             'roles' => ['@'],
                         ], 
@@ -252,6 +252,7 @@ class PurchaseOrderController extends Controller
                 $connection = \Yii::$app->db;
                 $transaction = $connection->beginTransaction();
                 try{
+                    $model->status_approval = null;
                     if($model->save()){
                         if(count($model->temps) > 0){
                             foreach($model->details as $empty)
@@ -429,18 +430,50 @@ class PurchaseOrderController extends Controller
         throw new NotFoundHttpException('The requested page does not exist.');
     }
 
-    public function actionListItem($q)
+    public function actionListItem()
     {
         $model = MasterMaterialItem::find()
             ->alias('a')
-            ->select(['concat(a.code, "-", a.name) as text', 'a.code id', 'a.code as item_code', 'a.*', 'b.composite'])
+            ->select(['a.*', 'b.composite'])
             ->leftJoin('master_satuan b', 'b.code = a.satuan_code')
             ->where(['a.status'=>1])
-            ->andWhere('a.code LIKE "%'.$q.'%" OR a.name LIKE "%'.$q.'%"')
+            ->orderBy(['a.code'=>SORT_ASC])
             ->limit(10)
-            ->asArray()
             ->all();
-        return json_encode(['results'=>$model]);
+        return json_encode(['data'=>$this->renderPartial('_list_item', ['model'=>$model])]);
+    }
+
+    public function actionSearch()
+    {
+        $model = [];
+        if(isset($_POST['search'])){
+            $model = MasterMaterialItem::find()
+                ->alias('a')
+                ->select(['a.*', 'b.composite'])
+                ->leftJoin('master_satuan b', 'b.code = a.satuan_code')
+                ->leftJoin('master_kode c', 'c.code = a.type_code')
+                ->where(['a.status'=>1])
+                ->andWhere('a.code LIKE "%'.$_POST['search'].'%" 
+                    OR a.name LIKE "%'.$_POST['search'].'%" 
+                    OR c.name  LIKE "%'.$_POST['search'].'%"')
+                ->orderBy(['a.code'=>SORT_ASC])
+                ->limit(10)
+                // ->asArray()
+                ->all();
+        }
+        return json_encode(['data'=>$this->renderPartial('_list_item', ['model'=>$model])]);
+    }
+
+    public function actionItem()
+    {
+        $model = MasterMaterialItem::find()
+            ->alias('a')
+            ->select(['a.*', 'a.code as item_code', 'a.name as item_name', 'b.composite'])
+            ->leftJoin('master_satuan b', 'b.code = a.satuan_code')
+            ->where(['a.code'=>$_POST['code'], 'a.status'=>1])
+            ->asArray()
+            ->one();
+        return json_encode($model);
     }
 
     public function actionTemp()
@@ -458,7 +491,11 @@ class PurchaseOrderController extends Controller
 
     public function actionGetTemp($id)
     {
-        $temp = TempPurchaseOrderDetail::find()->where(['id'=>$id])->asArray()->one();
+        $temp = TempPurchaseOrderDetail::find()
+            ->select(['*', 'name as item_name'])
+            ->where(['id'=>$id])
+            ->asArray()
+            ->one();
         return json_encode($temp);
     }
 
@@ -844,41 +881,34 @@ class PurchaseOrderController extends Controller
                         $logs_mail->subject = 'Approval Purchase Order '. $app->no_po;
 						$logs_mail->body = $body;
 						$logs_mail->keterangan = '';
-                        $logs_mail->status = 0;
-                        if(!$logs_mail->save()){
-                            $success = false;
-                            foreach($logs_mail->errors as $error=>$value){
-                                $message .= strtoupper($error).": ".$value[0].', ';
-                            }
-                            $message = substr($message, 0, -2);
-                        }
-
-                        $app->status=2;
-                        if(!$app->save()){
-                            $success = false;
-                            foreach($app->errors as $error=>$value){
-                                $message .= strtoupper($error).": ".$value[0].', ';
-                            }
-                            $message = substr($message, 0, -2);
-                        }
                         
-                        // $sendMail = \Yii::$app->mailer->compose()
-                        //     ->setFrom(['whye755@gmail.com' => 'Notification Reminder Approval'])
-                        //     ->setTo($logs_mail->email, $profile->name)
-                        //     ->setSubject($logs_mail->subject)
-                        //     ->setHtmlBody($body);
-                        // if($sendmail->send()){
-                        // }else{
-                        //     $logs_mail->status = 0;
-                        //     if(!$logs_mail->save()){
-                        //         $success = false;
-                        //         foreach($logs_mail->errors as $error=>$value){
-                        //             $message .= strtoupper($error).": ".$value[0].', ';
-                        //         }
-                        //         $message = substr($message, 0, -2);
-                        //     }
-                        //     $message = 'Gagal Send Email. Coba Sesaat Lagi.';
-                        // }
+                        $sendMail = \Yii::$app->mailer->compose()
+                            ->setFrom(['pos@ptmma.co.id' => 'Notification Reminder Approval'])
+                            ->setTo($logs_mail->email)
+                            ->setSubject($logs_mail->subject)
+                            ->setHtmlBody($body);
+                        if($sendMail->send()){
+                            $logs_mail->status = 1;
+                            if(!$logs_mail->save()){
+                                $success = false;
+                                foreach($logs_mail->errors as $error=>$value){
+                                    $message .= strtoupper($error).": ".$value[0].', ';
+                                }
+                                $message = substr($message, 0, -2);
+                            }
+    
+                            $app->status=2;
+                            if(!$app->save()){
+                                $success = false;
+                                foreach($app->errors as $error=>$value){
+                                    $message .= strtoupper($error).": ".$value[0].', ';
+                                }
+                                $message = substr($message, 0, -2);
+                            }
+                        }else{
+                            $success = false;
+                            $message = 'Gagal Send Email. Coba Sesaat Lagi.';
+                        }
                     }else{
                         $success = false;
 						$message = 'Email user to approval is EMPTY';
@@ -920,31 +950,25 @@ class PurchaseOrderController extends Controller
             $logs_mail->subject = 'Approval Purchase Order '. $approval->no_po;
             $logs_mail->body = $body;
             $logs_mail->keterangan = '';
-            $logs_mail->status = 0;
-            $logs_mail->status = 1;
-            if(!$logs_mail->save()){
-                $success = false;
-                foreach($logs_mail->errors as $error=>$value){
-                    $message .= strtoupper($error).": ".$value[0].', ';
+            
+            $sendMail = \Yii::$app->mailer->compose()
+                ->setFrom(['pos@ptmma.co.id' => 'Notification Reminder Approval'])
+                ->setTo($logs_mail->email)
+                ->setSubject($logs_mail->subject)
+                ->setHtmlBody($body);
+            if($sendMail->send()){
+                $logs_mail->status = 1;
+                if(!$logs_mail->save()){
+                    $success = false;
+                    foreach($logs_mail->errors as $error=>$value){
+                        $message .= strtoupper($error).": ".$value[0].', ';
+                    }
+                    $message = substr($message, 0, -2);
                 }
-                $message = substr($message, 0, -2);
+            }else{
+                $success = false;
+                $message = 'Gagal Send Email. Coba Sesaat Lagi.';
             }
-            // $sendMail = \Yii::$app->mailer->compose()
-            //     ->setFrom(['whye755@gmail.com' => 'Notification Reminder Approval'])
-            //     ->setTo($logs_mail->email, $profile->name)
-            //     ->setSubject($logs_mail->subject)
-            //     ->setHtmlBody($body);
-            // if($sendmail->send()){
-            // }else{
-            //     if(!$logs_mail->save()){
-            //         $success = false;
-            //         foreach($logs_mail->errors as $error=>$value){
-            //             $message .= strtoupper($error).": ".$value[0].', ';
-            //         }
-            //         $message = substr($message, 0, -2);
-            //     }
-            //     $message = 'Gagal Send Email. Coba Sesaat Lagi.';
-            // }
         }else{
             $success = false;
 			$message = 'Pengaturan Approval belum di setting.';

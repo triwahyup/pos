@@ -19,36 +19,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 }
             ],
             [
-                'attribute' => 'qty_in',
-                'contentOptions' => [
-                    'class' => 'text-right',
-                ],
-                'format' => 'raw',
-                'value' => function($model, $value) {
-                    return '<strong>'.number_format($model->qty_in) .'</strong><br />'. $model->konversi($model->item, $model->qty_in);
-                }
-            ],
-            [
-                'attribute' => 'qty_out',
-                'contentOptions' => [
-                    'class' => 'text-right',
-                ],
-                'format' => 'raw',
-                'value' => function($model, $value) {
-                    return '<strong>'.number_format($model->qty_out) .'</strong><br />'. $model->konversi($model->item, $model->qty_out);
-                }
-            ],
-            [
-                'attribute' => 'qty_retur',
-                'contentOptions' => [
-                    'class' => 'text-right',
-                ],
-                'format' => 'raw',
-                'value' => function($model, $value) {
-                    return '<strong>'.number_format($model->qty_retur) .'</strong><br />'. $model->konversi($model->item, $model->qty_retur);
-                }
-            ],
-            [
                 'attribute' => 'onhand',
                 'contentOptions' => [
                     'class' => 'text-right',

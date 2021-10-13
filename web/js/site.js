@@ -154,6 +154,7 @@ var temp = {
 		// disable button update dan delete
 		$("[data-button=\"update_temp\"]").prop("disabled", true);
 		$("[data-button=\"delete_temp\"]").prop("disabled", true);
+		$("button[type=\"submit\"]").prop("disabled", true);
 
 		temp.event();
 	},
@@ -164,6 +165,7 @@ var temp = {
 		// enable button update dan delete
 		$("[data-button=\"update_temp\"]").prop("disabled", false);
 		$("[data-button=\"delete_temp\"]").prop("disabled", false);
+		$("button[type=\"submit\"]").prop("disabled", false);
 		// clear data temp
 		$("[data-temp]").val(null);
 	},
