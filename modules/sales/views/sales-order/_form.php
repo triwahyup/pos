@@ -85,7 +85,7 @@ use yii\widgets\ActiveForm;
         <div class="col-lg-12 col-md-12 col-xs-12 margin-top-20 padding-left-0">
             <div class="margin-top-20"></div>
             <div class="col-lg-3 col-md-3 col-xs-12 padding-left-0">
-                <?= $form->field($model, 'nama_order')->textInput(['placeholder' => 'Pilih data job tekan F4']) ?>
+                <?= $form->field($model, 'nama_order')->textInput(['placeholder' => 'Pilih data job tekan F4', 'value' => (!$model->isNewRecord) ? $model->order->name : '']) ?>
                 <?= $form->field($model, 'order_code')->hiddenInput()->label(false) ?>
                 <?= $form->field($model, 'type_order')->hiddenInput()->label(false) ?>
             </div>

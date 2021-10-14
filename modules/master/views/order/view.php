@@ -174,7 +174,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                                 <div class="col-lg-12 col-md-12 col-xs-12 text-left padding-left-0">
                                                     <?php if(count($val->detailsProduksi) > 0):
                                                         $total_biaya=0;?>
-                                                        <label class="text-left">Detail Proses</label>
+                                                        <label class="text-left"><strong>Detail Proses:</strong></label>
                                                         <ul class="desc-custom padding-left-0">
                                                             <?php foreach($val->detailsProduksi as $v):
                                                                 $total_biaya += $v->total_biaya;

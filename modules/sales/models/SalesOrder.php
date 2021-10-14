@@ -74,8 +74,9 @@ class SalesOrder extends \yii\db\ActiveRecord
             'tgl_po' => 'Tgl. Po',
             'customer_code' => 'Customer',
             'ppn' => 'Ppn (%)',
+            'total_biaya' => 'Total Biaya',
             'total_order' => 'Total Order',
-            'grand_total' => 'Total Order',
+            'grand_total' => 'Grand Total',
             'status' => 'Status',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
@@ -99,7 +100,6 @@ class SalesOrder extends \yii\db\ActiveRecord
     {
         $this->total_order = str_replace(',', '', $this->total_order);
         $this->total_biaya = str_replace(',', '', $this->total_biaya);
-        $this->grand_total = str_replace(',', '', $this->grand_total);
         return parent::beforeSave($attribute);
     }
 

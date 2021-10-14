@@ -35,12 +35,16 @@ use kartik\widgets\Select2;
                 </div>
                 <div class="col-lg-6 col-md-6 col-xs-12 padding-left-0">
                     <?= $form->field($model, 'parent_1')->widget(Select2::classname(), [
-                            'data' => (!$model->isNewRecord) ? [$model->code => $model->name] : []
+                            'data' => (!$model->isNewRecord) ? [$model->code => $model->name] : [],
+                            'options' => ['placeholder' => 'Parent 1', 'value' => !$model->isNewRecord ? $model->code : ''],
+                            'pluginOptions' => ['allowClear' => true],
                         ]) ?>
                 </div>
                 <div class="col-lg-6 col-md-6 col-xs-12 padding-left-0">
                     <?= $form->field($model, 'parent_2')->widget(Select2::classname(), [
-                            'data' => (!$model->isNewRecord) ? [$model->parent_code => $model->parent->name] : []
+                            'data' => (!$model->isNewRecord) ? [$model->parent_code => $model->parent->name] : [],
+                            'options' => ['placeholder' => 'Parent 2', 'value' => !$model->isNewRecord ? $model->parent_code : ''],
+                            'pluginOptions' => ['allowClear' => true],
                         ]) ?>
                 </div>
             </div>

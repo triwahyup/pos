@@ -75,13 +75,13 @@ $this->params['breadcrumbs'][] = $this->title;
                 }
             ],
             [
-                'attribute' => 'total_order',
+                'attribute' => 'grand_total',
                 'contentOptions' => [
                     'class' => 'text-right',
                 ],
                 'value' => function($model, $index, $key)
                 {
-                    return number_format($model->total_order).'.-';
+                    return number_format($model->grand_total).'.-';
                 }
             ],
             [

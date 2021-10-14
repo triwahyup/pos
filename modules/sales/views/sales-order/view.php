@@ -75,8 +75,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attributes' => [
                     [
                         'attribute' => 'ppn',
+                        'format' => 'raw',
                         'value'=> function ($model, $index) { 
-                            return (!empty($model->ppn)) ? $model->ppn.' %' : '';
+                            return (!empty($model->ppn)) ? '<strong>'.$model->ppn.' %</strong>' : '';
                         }
                     ],
                     [
@@ -208,7 +209,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                                 <div class="col-lg-12 col-md-12 col-xs-12 text-left padding-left-0">
                                                     <?php if(count($val->detailsProduksi) > 0):
                                                         $total_biaya=0;?>
-                                                        <label class="text-left">Detail Proses</label>
+                                                        <label class="text-left"><strong>Detail Proses:</strong></label>
                                                         <ul class="desc-custom padding-left-0">
                                                             <?php foreach($val->detailsProduksi as $v):
                                                                 $total_biaya += $v->total_biaya;
@@ -230,11 +231,19 @@ $this->params['breadcrumbs'][] = $this->title;
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
+                            <?php
+                                if(!empty($model->ppn) || $model->ppn !=0){
+                                    $ppn = ($totalOrder+$totalBiaya) / ($model->ppn*100);
+                                    $grandTotal = number_format($totalOrder+$totalBiaya+$ppn).'.- (PPN '.$model->ppn.'%)';
+                                }else{
+                                    $grandTotal = number_format($totalOrder+$totalBiaya).'.-';
+                                }
+                            ?>
                             <tr>
                                 <td class="summary" colspan="3"></td>
                                 <td class="summary" colspan="2"><strong><?='Total Order: Rp. '.number_format($totalOrder).'.-' ?></strong></td>
                                 <td class="summary" colspan="2"><strong><?='Total Biaya: Rp. '.number_format($totalBiaya).'.-' ?></strong></td>
-                                <td class="summary"><strong><?='Grand Total: Rp. '.number_format($totalOrder+$totalBiaya).'.-' ?></strong></td>
+                                <td class="summary"><strong><?='Grand Total: Rp. '.$grandTotal ?></strong></td>
                             </tr>
                         <?php else : ?>
                             <tr>

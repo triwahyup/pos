@@ -486,7 +486,6 @@ class SalesOrderController extends Controller
                             $message = 'STOCK ITEM '.$val->item_code.' TIDAK DITEMUKAN.';
                         }
                     }
-                    // print_r();die;
                     // PROSES SIMPAN SPK
                 }else{
                     $success = false;
