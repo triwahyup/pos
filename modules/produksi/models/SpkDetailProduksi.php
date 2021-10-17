@@ -1,13 +1,14 @@
 <?php
 
-namespace app\modules\sales\models;
+namespace app\modules\produksi\models;
 
 use Yii;
+use yii\behaviors\TimestampBehavior;
 
 /**
- * This is the model class for table "sales_order_produksi_detail".
+ * This is the model class for table "spk_detail_produksi".
  *
- * @property string $no_so
+ * @property string $no_spk
  * @property int $urutan
  * @property string $order_code
  * @property string|null $name
@@ -22,14 +23,21 @@ use Yii;
  * @property int|null $created_at
  * @property int|null $updated_at
  */
-class SalesOrderProduksiDetail extends \yii\db\ActiveRecord
+class SpkDetailProduksi extends \yii\db\ActiveRecord
 {
     /**
      * {@inheritdoc}
      */
     public static function tableName()
     {
-        return 'sales_order_produksi_detail';
+        return 'spk_detail_produksi';
+    }
+
+    public function behaviors()
+	{
+        return [
+            TimestampBehavior::className(),
+        ];
     }
 
     /**
@@ -38,14 +46,14 @@ class SalesOrderProduksiDetail extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['no_so', 'urutan', 'order_code'], 'required'],
+            [['no_spk', 'urutan', 'order_code'], 'required'],
             [['urutan', 'type', 'status', 'created_at', 'updated_at'], 'integer'],
             [['panjang', 'lebar', 'index', 'total_biaya'], 'number'],
-            [['no_so'], 'string', 'max' => 12],
-            [['order_code', 'biaya_produksi_code'], 'string', 'max' => 3],
+            [['no_spk'], 'string', 'max' => 12],
+            [['order_code', 'biaya_produksi_code', 'mesin_code', 'mesin_type_code'], 'string', 'max' => 3],
             [['name'], 'string', 'max' => 128],
             [['item_code'], 'string', 'max' => 7],
-            [['no_so', 'urutan'], 'unique', 'targetAttribute' => ['no_so', 'urutan']],
+            [['no_spk', 'urutan'], 'unique', 'targetAttribute' => ['no_spk', 'urutan']],
         ];
     }
 
@@ -55,7 +63,7 @@ class SalesOrderProduksiDetail extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'no_so' => 'No So',
+            'no_spk' => 'No Spk',
             'urutan' => 'Urutan',
             'order_code' => 'Order Code',
             'name' => 'Name',

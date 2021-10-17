@@ -5,7 +5,7 @@ namespace app\modules\master\models;
 use Yii;
 use app\modules\inventory\models\InventoryStockItem;
 use app\modules\master\models\MasterMaterialItem;
-use app\modules\master\models\TempMasterOrderProduksiDetail;
+use app\modules\master\models\TempMasterOrderDetailProduksi;
 
 /**
  * This is the model class for table "temp_master_order_detail".
@@ -144,9 +144,9 @@ class TempMasterOrderDetail extends \yii\db\ActiveRecord
     public function getDetailsProduksi()
     {
         if(!empty($this->order_code)){
-            return $this->hasMany(TempMasterOrderProduksiDetail::className(), ['order_code' => 'order_code', 'item_code' => 'item_code']);
+            return $this->hasMany(TempMasterOrderDetailProduksi::className(), ['order_code' => 'order_code', 'item_code' => 'item_code']);
         }else{
-            return $this->hasMany(TempMasterOrderProduksiDetail::className(), ['item_code' => 'item_code', 'user_id'=> 'user_id']);
+            return $this->hasMany(TempMasterOrderDetailProduksi::className(), ['item_code' => 'item_code', 'user_id'=> 'user_id']);
         }
     }
 }

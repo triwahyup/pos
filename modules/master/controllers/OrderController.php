@@ -8,9 +8,9 @@ use app\modules\master\models\MasterBiayaProduksi;
 use app\modules\master\models\MasterMaterialItem;
 use app\modules\master\models\MasterOrder;
 use app\modules\master\models\MasterOrderDetail;
-use app\modules\master\models\MasterOrderProduksiDetail;
+use app\modules\master\models\MasterOrderDetailProduksi;
 use app\modules\master\models\TempMasterOrderDetail;
-use app\modules\master\models\TempMasterOrderProduksiDetail;
+use app\modules\master\models\TempMasterOrderDetailProduksi;
 use app\modules\master\models\MasterOrderSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -132,7 +132,7 @@ class OrderController extends Controller
 
                         if(count($model->tempsProduksi()) > 0){
                             foreach($model->tempsProduksi() as $temp){
-                                $detail = new MasterOrderProduksiDetail();
+                                $detail = new MasterOrderDetailProduksi();
                                 $detail->attributes = $temp->attributes;
                                 $detail->order_code = $model->code;
                                 if(!$detail->save()){
@@ -238,7 +238,7 @@ class OrderController extends Controller
                             foreach($model->detailsProduksi as $empty)
                                 $empty->delete();
                             foreach($model->tempsProduksi as $temp){
-                                $detail = new MasterOrderProduksiDetail();
+                                $detail = new MasterOrderDetailProduksi();
                                 $detail->attributes = $temp->attributes;
                                 if(!$detail->save()){
                                     $success = false;
@@ -305,7 +305,7 @@ class OrderController extends Controller
                 }
             }
             foreach($model->detailsProduksi as $detail){
-                $tempProduksi = new TempMasterOrderProduksiDetail();
+                $tempProduksi = new TempMasterOrderDetailProduksi();
                 $tempProduksi->attributes = $detail->attributes;
                 $tempProduksi->user_id = \Yii::$app->user->id;
                 if(!$tempProduksi->save()){
@@ -596,11 +596,11 @@ class OrderController extends Controller
         if($request->isPost){
             $materialItem = MasterMaterialItem::findOne(['code'=>$request->post('item'), 'status'=>1]);
             $biayaProduksi = MasterBiayaProduksi::findOne(['code'=>$request->post('biaya'), 'status'=>1]);
-            $checkTemp = $model = TempMasterOrderProduksiDetail::find()
+            $checkTemp = $model = TempMasterOrderDetailProduksi::find()
                 ->where(['biaya_produksi_code'=>$biayaProduksi->code, 'item_code'=>$materialItem->code, 'user_id'=> \Yii::$app->user->id])
                 ->one();
             if(empty($checkTemp)){
-                $temp = new TempMasterOrderProduksiDetail();
+                $temp = new TempMasterOrderDetailProduksi();
                 $temp->attributes = $materialItem->attributes;
                 $temp->attributes = $biayaProduksi->attributes;
                 $temp->biaya_produksi_code = $biayaProduksi->code;
@@ -670,7 +670,7 @@ class OrderController extends Controller
 
     protected function findTempProduksi($id)
     {
-        $temp = TempMasterOrderProduksiDetail::findOne(['id'=>$id, 'user_id'=>\Yii::$app->user->id]);
+        $temp = TempMasterOrderDetailProduksi::findOne(['id'=>$id, 'user_id'=>\Yii::$app->user->id]);
         if(isset($temp)){
             return $temp;
         }
@@ -686,11 +686,11 @@ class OrderController extends Controller
 			$connection->createCommand('ALTER TABLE temp_master_order_detail AUTO_INCREMENT=1')->query();
         }
 
-        TempMasterOrderProduksiDetail::deleteAll('user_id=:user_id', [':user_id'=>\Yii::$app->user->id]);
-        $tempProduksi = TempMasterOrderProduksiDetail::find()->all();
+        TempMasterOrderDetailProduksi::deleteAll('user_id=:user_id', [':user_id'=>\Yii::$app->user->id]);
+        $tempProduksi = TempMasterOrderDetailProduksi::find()->all();
         if(empty($tempProduksi)){
             $connection = \Yii::$app->db;
-			$connection->createCommand('ALTER TABLE temp_master_order_produksi_detail AUTO_INCREMENT=1')->query();
+			$connection->createCommand('ALTER TABLE temp_master_order_detail_produksi AUTO_INCREMENT=1')->query();
         }
     }
 }

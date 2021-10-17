@@ -5,17 +5,21 @@ namespace app\modules\sales\controllers;
 use app\models\Logs;
 use app\models\User;
 use app\modules\inventory\models\InventoryStockItem;
+use app\modules\inventory\models\InventoryStockTransaction;
 use app\modules\master\models\MasterBiayaProduksi;
 use app\modules\master\models\MasterMaterialItem;
 use app\modules\master\models\MasterOrder;
 use app\modules\master\models\MasterOrderDetail;
-use app\modules\master\models\MasterOrderProduksiDetail;
+use app\modules\master\models\MasterOrderDetailProduksi;
 use app\modules\master\models\MasterPerson;
+use app\modules\produksi\models\Spk;
+use app\modules\produksi\models\SpkDetail;
+use app\modules\produksi\models\SpkDetailProduksi;
 use app\modules\sales\models\SalesOrder;
 use app\modules\sales\models\SalesOrderDetail;
-use app\modules\sales\models\SalesOrderProduksiDetail;
+use app\modules\sales\models\SalesOrderDetailProduksi;
 use app\modules\sales\models\TempSalesOrderDetail;
-use app\modules\sales\models\TempSalesOrderProduksiDetail;
+use app\modules\sales\models\TempSalesOrderDetailProduksi;
 use app\modules\sales\models\SalesOrderSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -157,7 +161,7 @@ class SalesOrderController extends Controller
 
                         if(count($model->tempsProduksi()) > 0){
                             foreach($model->tempsProduksi() as $tempProduksi){
-                                $detailProduksi = new SalesOrderProduksiDetail();
+                                $detailProduksi = new SalesOrderDetailProduksi();
                                 $detailProduksi->attributes = $tempProduksi->attributes;
                                 $detailProduksi->no_so = $model->no_so;
                                 if(!$detailProduksi->save()){
@@ -284,7 +288,7 @@ class SalesOrderController extends Controller
                             foreach($model->detailsProduksi as $empty)
                                 $empty->delete();
                             foreach($model->tempsProduksi as $tempProduksi){
-                                $detailProduksi = new SalesOrderProduksiDetail();
+                                $detailProduksi = new SalesOrderDetailProduksi();
                                 $detailProduksi->attributes = $tempProduksi->attributes;
                                 if(!$detailProduksi->save()){
                                     $success = false;
@@ -355,7 +359,7 @@ class SalesOrderController extends Controller
                     }
                 }
                 foreach($model->detailsProduksi as $detail){
-                    $tempProduksi = new TempSalesOrderProduksiDetail();
+                    $tempProduksi = new TempSalesOrderDetailProduksi();
                     $tempProduksi->attributes = $detail->attributes;
                     $tempProduksi->user_id = \Yii::$app->user->id;
                     if(!$tempProduksi->save()){
@@ -470,16 +474,42 @@ class SalesOrderController extends Controller
                 if($model->save()){
                     // PROSES KURANG STOK
                     foreach($model->details as $val){
-                        if(isset($val->stock)){
-                            $stock = $val->stock->satuanTerkecil($val->item_code, [
+                        $stockItem = $val->stock;
+                        if(isset($stockItem)){
+                            $stock = $stockItem->satuanTerkecil($val->item_code, [
                                 0=>$val->qty_order_1,
                                 1=>$val->qty_order_2
                             ]);
-                            if($val->stock->onhand > $stock){
-
+                            if($stockItem->onhand > $stock){
+                                $stockItem->onhand = $stockItem->onhand - $stock;
+                                $stockItem->onsales = $stockItem->onsales + $stock;
+                                if(!$stockItem->save()){
+                                    $success = false;
+                                    $message = (count($stockItem->errors) > 0) ? 'ERROR UPDATE STOCK ITEM: ' : '';
+                                    foreach($stockItem->errors as $error => $value){
+                                        $message .= strtoupper($value[0].', ');
+                                    }
+                                    $message = substr($message, 0, -2);
+                                }
+                                
+                                $stockTransaction = new InventoryStockTransaction();
+                                $stockTransaction->attributes = $stockItem->attributes;
+                                $stockTransaction->no_document = $model->no_so;
+                                $stockTransaction->tgl_document = $model->tgl_so;
+                                $stockTransaction->type_document = "SALES ORDER";
+                                $stockTransaction->status_document = "OUT";
+                                $stockTransaction->qty_out = $stock;
+                                if(!$stockTransaction->save()){
+                                    $success = false;
+                                    $message = (count($stockTransaction->errors) > 0) ? 'ERROR UPDATE STOCK TRANSACTION: ' : '';
+                                    foreach($stockTransaction->errors as $error => $value){
+                                        $message .= strtoupper($value[0].', ');
+                                    }
+                                    $message = substr($message, 0, -2);
+                                }
                             }else{
                                 $success = false;
-                                $message = 'SISA STOCK ITEM '.$val->item_code.' TIDAK MENCUKUPI. SISA '.$val->stock->onhand;
+                                $message = 'SISA STOCK ITEM '.$val->item_code.' TIDAK MENCUKUPI. SISA '.$stockItem->onhand;
                             }
                         }else{
                             $success = false;
@@ -487,6 +517,45 @@ class SalesOrderController extends Controller
                         }
                     }
                     // PROSES SIMPAN SPK
+                    $spk = new Spk();
+                    $spk->attributes = $model->attributes;
+                    $spk->no_spk = $spk->generateCode();
+                    $spk->tgl_spk = date('Y-m-d');
+                    if($spk->save()){
+                        foreach($model->details as $detail){
+                            $spkDetail = new SpkDetail();
+                            $spkDetail->attributes = $spk->attributes;
+                            $spkDetail->attributes = $detail->attributes;
+                            if(!$spkDetail->save()){
+                                $success = false;
+                                $message = (count($spkDetail->errors) > 0) ? 'ERROR CREATE SPK DETAIL: ' : '';
+                                foreach($spkDetail->errors as $error => $value){
+                                    $message .= strtoupper($value[0].', ');
+                                }
+                                $message = substr($message, 0, -2);
+                            }
+                        }
+                        foreach($model->detailsProduksi as $produksi){
+                            $spkProduksi = new SpkDetailProduksi();
+                            $spkProduksi->attributes = $spk->attributes;
+                            $spkProduksi->attributes = $produksi->attributes;
+                            if(!$spkProduksi->save()){
+                                $success = false;
+                                $message = (count($spkProduksi->errors) > 0) ? 'ERROR CREATE SPK PRODUKSI: ' : '';
+                                foreach($spkProduksi->errors as $error => $value){
+                                    $message .= strtoupper($value[0].', ');
+                                }
+                                $message = substr($message, 0, -2);
+                            }
+                        }
+                    }else{
+                        $success = false;
+                        $message = (count($spk->errors) > 0) ? 'ERROR CREATE SPK: ' : '';
+                        foreach($spk->errors as $error => $value){
+                            $message .= strtoupper($value[0].', ');
+                        }
+                        $message = substr($message, 0, -2);
+                    }
                 }else{
                     $success = false;
                     $message = (count($model->errors) > 0) ? 'ERROR POST SALES ORDER TO SPK: ' : '';
@@ -498,7 +567,7 @@ class SalesOrderController extends Controller
 
                 if($success){
                     $message = '['.$model->no_so.'] SUCCESS POST SALES ORDER TO SPK.';
-                    // $transaction->commit();
+                    $transaction->commit();
                     $logs =	[
                         'type' => Logs::TYPE_USER,
                         'description' => $message,
@@ -590,9 +659,9 @@ class SalesOrderController extends Controller
                     }
                 }
 
-                TempSalesOrderProduksiDetail::deleteAll('user_id=:user', [':user'=>\Yii::$app->user->id]);
+                TempSalesOrderDetailProduksi::deleteAll('user_id=:user', [':user'=>\Yii::$app->user->id]);
                 foreach($model->detailsProduksi as $detail){
-                    $tempProduksi = new TempSalesOrderProduksiDetail();
+                    $tempProduksi = new TempSalesOrderDetailProduksi();
                     $tempProduksi->attributes = $detail->attributes;
                     $tempProduksi->user_id = \Yii::$app->user->id;
                     if(!$tempProduksi->save()){
@@ -656,11 +725,11 @@ class SalesOrderController extends Controller
         if($request->isPost){
             $materialItem = MasterMaterialItem::findOne(['code'=>$request->post('item'), 'status'=>1]);
             $biayaProduksi = MasterBiayaProduksi::findOne(['code'=>$request->post('biaya'), 'status'=>1]);
-            $checkTemp = $model = TempSalesOrderProduksiDetail::find()
+            $checkTemp = $model = TempSalesOrderDetailProduksi::find()
                 ->where(['biaya_produksi_code'=>$biayaProduksi->code, 'item_code'=>$materialItem->code, 'user_id'=> \Yii::$app->user->id])
                 ->one();
             if(empty($checkTemp)){
-                $temp = new TempSalesOrderProduksiDetail();
+                $temp = new TempSalesOrderDetailProduksi();
                 $temp->attributes = $materialItem->attributes;
                 $temp->attributes = $biayaProduksi->attributes;
                 $temp->biaya_produksi_code = $biayaProduksi->code;
@@ -747,7 +816,7 @@ class SalesOrderController extends Controller
 
     protected function findTempProduksi($id)
     {
-        $temp = TempSalesOrderProduksiDetail::findOne(['id'=>$id, 'user_id'=>\Yii::$app->user->id]);
+        $temp = TempSalesOrderDetailProduksi::findOne(['id'=>$id, 'user_id'=>\Yii::$app->user->id]);
         if(isset($temp)){
             return $temp;
         }
@@ -763,11 +832,11 @@ class SalesOrderController extends Controller
 			$connection->createCommand('ALTER TABLE temp_sales_order_detail AUTO_INCREMENT=1')->query();
         }
 
-        TempSalesOrderProduksiDetail::deleteAll('user_id=:user_id', [':user_id'=>\Yii::$app->user->id]);
-        $tempProduksi = TempSalesOrderProduksiDetail::find()->all();
+        TempSalesOrderDetailProduksi::deleteAll('user_id=:user_id', [':user_id'=>\Yii::$app->user->id]);
+        $tempProduksi = TempSalesOrderDetailProduksi::find()->all();
         if(empty($tempProduksi)){
             $connection = \Yii::$app->db;
-			$connection->createCommand('ALTER TABLE temp_sales_order_produksi_detail AUTO_INCREMENT=1')->query();
+			$connection->createCommand('ALTER TABLE temp_sales_order_detail_produksi AUTO_INCREMENT=1')->query();
         }
     }
 }

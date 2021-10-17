@@ -4,7 +4,7 @@ namespace app\modules\master\models;
 
 use Yii;
 use app\modules\master\models\MasterMaterialItem;
-use app\modules\master\models\MasterOrderProduksiDetail;
+use app\modules\master\models\MasterOrderDetailProduksi;
 use yii\behaviors\TimestampBehavior;
 
 /**
@@ -92,6 +92,6 @@ class MasterOrderDetail extends \yii\db\ActiveRecord
 
     public function getDetailsProduksi()
     {
-        return $this->hasMany(MasterOrderProduksiDetail::className(), ['order_code' => 'order_code', 'item_code' => 'item_code']);
+        return $this->hasMany(MasterOrderDetailProduksi::className(), ['order_code' => 'order_code', 'item_code' => 'item_code']);
     }
 }

@@ -4,7 +4,7 @@ namespace app\modules\sales\models;
 
 use Yii;
 use app\modules\master\models\MasterMaterialItem;
-use app\modules\sales\models\TempSalesOrderProduksiDetail;
+use app\modules\sales\models\TempSalesOrderDetailProduksi;
 
 /**
  * This is the model class for table "temp_sales_order_detail".
@@ -120,9 +120,9 @@ class TempSalesOrderDetail extends \yii\db\ActiveRecord
     public function getDetailsProduksi()
     {
         if(!empty($this->no_so)){
-            return $this->hasMany(TempSalesOrderProduksiDetail::className(), ['no_so' => 'no_so', 'item_code' => 'item_code']);
+            return $this->hasMany(TempSalesOrderDetailProduksi::className(), ['no_so' => 'no_so', 'item_code' => 'item_code']);
         }else{
-            return $this->hasMany(TempSalesOrderProduksiDetail::className(), ['item_code' => 'item_code', 'user_id'=> 'user_id']);
+            return $this->hasMany(TempSalesOrderDetailProduksi::className(), ['item_code' => 'item_code', 'user_id'=> 'user_id']);
         }
     }
 }

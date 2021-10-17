@@ -4,9 +4,9 @@ namespace app\modules\master\models;
 
 use Yii;
 use app\modules\master\models\MasterOrderDetail;
-use app\modules\master\models\MasterOrderProduksiDetail;
+use app\modules\master\models\MasterOrderDetailProduksi;
 use app\modules\master\models\TempMasterOrderDetail;
-use app\modules\master\models\TempMasterOrderProduksiDetail;
+use app\modules\master\models\TempMasterOrderDetailProduksi;
 use yii\behaviors\TimestampBehavior;
 
 /**
@@ -103,16 +103,16 @@ class MasterOrder extends \yii\db\ActiveRecord
 
     public function getDetailsProduksi()
     {
-        return $this->hasMany(MasterOrderProduksiDetail::className(), ['order_code' => 'code']);
+        return $this->hasMany(MasterOrderDetailProduksi::className(), ['order_code' => 'code']);
     }
 
     public function getTempsProduksi()
     {
-        return $this->hasMany(TempMasterOrderProduksiDetail::className(), ['order_code' => 'code']);
+        return $this->hasMany(TempMasterOrderDetailProduksi::className(), ['order_code' => 'code']);
     }
 
     public function tempsProduksi()
     {
-        return TempMasterOrderProduksiDetail::find()->where(['user_id' => \Yii::$app->user->id])->all();
+        return TempMasterOrderDetailProduksi::find()->where(['user_id' => \Yii::$app->user->id])->all();
     }
 }

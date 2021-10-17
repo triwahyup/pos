@@ -1,17 +1,19 @@
 <?php
 
-namespace app\modules\master\models;
+namespace app\modules\sales\models;
 
 use Yii;
 use app\modules\master\models\MasterMaterialItem;
 
 /**
- * This is the model class for table "temp_master_order_produksi_detail".
+ * This is the model class for table "temp_sales_order_detail_produksi".
  *
  * @property int $id
- * @property string $order_code
- * @property int $urutan
+ * @property string|null $no_so
+ * @property string|null $order_code
+ * @property int|null $urutan
  * @property string|null $name
+ * @property string|null $item_code
  * @property string|null $biaya_produksi_code
  * @property float|null $panjang
  * @property float|null $lebar
@@ -20,14 +22,14 @@ use app\modules\master\models\MasterMaterialItem;
  * @property float|null $total_biaya
  * @property int|null $user_id
  */
-class TempMasterOrderProduksiDetail extends \yii\db\ActiveRecord
+class TempSalesOrderDetailProduksi extends \yii\db\ActiveRecord
 {
     /**
      * {@inheritdoc}
      */
     public static function tableName()
     {
-        return 'temp_master_order_produksi_detail';
+        return 'temp_sales_order_detail_produksi';
     }
 
     /**
@@ -38,9 +40,10 @@ class TempMasterOrderProduksiDetail extends \yii\db\ActiveRecord
         return [
             [['urutan', 'type', 'user_id'], 'integer'],
             [['panjang', 'lebar', 'index', 'total_biaya'], 'number'],
+            [['no_so'], 'string', 'max' => 12],
             [['order_code', 'biaya_produksi_code'], 'string', 'max' => 3],
-            [['item_code'], 'string', 'max' => 7],
             [['name'], 'string', 'max' => 128],
+            [['item_code'], 'string', 'max' => 7],
         ];
     }
 
@@ -51,9 +54,11 @@ class TempMasterOrderProduksiDetail extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
+            'no_so' => 'No So',
             'order_code' => 'Order Code',
             'urutan' => 'Urutan',
             'name' => 'Name',
+            'item_code' => 'Item Code',
             'biaya_produksi_code' => 'Biaya Produksi Code',
             'panjang' => 'Panjang',
             'lebar' => 'Lebar',
@@ -66,14 +71,14 @@ class TempMasterOrderProduksiDetail extends \yii\db\ActiveRecord
 
     public function getCount()
     {
-        return TempMasterOrderProduksiDetail::find()->where(['user_id'=> \Yii::$app->user->id])->count();
+        return TempSalesOrderDetailProduksi::find()->where(['user_id'=> \Yii::$app->user->id])->count();
     }
 
     public function getTmps()
     {
-        return TempMasterOrderProduksiDetail::find()->where(['user_id'=> \Yii::$app->user->id])->all();
+        return TempSalesOrderDetailProduksi::find()->where(['user_id'=> \Yii::$app->user->id])->all();
     }
-
+    
     public function getItem()
     {
         return $this->hasOne(MasterMaterialItem::className(), ['code' => 'item_code']);

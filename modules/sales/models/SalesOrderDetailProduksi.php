@@ -3,15 +3,13 @@
 namespace app\modules\sales\models;
 
 use Yii;
-use app\modules\master\models\MasterMaterialItem;
 
 /**
- * This is the model class for table "temp_sales_order_produksi_detail".
+ * This is the model class for table "sales_order_detail_produksi".
  *
- * @property int $id
- * @property string|null $no_so
- * @property string|null $order_code
- * @property int|null $urutan
+ * @property string $no_so
+ * @property int $urutan
+ * @property string $order_code
  * @property string|null $name
  * @property string|null $item_code
  * @property string|null $biaya_produksi_code
@@ -20,16 +18,18 @@ use app\modules\master\models\MasterMaterialItem;
  * @property int|null $type
  * @property float|null $index
  * @property float|null $total_biaya
- * @property int|null $user_id
+ * @property int|null $status
+ * @property int|null $created_at
+ * @property int|null $updated_at
  */
-class TempSalesOrderProduksiDetail extends \yii\db\ActiveRecord
+class SalesOrderDetailProduksi extends \yii\db\ActiveRecord
 {
     /**
      * {@inheritdoc}
      */
     public static function tableName()
     {
-        return 'temp_sales_order_produksi_detail';
+        return 'sales_order_detail_produksi';
     }
 
     /**
@@ -38,12 +38,14 @@ class TempSalesOrderProduksiDetail extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['urutan', 'type', 'user_id'], 'integer'],
+            [['no_so', 'urutan', 'order_code'], 'required'],
+            [['urutan', 'type', 'status', 'created_at', 'updated_at'], 'integer'],
             [['panjang', 'lebar', 'index', 'total_biaya'], 'number'],
             [['no_so'], 'string', 'max' => 12],
             [['order_code', 'biaya_produksi_code'], 'string', 'max' => 3],
             [['name'], 'string', 'max' => 128],
             [['item_code'], 'string', 'max' => 7],
+            [['no_so', 'urutan'], 'unique', 'targetAttribute' => ['no_so', 'urutan']],
         ];
     }
 
@@ -53,10 +55,9 @@ class TempSalesOrderProduksiDetail extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
             'no_so' => 'No So',
-            'order_code' => 'Order Code',
             'urutan' => 'Urutan',
+            'order_code' => 'Order Code',
             'name' => 'Name',
             'item_code' => 'Item Code',
             'biaya_produksi_code' => 'Biaya Produksi Code',
@@ -65,28 +66,9 @@ class TempSalesOrderProduksiDetail extends \yii\db\ActiveRecord
             'type' => 'Type',
             'index' => 'Index',
             'total_biaya' => 'Total Biaya',
-            'user_id' => 'User ID',
+            'status' => 'Status',
+            'created_at' => 'Created At',
+            'updated_at' => 'Updated At',
         ];
-    }
-
-    public function getCount()
-    {
-        return TempSalesOrderProduksiDetail::find()->where(['user_id'=> \Yii::$app->user->id])->count();
-    }
-
-    public function getTmps()
-    {
-        return TempSalesOrderProduksiDetail::find()->where(['user_id'=> \Yii::$app->user->id])->all();
-    }
-    
-    public function getItem()
-    {
-        return $this->hasOne(MasterMaterialItem::className(), ['code' => 'item_code']);
-    }
-
-    public function totalBiaya()
-    {
-        $total = $this->item->panjang * $this->item->lebar * $this->index * 500;
-        return ceil($total);
     }
 }

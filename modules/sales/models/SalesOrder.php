@@ -6,9 +6,9 @@ use Yii;
 use app\modules\master\models\MasterOrder;
 use app\modules\master\models\MasterPerson;
 use app\modules\sales\models\SalesOrderDetail;
-use app\modules\sales\models\SalesOrderProduksiDetail;
+use app\modules\sales\models\SalesOrderDetailProduksi;
 use app\modules\sales\models\TempSalesOrderDetail;
-use app\modules\sales\models\TempSalesOrderProduksiDetail;
+use app\modules\sales\models\TempSalesOrderDetailProduksi;
 use yii\behaviors\TimestampBehavior;
 
 /**
@@ -130,17 +130,17 @@ class SalesOrder extends \yii\db\ActiveRecord
 
     public function getDetailsProduksi()
     {
-        return $this->hasMany(SalesOrderProduksiDetail::className(), ['no_so' => 'no_so']);
+        return $this->hasMany(SalesOrderDetailProduksi::className(), ['no_so' => 'no_so']);
     }
 
     public function getTempsProduksi()
     {
-        return $this->hasMany(TempSalesOrderProduksiDetail::className(), ['no_so' => 'no_so']);
+        return $this->hasMany(TempSalesOrderDetailProduksi::className(), ['no_so' => 'no_so']);
     }
 
     public function tempsProduksi()
     {
-        return TempSalesOrderProduksiDetail::find()->where(['user_id' => \Yii::$app->user->id])->all();
+        return TempSalesOrderDetailProduksi::find()->where(['user_id' => \Yii::$app->user->id])->all();
     }
 
     public function getCustomer()

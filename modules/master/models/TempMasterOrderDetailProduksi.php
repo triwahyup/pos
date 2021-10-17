@@ -3,11 +3,12 @@
 namespace app\modules\master\models;
 
 use Yii;
-use yii\behaviors\TimestampBehavior;
+use app\modules\master\models\MasterMaterialItem;
 
 /**
- * This is the model class for table "master_order_produksi_detail".
+ * This is the model class for table "temp_master_order_detail_produksi".
  *
+ * @property int $id
  * @property string $order_code
  * @property int $urutan
  * @property string|null $name
@@ -17,25 +18,16 @@ use yii\behaviors\TimestampBehavior;
  * @property int|null $type
  * @property float|null $index
  * @property float|null $total_biaya
- * @property int|null $status
- * @property int|null $created_at
- * @property int|null $updated_at
+ * @property int|null $user_id
  */
-class MasterOrderProduksiDetail extends \yii\db\ActiveRecord
+class TempMasterOrderDetailProduksi extends \yii\db\ActiveRecord
 {
     /**
      * {@inheritdoc}
      */
     public static function tableName()
     {
-        return 'master_order_produksi_detail';
-    }
-
-    public function behaviors()
-    {
-        return [
-            TimestampBehavior::className(),
-        ];
+        return 'temp_master_order_detail_produksi';
     }
 
     /**
@@ -44,14 +36,11 @@ class MasterOrderProduksiDetail extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['order_code', 'urutan'], 'required'],
-            [['urutan', 'type', 'status', 'created_at', 'updated_at'], 'integer'],
+            [['urutan', 'type', 'user_id'], 'integer'],
             [['panjang', 'lebar', 'index', 'total_biaya'], 'number'],
             [['order_code', 'biaya_produksi_code'], 'string', 'max' => 3],
             [['item_code'], 'string', 'max' => 7],
             [['name'], 'string', 'max' => 128],
-            [['order_code', 'urutan'], 'unique', 'targetAttribute' => ['order_code', 'urutan']],
-            [['status'], 'default', 'value' => 1],
         ];
     }
 
@@ -61,6 +50,7 @@ class MasterOrderProduksiDetail extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
+            'id' => 'ID',
             'order_code' => 'Order Code',
             'urutan' => 'Urutan',
             'name' => 'Name',
@@ -70,9 +60,28 @@ class MasterOrderProduksiDetail extends \yii\db\ActiveRecord
             'type' => 'Type',
             'index' => 'Index',
             'total_biaya' => 'Total Biaya',
-            'status' => 'Status',
-            'created_at' => 'Created At',
-            'updated_at' => 'Updated At',
+            'user_id' => 'User ID',
         ];
+    }
+
+    public function getCount()
+    {
+        return TempMasterOrderDetailProduksi::find()->where(['user_id'=> \Yii::$app->user->id])->count();
+    }
+
+    public function getTmps()
+    {
+        return TempMasterOrderDetailProduksi::find()->where(['user_id'=> \Yii::$app->user->id])->all();
+    }
+
+    public function getItem()
+    {
+        return $this->hasOne(MasterMaterialItem::className(), ['code' => 'item_code']);
+    }
+
+    public function totalBiaya()
+    {
+        $total = $this->item->panjang * $this->item->lebar * $this->index * 500;
+        return ceil($total);
     }
 }

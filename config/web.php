@@ -84,6 +84,9 @@ $config = [
         'pengaturan' => [
             'class' => 'app\modules\pengaturan\Module',
         ],
+        'produksi' => [
+            'class' => 'app\modules\produksi\Module',
+        ],
         'purchasing' => [
             'class' => 'app\modules\purchasing\Module',
         ],
@@ -96,7 +99,7 @@ $config = [
     ],
 ];
 
-// if (getenv('APP_DEBUG')) {
+if (getenv('APP_DEBUG')) {
     // configuration adjustments for 'dev' environment
     $config['bootstrap'][] = 'debug';
     $config['modules']['debug'] = [
@@ -111,5 +114,5 @@ $config = [
         // uncomment the following to add your IP if you are not connecting from localhost.
         //'allowedIPs' => ['127.0.0.1', '::1'],
     ];
-// }
+}
 return $config;

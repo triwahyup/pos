@@ -1,17 +1,14 @@
 <?php
-
-namespace app\modules\sales\models;
-use app\modules\inventory\models\InventoryStockItem;
-use app\modules\master\models\MasterMaterialItem;
-use app\modules\sales\models\SalesOrderDetailProduksi;
-use yii\behaviors\TimestampBehavior;
+namespace app\modules\produksi\models;
 
 use Yii;
+use app\modules\sales\models\SpkDetailProduksi;
+use yii\behaviors\TimestampBehavior;
 
 /**
- * This is the model class for table "sales_order_detail".
+ * This is the model class for table "spk_detail".
  *
- * @property string $no_so
+ * @property string $no_spk
  * @property int $urutan
  * @property string $order_code
  * @property string|null $item_code
@@ -47,14 +44,21 @@ use Yii;
  * @property int|null $created_at
  * @property int|null $updated_at
  */
-class SalesOrderDetail extends \yii\db\ActiveRecord
+class SpkDetail extends \yii\db\ActiveRecord
 {
     /**
      * {@inheritdoc}
      */
     public static function tableName()
     {
-        return 'sales_order_detail';
+        return 'spk_detail';
+    }
+
+    public function behaviors()
+	{
+        return [
+            TimestampBehavior::className(),
+        ];
     }
 
     /**
@@ -63,14 +67,14 @@ class SalesOrderDetail extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['no_so', 'urutan', 'order_code'], 'required'],
+            [['no_spk', 'urutan', 'order_code'], 'required'],
             [['urutan', 'potong', 'objek', 'mesin', 'jumlah_warna', 'lembar_ikat', 'status', 'created_at', 'updated_at'], 'integer'],
             [['panjang', 'lebar', 'harga_beli_1', 'harga_beli_2', 'harga_beli_3', 'harga_jual_1', 'harga_jual_2', 'harga_jual_3', 'harga_cetak', 'qty_order_1', 'qty_order_2', 'qty_order_3', 'jumlah_cetak', 'jumlah_objek', 'jumlah_lem', 'total_order'], 'number'],
-            [['no_so'], 'string', 'max' => 12],
+            [['no_spk'], 'string', 'max' => 12],
             [['order_code', 'satuan_code', 'material_code', 'type_code', 'group_supplier_code', 'group_material_code'], 'string', 'max' => 3],
             [['item_code'], 'string', 'max' => 7],
             [['um_1', 'um_2', 'um_3'], 'string', 'max' => 5],
-            [['no_so', 'urutan'], 'unique', 'targetAttribute' => ['no_so', 'urutan']],
+            [['no_spk', 'urutan'], 'unique', 'targetAttribute' => ['no_spk', 'urutan']],
         ];
     }
 
@@ -80,7 +84,7 @@ class SalesOrderDetail extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'no_so' => 'No So',
+            'no_spk' => 'No Spk',
             'urutan' => 'Urutan',
             'order_code' => 'Order Code',
             'item_code' => 'Item Code',
@@ -118,18 +122,8 @@ class SalesOrderDetail extends \yii\db\ActiveRecord
         ];
     }
 
-    public function getItem()
-    {
-        return $this->hasOne(MasterMaterialItem::className(), ['code' => 'item_code']);
-    }
-
     public function getDetailsProduksi()
     {
-        return $this->hasMany(SalesOrderDetailProduksi::className(), ['no_so' => 'no_so', 'item_code' => 'item_code']);
-    }
-
-    public function getStock()
-    {
-        return $this->hasOne(InventoryStockItem::className(), ['item_code' => 'item_code']);
+        return $this->hasMany(SpkDetailProduksi::className(), ['no_spk' => 'no_spk', 'item_code' => 'item_code']);
     }
 }

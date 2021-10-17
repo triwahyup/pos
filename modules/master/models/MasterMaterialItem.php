@@ -98,10 +98,8 @@ class MasterMaterialItem extends \yii\db\ActiveRecord
         }
         if($type == \Yii::$app->params['MATERIAL_KERTAS_CODE']){
             return (string)'1'.sprintf('%06s', ($total+1));
-        }else if($type == \Yii::$app->params['MATERIAL_TINTA_CODE']){
-            return (string)'2'.sprintf('%06s', ($total+1));
         }else{
-            return (string)'3'.sprintf('%06s', ($total+1));
+            return (string)'2'.sprintf('%06s', ($total+1));
         }
     }
 
