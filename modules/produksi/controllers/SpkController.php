@@ -2,10 +2,13 @@
 
 namespace app\modules\produksi\controllers;
 
+use app\models\Logs;
+use app\models\User;
 use app\modules\produksi\models\Spk;
 use app\modules\produksi\models\SpkSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
+use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 
 /**
@@ -21,6 +24,21 @@ class SpkController extends Controller
         return array_merge(
             parent::behaviors(),
             [
+                'access' => [
+                    'class' => AccessControl::className(),
+				    'rules' => [
+                        [
+                            'actions' => ['index', 'view'],
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('spk')),
+                            'roles' => ['@'],
+                        ],
+                        [
+                            'actions' => ['update'],
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('spk')),
+                            'roles' => ['@'],
+                        ],
+                    ],
+                ],
                 'verbs' => [
                     'class' => VerbFilter::className(),
                     'actions' => [
@@ -124,7 +142,7 @@ class SpkController extends Controller
      */
     protected function findModel($no_spk)
     {
-        if (($model = Spk::findOne($id)) !== null) {
+        if (($model = Spk::findOne($no_spk)) !== null) {
             return $model;
         }
 

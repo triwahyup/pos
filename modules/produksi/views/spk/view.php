@@ -6,39 +6,16 @@ use yii\widgets\DetailView;
 /* @var $this yii\web\View */
 /* @var $model app\modules\produksi\models\Spk */
 
-$this->title = $model->no_spk;
-$this->params['breadcrumbs'][] = ['label' => 'Spks', 'url' => ['index']];
+$this->title = 'No.SPK: '.$model->no_spk;
+$this->params['breadcrumbs'][] = ['label' => 'Spk', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
 ?>
 <div class="spk-view">
-
-    <h1><?= Html::encode($this->title) ?></h1>
-
-    <p>
-        <?= Html::a('Update', ['update', 'no_spk' => $model->no_spk], ['class' => 'btn btn-primary']) ?>
-        <?= Html::a('Delete', ['delete', 'no_spk' => $model->no_spk], [
-            'class' => 'btn btn-danger',
-            'data' => [
-                'confirm' => 'Are you sure you want to delete this item?',
-                'method' => 'post',
-            ],
-        ]) ?>
+    <p class="text-right">
+        <?= Html::a('<i class="fontello icon-pencil"></i><span>Update</span>', ['update', 'no_spk' => $model->no_spk], ['class' => 'btn btn-warning btn-flat btn-sm']) ?>
     </p>
-
-    <?= DetailView::widget([
-        'model' => $model,
-        'attributes' => [
-            'no_spk',
-            'tgl_spk',
-            'no_so',
-            'tgl_so',
-            'keterangan',
-            'status',
-            'status_produksi',
-            'created_at',
-            'updated_at',
-        ],
-    ]) ?>
-
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
+        
+    </div>
 </div>

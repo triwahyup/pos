@@ -1,5 +1,5 @@
 <?php
-
+use kartik\date\DatePicker;
 use yii\helpers\Html;
 use yii\grid\GridView;
 
@@ -7,38 +7,71 @@ use yii\grid\GridView;
 /* @var $searchModel app\modules\produksi\models\SpkSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Spks';
+$this->title = 'Spk';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="spk-index">
-
-    <h1><?= Html::encode($this->title) ?></h1>
-
-    <p>
-        <?= Html::a('Create Spk', ['create'], ['class' => 'btn btn-success']) ?>
-    </p>
-
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
-
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
-
-            'no_spk',
-            'tgl_spk',
-            'no_so',
-            'tgl_so',
-            'keterangan',
-            //'status',
-            //'status_produksi',
-            //'created_at',
-            //'updated_at',
-
-            ['class' => 'yii\grid\ActionColumn'],
+            [
+                'attribute' => 'no_spk',
+                'contentOptions' => [
+                    'class' => 'text-center',
+                ],
+                'format' => 'raw',
+                'value' => function($model, $index, $key) {
+                    return Html::a($model->no_spk, ['view', 'no_spk' => $model->no_spk]);
+                }
+            ],
+            [
+                'attribute' => 'tgl_spk',
+                'contentOptions' => [
+                    'class' => 'text-center',
+                ],
+                'filter' => DatePicker::widget([
+                    'model' => $searchModel, 
+                    'name' => 'tgl_spk', 
+                    'type' => DatePicker::TYPE_COMPONENT_APPEND,
+                    'pickerButton' => false,
+                    'attribute' => 'tgl_spk',
+                    'pluginOptions' => [
+                        'format' => 'yyyy-mm-dd',
+                        'autoclose' => true,
+                    ],
+                ]),
+            ],
+            [
+                'attribute' => 'no_so',
+                'contentOptions' => [
+                    'class' => 'text-center',
+                ],
+            ],
+            [
+                'attribute' => 'tgl_so',
+                'contentOptions' => [
+                    'class' => 'text-center',
+                ],
+                'filter' => DatePicker::widget([
+                    'model' => $searchModel, 
+                    'name' => 'tgl_so', 
+                    'type' => DatePicker::TYPE_COMPONENT_APPEND,
+                    'pickerButton' => false,
+                    'attribute' => 'tgl_so',
+                    'pluginOptions' => [
+                        'format' => 'yyyy-mm-dd',
+                        'autoclose' => true,
+                    ],
+                ]),
+            ],
+            [
+                'attribute' => 'status_produksi',
+                'contentOptions' => [
+                    'class' => 'text-center',
+                ],
+            ],
         ],
     ]); ?>
-
-
 </div>

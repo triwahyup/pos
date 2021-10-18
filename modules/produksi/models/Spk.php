@@ -60,10 +60,10 @@ class Spk extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'no_spk' => 'No Spk',
-            'tgl_spk' => 'Tgl Spk',
-            'no_so' => 'No So',
-            'tgl_so' => 'Tgl So',
+            'no_spk' => 'No. Spk',
+            'tgl_spk' => 'Tgl. Spk',
+            'no_so' => 'No. So',
+            'tgl_so' => 'Tgl. So',
             'keterangan' => 'Keterangan',
             'status' => 'Status',
             'status_produksi' => 'Status Produksi',
