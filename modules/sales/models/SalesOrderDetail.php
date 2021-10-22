@@ -42,7 +42,6 @@ use Yii;
  * @property float|null $qty_order_3
  * @property float|null $jumlah_cetak
  * @property float|null $jumlah_objek
- * @property float|null $jumlah_lem
  * @property int|null $status
  * @property int|null $created_at
  * @property int|null $updated_at
@@ -65,7 +64,7 @@ class SalesOrderDetail extends \yii\db\ActiveRecord
         return [
             [['no_so', 'urutan', 'order_code'], 'required'],
             [['urutan', 'potong', 'objek', 'mesin', 'jumlah_warna', 'lembar_ikat', 'status', 'created_at', 'updated_at'], 'integer'],
-            [['panjang', 'lebar', 'harga_beli_1', 'harga_beli_2', 'harga_beli_3', 'harga_jual_1', 'harga_jual_2', 'harga_jual_3', 'harga_cetak', 'qty_order_1', 'qty_order_2', 'qty_order_3', 'jumlah_cetak', 'jumlah_objek', 'jumlah_lem', 'total_order'], 'number'],
+            [['panjang', 'lebar', 'harga_beli_1', 'harga_beli_2', 'harga_beli_3', 'harga_jual_1', 'harga_jual_2', 'harga_jual_3', 'harga_cetak', 'qty_order_1', 'qty_order_2', 'qty_order_3', 'jumlah_cetak', 'jumlah_objek', 'total_order'], 'number'],
             [['no_so'], 'string', 'max' => 12],
             [['order_code', 'satuan_code', 'material_code', 'type_code', 'group_supplier_code', 'group_material_code'], 'string', 'max' => 3],
             [['item_code'], 'string', 'max' => 7],
@@ -111,7 +110,6 @@ class SalesOrderDetail extends \yii\db\ActiveRecord
             'qty_order_3' => 'Qty Order 3',
             'jumlah_cetak' => 'Jumlah Cetak',
             'jumlah_objek' => 'Jumlah Objek',
-            'jumlah_lem' => 'Jumlah Lem',
             'status' => 'Status',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',

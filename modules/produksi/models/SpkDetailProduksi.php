@@ -50,7 +50,7 @@ class SpkDetailProduksi extends \yii\db\ActiveRecord
             [['urutan', 'type', 'status', 'created_at', 'updated_at'], 'integer'],
             [['panjang', 'lebar', 'index', 'total_biaya'], 'number'],
             [['no_spk'], 'string', 'max' => 12],
-            [['order_code', 'biaya_produksi_code', 'mesin_code', 'mesin_type_code'], 'string', 'max' => 3],
+            [['order_code', 'biaya_produksi_code'], 'string', 'max' => 3],
             [['name'], 'string', 'max' => 128],
             [['item_code'], 'string', 'max' => 7],
             [['no_spk', 'urutan'], 'unique', 'targetAttribute' => ['no_spk', 'urutan']],

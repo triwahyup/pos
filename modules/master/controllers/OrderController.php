@@ -419,7 +419,7 @@ class OrderController extends Controller
             ->alias('a')
             ->select(['a.*', 'b.composite'])
             ->leftJoin('master_satuan b', 'b.code = a.satuan_code')
-            ->where(['a.status'=>1])
+            ->where(['a.type_code'=>\Yii::$app->params['MATERIAL_KERTAS_CODE'], 'a.status'=>1])
             ->orderBy(['a.code'=>SORT_ASC])
             ->limit(10)
             ->all();
@@ -435,7 +435,7 @@ class OrderController extends Controller
                 ->select(['a.*', 'b.composite'])
                 ->leftJoin('master_satuan b', 'b.code = a.satuan_code')
                 ->leftJoin('master_kode c', 'c.code = a.type_code')
-                ->where(['a.status'=>1])
+                ->where(['a.type_code'=>\Yii::$app->params['MATERIAL_KERTAS_CODE'], 'a.status'=>1])
                 ->andWhere('a.code LIKE "%'.$_POST['search'].'%" 
                     OR a.name LIKE "%'.$_POST['search'].'%" 
                     OR c.name  LIKE "%'.$_POST['search'].'%"')

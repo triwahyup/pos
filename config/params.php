@@ -3,11 +3,9 @@
 $data = [
     'DEVELOPER' => ['developer'],
     'MATERIAL_KERTAS' => 'KERTAS',
-    'MATERIAL_TINTA' => 'TINTA',
-    'MATERIAL_LAIN' => 'LAIN2',
     'MATERIAL_BP' => 'BAHAN PEMBANTU',
     'MATERIAL_KERTAS_CODE' => '007',
-    'MATERIAL_TINTA_CODE' => '008',
+    'MATERIAL_BP_CODE' => '010',
     'TYPE_CUSTOMER' => 1,
     'TYPE_SUPPLIER' => 2,
     'TYPE_OUTSOURCE' => 3,

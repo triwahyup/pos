@@ -4,8 +4,8 @@ namespace app\modules\produksi\models;
 
 use Yii;
 use app\modules\sales\models\SalesOrder;
-use app\modules\sales\models\SpkDetail;
-use app\modules\sales\models\SpkDetailProduksi;
+use app\modules\produksi\models\SpkDetail;
+use app\modules\produksi\models\SpkDetailProduksi;
 use yii\behaviors\TimestampBehavior;
 
 /**

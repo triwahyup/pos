@@ -255,8 +255,9 @@ use yii\widgets\MaskedInput;
                                 <th class="text-center">No.</th>
                                 <th class="text-center">Item</th>
                                 <th class="text-center" colspan="2">QTY</th>
-                                <th class="text-center" colspan="3">QTY Detail</th>
-                                <th class="text-center">Harga Cetak</th>
+                                <th class="text-center" colspan="2">Harga Material (Rp)</th>
+                                <th class="text-center" colspan="2">QTY Cetak</th>
+                                <th class="text-center">Harga Cetak (Rp)</th>
                                 <th class="text-center">Action</th>
                             </tr>
                         </thead>

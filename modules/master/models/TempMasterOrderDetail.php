@@ -47,7 +47,7 @@ class TempMasterOrderDetail extends \yii\db\ActiveRecord
             [['urutan', 'user_id'], 'integer'],
             [['panjang', 'lebar', 'harga_cetak', 'harga_beli_1', 'harga_beli_2', 'harga_beli_3', 'harga_jual_1', 'harga_jual_2', 'harga_jual_3', 'potong', 'objek', 'mesin', 'jumlah_warna', 'lembar_ikat', 'qty_order_1', 'qty_order_2', 'qty_order_3', 'total_order'], 'safe'],
             [['order_code', 'satuan_code', 'type_code', 'material_code', 'group_material_code', 'group_supplier_code'], 'string', 'max' => 3],
-            [['jumlah_cetak', 'jumlah_objek', 'jumlah_lem'], 'number'],
+            [['jumlah_cetak', 'jumlah_objek'], 'number'],
             [['um_1', 'um_2', 'um_3'], 'string', 'max' => 5],
             [['item_code'], 'string', 'max' => 7],
         ];
@@ -137,7 +137,6 @@ class TempMasterOrderDetail extends \yii\db\ActiveRecord
         ]);
         $this->jumlah_cetak = $konversi * $this->potong;
         $this->jumlah_objek = $this->jumlah_cetak * $this->objek;
-        $this->jumlah_lem = 0;
         return true;
     }
 

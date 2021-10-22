@@ -99,7 +99,7 @@ $config = [
     ],
 ];
 
-if (getenv('APP_DEBUG')) {
+// if (getenv('APP_DEBUG')) {
     // configuration adjustments for 'dev' environment
     $config['bootstrap'][] = 'debug';
     $config['modules']['debug'] = [
@@ -114,5 +114,5 @@ if (getenv('APP_DEBUG')) {
         // uncomment the following to add your IP if you are not connecting from localhost.
         //'allowedIPs' => ['127.0.0.1', '::1'],
     ];
-}
+// }
 return $config;

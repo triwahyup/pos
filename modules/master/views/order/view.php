@@ -108,8 +108,9 @@ $this->params['breadcrumbs'][] = $this->title;
                             <th class="text-center">No.</th>
                             <th class="text-center">Item</th>
                             <th class="text-center" colspan="2">QTY</th>
-                            <th class="text-center" colspan="3">QTY Detail</th>
-                            <th class="text-center">Harga Cetak</th>
+                            <th class="text-center" colspan="2">Harga Material (Rp)</th>
+                            <th class="text-center" colspan="2">QTY Cetak</th>
+                            <th class="text-center">Harga Cetak (Rp)</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -124,9 +125,11 @@ $this->params['breadcrumbs'][] = $this->title;
                                     <?php for($a=1;$a<3;$a++): ?>
                                         <td class="text-right"><?=(!empty($val['qty_order_'.$a])) ? number_format($val['qty_order_'.$a]).'<br /><span class="text-muted font-size-10">'.$val['um_'.$a].'</span>' : null ?></td>
                                     <?php endfor; ?>
+                                    <?php for($a=1;$a<3;$a++): ?>
+                                        <td class="text-right"><?=(!empty($val['harga_jual_'.$a])) ? number_format($val['harga_jual_'.$a]).'.-<br /><span class="text-muted font-size-10">Per '.$val['um_'.$a].'</span>' : null ?></td>
+                                    <?php endfor; ?>
                                     <td class="text-right"><?=number_format($val['jumlah_cetak']).'.- <br /><span class="text-muted font-size-10">QTY Cetak</span>' ?></td>
                                     <td class="text-right"><?=number_format($val['jumlah_objek']).'.- <br /><span class="text-muted font-size-10">QTY Objek</span>' ?></td>
-                                    <td class="text-right"><?=number_format($val['jumlah_lem']).'.- <br /><span class="text-muted font-size-10">QTY Lem</span>' ?></td>
                                     <td class="text-right"><?=number_format($val['harga_cetak']).'.- <br /><span class="text-muted font-size-10">Per Objek</span>' ?></td>
                                 </tr>
                                 <tr>
@@ -197,7 +200,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                 </tr>
                             <?php endforeach; ?>
                             <tr>
-                                <td class="summary" colspan="3"></td>
+                                <td class="summary" colspan="4"></td>
                                 <td class="summary" colspan="2"><strong><?='Total Order: Rp. '.number_format($totalOrder).'.-' ?></strong></td>
                                 <td class="summary" colspan="2"><strong><?='Total Biaya: Rp. '.number_format($totalBiaya).'.-' ?></strong></td>
                                 <td class="summary"><strong><?='Grand Total: Rp. '.number_format($totalOrder+$totalBiaya).'.-' ?></strong></td>
