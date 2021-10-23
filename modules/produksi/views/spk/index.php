@@ -71,6 +71,10 @@ $this->params['breadcrumbs'][] = $this->title;
                 'contentOptions' => [
                     'class' => 'text-center',
                 ],
+                'format' => 'raw',
+                'value' => function($model, $index, $key) {
+                    return $model->statusProduksi();
+                }
             ],
         ],
     ]); ?>

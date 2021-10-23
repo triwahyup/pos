@@ -3,6 +3,7 @@
 namespace app\modules\produksi\models;
 
 use Yii;
+use app\modules\master\models\MasterMaterial;
 use app\modules\master\models\MasterMaterialItem;
 use yii\behaviors\TimestampBehavior;
 
@@ -36,11 +37,8 @@ class SpkDetailBahan extends \yii\db\ActiveRecord
 {
     public $item_name;
     public $type_bahan;
-    public $qty_cetak;
-    public $qty_objek;
-    public $pilih_proses;
-    public $pilih_mesin;
-
+    public $tgl_spk;
+    
     /**
      * {@inheritdoc}
      */
@@ -63,6 +61,7 @@ class SpkDetailBahan extends \yii\db\ActiveRecord
     {
         return [
             [['item_code', 'item_bahan_code'], 'required'],
+            [['tgl_spk'], 'safe'],
             [['urutan', 'status', 'created_at', 'updated_at'], 'integer'],
             [['harga_beli_1', 'harga_beli_2', 'harga_beli_3', 'harga_jual_1', 'harga_jual_2', 'harga_jual_3', 'qty_1', 'qty_2', 'qty_3'], 'number'],
             [['item_bahan_name'], 'string', 'max' => 128],
@@ -114,5 +113,10 @@ class SpkDetailBahan extends \yii\db\ActiveRecord
     public function getItemBahan()
     {
         return $this->hasOne(MasterMaterialItem::className(), ['code' => 'item_bahan_code']);
+    }
+
+    public function getTypeBahan()
+    {
+        return $this->hasOne(MasterMaterial::className(), ['code' => 'type_bahan_code']);
     }
 }

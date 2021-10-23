@@ -1,5 +1,4 @@
 <?php
-use kartik\widgets\Select2;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\ActiveForm;
@@ -16,76 +15,35 @@ $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="spk-view">
     <div class="col-lg-12 col-md-12 col-xs-12">
+        <h4>Status Produksi:</h4>
+        <?=$model->statusProduksi() ?>
+    </div>
+    <div class="col-lg-12 col-md-12 col-xs-12">
         <?php $form = ActiveForm::begin(['id'=>'form']); ?>
             <div class="text-right">
                 <a href="javascript:void(0)" id="hidden_detail_bahan">
-                    <span>Tutup Form Input Bahan >></span>
+                    <span>Form Input Bahan >></span>
                 </a>
                 <hr class="margin-top-5 margin-bottom-5" />
             </div>
             <div class="margin-bottom-40"></div>
             <div data-form>
-                <!-- Material -->
+                <?= $form->field($spkBahan, 'no_spk')->hiddenInput(['value'=>$_GET['no_spk']])->label(false) ?>
+                <?= $form->field($spkBahan, 'tgl_spk')->hiddenInput(['value'=>$model->tgl_spk])->label(false) ?>
+                <!-- Bahan -->
                 <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
                     <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12">
                         <label class="font-size-12">Pilih Material:</label>
                     </div>
-                    <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
-                        <?= $form->field($spkBahan, 'item_name')->widget(Select2::classname(), [
-                                'data' => $dataItem,
-                                'options' => [
-                                    'placeholder' => 'Pilih Material',
-                                    'class' => 'select2',
-                                    'data-temp' => true
-                                ],
-                            ])->label(false) ?>
-                        <?= $form->field($spkBahan, 'item_code')->hiddenInput(['data-temp' => true])->label(false) ?>
-                    </div>
-                </div>
-                <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
-                    <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12">
-                        <label class="font-size-12">QTY Cetak / Objek:</label>
-                    </div>
                     <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
-                        <?= $form->field($spkBahan, 'qty_cetak')->textInput(['readonly' => true, 'data-temp' => true])->label(false) ?>
-                    </div>
-                    <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12">
-                        <?= $form->field($spkBahan, 'qty_objek')->textInput(['readonly' => true, 'data-temp' => true])->label(false) ?>
-                    </div>
-                </div>
-                <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
-                    <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12">
-                        <label class="font-size-12">Pilih Proses:</label>
+                        <?= $form->field($spkBahan, 'item_code')->textInput(['readonly' => true, 'value' => $spkDetail->item_code])->label(false) ?>
+                        <?= $form->field($spkBahan, 'order_code')->hiddenInput(['readonly' => true, 'value' => $spkDetail->order_code])->label(false) ?>
                     </div>
                     <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
-                        <?= $form->field($spkBahan, 'pilih_proses')->widget(Select2::classname(), [
-                                'data' => [],
-                                'options' => [
-                                    'placeholder' => 'Pilih Proses',
-                                    'class' => 'select2',
-                                    'data-temp' => true,
-                                ],
-                            ])->label(false) ?>
+                        <?= $form->field($spkBahan, 'item_name')->textInput(['readonly' => true, 'value' => $spkDetail->item->name])->label(false) ?>
                     </div>
                 </div>
                 <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
-                    <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12">
-                        <label class="font-size-12">Pilih Mesin:</label>
-                    </div>
-                    <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
-                        <?= $form->field($spkBahan, 'pilih_mesin')->widget(Select2::classname(), [
-                                'data' => [],
-                                'options' => [
-                                    'placeholder' => 'Pilih Mesin',
-                                    'class' => 'select2',
-                                    'data-temp' => true,
-                                ],
-                            ])->label(false) ?>
-                    </div>
-                </div>
-                <!-- Bahan -->
-                <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
-                    <div class="margin-top-40"></div>
                     <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12">
                         <label class="font-size-12">Pilih Bahan:</label>
                     </div>
@@ -135,6 +93,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                     'data-align' => 'text-right',
                                     'data-temp' => true,
                                     'readonly' => true,
+                                    'maxlength' => 3,
                                 ]
                             ])->label(false) ?>
                     </div>
@@ -144,10 +103,13 @@ $this->params['breadcrumbs'][] = $this->title;
                 </div>
                 <div class="col-lg-12 col-md-12 col-xs-12">
                     <div class="margin-top-20"></div>
-                    <button class="btn btn-success margin-bottom-20" data-button="create_temp">
+                    <button class="btn btn-success margin-bottom-20" data-button="create_bahan">
                         <i class="fontello icon-plus"></i>
-                        <span>Tambah Data Proses dan Bahan</span>
+                        <span>Masukkan Bahan</span>
                     </button>
+                </div>
+                <!-- Material -->
+                <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
                 </div>
             </div>
         <?php ActiveForm::end(); ?>
@@ -155,7 +117,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="col-lg-12 col-md-12 col-xs-12">
         <div class="text-right">
             <a href="javascript:void(0)" id="hidden_detail_material">
-                <span>Tutup Detail Material dan Proses >></span>
+                <span>Detail Material dan Proses >></span>
             </a>
             <hr class="margin-top-5 margin-bottom-5" />
         </div>
@@ -188,35 +150,35 @@ $this->params['breadcrumbs'][] = $this->title;
                                             <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
                                                 <div class="col-lg-4 col-md-4 col-xs-12 padding-left-0 padding-right-0">
                                                     <div class="td-desc">
-                                                        <label>Panjang</label>
+                                                        <label><strong>Panjang</strong></label>
                                                         <span><?=$val->panjang ?></span>
                                                     </div>
                                                     <div class="td-desc">
-                                                        <label>Lebar</label>
+                                                        <label><strong>Lebar</strong></label>
                                                         <span><?=$val->lebar ?></span>
                                                     </div>
                                                     <div class="td-desc">
-                                                        <label>Potong</label>
+                                                        <label><strong>Potong</strong></label>
                                                         <span><?=$val->potong ?></span>
                                                     </div>
                                                 </div>
                                                 <div class="col-lg-4 col-md-4 col-xs-12 padding-left-0 padding-right-0">
                                                     <div class="td-desc">
-                                                        <label>Objek</label>
+                                                        <label><strong>Objek</strong></label>
                                                         <span><?=$val->objek ?></span>
                                                     </div>
                                                     <div class="td-desc">
-                                                        <label>Mesin</label>
+                                                        <label><strong>Mesin</strong></label>
                                                         <span><?=$val->mesin ?></span>
                                                     </div>
                                                     <div class="td-desc">
-                                                        <label>Warna</label>
+                                                        <label><strong>Warna</strong></label>
                                                         <span><?=$val->jumlah_warna ?></span>
                                                     </div>
                                                 </div>
                                                 <div class="col-lg-4 col-md-4 col-xs-12 padding-left-0 padding-right-0">
                                                     <div class="td-desc">
-                                                        <label>Lb. Ikat</label>
+                                                        <label><strong>Lb. Ikat</strong></label>
                                                         <span><?=$val->lembar_ikat ?></span>
                                                     </div>
                                                 </div>
@@ -240,6 +202,32 @@ $this->params['breadcrumbs'][] = $this->title;
                                             </div>
                                         </div>
                                     </div>
+                                    <?php if(count($val->detailsBahan) > 0): ?>
+                                        <div class="col-lg-12 col-md-12 col-xs-12 text-left">
+                                            <div class="col-lg-12 col-md-12 col-xs-12 text-left">
+                                                <hr />
+                                                <strong>Detail Bahan:</strong>
+                                                <ul class="desc-custom-2 padding-left-0">
+                                                    <?php foreach($val->detailsBahan as $v): ?>
+                                                        <li>
+                                                            <span><?=$v->item_bahan_name ?></span>
+                                                            <span><?=(isset($v->typeBahan)) ? $v->typeBahan->name : '-' ?></span>
+                                                            <span><?=(($v->qty_1!=0) ? $v->qty_1 : 0).' '.$v->um_1.' / '.(($v->qty_2!=0) ? $v->qty_2 : 0).' '.$v->um_2 ?></span>
+                                                            <a href="javascript:void(0)" 
+                                                                data-button="delete_bahan"
+                                                                data-spk="<?=$v->no_spk?>"
+                                                                data-urutan="<?=$v->urutan?>"
+                                                                data-item="<?=$v->item_code?>"
+                                                                data-bahan="<?=$v->item_bahan_code?>">
+                                                                <span>Kembalikan Stock</span>
+                                                            </a>
+                                                        </li>
+                                                    <?php endforeach; ?>
+                                                    <li class="hidden"></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    <?php endif; ?>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -256,59 +244,6 @@ $this->params['breadcrumbs'][] = $this->title;
 </div>
 <div data-popup="popup"></div>
 <script>
-function list_proses(no_spk, code)
-{
-    $.ajax({
-        url: "<?=Url::to(['spk/list-proses'])?>",
-		type: "GET",
-        data: {
-            no_spk: no_spk,
-            code: code
-        },
-		dataType: "text",
-        error: function(xhr, status, error) {},
-		beforeSend: function (data){},
-        success: function(data){
-            var o = $.parseJSON(data);
-            $("#spkdetailbahan-pilih_proses").empty();
-            $.each(o, function(index, value){
-                var opt = new Option(value.name, value.code, false, false);
-                $("#spkdetailbahan-pilih_proses").append(opt);
-            });
-            $("#spkdetailbahan-pilih_proses").val(null);
-        },
-        complete: function(){}
-    });
-}
-
-function event_change_item(el)
-{
-    no_spk = "<?=$_GET['no_spk']?>";
-    code = el.val();
-    $.ajax({
-        url: "<?=Url::to(['spk/list-material'])?>",
-		type: "GET",
-        data: {
-            no_spk: no_spk,
-            code: code
-        },
-		dataType: "text",
-        error: function(xhr, status, error) {},
-		beforeSend: function (data){
-            el.loader("load");
-        },
-        success: function(data){
-            var o = $.parseJSON(data);
-            $("#spkdetailbahan-item_code").val(o.item_code);
-            
-            list_proses(no_spk, code);
-        },
-        complete: function(){
-            el.loader("destroy");
-        }
-    });
-}
-
 function load_bahan()
 {
     $.ajax({
@@ -336,7 +271,7 @@ function search_bahan(el)
 {
     search = el.val();
     $.ajax({
-        url: "<?=Url::to(['spk/search'])?>",
+        url: "<?=Url::to(['spk/search-bahan'])?>",
 		type: "POST",
         data: {
             search: search,
@@ -364,10 +299,10 @@ function search_bahan(el)
     });
 }
 
-function select_bahan(code)
+function item_bahan(code)
 {
     $.ajax({
-        url: "<?=Url::to(['spk/item'])?>",
+        url: "<?=Url::to(['spk/item-bahan'])?>",
 		type: "POST",
         data: {
             code: code,
@@ -393,16 +328,80 @@ function select_bahan(code)
     });
 }
 
+function create_bahan(el)
+{
+    $.ajax({
+        url: "<?= Url::to(['spk/create-bahan']) ?>",
+        type: "POST",
+        dataType: "text",
+        error: function(xhr, status, error) {},
+        beforeSend: function(){
+            el.loader("load");
+        },
+        data: $("#form").serialize(),
+        success: function(data){
+            var o = $.parseJSON(data);
+            if(o.success == true){
+                notification.open("success", o.message, timeOut);
+                setTimeout(function(){
+                    location.reload();
+                }, 500);
+            }else{
+                notification.open("danger", o.message, timeOut);
+            }
+            $("[data-temp]").val("");
+        },
+        complete: function(){
+            el.loader("destroy");
+        }
+    });
+}
+
+function delete_bahan(el)
+{
+    data = el.data();
+    $.ajax({
+        url: "<?= Url::to(['spk/delete-bahan']) ?>",
+        type: "POST",
+        dataType: "text",
+        error: function(xhr, status, error) {},
+        beforeSend: function(){
+            el.loader("load");
+        },
+        data: {
+            no_spk: data.spk,
+            urutan: data.urutan,
+            item_code: data.item,
+            item_bahan_code: data.bahan,
+        },
+        success: function(data){
+            var o = $.parseJSON(data);
+            if(o.success == true){
+                notification.open("success", o.message, timeOut);
+                setTimeout(function(){
+                    location.reload();
+                }, 500);
+            }else{
+                notification.open("danger", o.message, timeOut);
+            }
+        },
+        complete: function(){
+            el.loader("destroy");
+        }
+    });
+}
+
+var timeOut = 3000;
 $(document).ready(function(){
     $("body").off("click","#hidden_detail_bahan").on("click","#hidden_detail_bahan", function(e){
         e.preventDefault();
         $(this).parent().siblings("[data-form]").toggleClass("hidden");
         if($(this).parent().siblings("[data-form]").hasClass("hidden")){
             $(this).parent().siblings("[data-form]").slideUp();
-            $(this).html("<span>Tampilkan Form Input Bahan >></span>");
+            $(this).html("<span>Form Input Bahan >></span>");
         }else{
             $(this).parent().siblings("[data-form]").slideDown();
-            $(this).html("<span>Tutup Form Input Bahan >></span>");
+            $(this).html("<span>Form Input Bahan >></span>");
         }
     });
 
@@ -411,21 +410,11 @@ $(document).ready(function(){
         $(this).parent().next().toggleClass("hidden");
         if($(this).parent().next().hasClass("hidden")){
             $(this).parent().next().slideUp();
-            $(this).html("<span>Tampilkan Detail Material dan Proses >></span>");
+            $(this).html("<span>Detail Material dan Proses >></span>");
         }else{
             $(this).parent().next().slideDown();
-            $(this).html("<span>Tutup Detail Material dan Proses >></span>");
+            $(this).html("<span>Detail Material dan Proses >></span>");
         }
-    });
-
-    $("body").off("change","#spkdetailbahan-item_name").on("change","#spkdetailbahan-item_name", function(e){
-        e.preventDefault();
-        event_change_item($(this));
-    });
-
-    $("body").off("change","#spkdetailbahan-pilih_proses").on("change","#spkdetailbahan-pilih_proses", function(e){
-        e.preventDefault();
-        // event_change_proses($(this));
     });
 
     $("body").off("keydown","#spkdetailbahan-item_bahan_name")
@@ -444,7 +433,17 @@ $(document).ready(function(){
     $("body").off("click","[data-id=\"popup\"] table > tbody tr").on("click","[data-id=\"popup\"] table > tbody tr", function(e){
         e.preventDefault();
         var data = $(this).data();
-        select_bahan(data.code);
+        item_bahan(data.code);
+    });
+
+    $("body").off("click","[data-button=\"create_bahan\"]").on("click","[data-button=\"create_bahan\"]", function(e){
+        e.preventDefault();
+        create_bahan($(this));
+    });
+
+    $("body").off("click","[data-button=\"delete_bahan\"]").on("click","[data-button=\"delete_bahan\"]", function(e){
+        e.preventDefault();
+        delete_bahan($(this));
     });
 });
 </script>

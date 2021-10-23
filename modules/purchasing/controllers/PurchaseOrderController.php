@@ -505,23 +505,29 @@ class PurchaseOrderController extends Controller
         $message = '';
         if($request->isPost){
             $data = $request->post('TempPurchaseOrderDetail');
-            $temp = new TempPurchaseOrderDetail();
-            $temp->attributes = (array)$data;
-            $temp->attributes = ($temp->item) ? $temp->item->attributes : '';
-            $temp->urutan = $temp->count +1;
-            $temp->user_id = \Yii::$app->user->id;
-            if(!empty($request->post('PurchaseOrder')['no_po'])){
-                $temp->no_po = $request->post('PurchaseOrder')['no_po'];
-            }
-            $temp->total_order = $temp->totalBeli;
-            if($temp->save()){
-                $message = 'CREATE TEMP SUCCESSFULLY';
+            $item = MasterMaterialItem::findOne(['code'=>$data['item_code'], 'status'=>1]);
+            if($item->harga_beli_1 > 0 && $item->harga_jual_1 > 0){
+                $temp = new TempPurchaseOrderDetail();
+                $temp->attributes = (array)$data;
+                $temp->attributes = ($temp->item) ? $temp->item->attributes : '';
+                $temp->urutan = $temp->count +1;
+                $temp->user_id = \Yii::$app->user->id;
+                if(!empty($request->post('PurchaseOrder')['no_po'])){
+                    $temp->no_po = $request->post('PurchaseOrder')['no_po'];
+                }
+                $temp->total_order = $temp->totalBeli;
+                if($temp->save()){
+                    $message = 'CREATE TEMP SUCCESSFULLY';
+                }else{
+                    $success = false;
+                    foreach($temp->errors as $error => $value){
+                        $message = $value[0].', ';
+                    }
+                    $message = substr($message, 0, -2);
+                }
             }else{
                 $success = false;
-                foreach($temp->errors as $error => $value){
-                    $message = $value[0].', ';
-                }
-                $message = substr($message, 0, -2);
+                $message = 'Harga Beli / Harga Jual masih kosong. Silakan input harga terlebih dahulu di menu Master Material Item.';
             }
         }else{
             throw new NotFoundHttpException('The requested data does not exist.');
@@ -536,18 +542,24 @@ class PurchaseOrderController extends Controller
         $message = '';
         if($request->isPost){
             $data = $request->post('TempPurchaseOrderDetail');
-            $temp = $this->findTemp($data['id']);
-            $temp->attributes = (array)$data;
-            $temp->attributes = ($temp->item) ? $temp->item->attributes : '';
-            $temp->total_order = $temp->totalBeli;
-            if($temp->save()){
-                $message = 'UPDATE TEMP SUCCESSFULLY';
+            $item = MasterMaterialItem::findOne(['code'=>$data['item_code'], 'status'=>1]);
+            if($item->harga_beli_1 > 0 && $item->harga_jual_1 > 0){
+                $temp = $this->findTemp($data['id']);
+                $temp->attributes = (array)$data;
+                $temp->attributes = ($temp->item) ? $temp->item->attributes : '';
+                $temp->total_order = $temp->totalBeli;
+                if($temp->save()){
+                    $message = 'UPDATE TEMP SUCCESSFULLY';
+                }else{
+                    $success = false;
+                    foreach($temp->errors as $error => $value){
+                        $message = $value[0].', ';
+                    }
+                    $message = substr($message, 0, -2);
+                }
             }else{
                 $success = false;
-                foreach($temp->errors as $error => $value){
-                    $message = $value[0].', ';
-                }
-                $message = substr($message, 0, -2);
+                $message = 'Harga Beli / Harga Jual masih kosong. Silakan mengisikan harga terlebih dahulu di menu Master Material Item.';
             }
         }else{
             throw new NotFoundHttpException('The requested data does not exist.');

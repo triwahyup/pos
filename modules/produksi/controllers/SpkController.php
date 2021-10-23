@@ -4,6 +4,8 @@ namespace app\modules\produksi\controllers;
 
 use app\models\Logs;
 use app\models\User;
+use app\modules\inventory\models\InventoryStockItem;
+use app\modules\inventory\models\InventoryStockTransaction;
 use app\modules\master\models\MasterKode;
 use app\modules\master\models\MasterMaterialItem;
 use app\modules\master\models\MasterMesin;
@@ -34,7 +36,10 @@ class SpkController extends Controller
                     'class' => AccessControl::className(),
 				    'rules' => [
                         [
-                            'actions' => ['index', 'view', 'item', 'list-proses', 'list-bahan', 'search', 'list-material'],
+                            'actions' => [
+                                'index', 'view',
+                                'list-bahan', 'search-bahan', 'item-bahan', 'create-bahan', 'delete-bahan',
+                            ],
                             'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('spk')),
                             'roles' => ['@'],
                         ],
@@ -74,25 +79,12 @@ class SpkController extends Controller
     public function actionView($no_spk)
     {
         $spkBahan = new SpkDetailBahan();
-        $dataItem = SpkDetail::find()
-            ->alias('a')
-            ->select(['concat(b.code, "-", b.name)'])
-            ->leftJoin('master_material_item b', 'b.code = a.item_code')
-            ->where(['a.no_spk'=>$no_spk, 'b.status'=>1])
-            ->orderBy(['urutan'=>SORT_ASC])
-            ->indexBy('item_code')
-            ->column();
-        $dataProses = MasterKode::find()
-            ->select(['value'])
-            ->where(['type'=>\Yii::$app->params['TYPE_MESIN'], 'status'=>1])
-            ->indexBy('code')
-            ->column();
+        $spkDetail = SpkDetail::findOne(['no_spk'=>$no_spk]);
         
         return $this->render('view', [
             'model' => $this->findModel($no_spk),
             'spkBahan' => $spkBahan,
-            'dataItem' => $dataItem,
-            'dataProses' => $dataProses,
+            'spkDetail' => $spkDetail,
         ]);
     }
 
@@ -112,22 +104,6 @@ class SpkController extends Controller
         throw new NotFoundHttpException('The requested page does not exist.');
     }
 
-    public function actionListMaterial($no_spk, $code)
-    {
-        if(isset($code)){
-            $model = SpkDetail::find()->where(['no_spk'=>$no_spk, 'item_code'=>$code])->asArray()->one();
-            return json_encode($model);
-        }
-    }
-
-    public function actionListProses($no_spk, $code)
-    {
-        if(isset($code)){
-            $model = SpkDetailProduksi::find()->where(['no_spk'=>$no_spk, 'item_code'=>$code, 'status'=>1])->asArray()->all();
-            return json_encode($model);
-        }
-    }
-
     public function actionListBahan()
     {
         $model = MasterMaterialItem::find()
@@ -140,8 +116,8 @@ class SpkController extends Controller
             ->all();
         return json_encode(['data'=>$this->renderPartial('_list_bahan', ['model'=>$model])]);
     }
-
-    public function actionSearch()
+    
+    public function actionSearchBahan()
     {
         $model = [];
         if(isset($_POST['search'])){
@@ -161,7 +137,7 @@ class SpkController extends Controller
         return json_encode(['data'=>$this->renderPartial('_list_bahan', ['model'=>$model])]);
     }
 
-    public function actionItem()
+    public function actionItemBahan()
     {
         $model = MasterMaterialItem::find()
             ->alias('a')
@@ -178,5 +154,217 @@ class SpkController extends Controller
             ->asArray()
             ->one();
         return json_encode($model);
+    }
+
+    public function actionCreateBahan()
+    {
+        $request = \Yii::$app->request;
+        $success = true;
+        $message = '';
+        if($request->isPost){
+            $data = $request->post('SpkDetailBahan');
+            if(!empty($data['item_name']) && !empty($data['item_bahan_name'])){
+                $stockItem = InventoryStockItem::findOne(['item_code'=>$data['item_bahan_code']]);
+                if($stockItem->onhand > 0){
+                    if(!empty($data['qty_1']) || !empty($data['qty_2'])){
+                        $connection = \Yii::$app->db;
+                        $transaction = $connection->beginTransaction();
+                        try{
+                            $model = SpkDetailBahan::findOne(['no_spk'=>$data['no_spk'], 'item_code'=>$data['item_code'], 'item_bahan_code'=>$data['item_bahan_code']]);
+                            $urutan = SpkDetailBahan::find()->where(['no_spk'=>$data['no_spk'], 'item_code'=>$data['item_code']])->count();
+                            if(isset($model)){
+                                $model->qty_1 = $model->qty_1 + $data['qty_1'];
+                                $model->qty_2 = $model->qty_2 + $data['qty_2'];
+                                $model->tgl_spk = $data['tgl_spk'];
+                            }else{
+                                $model = new SpkDetailBahan();
+                                $model->attributes = (array)$data;
+                                $model->attributes = $model->itemBahan->attributes;
+                                $model->satuan_bahan_code = $model->itemBahan->satuan_code;
+                                $model->urutan = $urutan +1;
+                            }
+                            
+                            if($model->save()){
+                                // PROSES KURANG STOK
+                                $stock = $stockItem->satuanTerkecil($model->item_bahan_code, [
+                                    0=>$data['qty_1'],
+                                    1=>$data['qty_2'],
+                                ]);
+                                if($stockItem->onhand > $stock){
+                                    $stockItem->onhand = $stockItem->onhand - $stock;
+                                    $stockItem->onsales = $stockItem->onsales + $stock;
+                                    if(!$stockItem->save()){
+                                        $success = false;
+                                        $message = (count($stockItem->errors) > 0) ? 'ERROR UPDATE STOCK ITEM: ' : '';
+                                        foreach($stockItem->errors as $error => $value){
+                                            $message .= strtoupper($value[0].', ');
+                                        }
+                                        $message = substr($message, 0, -2);
+                                    }
+                                    
+                                    $stockTransaction = new InventoryStockTransaction();
+                                    $stockTransaction->attributes = $stockItem->attributes;
+                                    $stockTransaction->no_document = $model->no_spk;
+                                    $stockTransaction->tgl_document = $model->tgl_spk;
+                                    $stockTransaction->type_document = "SPK";
+                                    $stockTransaction->status_document = "OUT";
+                                    $stockTransaction->qty_out = $stock;
+                                    if(!$stockTransaction->save()){
+                                        $success = false;
+                                        $message = (count($stockTransaction->errors) > 0) ? 'ERROR UPDATE STOCK TRANSACTION: ' : '';
+                                        foreach($stockTransaction->errors as $error => $value){
+                                            $message .= strtoupper($value[0].', ');
+                                        }
+                                        $message = substr($message, 0, -2);
+                                    }
+                                }else{
+                                    $success = false;
+                                    $message = 'SISA STOCK ITEM '.$model->item_code.' TIDAK MENCUKUPI. SISA '.$stockItem->onhand;
+                                }
+                            }else{
+                                $success = false;
+                                $message = (count($model->errors) > 0) ? 'ERROR CREATE SPK BAHAN: ' : '';
+                                foreach($model->errors as $error => $value){
+                                    $message .= strtoupper($value[0].', ');
+                                }
+                                $message = substr($message, 0, -2);
+                            }
+
+                            if($success){
+                                $message = '['.$model->no_spk.'-'.$model->urutan.'] SUCCESS CREATE SPK BAHAN.';
+                                $transaction->commit();
+                                $logs =	[
+                                    'type' => Logs::TYPE_USER,
+                                    'description' => $message,
+                                ];
+                                Logs::addLog($logs);
+                            }else{
+                                $transaction->rollBack();
+                            }
+                        }catch(Exception $e){
+                            $success = false;
+                            $message = $e->getMessage();
+                            $transaction->rollBack();
+                        }
+                        $logs =	[
+                            'type' => Logs::TYPE_USER,
+                            'description' => $message,
+                        ];
+                        Logs::addLog($logs);
+                    }else{
+                        $success = false;
+                        $message = 'QTY kosong.';
+                    }
+                }else{
+                    $success = false;
+                    $message = 'Stock tidak mencukupi. Sisa stock '.$stockItem->onhand;
+                }
+            }else{
+                $success = false;
+                $message = 'Material dan Bahan wajib diisi.';
+            }
+        }else{
+            throw new NotFoundHttpException('The requested data does not exist.');
+        }
+        return json_encode(['success'=>$success, 'message'=>$message]);
+    }
+
+    public function actionDeleteBahan()
+    {
+        $request = \Yii::$app->request;
+        $success = true;
+        $message = '';
+        if($request->isPost){
+            $noSpk = $request->post('no_spk');
+            $urutan = $request->post('urutan');
+            $itemCode = $request->post('item_code');
+            $itemBahanCode = $request->post('item_bahan_code');
+            $prosesSpk = $this->findModel($noSpk);
+            if($prosesSpk->status_produksi == 1){
+                $model = SpkDetailBahan::findOne(['no_spk'=>$noSpk, 'urutan'=>$urutan, 'item_code'=>$itemCode, 'item_bahan_code'=>$itemBahanCode]);
+                if(isset($model)){
+                    $connection = \Yii::$app->db;
+                    $transaction = $connection->beginTransaction();
+                    try{
+                        if($model->delete()){
+                            // KEMBALIKAN STOK
+                            $stockItem = InventoryStockItem::findOne(['item_code'=>$itemBahanCode, 'status'=>1]);
+                            if(isset($stockItem)){
+                                $stock = $stockItem->satuanTerkecil($model->item_bahan_code, [
+                                    0=>$model->qty_1,
+                                    1=>$model->qty_2,
+                                ]);
+                                $stockItem->onhand = $stockItem->onhand+$stock;
+                                $stockItem->onsales = $stockItem->onsales-$stock;
+                                if(!$stockItem->save()){
+                                    $success = false;
+                                    $message = (count($stockItem->errors) > 0) ? 'ERROR UPDATE STOCK ITEM: ' : '';
+                                    foreach($stockItem->errors as $error => $value){
+                                        $message .= strtoupper($value[0].', ');
+                                    }
+                                    $message = substr($message, 0, -2);
+                                }
+    
+                                $stockTransaction = new InventoryStockTransaction();
+                                $stockTransaction->attributes = $stockItem->attributes;
+                                $stockTransaction->no_document = $model->no_spk;
+                                $stockTransaction->tgl_document = date('Y-m-d');
+                                $stockTransaction->type_document = "ROLLBACK SPK";
+                                $stockTransaction->status_document = "IN";
+                                $stockTransaction->qty_in = $stock;
+                                if(!$stockTransaction->save()){
+                                    $success = false;
+                                    $message = (count($stockTransaction->errors) > 0) ? 'ERROR UPDATE STOCK TRANSACTION: ' : '';
+                                    foreach($stockTransaction->errors as $error => $value){
+                                        $message .= strtoupper($value[0].', ');
+                                    }
+                                    $message = substr($message, 0, -2);
+                                }
+                            }else{
+                                $success = false;
+                                $message = 'Item {'.$model->item_code.'} tidak ditemukan di Inventory Stock Item';
+                            }
+                        }else{
+                            $success = false;
+                            $message = (count($model->errors) > 0) ? 'ERROR DELETE SPK BAHAN: ' : '';
+                            foreach($model->errors as $error => $value){
+                                $message .= strtoupper($value[0].', ');
+                            }
+                            $message = substr($message, 0, -2);
+                        }
+    
+                        if($success){
+                            $message = '['.$model->no_spk.'-'.$model->urutan.'] SUCCESS DELETE SPK BAHAN.';
+                            $transaction->commit();
+                            $logs =	[
+                                'type' => Logs::TYPE_USER,
+                                'description' => $message,
+                            ];
+                            Logs::addLog($logs);
+                        }else{
+                            $transaction->rollback();
+                        }
+                    }catch(Exception $e){
+                        $success = false;
+                        $message = $e->getMessage();
+                        $transaction->rollBack();
+                    }
+                    $logs =	[
+                        'type' => Logs::TYPE_USER,
+                        'description' => $message,
+                    ];
+                    Logs::addLog($logs);
+                }else{
+                    $success = false;
+                    $message = 'DATA NOT FOUND.';
+                }
+            }else{
+                $success = false;
+                $message = 'SPK SUDAH DI PROSES. TIDAK BISA MENGEMBALIKAN STOK.';
+            }
+        }else{
+            throw new NotFoundHttpException('The requested data does not exist.');
+        }
+        return json_encode(['success'=>$success, 'message'=>$message]);
     }
 }

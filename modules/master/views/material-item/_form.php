@@ -58,7 +58,7 @@ use yii\widgets\MaskedInput;
                                 'data-align' => 'text-right',
                                 'data-name' => 'iconbox',
                                 'data-icons' => 'rupiah',
-                                'readonly' => (!$model->isNewRecord && !empty($model->harga_beli_1)) ? false : true,
+                                'readonly' => (!$model->isNewRecord && !empty($model->um_1)) ? false : true,
                             ]
                         ]) ?>
                     </div>
@@ -74,7 +74,7 @@ use yii\widgets\MaskedInput;
                                 'data-align' => 'text-right',
                                 'data-name' => 'iconbox',
                                 'data-icons' => 'rupiah',
-                                'readonly' => (!$model->isNewRecord && !empty($model->harga_jual_1)) ? false : true,
+                                'readonly' => (!$model->isNewRecord && !empty($model->um_1)) ? false : true,
                             ]
                         ]) ?>
                     </div>
@@ -95,7 +95,7 @@ use yii\widgets\MaskedInput;
                                 'data-align' => 'text-right',
                                 'data-name' => 'iconbox',
                                 'data-icons' => 'rupiah',
-                                'readonly' => (!$model->isNewRecord && !empty($model->harga_beli_2)) ? false : true,
+                                'readonly' => (!$model->isNewRecord && !empty($model->um_2)) ? false : true,
                             ]
                         ]) ?>
                     </div>
@@ -111,7 +111,7 @@ use yii\widgets\MaskedInput;
                                 'data-align' => 'text-right',
                                 'data-name' => 'iconbox',
                                 'data-icons' => 'rupiah',
-                                'readonly' => (!$model->isNewRecord && !empty($model->harga_jual_2)) ? false : true,
+                                'readonly' => (!$model->isNewRecord && !empty($model->um_2)) ? false : true,
                             ]
                         ]) ?>
                     </div>

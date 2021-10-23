@@ -3,6 +3,7 @@ namespace app\modules\produksi\models;
 
 use Yii;
 use app\modules\master\models\MasterMaterialItem;
+use app\modules\produksi\models\SpkDetailBahan;
 use app\modules\produksi\models\SpkDetailProduksi;
 use yii\behaviors\TimestampBehavior;
 
@@ -124,6 +125,11 @@ class SpkDetail extends \yii\db\ActiveRecord
     public function getItem()
     {
         return $this->hasOne(MasterMaterialItem::className(), ['code' => 'item_code']);
+    }
+
+    public function getDetailsBahan()
+    {
+        return $this->hasMany(SpkDetailBahan::className(), ['no_spk' => 'no_spk', 'item_code' => 'item_code']);
     }
     
     public function getDetailsProduksi()

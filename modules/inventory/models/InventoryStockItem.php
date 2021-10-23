@@ -71,12 +71,31 @@ class InventoryStockItem extends \yii\db\ActiveRecord
 
     public function satuanTerkecil($item_code, $qty)
     {
-        $item = MasterMaterialItem::findOne($item_code);
         $total_material = 0;
-        if(isset($item->typeCode)){
-            $type = $item->typeCode->value;
-            if($type == 'KERTAS'){
+        $item = MasterMaterialItem::findOne($item_code);
+        if(isset($item)){
+            // KERTAS
+            if($item->type_code == '007'){
                 $total_material = ($qty[0] * 500) + $qty[1];
+            }
+            // BAHAN PEMBANTU
+            else if($item->type_code == '010'){
+                // TINTA
+                if($item->material_code == '016'){
+                    $total_material = ($qty[0] * 1000) + $qty[1];
+                }
+                // BOX, TAS PLASTIK, SINGLE FACE
+                else if($item->material_code == '017' || $item->material_code == '018' || $item->material_code == '019'){
+                    $total_material = $qty[0];
+                }
+                // LAIN2
+                else{
+                    if($item->um_1 == 'KG'){
+                        $total_material = ($qty[0] * 1000) + $qty[1];
+                    }else{
+                        $total_material = $qty[0];
+                    }
+                }
             }
         }
         return $total_material;
@@ -88,9 +107,35 @@ class InventoryStockItem extends \yii\db\ActiveRecord
         $desc = '';
         $result = [];
         if(isset($item)){
-            $result[0] = floor($qty / 500);
-            $sisa = $qty - ($result[0] * 500);
-            $result[1] = $sisa;
+            // KERTAS
+            if($item->type_code == '007'){
+                $result[0] = floor($qty / 500);
+                $sisa = $qty - ($result[0] * 500);
+                $result[1] = $sisa;
+            }
+            // BAHAN PEMBANTU
+            else if($item->type_code == '010'){
+                // TINTA
+                if($item->material_code == '016'){
+                    $result[0] = floor($qty / 1000);
+                    $sisa = $qty - ($result[0] * 1000);
+                    $result[1] = $sisa;
+                }
+                // BOX, TAS PLASTIK, SINGLE FACE
+                else if($item->material_code == '017' || $item->material_code == '018' || $item->material_code == '019'){
+                    $result[0] = $qty;
+                }
+                // LAIN2
+                else{
+                    if($item->um_1 == 'KG'){
+                        $result[0] = floor($qty / 1000);
+                        $sisa = $qty - ($result[0] * 1000);
+                        $result[1] = $sisa;
+                    }else{
+                        $result[0] = $qty;
+                    }
+                }
+            }
         }
         foreach($result as $index=>$val){
             $desc .= $val .' '.$item['um_'.($index+1)].' / ';

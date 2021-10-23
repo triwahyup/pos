@@ -1190,6 +1190,23 @@ select {
         }
     }
 }
+.desc-custom-2 {
+    li {
+        span {
+            display: inline-block;
+            padding-right: 30px;
+            &:nth-child(1){
+                width: 250px;
+            }
+            &:nth-child(2){
+                width: 150px;
+            }
+            &:nth-child(3){
+                width: 150px;
+            }
+        }
+    }
+}
 /** END CUSTOM TABLE GRIDVIEW **/
 
 /** ERROR STYLE **/
@@ -1258,9 +1275,15 @@ select {
     .popup-form-body {
         padding: 20px;
     }
+    .popup-header {
+        h5 {
+            font-size: 14px;
+        }
+    }
     .popup-body {
         .form-control {
             .borderRadius(0);
+            font-size: 12px;
             height: 30px;
         }
         table {
