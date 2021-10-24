@@ -12,7 +12,7 @@ use app\modules\master\models\MasterMesin;
 use app\modules\produksi\models\Spk;
 use app\modules\produksi\models\SpkDetail;
 use app\modules\produksi\models\SpkDetailBahan;
-use app\modules\produksi\models\SpkDetailProduksi;
+use app\modules\produksi\models\SpkDetailProses;
 use app\modules\produksi\models\SpkSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -39,6 +39,8 @@ class SpkController extends Controller
                             'actions' => [
                                 'index', 'view',
                                 'list-bahan', 'search-bahan', 'item-bahan', 'create-bahan', 'delete-bahan',
+                                'lock-bahan', 'lock-proses',
+                                'list-mesin', 'create-proses', 'delete-proses',
                             ],
                             'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('spk')),
                             'roles' => ['@'],
@@ -79,11 +81,13 @@ class SpkController extends Controller
     public function actionView($no_spk)
     {
         $spkBahan = new SpkDetailBahan();
+        $spkProses = new SpkDetailProses();
         $spkDetail = SpkDetail::findOne(['no_spk'=>$no_spk]);
         
         return $this->render('view', [
             'model' => $this->findModel($no_spk),
             'spkBahan' => $spkBahan,
+            'spkProses' => $spkProses,
             'spkDetail' => $spkDetail,
         ]);
     }
@@ -287,6 +291,17 @@ class SpkController extends Controller
                     $transaction = $connection->beginTransaction();
                     try{
                         if($model->delete()){
+                            foreach($model->datas as $index=>$val){
+                                $val->urutan = $index +1;
+                                if(!$val->save()){
+                                    $success = false;
+                                    foreach($val->errors as $error => $value){
+                                        $message .= strtoupper($value[0].', ');
+                                    }
+                                    $message = substr($message, 0, -2);
+                                }
+                            }
+
                             // KEMBALIKAN STOK
                             $stockItem = InventoryStockItem::findOne(['item_code'=>$itemBahanCode, 'status'=>1]);
                             if(isset($stockItem)){
@@ -361,6 +376,238 @@ class SpkController extends Controller
             }else{
                 $success = false;
                 $message = 'SPK SUDAH DI PROSES. TIDAK BISA MENGEMBALIKAN STOK.';
+            }
+        }else{
+            throw new NotFoundHttpException('The requested data does not exist.');
+        }
+        return json_encode(['success'=>$success, 'message'=>$message]);
+    }
+
+    public function actionLockBahan($no_spk)
+    {
+        $success = true;
+		$message = '';
+        $model = $this->findModel($no_spk);
+        if(isset($model)){
+            $model->status_produksi=2;
+            if($model->save()){
+                \Yii::$app->session->setFlash('success', 'NO. SPK '.$no_spk.' BERHASIL DI PROSES.');
+            }else{
+                $success = false;
+                foreach($model->errors as $error => $value){
+                    $message .= strtoupper($value[0].', ');
+                }
+                $message = substr($message, 0, -2);
+            }
+        }else{
+            $success = false;
+            $message = 'Data SPK not valid.';
+        }
+        if(!$success){
+            \Yii::$app->session->setFlash('error', $message);
+        }
+        return $this->redirect(['view', 'no_spk' => $model->no_spk]);
+    }
+
+    public function actionLockProses($no_spk)
+    {
+        $success = true;
+		$message = '';
+        $model = $this->findModel($no_spk);
+        if(isset($model)){
+            $model->status_produksi=3;
+            if($model->save()){
+                \Yii::$app->session->setFlash('success', 'NO. SPK '.$no_spk.' BERHASIL DI PROSES.');
+            }else{
+                $success = false;
+                foreach($model->errors as $error => $value){
+                    $message .= strtoupper($value[0].', ');
+                }
+                $message = substr($message, 0, -2);
+            }
+        }else{
+            $success = false;
+            $message = 'Data SPK not valid.';
+        }
+        if(!$success){
+            \Yii::$app->session->setFlash('error', $message);
+        }
+        return $this->redirect(['view', 'no_spk' => $model->no_spk]);
+    }
+
+    public function actionListMesin($no_spk, $item_code, $type)
+    {
+        $keterangan = 'Keterangan: ';
+        $sisaProses = 0;
+        $stockItem = InventoryStockItem::findOne(['item_code'=>$item_code, 'status'=>1]);
+        if(isset($stockItem)){
+            $spkDetail = SpkDetail::findOne(['no_spk'=>$no_spk, 'item_code'=>$item_code]);
+            $qtyOrder = $stockItem->satuanTerkecil($spkDetail->item_code, [
+                0=>$spkDetail->qty_order_1,
+                1=>$spkDetail->qty_order_2,
+            ]);
+            $konversi = $stockItem->konversi($spkDetail->item_code, $qtyOrder);
+            
+            $qtyProses = 0;
+            if(count($spkDetail->detailsProses) > 0){
+                foreach($spkDetail->detailsProses as $val){
+                    $qtyProses += $val->qty_proses;
+                }
+            }
+
+            if($type == 1){
+                $sisaProses = $qtyOrder-$qtyProses;
+                $keterangan .= 'Order '.$konversi.' ('.$qtyOrder.' LB). Dipotong menjadi '.$spkDetail->potong.'. Sisa yang belum di proses '.$sisaProses.' LB.';
+            }
+        }
+        
+        $andWhere = '';
+        if($type == 1){            
+            $andWhere = 'type_code="014"';
+        }else if($type == 2){
+            $andWhere = 'type_code="012"';
+        }else if($type == 3){
+            $andWhere = 'type_code="013"';
+        }else if($type == 5){
+            $andWhere = 'type_code="015"';
+        }else{
+            $andWhere = 'type_code IN("016","017")';
+        }
+        
+        $mesin = MasterMesin::find()
+            ->select(['name as name', 'code as code'])
+            ->where(['status'=>1])
+            ->andWhere($andWhere)
+            ->asArray()
+            ->all();
+        return json_encode(['mesin'=>$mesin, 'keterangan'=>$keterangan, 'sisa_proses'=>$sisaProses]);
+    }
+
+    public function actionCreateProses()
+    {
+        $request = \Yii::$app->request;
+        $success = true;
+        $message = '';
+        if($request->isPost){
+            $data = $request->post('SpkDetailProses');
+            
+            $spkDetail = SpkDetail::findOne(['no_spk'=>$data['no_spk'], 'item_code'=>$data['item_code']]);
+            if(isset($spkDetail)){
+                $qtyOrder = 0;
+                $stockItem = InventoryStockItem::findOne(['item_code'=>$spkDetail->item_code]);
+                if(isset($stockItem)){
+                    $qtyOrder = $stockItem->satuanTerkecil($spkDetail->item_code, [
+                        0=>$spkDetail->qty_order_1,
+                        1=>$spkDetail->qty_order_2,
+                    ]);
+                }
+                $qtyProses = 0;
+                if(count($spkDetail->detailsProses) > 0){
+                    foreach($spkDetail->detailsProses as $val){
+                        $qtyProses += $val->qty_proses;
+                    }
+                }
+                $totalQTY = $qtyOrder-$qtyProses;
+                
+                if(!$totalQTY == 0){
+                    if(!$data['qty_proses'] == 0){
+                        if($totalQTY >= $data['qty_proses']){
+                            $filter = [
+                                'no_spk'=>$data['no_spk'],
+                                'item_code'=>$data['item_code'],
+                                'mesin_code'=>$data['mesin_code'],
+                                'type_proses'=>$data['type_proses']
+                            ];
+                            $spkProses = SpkDetailProses::findOne($filter);
+                            if(empty($spkProses)){
+                                $spkProses = new SpkDetailProses();
+                                $spkProses->attributes = (array)$data;
+                                $spkProses->urutan = count($spkDetail->detailsProses) +1;
+                                $spkProses->mesin_type_code = $spkProses->mesin->type_code;
+                                $spkProses->status_proses = 1; // IN PROGRESS
+                                if($spkProses->save()){
+                                    $message = '['.$spkProses->no_spk.'-'.$spkProses->urutan.'] SUCCESS CREATE SPK PROSES.';
+                                    $logs =	[
+                                        'type' => Logs::TYPE_USER,
+                                        'description' => $message,
+                                    ];
+                                    Logs::addLog($logs);
+                                }else{
+                                    $success = false;
+                                    $message = (count($spkProses->errors) > 0) ? 'ERROR CREATE SPK PROSES: ' : '';
+                                    foreach($spkProses->errors as $error => $value){
+                                        $message .= strtoupper($value[0].', ');
+                                    }
+                                    $message = substr($message, 0, -2);
+                                }
+                            }else{
+                                $success = false;
+                                $message = 'MESIN '.$spkProses->mesin->name.' SUDAH DIGUNAKAN.';
+                            }
+                        }else{
+                            $success = false;
+                            $message = 'QTY yang akan diproses terlalu besar. Maksimal input proses '.$totalQTY;
+                        }
+                    }else{
+                        $success = false;
+                        $message = 'QTY tidak boleh 0.';
+                    }
+                }else{
+                    $success = false;
+                    $message = 'QTY tidak ditemukan / Semua QTY telah di proses.';
+                }
+            }else{
+                $success = false;
+                $message = 'Item tidak ditemukan di SPK Detail.';
+            }
+        }
+        else{
+            throw new NotFoundHttpException('The requested data does not exist.');
+        }
+        return json_encode(['success'=>$success, 'message'=>$message]);
+    }
+
+    public function actionDeleteProses()
+    {
+        $request = \Yii::$app->request;
+        $success = true;
+        $message = '';
+        if($request->isPost){
+            $noSpk = $request->post('no_spk');
+            $urutan = $request->post('urutan');
+            $itemCode = $request->post('item_code');
+            $prosesSpk = $this->findModel($noSpk);
+            if($prosesSpk->status_produksi == 2){
+                $model = SpkDetailProses::findOne(['no_spk'=>$noSpk, 'urutan'=>$urutan, 'item_code'=>$itemCode]);
+                if($model->delete()){
+                    foreach($model->datas as $index=>$val){
+                        $val->urutan = $index +1;
+                        if(!$val->save()){
+                            $success = false;
+                            foreach($val->errors as $error => $value){
+                                $message .= strtoupper($value[0].', ');
+                            }
+                            $message = substr($message, 0, -2);
+                        }
+                    }
+
+                    $message = '['.$model->no_spk.'-'.$model->urutan.'] SUCCESS DELETE SPK PROSES.';
+                    $logs =	[
+                        'type' => Logs::TYPE_USER,
+                        'description' => $message,
+                    ];
+                    Logs::addLog($logs);
+                }else{
+                    $success = false;
+                    $message = (count($model->errors) > 0) ? 'ERROR DELETE SPK PROSES: ' : '';
+                    foreach($model->errors as $error => $value){
+                        $message .= strtoupper($value[0].', ');
+                    }
+                    $message = substr($message, 0, -2);
+                }
+            }else{
+                $success = false;
+                $message = 'SPK SUDAH DI PROSES. TIDAK BISA MENGHAPUS PROSES.';
             }
         }else{
             throw new NotFoundHttpException('The requested data does not exist.');

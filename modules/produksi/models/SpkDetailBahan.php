@@ -119,4 +119,9 @@ class SpkDetailBahan extends \yii\db\ActiveRecord
     {
         return $this->hasOne(MasterMaterial::className(), ['code' => 'type_bahan_code']);
     }
+
+    public function getDatas()
+    {
+        return SpkDetailBahan::find()->where(['no_spk'=> $this->no_spk, 'item_code' => $this->item_code])->all();
+    }
 }

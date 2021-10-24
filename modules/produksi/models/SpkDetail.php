@@ -5,6 +5,7 @@ use Yii;
 use app\modules\master\models\MasterMaterialItem;
 use app\modules\produksi\models\SpkDetailBahan;
 use app\modules\produksi\models\SpkDetailProduksi;
+use app\modules\produksi\models\SpkDetailProses;
 use yii\behaviors\TimestampBehavior;
 
 /**
@@ -135,5 +136,10 @@ class SpkDetail extends \yii\db\ActiveRecord
     public function getDetailsProduksi()
     {
         return $this->hasMany(SpkDetailProduksi::className(), ['no_spk' => 'no_spk', 'item_code' => 'item_code']);
+    }
+
+    public function getDetailsProses()
+    {
+        return $this->hasMany(SpkDetailProses::className(), ['no_spk' => 'no_spk', 'item_code' => 'item_code']);
     }
 }

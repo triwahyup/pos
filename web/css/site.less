@@ -65,6 +65,9 @@
 .margin-top-40 {
     margin-top: 40px;
 }
+.font-size-8 {
+    font-size: 8px !important;
+}
 .font-size-10 {
     font-size: 10px !important;
 }
@@ -1192,16 +1195,21 @@ select {
 }
 .desc-custom-2 {
     li {
-        span {
+        a {
+            position: relative;
+            span {
+                i {
+                    color: @color_danger;
+                    top: 6px;
+                }
+            }
+        }
+        span, strong {
             display: inline-block;
-            padding-right: 30px;
-            &:nth-child(1){
-                width: 250px;
+            &.wd-100 {
+                width: 100px;
             }
-            &:nth-child(2){
-                width: 150px;
-            }
-            &:nth-child(3){
+            &.wd-150 {
                 width: 150px;
             }
         }

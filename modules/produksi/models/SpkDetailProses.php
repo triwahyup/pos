@@ -3,6 +3,7 @@
 namespace app\modules\produksi\models;
 
 use Yii;
+use app\modules\master\models\MasterMesin;
 use yii\behaviors\TimestampBehavior;
 
 /**
@@ -44,9 +45,9 @@ class SpkDetailProses extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['no_spk', 'urutan', 'order_code', 'item_code', 'type_proses'], 'required'],
+            [['no_spk', 'order_code', 'item_code', 'type_proses', 'mesin_code', 'qty_proses'], 'required'],
+            [['qty_proses'], 'safe'],
             [['urutan', 'type_proses', 'status_proses', 'status', 'created_at', 'updated_at'], 'integer'],
-            [['qty_proses'], 'number'],
             [['no_spk'], 'string', 'max' => 12],
             [['order_code', 'mesin_code', 'mesin_type_code'], 'string', 'max' => 3],
             [['item_code'], 'string', 'max' => 7],
@@ -74,5 +75,39 @@ class SpkDetailProses extends \yii\db\ActiveRecord
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
         ];
+    }
+
+    public function getMesin()
+    {
+        return $this->hasOne(MasterMesin::className(), ['code' => 'mesin_code']);
+    }
+
+    public function typeProses()
+    {
+        $type = '';
+        if($this->type_proses == 1) $type = 'Proses Potong';
+        else if($this->type_proses == 2) $type = 'Proses Cetak';
+        else if($this->type_proses == 3) $type = 'Proses Pond';
+        else if($this->type_proses == 4) $type = 'Proses Pretel';
+        else if($this->type_proses == 5) $type = 'Proses Lem';
+        return $type;
+    }
+
+    public function statusProses()
+    {
+        $message = '';
+        if($this->status_proses == 1){
+            $message = '<span class="text-label text-primary font-size-8"><strong>In Progress</strong></span>';
+        }else if($this->status_proses == 2){
+            $message = '<span class="text-label text-success font-size-8"><strong>Done</strong></span>';
+        }else if($this->status_proses == 3){
+            $message = '<span class="text-label text-danger font-size-8"><strong>Rusak Sebagian</strong></span>';
+        }
+        return $message;
+    }
+
+    public function getDatas()
+    {
+        return SpkDetailProses::find()->where(['no_spk'=> $this->no_spk, 'item_code' => $this->item_code])->all();
     }
 }

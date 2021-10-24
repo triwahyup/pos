@@ -7,6 +7,7 @@ use app\modules\sales\models\SalesOrder;
 use app\modules\produksi\models\SpkDetail;
 use app\modules\produksi\models\SpkDetailBahan;
 use app\modules\produksi\models\SpkDetailProduksi;
+use app\modules\produksi\models\SpkDetailProses;
 use yii\behaviors\TimestampBehavior;
 
 /**
@@ -104,14 +105,23 @@ class Spk extends \yii\db\ActiveRecord
         return $this->hasMany(SpkDetailBahan::className(), ['no_spk' => 'no_spk']);
     }
 
+    public function getDetailsProses()
+    {
+        return $this->hasMany(SpkDetailProses::className(), ['no_spk' => 'no_spk']);
+    }
+
     public function statusProduksi()
     {
         $message = '';
         if($this->status_produksi == 1){
             $message = '<span class="text-label text-default">Belum Proses</span>';
+        }else if($this->status_produksi == 2){
+            $message = '<span class="text-label text-primary">Proses SPK (Akan dikerjakan)</span>';
+        }else if($this->status_produksi == 3){
+            $message = '<span class="text-label text-primary">Proses SPK (In Progress)</span>';
         }
         
-        if(count($this->detailsBahan) > 0){
+        if(count($this->detailsBahan) > 0 && $this->status_produksi == 1){
             $message = '<span class="text-label text-primary">Proses Input Bahan</span>';
         }
         return $message;
