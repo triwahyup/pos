@@ -415,15 +415,39 @@ class SpkController extends Controller
 		$message = '';
         $model = $this->findModel($no_spk);
         if(isset($model)){
-            $model->status_produksi=3;
-            if($model->save()){
-                \Yii::$app->session->setFlash('success', 'NO. SPK '.$no_spk.' BERHASIL DI PROSES.');
-            }else{
-                $success = false;
-                foreach($model->errors as $error => $value){
-                    $message .= strtoupper($value[0].', ');
+            $connection = \Yii::$app->db;
+            $transaction = $connection->beginTransaction();
+            try{
+                $model->status_produksi=3;
+                if($model->save()){
+                    foreach($model->detailsProses as $detail){
+                        $detail->status_proses = 2;
+                        if(!$detail->save()){
+                            $success = false;
+                            foreach($detail->errors as $error => $value){
+                                $message .= strtoupper($value[0].', ');
+                            }
+                            $message = substr($message, 0, -2);
+                        }
+                    }
+                }else{
+                    $success = false;
+                    foreach($model->errors as $error => $value){
+                        $message .= strtoupper($value[0].', ');
+                    }
+                    $message = substr($message, 0, -2);
                 }
-                $message = substr($message, 0, -2);
+
+                if($success){
+                    $transaction->commit();
+                    \Yii::$app->session->setFlash('success', 'NO. SPK '.$no_spk.' BERHASIL DI PROSES.');
+                }else{
+                    $transaction->rollBack();
+                }
+            }catch(Exception $e){
+                $success = false;
+                $message = $e->getMessage();
+                $transaction->rollBack();
             }
         }else{
             $success = false;

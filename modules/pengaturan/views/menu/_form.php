@@ -7,6 +7,22 @@ use kartik\widgets\Select2;
 /* @var $this yii\web\View */
 /* @var $model app\modules\pengaturan\models\PengaturanMenu */
 /* @var $form yii\widgets\ActiveForm */
+
+$dataParent = [];
+if(!$model->isNewRecord){
+    if($model->level == 1){
+        $dataParent = [
+            $model->code => $model->name
+        ];
+    }
+    if($model->level == 2){
+        print_r('A');die;
+        $model->parent_1 = $model->parent->code;
+        // $dataParent = [
+        //     $model->parent->code => $model->parent->name
+        // ];
+    }
+}
 ?>
 
 <div class="pengaturan-menu-form">
@@ -35,14 +51,14 @@ use kartik\widgets\Select2;
                 </div>
                 <div class="col-lg-6 col-md-6 col-xs-12 padding-left-0">
                     <?= $form->field($model, 'parent_1')->widget(Select2::classname(), [
-                            'data' => (!$model->isNewRecord) ? [$model->code => $model->name] : [],
+                            'data' => $dataParent,
                             'options' => ['placeholder' => 'Parent 1', 'value' => !$model->isNewRecord ? $model->code : ''],
                             'pluginOptions' => ['allowClear' => true],
                         ]) ?>
                 </div>
                 <div class="col-lg-6 col-md-6 col-xs-12 padding-left-0">
                     <?= $form->field($model, 'parent_2')->widget(Select2::classname(), [
-                            'data' => (!$model->isNewRecord) ? [$model->parent_code => $model->parent->name] : [],
+                            'data' => $dataParent,
                             'options' => ['placeholder' => 'Parent 2', 'value' => !$model->isNewRecord ? $model->parent_code : ''],
                             'pluginOptions' => ['allowClear' => true],
                         ]) ?>

@@ -2,6 +2,7 @@
 namespace app\modules\produksi\models;
 
 use Yii;
+use app\modules\master\models\MasterOrder;
 use app\modules\master\models\MasterMaterialItem;
 use app\modules\produksi\models\SpkDetailBahan;
 use app\modules\produksi\models\SpkDetailProduksi;
@@ -126,6 +127,11 @@ class SpkDetail extends \yii\db\ActiveRecord
     public function getItem()
     {
         return $this->hasOne(MasterMaterialItem::className(), ['code' => 'item_code']);
+    }
+
+    public function getOrder()
+    {
+        return $this->hasOne(MasterOrder::className(), ['code' => 'order_code']);
     }
 
     public function getDetailsBahan()

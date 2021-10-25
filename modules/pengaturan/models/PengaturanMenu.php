@@ -103,6 +103,6 @@ class PengaturanMenu extends \yii\db\ActiveRecord
 
     public function getChild()
     {
-        return $this->hasMany(PengaturanMenu::className(), ['parent_code' => 'code'])->orderBy(['urutan' => SORT_ASC]);;
+        return $this->hasMany(PengaturanMenu::className(), ['parent_code' => 'code'])->orderBy(['urutan' => SORT_ASC]);
     }
 }

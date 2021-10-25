@@ -6,7 +6,7 @@ $(function(){
 		var _this=$(this);
 		if(this.href === path || this.href === pathSplit) {
 			_this.closest(".navbar-menu").addClass("active");
-			$(".navbar-menu-body").scrollTop((_this.offset().top - ($(".navbar-menu-body").height() - $(".navbar-menu-body").offset().top)));
+			$(".navbar-menu-body").scrollTop($(".navbar-menu.active").offset().top);
 		}
 	});
 });
