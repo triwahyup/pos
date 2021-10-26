@@ -40,7 +40,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 [
                     'attribute' => 'type_code',
                     'value' => function ($model, $index) { 
-                        return (isset($model->typeCode)) ? $model->typeCode->name : '-';
+                        return (isset($model->typeKode)) ? strtolower($model->typeKode->name) : '-';
                     }
                 ],
                 'level',
