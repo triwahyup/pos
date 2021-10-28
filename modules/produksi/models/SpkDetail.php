@@ -148,4 +148,10 @@ class SpkDetail extends \yii\db\ActiveRecord
     {
         return $this->hasMany(SpkDetailProses::className(), ['no_spk' => 'no_spk', 'item_code' => 'item_code']);
     }
+
+    public function detailsProses($type)
+    {
+        $model = SpkDetailProses::findAll(['no_spk'=>$this->no_spk, 'item_code'=>$this->item_code, 'type_proses'=>$type]);
+        return $model;
+    }
 }

@@ -80,12 +80,13 @@ class SpkController extends Controller
      */
     public function actionView($no_spk)
     {
+        $model = $this->findModel($no_spk);
         $spkBahan = new SpkDetailBahan();
         $spkProses = new SpkDetailProses();
         $spkDetail = SpkDetail::findOne(['no_spk'=>$no_spk]);
         
         return $this->render('view', [
-            'model' => $this->findModel($no_spk),
+            'model' => $model,
             'spkBahan' => $spkBahan,
             'spkProses' => $spkProses,
             'spkDetail' => $spkDetail,
@@ -415,39 +416,47 @@ class SpkController extends Controller
 		$message = '';
         $model = $this->findModel($no_spk);
         if(isset($model)){
-            $connection = \Yii::$app->db;
-            $transaction = $connection->beginTransaction();
-            try{
-                $model->status_produksi=3;
-                if($model->save()){
-                    foreach($model->detailsProses as $detail){
-                        $detail->status_proses = 2;
-                        if(!$detail->save()){
-                            $success = false;
-                            foreach($detail->errors as $error => $value){
-                                $message .= strtoupper($value[0].', ');
+            $spkProses = SpkDetailProses::findOne(['no_spk'=>$no_spk, 'status_proses'=>1]);
+            if(isset($spkProses)){
+                $connection = \Yii::$app->db;
+                $transaction = $connection->beginTransaction();
+                try{
+                    $model->status_produksi=3;
+                    if($model->save()){
+                        foreach($model->detailsProses as $detail){
+                            if($detail->status_proses == 1){
+                                $detail->status_proses = 2;
+                                if(!$detail->save()){
+                                    $success = false;
+                                    foreach($detail->errors as $error => $value){
+                                        $message .= strtoupper($value[0].', ');
+                                    }
+                                    $message = substr($message, 0, -2);
+                                }
                             }
-                            $message = substr($message, 0, -2);
                         }
+                    }else{
+                        $success = false;
+                        foreach($model->errors as $error => $value){
+                            $message .= strtoupper($value[0].', ');
+                        }
+                        $message = substr($message, 0, -2);
                     }
-                }else{
+    
+                    if($success){
+                        $transaction->commit();
+                        \Yii::$app->session->setFlash('success', 'NO. SPK '.$no_spk.' BERHASIL DI PROSES.');
+                    }else{
+                        $transaction->rollBack();
+                    }
+                }catch(Exception $e){
                     $success = false;
-                    foreach($model->errors as $error => $value){
-                        $message .= strtoupper($value[0].', ');
-                    }
-                    $message = substr($message, 0, -2);
-                }
-
-                if($success){
-                    $transaction->commit();
-                    \Yii::$app->session->setFlash('success', 'NO. SPK '.$no_spk.' BERHASIL DI PROSES.');
-                }else{
+                    $message = $e->getMessage();
                     $transaction->rollBack();
                 }
-            }catch(Exception $e){
+            }else{
                 $success = false;
-                $message = $e->getMessage();
-                $transaction->rollBack();
+                $message = 'Data SPK Proses masih kosong.';
             }
         }else{
             $success = false;
@@ -466,22 +475,32 @@ class SpkController extends Controller
         $stockItem = InventoryStockItem::findOne(['item_code'=>$item_code, 'status'=>1]);
         if(isset($stockItem)){
             $spkDetail = SpkDetail::findOne(['no_spk'=>$no_spk, 'item_code'=>$item_code]);
-            $qtyOrder = $stockItem->satuanTerkecil($spkDetail->item_code, [
-                0=>$spkDetail->qty_order_1,
-                1=>$spkDetail->qty_order_2,
-            ]);
-            $konversi = $stockItem->konversi($spkDetail->item_code, $qtyOrder);
-            
             $qtyProses = 0;
-            if(count($spkDetail->detailsProses) > 0){
-                foreach($spkDetail->detailsProses as $val){
+            if(count($spkDetail->detailsProses($type)) > 0){
+                foreach($spkDetail->detailsProses($type) as $val){
                     $qtyProses += $val->qty_proses;
                 }
             }
-
+            
+            // POTONG
             if($type == 1){
+                $qtyOrder = $stockItem->satuanTerkecil($spkDetail->item_code, [
+                    0=>$spkDetail->qty_order_1,
+                    1=>$spkDetail->qty_order_2,
+                ]);
+                $konversi = $stockItem->konversi($spkDetail->item_code, $qtyOrder);
                 $sisaProses = $qtyOrder-$qtyProses;
                 $keterangan .= 'Order '.$konversi.' ('.$qtyOrder.' LB). Dipotong menjadi '.$spkDetail->potong.'. Sisa yang belum di proses '.$sisaProses.' LB.';
+            }
+            // CETAK
+            else if($type == 2){
+                $sisaProses = $spkDetail->jumlah_cetak-$qtyProses;
+                $keterangan .= 'Total cetak '.$spkDetail->jumlah_cetak.' LB. Sisa yang belum di proses '.$sisaProses.' LB.';
+            }
+            // POND
+            else if($type == 3){
+                $sisaProses = $spkDetail->jumlah_objek-$qtyProses;
+                $keterangan .= 'Total cetak '.$spkDetail->jumlah_objek.' LB. Sisa yang belum di proses '.$sisaProses.' LB.';
             }
         }
         
@@ -517,21 +536,34 @@ class SpkController extends Controller
             
             $spkDetail = SpkDetail::findOne(['no_spk'=>$data['no_spk'], 'item_code'=>$data['item_code']]);
             if(isset($spkDetail)){
-                $qtyOrder = 0;
-                $stockItem = InventoryStockItem::findOne(['item_code'=>$spkDetail->item_code]);
-                if(isset($stockItem)){
-                    $qtyOrder = $stockItem->satuanTerkecil($spkDetail->item_code, [
-                        0=>$spkDetail->qty_order_1,
-                        1=>$spkDetail->qty_order_2,
-                    ]);
-                }
                 $qtyProses = 0;
-                if(count($spkDetail->detailsProses) > 0){
-                    foreach($spkDetail->detailsProses as $val){
+                if(count($spkDetail->detailsProses($data['type_proses'])) > 0){
+                    foreach($spkDetail->detailsProses($data['type_proses']) as $val){
                         $qtyProses += $val->qty_proses;
                     }
                 }
-                $totalQTY = $qtyOrder-$qtyProses;
+                
+                $totalQTY = 0;
+                // POTONG
+                if($data['type_proses'] == 1){
+                    $stockItem = InventoryStockItem::findOne(['item_code'=>$spkDetail->item_code]);
+                    $qtyOrder = 0;
+                    if(isset($stockItem)){
+                        $qtyOrder = $stockItem->satuanTerkecil($spkDetail->item_code, [
+                            0=>$spkDetail->qty_order_1,
+                            1=>$spkDetail->qty_order_2,
+                        ]);
+                    }
+                    $totalQTY = $qtyOrder-$qtyProses;
+                }
+                // CETAK
+                else if($data['type_proses'] == 2){
+                    $totalQTY = $spkDetail->jumlah_cetak-$qtyProses;
+                }
+                // POND
+                else if($data['type_proses'] == 3){
+                    $totalQTY = $spkDetail->jumlah_objek-$qtyProses;
+                }
                 
                 if(!$totalQTY == 0){
                     if(!$data['qty_proses'] == 0){

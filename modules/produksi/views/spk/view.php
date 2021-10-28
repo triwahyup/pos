@@ -129,7 +129,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                                     .' / <i class="text-muted">('.((($v->qty_1!=0) ? $v->qty_1 : 0).' '.$v->um_1.' / '.(($v->qty_2!=0) ? $v->qty_2 : 0).' '.$v->um_2).')</i>' 
                                             ?>
                                         </span>
-                                        <?php if($model->status_produksi == 1): ?>
+                                        <?php if($model->status_produksi == 1 && count($model->detailsProses) == 0): ?>
                                             <a class="text-danger"
                                                 href="javascript:void(0)" 
                                                 data-button="delete_bahan"
@@ -146,10 +146,6 @@ $this->params['breadcrumbs'][] = $this->title;
                                     </li>
                                 <?php endforeach; ?>
                             </ul>
-                            <?php if($model->status_produksi == 1): ?>
-                                <?= Html::a('<i class="fontello icon-progress-1"></i><span>Proses SPK</span>', [
-                                    'lock-bahan', 'no_spk'=>$model->no_spk], ['class' => 'btn btn-primary btn-flat btn-sm margin-bottom-20']) ?>
-                            <?php endif; ?>
                         <?php endif; ?>
                     </div>
                     <!-- DETAIL PROSES -->
@@ -167,7 +163,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                                     .' / '.$v->mesin->name.' <i class="text-muted">('.$v->mesin->typeCode->value.')</i>'
                                             ?>
                                         </span>
-                                        <?php if($model->status_produksi == 2): ?>
+                                        <?php if($model->status_produksi==2 && $v->status_proses==1): ?>
                                             <a class="text-danger"
                                                 href="javascript:void(0)" 
                                                 data-button="delete_proses"
@@ -180,16 +176,21 @@ $this->params['breadcrumbs'][] = $this->title;
                                                 </span>
                                             </a>
                                         <?php endif; ?>
-                                        <?php if($v->status_proses == 2): ?>
-                                            <span><?=$v->statusProses() ?></span>
+                                        <span><?=$v->statusProses() ?></span>
+                                    </li>
+                                    <li>
+                                        <?php if($v->status_proses==3): ?>
+                                            <span class="font-size-12 font-bold text-success"><?='Hasil Produksi: '.$v->qty_hasil ?></span>
+                                        <?php endif; ?>
+                                        <?php if($v->status_proses==4): ?>
+                                            <?=
+                                                '<span class="font-size-12 font-bold text-success">Hasil Produksi: '.$v->qty_hasil.', </span>
+                                                <span class="font-size-12 font-bold text-danger">QTY Rusak: '.($v->qty_proses - $v->qty_hasil).'</span>'
+                                            ?>
                                         <?php endif; ?>
                                     </li>
                                 <?php endforeach; ?>
                             </ul>
-                            <?php if($model->status_produksi == 2): ?>
-                                <?= Html::a('<i class="fontello icon-progress-1"></i><span>Proses In Progress SPK</span>', [
-                                    'lock-proses', 'no_spk'=>$model->no_spk], ['class' => 'btn btn-primary btn-flat btn-sm margin-bottom-20']) ?>
-                            <?php endif; ?>
                         <?php endif; ?>
                     </div>
                     <div class="margin-bottom-20"></div>
@@ -347,6 +348,16 @@ $this->params['breadcrumbs'][] = $this->title;
         <?php ActiveForm::end(); ?>
     </div>
 </div>
+<div class="col-lg-12 col-md-12 col-xs-12 text-right">
+    <?php if($model->status_produksi == 1): ?>
+        <?= Html::a('<i class="fontello icon-progress-1"></i><span>Proses SPK</span>', [
+            'lock-bahan', 'no_spk'=>$model->no_spk], ['class' => 'btn btn-primary btn-flat btn-sm margin-bottom-20']) ?>
+    <?php endif; ?>
+    <?php if($model->status_produksi == 2): ?>
+        <?= Html::a('<i class="fontello icon-progress-1"></i><span>Proses In Progress SPK</span>', [
+            'lock-proses', 'no_spk'=>$model->no_spk], ['class' => 'btn btn-primary btn-flat btn-sm margin-top-20']) ?>
+    <?php endif; ?>
+</div>
 <div data-popup="popup"></div>
 <script>
 function load_bahan()
@@ -438,12 +449,12 @@ function create_bahan(el)
     $.ajax({
         url: "<?= Url::to(['spk/create-bahan']) ?>",
         type: "POST",
+        data: $("#form").serialize(),
         dataType: "text",
         error: function(xhr, status, error) {},
         beforeSend: function(){
             el.loader("load");
         },
-        data: $("#form").serialize(),
         success: function(data){
             var o = $.parseJSON(data);
             if(o.success == true){
