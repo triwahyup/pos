@@ -158,4 +158,17 @@ class SpkDetail extends \yii\db\ActiveRecord
         $model = SpkDetailProses::findAll(['no_spk'=>$this->no_spk, 'item_code'=>$this->item_code, 'type_proses'=>$type]);
         return $model;
     }
+
+    public function getTypeIkat()
+    {
+        $type = '';
+        if($this->lembar_ikat_type==1){
+            $type = $this->lembar_ikat.' SAP';
+        }else if($this->lembar_ikat_type==2){
+            $type = $this->lembar_ikat.' IKAT';
+        }else if($this->lembar_ikat_type==3){
+            $type = $this->lembar_ikat.' DOS';
+        }
+        return $type;
+    }
 }

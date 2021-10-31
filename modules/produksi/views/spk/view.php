@@ -76,29 +76,29 @@ $this->params['breadcrumbs'][] = $this->title;
                         </div>
                         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
                             <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
-                                <label class="font-size-12">Potong / Jum.Cetak</label>
+                                <label class="font-size-12">Total Potong</label>
                             </div>
                             <div class="col-lg-8 col-md-8 col-sm-12 col-xs-12 padding-right-0">
                                 <span class="font-size-12">:</span>
-                                <strong class="font-size-12"><?=$val->potong.' <span class="text-muted font-size-10">(Jumlah cetak '.number_format($val['jumlah_cetak']).')</span>' ?></strong>
+                                <strong class="font-size-12"><?=$val->total_potong.' <span class="text-muted font-size-10">(Jumlah cetak '.number_format($val['jumlah_cetak']).')</span>' ?></strong>
                             </div>
                         </div>
                         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
                             <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
-                                <label class="font-size-12">Objek / Jum.Objek</label>
+                                <label class="font-size-12">Total Objek</label>
                             </div>
                             <div class="col-lg-8 col-md-8 col-sm-12 col-xs-12 padding-right-0">
                                 <span class="font-size-12">:</span>
-                                <strong class="font-size-12"><?=$val->objek.' <span class="text-muted font-size-10">(Jumlah objek '.number_format($val['jumlah_objek']).')</span>' ?></strong>
+                                <strong class="font-size-12"><?=$val->total_objek.' <span class="text-muted font-size-10">(Jumlah objek '.number_format($val['jumlah_objek']).')</span>' ?></strong>
                             </div>
                         </div>
                         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
                             <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
-                                <label class="font-size-12">Mesin / Warna / Lb.Ikat</label>
+                                <label class="font-size-12">Total Warna / Lb.Ikat</label>
                             </div>
                             <div class="col-lg-8 col-md-8 col-sm-12 col-xs-12 padding-right-0">
                                 <span class="font-size-12">:</span>
-                                <strong class="font-size-12"><?=$val->mesin.' / '.$val->jumlah_warna.' / '.$val->lembar_ikat ?></strong>
+                                <strong class="font-size-12"><?=$val->total_warna.' / '.$val->typeIkat ?></strong>
                             </div>
                         </div>
                     </div>

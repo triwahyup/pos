@@ -104,24 +104,8 @@ use yii\widgets\ActiveForm;
             <div class="margin-top-20"></div>
             <fieldset class="fieldset-box padding-20">
                 <legend>Detail Material</legend>
-                <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
-                    <table class="table table-bordered table-custom" data-table="detail">
-                        <thead>
-                            <tr>
-                                <th class="text-center">No.</th>
-                                <th class="text-center">Item</th>
-                                <th class="text-center" colspan="2">QTY</th>
-                                <th class="text-center" colspan="2">Harga Material (Rp)</th>
-                                <th class="text-center" colspan="2">QTY Cetak</th>
-                                <th class="text-center">Harga Cetak (Rp)</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td class="text-center text-danger" colspan="10">Data is empty</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0" data-render="detail">
+                    <p class="text-danger">Data masih kosong.</p>
                 </div>
             </fieldset>
             <div class="margin-bottom-20"></div>
@@ -244,16 +228,23 @@ function init_temp()
         },
         success: function(data){
             var o = $.parseJSON(data);
-            $("[data-table=\"detail\"] > tbody").html(o.model);
+            $("[data-render=\"detail\"]").html(o.model);
             $("#salesorder-total_order").val(o.total_order);
             $("#salesorder-total_biaya").val(o.total_biaya);
             $("#salesorder-grand_total").val(o.grand_total);
+
+            checkbox.init();
+            $.each(o.temps_produksi, function(index, value){
+                $("#proses_"+value.biaya_produksi_code+'_'+value.item_code).prop("checked", true);
+                $("#proses_"+value.biaya_produksi_code+'_'+value.item_code).next().find("i").removeClass("icon-ok").addClass("icon-ok");
+                $("#proses_"+value.biaya_produksi_code+'_'+value.item_code).attr("data-id", value.id);
+            });
         },
         complete: function(){}
     });
 }
 
-function create_temp_produksi(el)
+function create_temp_produksi(code, biaya, item)
 {
     var no_so = "<?=(isset($_GET['no_so'])) ? $_GET['no_so'] : '' ?>"
     $.ajax({
@@ -263,9 +254,9 @@ function create_temp_produksi(el)
         error: function(xhr, status, error) {},
         beforeSend: function(){},
         data: {
-            code: $("#code", el).val(),
-            biaya: $("#biaya", el).val(),
-            item: $("#item", el).val(),
+            code: code,
+            biaya: biaya,
+            item: item,
             no_so: no_so,
         },
         success: function(data){
@@ -330,21 +321,16 @@ $(document).ready(function(){
         select_order(data.code);
     });
 
-    $("body").off("click","[id^=\"tambah_proses_\"]").on("click","[id^=\"tambah_proses_\"]", function(e){
-        e.preventDefault();
-        $(this).next(".option-custom").show();
-    });
-    $("body").off("click",".option-custom > li:not([data-event])").on("click",".option-custom > li:not([data-event])", function(e){
-        e.preventDefault();
-        create_temp_produksi($(this));
-    });
-    $("body").off("click","#delete_temp").on("click","#delete_temp", function(e){
-        e.preventDefault();
-        delete_temp_produksi($(this).attr("data-id"));
-    });
-    $("body").off("click","li[data-event=\"close\"]").on("click","li[data-event=\"close\"]", function(e){
-        e.preventDefault();
-        $(".option-custom").hide();
+    $("body").off("click","[id^=\"proses_\"]").on("click","[id^=\"proses_\"]", function(e){
+        var prop = $(this).prop("checked"), 
+            id = $(this).attr("id").split("_")[1]+'_'+$(this).attr("id").split("_")[2];
+        if(prop == true){
+            console.log("Add Proses "+id);
+            create_temp_produksi($("#code_"+id).val(), $("#biaya_"+id).val(), $("#item_"+id).val());
+        }else{
+            console.log("Delete Proses "+id);
+            delete_temp_produksi($(this).attr("data-id"));
+        }
     });
 });
 </script>

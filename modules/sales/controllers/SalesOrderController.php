@@ -474,7 +474,7 @@ class SalesOrderController extends Controller
                 if($model->save()){
                     // PROSES KURANG STOK
                     foreach($model->details as $val){
-                        $stockItem = $val->stock;
+                        $stockItem = $val->inventoryStock;
                         if(isset($stockItem)){
                             $stock = $stockItem->satuanTerkecil($val->item_code, [
                                 0=>$val->qty_order_1,
@@ -718,11 +718,13 @@ class SalesOrderController extends Controller
         
         $biaya = MasterBiayaProduksi::findAll(['status'=>1]);
         $model =  $this->renderAjax('_temp', ['temps'=>$temps, 'biaya' => $biaya]);
+        $temps_produksi = TempSalesOrderDetailProduksi::find()->where(['user_id'=> \Yii::$app->user->id])->asArray()->all();
         return json_encode([
             'model'=>$model,
             'total_order'=>number_format($total_order),
             'total_biaya'=>number_format($total_biaya),
-            'grand_total'=>number_format($grand_total)
+            'grand_total'=>number_format($grand_total),
+            'temps_produksi'=>$temps_produksi,
         ]);
     }
 

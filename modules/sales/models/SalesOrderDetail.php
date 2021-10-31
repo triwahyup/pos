@@ -122,8 +122,21 @@ class SalesOrderDetail extends \yii\db\ActiveRecord
         return $this->hasMany(SalesOrderDetailProduksi::className(), ['no_so' => 'no_so', 'item_code' => 'item_code']);
     }
 
-    public function getStock()
+    public function getInventoryStock()
     {
         return $this->hasOne(InventoryStockItem::className(), ['item_code' => 'item_code']);
+    }
+
+    public function getTypeIkat()
+    {
+        $type = '';
+        if($this->lembar_ikat_type==1){
+            $type = $this->lembar_ikat.' SAP';
+        }else if($this->lembar_ikat_type==2){
+            $type = $this->lembar_ikat.' IKAT';
+        }else if($this->lembar_ikat_type==3){
+            $type = $this->lembar_ikat.' DOS';
+        }
+        return $type;
     }
 }

@@ -3,6 +3,7 @@
 namespace app\modules\sales\models;
 
 use Yii;
+use app\modules\inventory\models\InventoryStockItem;
 use app\modules\master\models\MasterMaterialItem;
 use app\modules\sales\models\TempSalesOrderDetailProduksi;
 
@@ -111,6 +112,11 @@ class TempSalesOrderDetail extends \yii\db\ActiveRecord
         return $this->hasOne(MasterMaterialItem::className(), ['code' => 'item_code']);
     }
 
+    public function getInventoryStock()
+    {
+        return $this->hasOne(InventoryStockItem::className(), ['item_code' => 'item_code']);
+    }
+
     public function getDetailsProduksi()
     {
         if(!empty($this->no_so)){
@@ -118,5 +124,18 @@ class TempSalesOrderDetail extends \yii\db\ActiveRecord
         }else{
             return $this->hasMany(TempSalesOrderDetailProduksi::className(), ['item_code' => 'item_code', 'user_id'=> 'user_id']);
         }
+    }
+
+    public function getTypeIkat()
+    {
+        $type = '';
+        if($this->lembar_ikat_type==1){
+            $type = $this->lembar_ikat.' SAP';
+        }else if($this->lembar_ikat_type==2){
+            $type = $this->lembar_ikat.' IKAT';
+        }else if($this->lembar_ikat_type==3){
+            $type = $this->lembar_ikat.' DOS';
+        }
+        return $type;
     }
 }
