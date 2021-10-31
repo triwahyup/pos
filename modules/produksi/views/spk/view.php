@@ -60,6 +60,9 @@ $this->params['breadcrumbs'][] = $this->title;
                                         <?=(!empty($val['qty_order_'.$a])) ? number_format($val['qty_order_'.$a]).' '.$val['um_'.$a] : null ?>
                                     <?php endfor; ?>
                                 </strong>
+                                <span class="text-muted font-size-12">
+                                    <?='('.$val->stock->satuanTerkecil($val->item_code, [0=>$val->qty_order_1, 1=>$val->qty_order_2]).' LEMBAR)' ?>
+                                </span>
                             </div>
                         </div>
                         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
@@ -383,20 +386,17 @@ function load_bahan()
     });
 }
 
-function search_bahan(el)
+function search_bahan(code)
 {
-    search = el.val();
     $.ajax({
         url: "<?=Url::to(['spk/search-bahan'])?>",
 		type: "POST",
         data: {
-            search: search,
+            code: code,
         },
 		dataType: "text",
         error: function(xhr, status, error) {},
-		beforeSend: function(){
-			el.loader("load");
-		},
+		beforeSend: function(){},
         success: function(data){
             popup.close();
             var o = $.parseJSON(data);
@@ -409,9 +409,7 @@ function search_bahan(el)
 				}
 			});
         },
-        complete: function(){
-			el.loader("destroy");
-		}
+        complete: function(){}
     });
 }
 
@@ -631,12 +629,6 @@ $(document).ready(function(){
             load_bahan();
         }
     });
-    $("body").off("keypress","#search").on("keypress","#search", function(e){
-		var key = e.charCode ? e.charCode : e.keyCode ? e.keyCode : 0;
-		if(key == KEY.ENTER){
-            search_bahan($(this));
-		}
-	});
     $("body").off("click","[data-id=\"popup\"] table > tbody tr").on("click","[data-id=\"popup\"] table > tbody tr", function(e){
         e.preventDefault();
         var data = $(this).data();

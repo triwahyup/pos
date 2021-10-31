@@ -314,20 +314,17 @@ function load_item()
     });
 }
 
-function search_item(el)
+function search_item(code)
 {
-    search = el.val();
     $.ajax({
         url: "<?=Url::to(['purchase-order/search'])?>",
 		type: "POST",
         data: {
-            search: search,
+            code: code,
         },
 		dataType: "text",
         error: function(xhr, status, error) {},
-		beforeSend: function(){
-			el.loader("load");
-		},
+		beforeSend: function(){},
         success: function(data){
             popup.close();
             var o = $.parseJSON(data);
@@ -341,7 +338,6 @@ function search_item(el)
 			});
         },
         complete: function(){
-			el.loader("destroy");
 		}
     });
 }
@@ -512,14 +508,7 @@ $(document).ready(function(){
             load_item();
         }
     });
-
-    $("body").off("keypress","#search").on("keypress","#search", function(e){
-		var key = e.charCode ? e.charCode : e.keyCode ? e.keyCode : 0;
-		if(key == KEY.ENTER){
-            search_item($(this));
-		}
-	});
-
+    
     $("body").off("click","[data-id=\"popup\"] table > tbody tr").on("click","[data-id=\"popup\"] table > tbody tr", function(e){
         e.preventDefault();
         var data = $(this).data();

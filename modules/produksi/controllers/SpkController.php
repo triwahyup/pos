@@ -37,7 +37,7 @@ class SpkController extends Controller
 				    'rules' => [
                         [
                             'actions' => [
-                                'index', 'view',
+                                'index', 'view', 'autocomplete',
                                 'list-bahan', 'search-bahan', 'item-bahan', 'create-bahan', 'delete-bahan',
                                 'lock-bahan', 'lock-proses',
                                 'list-mesin', 'create-proses', 'delete-proses',
@@ -109,15 +109,33 @@ class SpkController extends Controller
         throw new NotFoundHttpException('The requested page does not exist.');
     }
 
+    public function actionAutocomplete()
+    {
+        $model = [];
+        if(isset($_POST['search'])){
+            $model = MasterMaterialItem::find()
+                ->select(['code', 'concat(code,"-",name) label', 'concat(code,"-",name) name'])
+                ->where(['type_code'=>\Yii::$app->params['MATERIAL_BP_CODE'], 'status'=>1])
+                ->andWhere('concat(code,"-",name) LIKE "%'.$_POST['search'].'%"')
+                ->asArray()
+                ->limit(10)
+                ->all();
+        }
+        return  json_encode($model);
+    }
+
     public function actionListBahan()
     {
         $model = MasterMaterialItem::find()
             ->alias('a')
-            ->select(['a.*', 'b.composite'])
-            ->leftJoin('master_satuan b', 'b.code = a.satuan_code')
+            ->select(['a.*', 'b.onhand', 'c.name satuan', 'd.name material'])
+            ->leftJoin('inventory_stock_item b', 'b.item_code = a.code')
+            ->leftJoin('master_satuan c', 'c.code = a.satuan_code')
+            ->leftJoin('master_material d', 'd.code = a.material_code')
             ->where(['a.type_code'=>\Yii::$app->params['MATERIAL_BP_CODE'], 'a.status'=>1])
             ->orderBy(['a.code'=>SORT_ASC])
             ->limit(10)
+            ->asArray()
             ->all();
         return json_encode(['data'=>$this->renderPartial('_list_bahan', ['model'=>$model])]);
     }
@@ -125,18 +143,15 @@ class SpkController extends Controller
     public function actionSearchBahan()
     {
         $model = [];
-        if(isset($_POST['search'])){
+        if(isset($_POST['code'])){
             $model = MasterMaterialItem::find()
                 ->alias('a')
-                ->select(['a.*', 'b.composite'])
-                ->leftJoin('master_satuan b', 'b.code = a.satuan_code')
-                ->leftJoin('master_material c', 'c.code = a.material_code AND c.type_code = a.type_code')
-                ->where(['a.type_code'=>\Yii::$app->params['MATERIAL_BP_CODE'], 'a.status'=>1])
-                ->andWhere('a.code LIKE "%'.$_POST['search'].'%" 
-                    OR a.name LIKE "%'.$_POST['search'].'%" 
-                    OR c.name  LIKE "%'.$_POST['search'].'%"')
-                ->orderBy(['a.code'=>SORT_ASC])
-                ->limit(10)
+                ->select(['a.*', 'b.onhand', 'c.name satuan', 'd.name material'])
+                ->leftJoin('inventory_stock_item b', 'b.item_code = a.code')
+                ->leftJoin('master_satuan c', 'c.code = a.satuan_code')
+                ->leftJoin('master_material d', 'd.code = a.material_code')
+                ->where(['a.code'=>$_POST['code'], 'a.status'=>1])
+                ->asArray()
                 ->all();
         }
         return json_encode(['data'=>$this->renderPartial('_list_bahan', ['model'=>$model])]);
@@ -390,15 +405,20 @@ class SpkController extends Controller
 		$message = '';
         $model = $this->findModel($no_spk);
         if(isset($model)){
-            $model->status_produksi=2;
-            if($model->save()){
-                \Yii::$app->session->setFlash('success', 'NO. SPK '.$no_spk.' BERHASIL DI PROSES.');
+            if(count($model->detailsBahan) > 0){
+                $model->status_produksi=2;
+                if($model->save()){
+                    \Yii::$app->session->setFlash('success', 'NO. SPK '.$no_spk.' BERHASIL DI PROSES.');
+                }else{
+                    $success = false;
+                    foreach($model->errors as $error => $value){
+                        $message .= strtoupper($value[0].', ');
+                    }
+                    $message = substr($message, 0, -2);
+                }
             }else{
                 $success = false;
-                foreach($model->errors as $error => $value){
-                    $message .= strtoupper($value[0].', ');
-                }
-                $message = substr($message, 0, -2);
+                $message = 'Data SPK Bahan masih kosong.';
             }
         }else{
             $success = false;

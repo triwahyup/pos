@@ -23,7 +23,7 @@ use yii\widgets\MaskedInput;
                             'class' => 'select2',
                         ],
                     ]) ?>
-                <?= $form->field($model, 'keterangan')->textarea(['rows' => 2]) ?>
+                <?= $form->field($model, 'keterangan')->textarea(['rows' => 8]) ?>
             </div>
             <div class="col-lg-1 col-md-1 col-xs-12 padding-left-0"></div>
             <div class="col-lg-7 col-md-7 col-xs-12 padding-right-0">
@@ -138,24 +138,10 @@ use yii\widgets\MaskedInput;
                             </div>
                             <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
                                 <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padding-right-0">
-                                    <label>Mesin / Jml. Warna:</label>
+                                    <label>Total Warna:</label>
                                 </div>
-                                <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padding-right-0">
-                                    <?= $form->field($temp, 'mesin')->widget(MaskedInput::className(), [
-                                            'clientOptions' => [
-                                                'alias' =>  'decimal',
-                                                'groupSeparator' => ',',
-                                                'autoGroup' => true
-                                            ],
-                                            'options' => [
-                                                'data-align' => 'text-right',
-                                                'data-temp' => true,
-                                                'placeholder' => 'Mesin'
-                                            ]
-                                        ])->label(false) ?>
-                                </div>
-                                <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padding-right-0">
-                                    <?= $form->field($temp, 'jumlah_warna')->widget(MaskedInput::className(), [
+                                <div class="col-lg-8 col-md-8 col-sm-12 col-xs-12 padding-right-0">
+                                    <?= $form->field($temp, 'total_warna')->widget(MaskedInput::className(), [
                                             'clientOptions' => [
                                                 'alias' =>  'decimal',
                                                 'groupSeparator' => ',',
@@ -164,7 +150,7 @@ use yii\widgets\MaskedInput;
                                             'options' => [
                                                 'data-align' => 'text-right', 
                                                 'data-temp' => true,
-                                                'placeholder' => 'Jumlah Warna'
+                                                'placeholder' => 'Total Warna'
                                             ]
                                         ])->label(false) ?>
                                 </div>
@@ -173,10 +159,10 @@ use yii\widgets\MaskedInput;
                         <div class="col-lg-6 col-md-6 col-xs-12 padding-left-0 padding-right-0">
                             <div class="col-lg-12 col-md-12 col-xs-12 padding-right-0">
                                 <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padding-right-0">
-                                    <label>Lb. Potong / Objek:</label>
+                                    <label>Total Potong / Objek:</label>
                                 </div>
                                 <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padding-right-0">
-                                    <?= $form->field($temp, 'potong')->widget(MaskedInput::className(), [
+                                    <?= $form->field($temp, 'total_potong')->widget(MaskedInput::className(), [
                                             'clientOptions' => [
                                                 'alias' =>  'decimal',
                                                 'groupSeparator' => ',',
@@ -190,7 +176,7 @@ use yii\widgets\MaskedInput;
                                         ])->label(false) ?>
                                 </div>
                                 <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padding-right-0">
-                                    <?= $form->field($temp, 'objek')->widget(MaskedInput::className(), [
+                                    <?= $form->field($temp, 'total_objek')->widget(MaskedInput::className(), [
                                             'clientOptions' => [
                                                 'alias' =>  'decimal',
                                                 'groupSeparator' => ',',
@@ -206,23 +192,7 @@ use yii\widgets\MaskedInput;
                             </div>
                             <div class="col-lg-12 col-md-12 col-xs-12 padding-right-0">
                                 <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padding-right-0">
-                                    <label class="font-size-12">Harga Cetak / Lb. Ikat:</label>
-                                </div>
-                                <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padding-right-0">
-                                    <?= $form->field($temp, 'harga_cetak')->widget(MaskedInput::className(), [
-                                            'clientOptions' => [
-                                                'alias' =>  'decimal',
-                                                'groupSeparator' => ',',
-                                                'autoGroup' => true
-                                            ],
-                                            'options' => [
-                                                'data-align' => 'text-right',
-                                                'data-name' => 'iconbox',
-                                                'data-icons' => 'rupiah',
-                                                'placeholder' => 'Harga Cetak',
-                                                'data-temp' => true
-                                            ]
-                                        ])->label(false) ?>
+                                    <label>Lb. Ikat / Satuan:</label>
                                 </div>
                                 <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padding-right-0">
                                     <?= $form->field($temp, 'lembar_ikat')->widget(MaskedInput::className(), [
@@ -238,36 +208,20 @@ use yii\widgets\MaskedInput;
                                             ]
                                         ])->label(false) ?>
                                 </div>
+                                <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padding-right-0">
+                                    <?= $form->field($temp, 'lembar_ikat_type')->dropDownList([1=>'SAP', 2=>'IKAT', 3=>'DOS'], ['prompt'=>'Pilih Satuan Lembar Ikat', 'data-temp'=>true])->label(false) ?>
+                                </div>
                             </div>
                         </div>
                     </div>
                     <div class="col-lg-12 col-md-12 col-xs-12 text-right">
-                        <button class="btn btn-success margin-bottom-10 margin-top-10" data-button="create_temp">
+                        <button class="btn btn-success margin-bottom-10 margin-top-10 margin-bottom-20" data-button="create_temp">
                             <i class="fontello icon-plus"></i>
                             <span>Tambah Data Detail</span>
                         </button>
                     </div>
                 </div>
-                <div class="col-lg-12 col-md-12 col-xs-12">
-                    <table class="table table-bordered table-custom" data-table="detail">
-                        <thead>
-                            <tr>
-                                <th class="text-center">No.</th>
-                                <th class="text-center">Item</th>
-                                <th class="text-center" colspan="2">QTY</th>
-                                <th class="text-center" colspan="2">Harga Material (Rp)</th>
-                                <th class="text-center" colspan="2">QTY Cetak</th>
-                                <th class="text-center">Harga Cetak (Rp)</th>
-                                <th class="text-center">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td class="text-center text-danger" colspan="10">Data is empty</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+                <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0" data-render="detail"></div>
             </fieldset>
             <div class="margin-bottom-20"></div>
         </div>
@@ -303,20 +257,17 @@ function load_item()
     });
 }
 
-function search_item(el)
+function search_item(code)
 {
-    search = el.val();
     $.ajax({
         url: "<?=Url::to(['order/search'])?>",
 		type: "POST",
         data: {
-            search: search,
+            code: code,
         },
 		dataType: "text",
         error: function(xhr, status, error) {},
-		beforeSend: function(){
-			el.loader("load");
-		},
+		beforeSend: function(){},
         success: function(data){
             popup.close();
             var o = $.parseJSON(data);
@@ -329,9 +280,7 @@ function search_item(el)
 				}
 			});
         },
-        complete: function(){
-			el.loader("destroy");
-		}
+        complete: function(){}
     });
 }
 
@@ -374,11 +323,18 @@ function init_temp()
         },
         success: function(data){
             var o = $.parseJSON(data);
-            $("[data-table=\"detail\"] > tbody").html(o.model);
+            $("[data-render=\"detail\"]").html(o.model);
             $("#masterorder-total_order").val(o.total_order);
             $("#masterorder-total_biaya").val(o.total_biaya);
             $("#masterorder-grand_total").val(o.grand_total);
             $("[id^=\"tempmasterorderdetail-qty_order_\"]").attr("readonly", true);
+            
+            checkbox.init();
+            $.each(o.temps_produksi, function(index, value){
+                $("#proses_"+value.biaya_produksi_code+'_'+value.item_code).prop("checked", true);
+                $("#proses_"+value.biaya_produksi_code+'_'+value.item_code).next().find("i").removeClass("icon-ok").addClass("icon-ok");
+                $("#proses_"+value.biaya_produksi_code+'_'+value.item_code).attr("data-id", value.id);
+            });
         },
         complete: function(){
             temp.destroy();
@@ -562,13 +518,6 @@ $(document).ready(function(){
         }
     });
 
-    $("body").off("keypress","#search").on("keypress","#search", function(e){
-		var key = e.charCode ? e.charCode : e.keyCode ? e.keyCode : 0;
-		if(key == KEY.ENTER){
-            search_item($(this));
-		}
-	});
-
     $("body").off("click","[data-id=\"popup\"] table > tbody tr").on("click","[data-id=\"popup\"] table > tbody tr", function(e){
         e.preventDefault();
         var data = $(this).data();
@@ -587,18 +536,15 @@ $(document).ready(function(){
 
     $("body").off("click","[data-button=\"create_temp\"]").on("click","[data-button=\"create_temp\"]", function(e){
         e.preventDefault();
-        var success = true,
-            message = "";
-        
         if(!$("#masterorder-name").val() && !$("#masterorder-type_order").val()){
-            success = false;
-            message += 'Nama dan Type Order, ';
+            notification.open("danger", "Nama dan Type Order tidak boleh kosong!", timeOut);
         }
         if(!$("#tempmasterorderdetail-qty_order_1").val() && !$("#tempmasterorderdetail-qty_order_2").val()){
-            success = false;
-            message += 'QTY Order, ';
+            notification.open("danger", "QTY tidak boleh kosong!", timeOut);
         }
         
+        var success = true,
+            message = "";
         $.each($("[data-temp]:not(#tempmasterorderdetail-id):not(#tempmasterorderdetail-order_code):not([id^=\"tempmasterorderdetail-qty_order_\"])"), function(index, element){
             var a = $(element).attr("id").split("-"),
                 b = a[1].replace("_", " ");
@@ -639,21 +585,16 @@ $(document).ready(function(){
         delete_temp($(this).attr("data-target"));
     });
 
-    $("body").off("click","[id^=\"tambah_proses_\"]").on("click","[id^=\"tambah_proses_\"]", function(e){
-        e.preventDefault();
-        $(this).next(".option-custom").show();
-    });
-    $("body").off("click",".option-custom > li:not([data-event])").on("click",".option-custom > li:not([data-event])", function(e){
-        e.preventDefault();
-        create_temp_produksi($("#code", $(this)).val(), $("#biaya", $(this)).val(), $("#item", $(this)).val());
-    });
-    $("body").off("click","#delete_temp").on("click","#delete_temp", function(e){
-        e.preventDefault();
-        delete_temp_produksi($(this).attr("data-id"));
-    });
-    $("body").off("click","li[data-event=\"close\"]").on("click","li[data-event=\"close\"]", function(e){
-        e.preventDefault();
-        $(".option-custom").hide();
+    $("body").off("click","[id^=\"proses_\"]").on("click","[id^=\"proses_\"]", function(e){
+        var prop = $(this).prop("checked"), 
+            id = $(this).attr("id").split("_")[1]+'_'+$(this).attr("id").split("_")[2];
+        if(prop == true){
+            console.log("Add Proses "+id);
+            create_temp_produksi($("#code_"+id).val(), $("#biaya_"+id).val(), $("#item_"+id).val());
+        }else{
+            console.log("Delete Proses "+id);
+            delete_temp_produksi($(this).attr("data-id"));
+        }
     });
 });
 </script>

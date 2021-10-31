@@ -1,4 +1,5 @@
-<input type="text" name="search" id="search" class="form-control" placeholder="Cari berdasarkan Kode, Nama dan Type Material ...">
+<?php use yii\helpers\Url; ?>
+<input type="text" name="search" id="search" class="form-control" placeholder="Cari berdasarkan Kode dan Nama Material ...">
 <table class="table table-bordered table-custom margin-top-10">
 	<thead>
 		<tr>
@@ -7,17 +8,19 @@
 			<th class="text-center">Nama Item</th>
 			<th class="text-center">Type</th>
 			<th class="text-center">UM</th>
+			<th class="text-center">Stok Gudang</th>
 		</tr>
 	</thead>
 	<tbody>
 		<?php if(count($model) > 0): ?>
 			<?php foreach($model as $index=>$val) : ?>
-				<tr data-code="<?=$val->code ?>">
+				<tr data-code="<?=$val['code'] ?>">
                     <td class="text-center"><?=($index+1) ?></td>
-                    <td class="text-center"><?=$val->code ?></td>
-                    <td><?=$val->name ?></td>
-                    <td><?=(isset($val->material)) ? $val->material->name : '' ?></td>
-                    <td><?=(isset($val->satuan)) ? $val->satuan->name : '' ?></td>
+                    <td class="text-center"><?=$val['code'] ?></td>
+                    <td><?=$val['name'] ?></td>
+                    <td class="text-center"><?=$val['material'] ?></td>
+                    <td class="text-center"><?=$val['satuan'] ?></td>
+                    <td class="text-right"><?=number_format($val['onhand']) ?></td>
                 </tr>
 			<?php endforeach; ?>
 		<?php else : ?>
@@ -27,3 +30,34 @@
 		<?php endif; ?>
 	</tbody>
 </table>
+<script>
+$(document).ready(function(){
+	$("#search").autocomplete({
+        minLength: 1,
+        select: function(event, value){
+			search_bahan(value.item.code);
+        },
+        source: function(request, response){
+            $.ajax({
+                url: "<?=Url::to(['spk/autocomplete'])?>",
+                type: "POST",
+                dataType: "text",
+                error: function(xhr, status, error) {},
+                data: {
+                    search: request.term,
+                },
+                beforeSend: function (data){
+                    $("#search").loader("load");
+                },
+                success: function(data){
+                    var o = $.parseJSON(data);
+                    response(o);
+                },
+                complete: function(){
+                    $("#search").loader("destroy");
+                },
+            });
+        }
+    });
+});
+</script>

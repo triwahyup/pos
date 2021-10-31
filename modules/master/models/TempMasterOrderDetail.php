@@ -17,10 +17,7 @@ use app\modules\master\models\TempMasterOrderDetailProduksi;
  * @property string|null $satuan
  * @property float|null $panjang
  * @property float|null $lebar
- * @property int|null $potong
- * @property int|null $objek
- * @property int|null $mesin
- * @property int|null $jumlah_warna
+ * @property int|null $total_warna
  * @property int|null $lembar_ikat
  * @property float|null $harga_jual
  * @property float|null $harga_cetak
@@ -44,8 +41,8 @@ class TempMasterOrderDetail extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['urutan', 'user_id'], 'integer'],
-            [['panjang', 'lebar', 'harga_cetak', 'harga_beli_1', 'harga_beli_2', 'harga_beli_3', 'harga_jual_1', 'harga_jual_2', 'harga_jual_3', 'potong', 'objek', 'mesin', 'jumlah_warna', 'lembar_ikat', 'qty_order_1', 'qty_order_2', 'qty_order_3', 'total_order'], 'safe'],
+            [['urutan', 'user_id', 'lembar_ikat_type'], 'integer'],
+            [['panjang', 'lebar', 'harga_cetak', 'harga_beli_1', 'harga_beli_2', 'harga_beli_3', 'harga_jual_1', 'harga_jual_2', 'harga_jual_3', 'total_potong', 'total_objek', 'total_warna', 'lembar_ikat', 'qty_order_1', 'qty_order_2', 'qty_order_3', 'total_order'], 'safe'],
             [['order_code', 'satuan_code', 'type_code', 'material_code', 'group_material_code', 'group_supplier_code'], 'string', 'max' => 3],
             [['jumlah_cetak', 'jumlah_objek'], 'number'],
             [['um_1', 'um_2', 'um_3'], 'string', 'max' => 5],
@@ -66,10 +63,9 @@ class TempMasterOrderDetail extends \yii\db\ActiveRecord
             'satuan_code' => 'Satuan',
             'panjang' => 'Panjang',
             'lebar' => 'Lebar',
-            'potong' => 'Potong',
-            'objek' => 'Objek',
-            'mesin' => 'Mesin',
-            'jumlah_warna' => 'Jumlah Warna',
+            'total_potong' => 'Potong',
+            'total_objek' => 'Objek',
+            'total_warna' => 'Jumlah Warna',
             'lembar_ikat' => 'Lembar Ikat',
             'harga_jual' => 'Harga Jual',
             'harga_cetak' => 'Harga Cetak',
@@ -82,11 +78,10 @@ class TempMasterOrderDetail extends \yii\db\ActiveRecord
         $this->harga_cetak = str_replace(',', '', $this->harga_cetak);
         $this->qty_order_1 = str_replace(',', '', $this->qty_order_1);
         $this->qty_order_2 = str_replace(',', '', $this->qty_order_2);
-        $this->jumlah_warna = str_replace(',', '', $this->jumlah_warna);
+        $this->total_warna = str_replace(',', '', $this->total_warna);
         $this->lembar_ikat = str_replace(',', '', $this->lembar_ikat);
-        $this->mesin = str_replace(',', '', $this->mesin);
-        $this->potong = str_replace(',', '', $this->potong);
-        $this->objek = str_replace(',', '', $this->objek);
+        $this->total_potong = str_replace(',', '', $this->total_potong);
+        $this->total_objek = str_replace(',', '', $this->total_objek);
         $this->total_order = str_replace(',', '', $this->total_order);
         return parent::beforeSave($attribute);
     }
@@ -135,8 +130,8 @@ class TempMasterOrderDetail extends \yii\db\ActiveRecord
             0 => $this->qty_order_1,
             1 => $this->qty_order_2
         ]);
-        $this->jumlah_cetak = $konversi * $this->potong;
-        $this->jumlah_objek = $this->jumlah_cetak * $this->objek;
+        $this->jumlah_cetak = $konversi * $this->total_potong;
+        $this->jumlah_objek = $this->jumlah_cetak * $this->total_objek;
         return true;
     }
 
@@ -147,5 +142,18 @@ class TempMasterOrderDetail extends \yii\db\ActiveRecord
         }else{
             return $this->hasMany(TempMasterOrderDetailProduksi::className(), ['item_code' => 'item_code', 'user_id'=> 'user_id']);
         }
+    }
+
+    public function getTypeIkat()
+    {
+        $type = '';
+        if($this->lembar_ikat_type==1){
+            $type = $this->lembar_ikat.' SAP';
+        }else if($this->lembar_ikat_type==2){
+            $type = $this->lembar_ikat.' IKAT';
+        }else if($this->lembar_ikat_type==3){
+            $type = $this->lembar_ikat.' DOS';
+        }
+        return $type;
     }
 }

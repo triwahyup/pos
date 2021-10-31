@@ -39,7 +39,7 @@ class OrderController extends Controller
                             'roles' => ['@'],
                         ],
                         [
-                            'actions' => ['index', 'view', 'list-item', 'temp', 'get-temp', 'search', 'item'],
+                            'actions' => ['index', 'view', 'list-item', 'temp', 'get-temp', 'search', 'item', 'autocomplete'],
                             'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-order')),
                             'roles' => ['@'],
                         ], 
@@ -426,21 +426,31 @@ class OrderController extends Controller
         return json_encode(['data'=>$this->renderPartial('_list_item', ['model'=>$model])]);
     }
 
-    public function actionSearch()
+    public function actionAutocomplete()
     {
         $model = [];
         if(isset($_POST['search'])){
+            $model = MasterMaterialItem::find()
+                ->select(['code', 'concat(code,"-",name) label', 'concat(code,"-",name) name'])
+                ->where(['type_code'=>\Yii::$app->params['MATERIAL_KERTAS_CODE'], 'status'=>1])
+                ->andWhere('concat(code,"-",name) LIKE "%'.$_POST['search'].'%"')
+                ->asArray()
+                ->limit(10)
+                ->all();
+        }
+        return  json_encode($model);
+    }
+
+    public function actionSearch()
+    {
+        $model = [];
+        if(isset($_POST['code'])){
             $model = MasterMaterialItem::find()
                 ->alias('a')
                 ->select(['a.*', 'b.composite'])
                 ->leftJoin('master_satuan b', 'b.code = a.satuan_code')
                 ->leftJoin('master_kode c', 'c.code = a.type_code')
-                ->where(['a.type_code'=>\Yii::$app->params['MATERIAL_KERTAS_CODE'], 'a.status'=>1])
-                ->andWhere('a.code LIKE "%'.$_POST['search'].'%" 
-                    OR a.name LIKE "%'.$_POST['search'].'%" 
-                    OR c.name  LIKE "%'.$_POST['search'].'%"')
-                ->orderBy(['a.code'=>SORT_ASC])
-                ->limit(10)
+                ->where(['a.code'=>$_POST['code'], 'a.status'=>1])
                 ->all();
         }
         return json_encode(['data'=>$this->renderPartial('_list_item', ['model'=>$model])]);
@@ -473,11 +483,13 @@ class OrderController extends Controller
         
         $biaya = MasterBiayaProduksi::findAll(['status'=>1]);
         $model =  $this->renderAjax('_temp', ['temps'=>$temps, 'biaya' => $biaya]);
+        $temps_produksi = TempMasterOrderDetailProduksi::find()->where(['user_id'=> \Yii::$app->user->id])->asArray()->all();
         return json_encode([
             'model'=>$model,
             'total_order'=>number_format($total_order),
             'total_biaya'=>number_format($total_biaya),
-            'grand_total'=>number_format($grand_total)
+            'grand_total'=>number_format($grand_total),
+            'temps_produksi'=>$temps_produksi,
         ]);
     }
 

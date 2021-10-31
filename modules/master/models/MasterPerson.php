@@ -67,7 +67,7 @@ class MasterPerson extends \yii\db\ActiveRecord
             [['kecamatan_id'], 'string', 'max' => 7],
             [['kelurahan_id'], 'string', 'max' => 10],
             [['kode_pos'], 'string', 'max' => 8],
-            [['phone_1', 'phone_2'], 'string', 'max' => 16],
+            [['phone_1', 'phone_2', 'npwp'], 'string', 'max' => 16],
             [['email', 'fax'], 'string', 'max' => 32],
             [['code'], 'unique'],
             [['status'], 'default', 'value' => 1],

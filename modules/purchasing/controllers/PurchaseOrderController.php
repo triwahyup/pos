@@ -43,7 +43,7 @@ class PurchaseOrderController extends Controller
                             'roles' => ['@'],
                         ],
                         [
-                            'actions' => ['index', 'view', 'list-item', 'temp', 'get-temp', 'popup', 'search', 'item'],
+                            'actions' => ['index', 'view', 'list-item', 'temp', 'get-temp', 'popup', 'search', 'item', 'autocomplete'],
                             'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('purchase-order')),
                             'roles' => ['@'],
                         ], 
@@ -443,21 +443,31 @@ class PurchaseOrderController extends Controller
         return json_encode(['data'=>$this->renderPartial('_list_item', ['model'=>$model])]);
     }
 
-    public function actionSearch()
+    public function actionAutocomplete()
     {
         $model = [];
         if(isset($_POST['search'])){
+            $model = MasterMaterialItem::find()
+                ->select(['code', 'concat(code,"-",name) label', 'concat(code,"-",name) name'])
+                ->where(['status'=>1])
+                ->andWhere('concat(code,"-",name) LIKE "%'.$_POST['search'].'%"')
+                ->asArray()
+                ->limit(10)
+                ->all();
+        }
+        return  json_encode($model);
+    }
+
+    public function actionSearch()
+    {
+        $model = [];
+        if(isset($_POST['code'])){
             $model = MasterMaterialItem::find()
                 ->alias('a')
                 ->select(['a.*', 'b.composite'])
                 ->leftJoin('master_satuan b', 'b.code = a.satuan_code')
                 ->leftJoin('master_kode c', 'c.code = a.type_code')
-                ->where(['a.status'=>1])
-                ->andWhere('a.code LIKE "%'.$_POST['search'].'%" 
-                    OR a.name LIKE "%'.$_POST['search'].'%" 
-                    OR c.name  LIKE "%'.$_POST['search'].'%"')
-                ->orderBy(['a.code'=>SORT_ASC])
-                ->limit(10)
+                ->where(['a.code'=>$_POST['code'], 'a.status'=>1])
                 ->all();
         }
         return json_encode(['data'=>$this->renderPartial('_list_item', ['model'=>$model])]);

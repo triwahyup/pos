@@ -2,6 +2,7 @@
 namespace app\modules\produksi\models;
 
 use Yii;
+use app\modules\inventory\models\InventoryStockItem;
 use app\modules\master\models\MasterOrder;
 use app\modules\master\models\MasterMaterialItem;
 use app\modules\produksi\models\SpkDetailBahan;
@@ -23,10 +24,9 @@ use yii\behaviors\TimestampBehavior;
  * @property string|null $group_material_code
  * @property float|null $panjang
  * @property float|null $lebar
- * @property int|null $potong
- * @property int|null $objek
- * @property int|null $mesin
- * @property int|null $jumlah_warna
+ * @property int|null $total_potong
+ * @property int|null $total_objek
+ * @property int|null $total_warna
  * @property int|null $lembar_ikat
  * @property string|null $um_1
  * @property string|null $um_2
@@ -71,7 +71,7 @@ class SpkDetail extends \yii\db\ActiveRecord
     {
         return [
             [['no_spk', 'urutan', 'order_code'], 'required'],
-            [['urutan', 'potong', 'objek', 'mesin', 'jumlah_warna', 'lembar_ikat', 'status', 'created_at', 'updated_at'], 'integer'],
+            [['urutan', 'total_potong', 'total_objek', 'total_warna', 'lembar_ikat', 'status', 'created_at', 'updated_at', 'lembar_ikat_type'], 'integer'],
             [['panjang', 'lebar', 'harga_beli_1', 'harga_beli_2', 'harga_beli_3', 'harga_jual_1', 'harga_jual_2', 'harga_jual_3', 'harga_cetak', 'qty_order_1', 'qty_order_2', 'qty_order_3', 'jumlah_cetak', 'jumlah_objek', 'total_order'], 'number'],
             [['no_spk'], 'string', 'max' => 12],
             [['order_code', 'satuan_code', 'material_code', 'type_code', 'group_supplier_code', 'group_material_code'], 'string', 'max' => 3],
@@ -98,10 +98,9 @@ class SpkDetail extends \yii\db\ActiveRecord
             'group_material_code' => 'Group Material Code',
             'panjang' => 'Panjang',
             'lebar' => 'Lebar',
-            'potong' => 'Potong',
-            'objek' => 'Objek',
-            'mesin' => 'Mesin',
-            'jumlah_warna' => 'Jumlah Warna',
+            'total_potong' => 'Potong',
+            'total_objek' => 'Objek',
+            'total_warna' => 'Jumlah Warna',
             'lembar_ikat' => 'Lembar Ikat',
             'um_1' => 'Um 1',
             'um_2' => 'Um 2',
@@ -124,6 +123,11 @@ class SpkDetail extends \yii\db\ActiveRecord
         ];
     }
     
+    public function getStock()
+    {
+        return $this->hasOne(InventoryStockItem::className(), ['item_code' => 'item_code']);
+    }
+
     public function getItem()
     {
         return $this->hasOne(MasterMaterialItem::className(), ['code' => 'item_code']);

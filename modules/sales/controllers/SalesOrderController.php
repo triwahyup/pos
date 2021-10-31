@@ -48,7 +48,7 @@ class SalesOrderController extends Controller
                             'roles' => ['@'],
                         ],
                         [
-                            'actions' => ['index', 'view', 'list-order', 'load-order', 'temp', 'search', 'select-order'],
+                            'actions' => ['index', 'view', 'list-order', 'load-order', 'temp', 'search', 'select-order', 'autocomplete'],
                             'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('sales-order')),
                             'roles' => ['@'],
                         ], 
@@ -608,17 +608,26 @@ class SalesOrderController extends Controller
         return json_encode(['data'=>$this->renderPartial('_list_item', ['model'=>$model])]);
     }
 
-    public function actionSearch()
+    public function actionAutocomplete()
     {
         $model = [];
         if(isset($_POST['search'])){
             $model = MasterOrder::find()
+                ->select(['code', 'concat(code,"-",name) label', 'concat(code,"-",name) name'])
                 ->where(['status'=>1])
-                ->andWhere('code LIKE "%'.$_POST['search'].'%" 
-                    OR name LIKE "%'.$_POST['search'].'%"')
-                ->orderBy(['code'=>SORT_ASC])
+                ->andWhere('concat(code,"-",name) LIKE "%'.$_POST['search'].'%"')
+                ->asArray()
                 ->limit(10)
                 ->all();
+        }
+        return  json_encode($model);
+    }
+
+    public function actionSearch()
+    {
+        $model = [];
+        if(isset($_POST['code'])){
+            $model = MasterOrder::find()->where(['code'=>$_POST['code'], 'status'=>1])->all();
         }
         return json_encode(['data'=>$this->renderPartial('_list_item', ['model'=>$model])]);
     }

@@ -1,4 +1,5 @@
-<input type="text" name="search" id="search" class="form-control" placeholder="Cari berdasarkan Kode, Nama dan Type Material ...">
+<?php use yii\helpers\Url; ?>
+<input type="text" name="search" id="search" class="form-control" placeholder="Cari berdasarkan Kode dan Nama Order (Job) ...">
 <table class="table table-bordered table-custom margin-top-10">
 	<thead>
 		<tr>
@@ -25,3 +26,34 @@
 		<?php endif; ?>
 	</tbody>
 </table>
+<script>
+$(document).ready(function(){
+	$("#search").autocomplete({
+        minLength: 1,
+        select: function(event, value){
+			search_item(value.item.code);
+        },
+        source: function(request, response){
+            $.ajax({
+                url: "<?=Url::to(['sales-order/autocomplete'])?>",
+                type: "POST",
+                dataType: "text",
+                error: function(xhr, status, error) {},
+                data: {
+                    search: request.term,
+                },
+                beforeSend: function (data){
+                    $("#search").loader("load");
+                },
+                success: function(data){
+                    var o = $.parseJSON(data);
+                    response(o);
+                },
+                complete: function(){
+                    $("#search").loader("destroy");
+                },
+            });
+        }
+    });
+});
+</script>

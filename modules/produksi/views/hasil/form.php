@@ -4,7 +4,7 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\ActiveForm;
 
-$this->title = 'Hasi Produksi';
+$this->title = 'Hasil Produksi';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 
