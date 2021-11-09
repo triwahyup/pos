@@ -25,7 +25,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 ]) ?>
         <?php endif; ?>
     </p>
-
+    
     <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 pading-right-0">
         <div class="col-lg-6 col-md-6 col-xs-12 padding-left-0 pading-right-0">
             <?= DetailView::widget([
@@ -115,13 +115,14 @@ $this->params['breadcrumbs'][] = $this->title;
             ]) ?>
         </div>
     </div>
-    <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
         <div class="margin-top-20"></div>
-        <fieldset class="fieldset-box">
-            <legend>Detail Item</legend>
-            <div class="margin-top-20"></div>
-            <div class="col-lg-12 col-md-12 col-xs-12">
-                <div class="col-lg-12 col-md-12 col-xs-12">
+        <div class="document-container">
+            <div class="document-header">No. Purchase Order: <?=$model->no_po ?></div>
+            <div class="document-body">
+                <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
+                    <h6>Detail Material</h6>
+                    <hr />
                     <table class="table table-bordered table-custom">
                         <thead>
                             <tr>
@@ -163,18 +164,11 @@ $this->params['breadcrumbs'][] = $this->title;
                         </tbody>
                     </table>
                 </div>
-            </div>
-        </fieldset>
-        <div class="margin-bottom-20"></div>
-    </div>
-    <?php if(count($model->approvals) > 0): ?>
-        <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
-            <div class="margin-top-20"></div>
-            <fieldset class="fieldset-box">
-                <legend>Detail Approval</legend>
-                <div class="margin-top-20"></div>
-                <div class="col-lg-12 col-md-12 col-xs-12">
-                    <div class="col-lg-12 col-md-12 col-xs-12">
+                <?php if(count($model->approvals) > 0): ?>
+                    <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
+                        <div class="margin-bottom-20"></div>
+                        <h6>Detail Approval</h6>
+                        <hr />
                         <table class="table table-bordered table-custom">
                             <thead>
                                 <tr>
@@ -202,34 +196,33 @@ $this->params['breadcrumbs'][] = $this->title;
                             </tbody>
                         </table>
                     </div>
-                </div>
-            </fieldset>
-            <div class="margin-bottom-20"></div>
+                <?php endif; ?>
+                <?php if($sendApproval): ?>
+                    <div class="text-right">
+                        <?= Html::a('<i class="fontello icon-paper-plane-1"></i><span>Send Approval</span>', ['send-approval', 'no_po'=>$model->no_po], ['class' => 'btn btn-info btn-flat btn-sm']) ?>
+                    </div>
+                <?php endif; ?>
+                <?php if($postInvoice): ?>
+                    <div class="text-right">
+                        <?= Html::a('<i class="fontello icon-ok"></i><span>Post to Invoice Order</span>', ['post', 'no_po'=>$model->no_po], ['class' => 'btn btn-info btn-flat btn-sm']) ?>
+                    </div>
+                <?php endif; ?>
+                <?php if($typeApproval): ?>
+                    <div class="text-right">
+                        <button data-button="popup_app" class="btn btn-success" data-code="<?=$model->no_po ?>" data-type="APPROVE">
+                            <i class="fontello icon-ok"></i>
+                            <span>Approve</span>
+                        </button>
+                        <button data-button="popup_rjc" class="btn btn-danger" data-code="<?=$model->no_po ?>" data-type="REJECT">
+                            <i class="fontello icon-reply"></i>
+                            <span>Reject</span>
+                        </button>
+                    </div>
+                    <div data-form="approval"></div>
+                <?php endif; ?>
+            </div>
         </div>
-    <?php endif; ?>
-    <?php if($sendApproval): ?>
-        <div class="text-right">
-            <?= Html::a('<i class="fontello icon-paper-plane-1"></i><span>Send Approval</span>', ['send-approval', 'no_po'=>$model->no_po], ['class' => 'btn btn-info btn-flat btn-sm']) ?>
-        </div>
-    <?php endif; ?>
-    <?php if($postInvoice): ?>
-        <div class="text-right">
-            <?= Html::a('<i class="fontello icon-ok"></i><span>Post to Invoice Order</span>', ['post', 'no_po'=>$model->no_po], ['class' => 'btn btn-info btn-flat btn-sm']) ?>
-        </div>
-    <?php endif; ?>
-    <?php if($typeApproval): ?>
-        <div class="text-right">
-            <button data-button="popup_app" class="btn btn-success" data-code="<?=$model->no_po ?>" data-type="APPROVE">
-                <i class="fontello icon-ok"></i>
-                <span>Approve</span>
-            </button>
-            <button data-button="popup_rjc" class="btn btn-danger" data-code="<?=$model->no_po ?>" data-type="REJECT">
-                <i class="fontello icon-reply"></i>
-                <span>Reject</span>
-            </button>
-        </div>
-        <div data-form="approval"></div>
-    <?php endif; ?>
+    </div>
 </div>
 <script>
 function popup_approval(el)

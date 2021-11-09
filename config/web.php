@@ -5,17 +5,7 @@ $baseURL = preg_replace('/web$/', '', (new Request)->getBaseUrl());;
 
 $rules = require __DIR__ . '/rules.php';
 $params = require __DIR__ . '/params.php';
-
-if(getenv('APP_ENV') == 'local')
-    $directory = 'local';
-else if(getenv('APP_ENV') == 'beta')
-	$directory = 'beta';
-else if(getenv('APP_ENV') == 'production')
-    $directory = 'production';
-else
-    $directory = 'local';
-$db = require __DIR__ .'/'.$directory. '/db.php';
-
+$db = require __DIR__ . '/db.php';
 $config = [
     'id' => 'basic',
     'name' => 'POS Point of Sales',

@@ -502,12 +502,6 @@ function delete_temp_produksi(id)
     });
 }
 
-$(function(){
-    <?php if(!$model->isNewRecord): ?>
-        init_temp();
-    <?php endif; ?>
-});
-
 var timeOut = 3000;
 $(document).ready(function(){
     $("body").off("keydown","#tempmasterorderdetail-item_name")
@@ -596,5 +590,11 @@ $(document).ready(function(){
             delete_temp_produksi($(this).attr("data-id"));
         }
     });
+});
+
+$(function(){
+    <?php if(!$model->isNewRecord): ?>
+        init_temp();
+    <?php endif; ?>
 });
 </script>

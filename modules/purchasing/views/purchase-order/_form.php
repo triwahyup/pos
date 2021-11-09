@@ -250,15 +250,16 @@ use yii\widgets\MaskedInput;
                             <?= $form->field($temp, 'id')->hiddenInput(['data-temp' => true])->label(false) ?>
                         </div>
                     </div>
-                    <div class="col-lg-12 col-md-12 col-xs-12 text-right padding-right-0">
+                    <div class="col-lg-12 col-md-12 col-xs-12 text-right">
                         <button class="btn btn-success margin-bottom-20" data-button="create_temp">
                             <i class="fontello icon-plus"></i>
                             <span>Tambah Data Detail</span>
                         </button>
                     </div>
                 </div>
-                <div class="col-lg-12 col-md-12 col-xs-12 padding-right-0">
-                    <div class="col-lg-12 col-md-12 col-xs-12 padding-right-0">
+                <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
+                    <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
+                        <div class="margin-top-20"></div>
                         <table class="table table-bordered table-custom" data-table="detail">
                             <thead>
                                 <tr>

@@ -11,7 +11,9 @@ use app\modules\master\models\MasterKode;
 use app\modules\master\models\MasterSatuan;
 use app\modules\master\models\MasterMaterial;
 use app\modules\master\models\MasterMaterialItem;
+use app\modules\master\models\MasterMaterialItemPricelist;
 use app\modules\master\models\MasterMaterialItemSearch;
+use app\modules\master\models\TempMasterMaterialItemPricelist;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\AccessControl;
@@ -34,22 +36,22 @@ class MaterialItemController extends Controller
                     'class' => AccessControl::className(),
 				    'rules' => [
                         [
-                            'actions' => ['create'],
+                            'actions' => ['create', 'create-temp'],
                             'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('material-item')),
                             'roles' => ['@'],
                         ],
                         [
-                            'actions' => ['index', 'view', 'generate-code', 'um'],
+                            'actions' => ['index', 'view', 'generate-code', 'um', 'get-temp', 'temp'],
                             'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('material-item')),
                             'roles' => ['@'],
                         ], 
                         [
-                            'actions' => ['update'],
+                            'actions' => ['update', 'update-temp'],
                             'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('material-item')),
                             'roles' => ['@'],
                         ], 
                         [
-                            'actions' => ['delete'],
+                            'actions' => ['delete', 'delete-temp'],
                             'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('material-item')),
                             'roles' => ['@'],
                         ],
@@ -112,6 +114,7 @@ class MaterialItemController extends Controller
 
         $success = true;
         $message = '';
+        $temp = new TempMasterMaterialItemPricelist();
         $model = new MasterMaterialItem();
         if ($this->request->isPost) {
             if ($model->load($this->request->post())) {
@@ -119,15 +122,33 @@ class MaterialItemController extends Controller
 			    $transaction = $connection->beginTransaction();
                 try{
                     if($model->save()){
-                        $stockItem = new InventoryStockItem();
-                        $stockItem->item_code = $model->code;
-                        if(!$stockItem->save()){
-                            $success = false;
-                            $message = (count($stockItem->errors) > 0) ? 'ERROR CREATE INVENTORY STOCK: ' : '';
-                            foreach($stockItem->errors as $error => $value){
-                                $message .= $value[0].', ';
+                        if(count($model->temps()) > 0){
+                            foreach($model->temps() as $temp){
+                                $pricelist = new MasterMaterialItemPricelist();
+                                $pricelist->attributes = $temp->attributes;
+                                if(!$pricelist->save()){
+                                    $success = false;
+                                    $message = (count($pricelist->errors) > 0) ? 'ERROR CREATE PRICELIST: ' : '';
+                                    foreach($pricelist->errors as $error => $value){
+                                        $message .= strtoupper($value[0].', ');
+                                    }
+                                    $message = substr($message, 0, -2);
+                                }
                             }
-                            $message = substr($message, 0, -2);
+
+                            $stockItem = new InventoryStockItem();
+                            $stockItem->item_code = $model->code;
+                            if(!$stockItem->save()){
+                                $success = false;
+                                $message = (count($stockItem->errors) > 0) ? 'ERROR CREATE INVENTORY STOCK: ' : '';
+                                foreach($stockItem->errors as $error => $value){
+                                    $message .= $value[0].', ';
+                                }
+                                $message = substr($message, 0, -2);
+                            }
+                        }else{
+                            $success = false;
+                            $message = 'ERROR CREATE PRICELIST: PRICELIST IS EMPTY.';
                         }
                     }else{
                         $success = false;
@@ -139,6 +160,7 @@ class MaterialItemController extends Controller
                     }
 
                     if($success){
+                        $this->emptyTemp();
                         $transaction->commit();
                         $message = '['.$model->code.'] SUCCESS CREATE ITEM.';
                         $logs =	[
@@ -166,9 +188,11 @@ class MaterialItemController extends Controller
             }
         } else {
             $model->loadDefaultValues();
+            $this->emptyTemp();
         }
 
         return $this->render('create', [
+            'temp' => $temp,
             'model' => $model,
             'type' => $type,
             'material' => $material,
@@ -189,6 +213,7 @@ class MaterialItemController extends Controller
     {
         $success = true;
         $message = '';
+        $temp = new TempMasterMaterialItemPricelist();
         $model = $this->findModel($code);
         $type = MasterKode::find()
             ->select(['name'])
@@ -207,47 +232,86 @@ class MaterialItemController extends Controller
             ->column();
         $groupMaterial = [];
         $groupSupplier = [];
-        if ($this->request->isPost && $model->load($this->request->post())) {
-            $connection = \Yii::$app->db;
-            $transaction = $connection->beginTransaction();
-            try{
-                if(!$model->save()){
-                    $success = false;
-                    $message = (count($model->errors) > 0) ? 'ERROR UPDATE ITEM: ' : '';
-                    foreach($model->errors as $error => $value){
-                        $message .= $value[0].', ';
+        if($this->request->isPost){
+            if($model->load($this->request->post())){
+                $connection = \Yii::$app->db;
+                $transaction = $connection->beginTransaction();
+                try{
+                    if($model->save()){
+                        if(count($model->temps) > 0){
+                            foreach($model->pricelists as $empty)
+                                $empty->delete();
+                            foreach($model->temps as $temp){
+                                $pricelist = new MasterMaterialItemPricelist();
+                                $pricelist->attributes = $temp->attributes;
+                                if(!$pricelist->save()){
+                                    $success = false;
+                                    $message = (count($pricelist->errors) > 0) ? 'ERROR CREATE PRICELIST: ' : '';
+                                    foreach($pricelist->errors as $error => $value){
+                                        $message .= strtoupper($value[0].', ');
+                                    }
+                                    $message = substr($message, 0, -2);
+                                }
+                            }
+                        }else{
+                            $success = false;
+                            $message = 'ERROR UPDATE PRICELIST: PRICELIST IS EMPTY.';
+                        }
+                    }else{
+                        $success = false;
+                        $message = (count($model->errors) > 0) ? 'ERROR UPDATE ITEM: ' : '';
+                        foreach($model->errors as $error => $value){
+                            $message .= $value[0].', ';
+                        }
+                        $message = substr($message, 0, -2);
                     }
-                    $message = substr($message, 0, -2);
-                }
 
-                if($success){
-                    $transaction->commit();
-                    $message = '['.$model->code.'] SUCCESS UPDATE ITEM.';
-                    $logs =	[
-                        'type' => Logs::TYPE_USER,
-                        'description' => $message,
-                    ];
-                    Logs::addLog($logs);
+                    if($success){
+                        $this->emptyTemp();
+                        $transaction->commit();
+                        $message = '['.$model->code.'] SUCCESS UPDATE ITEM.';
+                        $logs =	[
+                            'type' => Logs::TYPE_USER,
+                            'description' => $message,
+                        ];
+                        Logs::addLog($logs);
 
-                    \Yii::$app->session->setFlash('success', $message);
-                    return $this->redirect(['view', 'code' => $model->code]);
-                }else{
+                        \Yii::$app->session->setFlash('success', $message);
+                        return $this->redirect(['view', 'code' => $model->code]);
+                    }else{
+                        $transaction->rollBack();
+                    }
+                }catch(\Exception $e){
+                    $success = false;
+                    $message = $e->getMessage();
                     $transaction->rollBack();
                 }
-            }catch(\Exception $e){
-                $success = false;
-                $message = $e->getMessage();
-                $transaction->rollBack();
+                $logs =	[
+                    'type' => Logs::TYPE_USER,
+                    'description' => $message,
+                ];
+                Logs::addLog($logs);
+                \Yii::$app->session->setFlash('error', $message);
             }
-            $logs =	[
-                'type' => Logs::TYPE_USER,
-                'description' => $message,
-            ];
-            Logs::addLog($logs);
-            \Yii::$app->session->setFlash('error', $message);
+        }else{
+            $this->emptyTemp();
+            foreach($model->pricelists as $pricelist){
+                $temp = new TempMasterMaterialItemPricelist();
+                $temp->attributes = $pricelist->attributes;
+                $temp->user_id = \Yii::$app->user->id;
+                if(!$temp->save()){
+                    $message = (count($temp->errors) > 0) ? 'ERROR LOAD DATA PRICELIST: ' : '';
+                    foreach($temp->errors as $error => $value){
+                        $message .= strtoupper($value[0].', ');
+                    }
+                    $message = substr($message, 0, -2);
+                    \Yii::$app->session->setFlash('error', $message);
+                }
+            }
         }
 
         return $this->render('update', [
+            'temp' => $temp,
             'model' => $model,
             'type' => $type,
             'material' => $material,
@@ -362,5 +426,119 @@ class MaterialItemController extends Controller
             ->asArray()
             ->one();
         return json_encode($model);
+    }
+
+    public function actionTemp()
+    {
+        $temps = TempMasterMaterialItemPricelist::findAll(['user_id'=> \Yii::$app->user->id]);
+        return json_encode(['model'=>$this->renderAjax('_temp', ['temps'=>$temps])]);
+    }
+
+    public function actionGetTemp($id)
+    {
+        $temp = TempMasterMaterialItemPricelist::find()->where(['id'=>$id])->asArray()->one();
+        return json_encode($temp);
+    }
+
+    public function actionCreateTemp()
+    {
+        $request = \Yii::$app->request;
+        $success = true;
+        $message = '';
+        if($request->isPost){
+            $model = $request->post('MasterMaterialItem');
+            if(isset($model)){
+                $data = $request->post('TempMasterMaterialItemPricelist');
+                $temp = new TempMasterMaterialItemPricelist();
+                $temp->attributes = (array)$data;
+                $temp->item_code = $model['code'];
+                $temp->urutan = $temp->count +1;
+                $temp->user_id = \Yii::$app->user->id;
+                if($temp->save()){
+                    $message = 'CREATE TEMP SUCCESSFULLY';
+                }else{
+                    $success = false;
+                    foreach($temp->errors as $error => $value){
+                        $message = $value[0].', ';
+                    }
+                    $message = substr($message, 0, -2);
+                }
+            }
+        }else{
+            throw new NotFoundHttpException('The requested data does not exist.');
+        }
+        return json_encode(['success'=>$success, 'message'=>$message]);
+    }
+
+    public function actionUpdateTemp()
+    {
+        $request = \Yii::$app->request;
+        $success = true;
+        $message = '';
+        if($request->isPost){
+            $data = $request->post('TempMasterMaterialItemPricelist');
+            $temp = $this->findTemp($data['id']);
+            $temp->attributes = (array)$data;
+            if($temp->save()){
+                $message = 'UPDATE TEMP SUCCESSFULLY';
+            }else{
+                $success = false;
+                foreach($temp->errors as $error => $value){
+                    $message = $value[0].', ';
+                }
+                $message = substr($message, 0, -2);
+            }
+        }else{
+            throw new NotFoundHttpException('The requested data does not exist.');
+        }
+        return json_encode(['success'=>$success, 'message'=>$message]);
+    }
+
+    public function actionDeleteTemp($id)
+    {
+        $success = true;
+        $message = '';
+        $temp = $this->findTemp($id);
+        if(isset($temp)){
+            if($temp->delete()){
+                foreach($temp->tmps as $index=>$val){
+                    $val->urutan = $index +1;
+                    if(!$val->save()){
+                        $success = false;
+                        foreach($val->errors as $error => $value){
+                            $message .= strtoupper($value[0].', ');
+                        }
+                        $message = substr($message, 0, -2);
+                    }
+                }
+                $message = 'DELETE TEMP SUCCESSFULLY';
+            }else{
+                $success = false;
+                foreach($temp->errors as $error => $value){
+                    $message = $value[0].', ';
+                }
+                $message = substr($message, 0, -2);
+            }
+        }
+        return json_encode(['success'=>$success, 'message'=>$message]);
+    }
+
+    protected function findTemp($id)
+    {
+        $temp = TempMasterMaterialItemPricelist::findOne(['id'=>$id, 'user_id'=>\Yii::$app->user->id]);
+        if(isset($temp)){
+            return $temp;
+        }
+        throw new NotFoundHttpException('The requested page does not exist.');
+    }
+
+    protected function emptyTemp()
+    {
+        TempMasterMaterialItemPricelist::deleteAll('user_id=:user_id', [':user_id'=>\Yii::$app->user->id]);
+        $temp = TempMasterMaterialItemPricelist::find()->all();
+        if(empty($temp)){
+            $connection = \Yii::$app->db;
+			$connection->createCommand('ALTER TABLE temp_master_material_item_pricelist AUTO_INCREMENT=1')->query();
+        }
     }
 }

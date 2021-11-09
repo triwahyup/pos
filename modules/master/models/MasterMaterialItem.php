@@ -7,7 +7,9 @@ use app\modules\master\models\MasterGroupMaterial;
 use app\modules\master\models\MasterGroupSupplier;
 use app\modules\master\models\MasterKode;
 use app\modules\master\models\MasterMaterial;
+use app\modules\master\models\MasterMaterialItemPricelist;
 use app\modules\master\models\MasterSatuan;
+use app\modules\master\models\TempMasterMaterialItemPricelist;
 use yii\behaviors\TimestampBehavior;
 
 /**
@@ -52,12 +54,11 @@ class MasterMaterialItem extends \yii\db\ActiveRecord
     {
         return [
             [['code', 'name', 'type_code', 'satuan_code', 'material_code'], 'required'],
-            [['type_code', 'material_code', 'harga_beli_1', 'harga_beli_2', 'harga_beli_3', 'harga_jual_1', 'harga_jual_2', 'harga_jual_3'], 'safe'],
+            [['type_code', 'material_code'], 'safe'],
             [['panjang', 'lebar', 'gram'], 'number'],
             [['keterangan'], 'string'],
             [['status', 'created_at', 'updated_at'], 'integer'],
             [['code'], 'string', 'max' => 7],
-            [['um_1', 'um_2', 'um_3'], 'string', 'max' => 5],
             [['name'], 'string', 'max' => 128],
             [['satuan_code', 'group_material_code', 'group_supplier_code'], 'string', 'max' => 3],
             [['code'], 'unique'],
@@ -128,14 +129,18 @@ class MasterMaterialItem extends \yii\db\ActiveRecord
         return $this->hasOne(MasterGroupSupplier::className(), ['code' => 'group_supplier_code']);
     }
 
-    public function beforeSave($attribute)
+    public function getPricelists()
     {
-        $this->harga_beli_1 = str_replace(',', '', $this->harga_beli_1);
-        $this->harga_beli_2 = str_replace(',', '', $this->harga_beli_2);
-        $this->harga_beli_3 = str_replace(',', '', $this->harga_beli_3);
-        $this->harga_jual_1 = str_replace(',', '', $this->harga_jual_1);
-        $this->harga_jual_2 = str_replace(',', '', $this->harga_jual_2);
-        $this->harga_jual_3 = str_replace(',', '', $this->harga_jual_3);
-        return parent::beforeSave($attribute);
+        return $this->hasMany(MasterMaterialItemPricelist::className(), ['item_code' => 'code']);
+    }
+
+    public function getTemps()
+    {
+        return $this->hasMany(TempMasterMaterialItemPricelist::className(), ['item_code' => 'code']);
+    }
+
+    public function temps()
+    {
+        return TempMasterMaterialItemPricelist::find()->where(['user_id' => \Yii::$app->user->id])->all();
     }
 }

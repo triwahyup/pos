@@ -63,42 +63,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 'panjang',
                 'lebar',
                 'gram',
-                [
-                    'attribute' => 'harga_beli_1',
-                    'value' => function ($model, $index) { 
-                        return 'Rp.'.number_format($model->harga_beli_1).'.-';
-                    }
-                ],
-                [
-                    'attribute' => 'harga_beli_2',
-                    'value' => function ($model, $index) { 
-                        return 'Rp.'.number_format($model->harga_beli_2).'.-';
-                    }
-                ],
-                [
-                    'attribute' => 'harga_beli_3',
-                    'value' => function ($model, $index) { 
-                        return 'Rp.'.number_format($model->harga_beli_3).'.-';
-                    }
-                ],
-                [
-                    'attribute' => 'harga_jual_1',
-                    'value' => function ($model, $index) { 
-                        return 'Rp.'.number_format($model->harga_jual_1).'.-';
-                    }
-                ],
-                [
-                    'attribute' => 'harga_beli_2',
-                    'value' => function ($model, $index) { 
-                        return 'Rp.'.number_format($model->harga_beli_2).'.-';
-                    }
-                ],
-                [
-                    'attribute' => 'harga_beli_3',
-                    'value' => function ($model, $index) { 
-                        return 'Rp.'.number_format($model->harga_beli_3).'.-';
-                    }
-                ],
                 'keterangan:ntext',
                 [
                     'attribute' => 'status',
@@ -126,5 +90,30 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
             ],
         ]) ?>
+    </div>
+    <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
+        <div class="margin-top-40"></div>
+        <h6>Pricelist</h6>
+        <hr />
+        <table class="table table-bordered table-custom">
+            <thead>
+                <tr>
+                    <th class="text-center">No.</th>
+                    <th class="text-center">Nama</th>
+                    <th class="text-center" colspan="3">Harga Beli</th>
+                    <th class="text-center" colspan="3">Harga Jual</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php if(count($model->pricelists) > 0): ?>
+                    <?php foreach($model->pricelists as $val): ?>
+                    <?php endforeach; ?>
+                <?php else : ?>
+                    <tr>
+                        <td class="text-center text-danger" colspan="15">Data is empty</td>
+                    </tr>
+                <?php endif; ?>
+            </tbody>
+        </table>
     </div>
 </div>
