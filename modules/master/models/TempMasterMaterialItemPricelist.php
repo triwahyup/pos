@@ -96,4 +96,15 @@ class TempMasterMaterialItemPricelist extends \yii\db\ActiveRecord
         $this->harga_jual_3 = str_replace(',', '', $this->harga_jual_3);
         return parent::beforeSave($attribute);
     }
+
+    public function getStatusActive()
+    {
+        $message = '';
+        if($this->status_active == 1){
+            $message = '<span class="text-label text-success">Pricelist Active</span>';
+        }else{
+            $message = '<span class="text-label text-default">Not Active</span>';
+        }
+        return $message;
+    }
 }

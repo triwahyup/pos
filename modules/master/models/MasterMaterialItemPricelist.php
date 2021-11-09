@@ -72,4 +72,15 @@ class MasterMaterialItemPricelist extends \yii\db\ActiveRecord
             'updated_at' => 'Updated At',
         ];
     }
+
+    public function getStatusActive()
+    {
+        $message = '';
+        if($this->status_active == 1){
+            $message = '<span class="text-label text-success">Pricelist Active</span>';
+        }else{
+            $message = '<span class="text-label text-default">Not Active</span>';
+        }
+        return $message;
+    }
 }

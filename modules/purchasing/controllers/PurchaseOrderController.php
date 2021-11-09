@@ -477,11 +477,15 @@ class PurchaseOrderController extends Controller
     {
         $model = MasterMaterialItem::find()
             ->alias('a')
-            ->select(['a.*', 'a.code as item_code', 'a.name as item_name', 'b.composite'])
-            ->leftJoin('master_satuan b', 'b.code = a.satuan_code')
-            ->where(['a.code'=>$_POST['code'], 'a.status'=>1])
+            ->select(['a.*', 'b.*', 'a.name as item_name', 'c.composite'])
+            ->leftJoin('master_material_item_pricelist b', 'b.item_code = a.code')
+            ->leftJoin('master_satuan c', 'c.code = a.satuan_code')
+            ->where(['a.code'=>$_POST['code'], 'a.status'=>1, 'b.status_active' => 1])
             ->asArray()
             ->one();
+        if(empty($model)){
+            $model = [];
+        }
         return json_encode($model);
     }
 
@@ -515,8 +519,14 @@ class PurchaseOrderController extends Controller
         $message = '';
         if($request->isPost){
             $data = $request->post('TempPurchaseOrderDetail');
-            $item = MasterMaterialItem::findOne(['code'=>$data['item_code'], 'status'=>1]);
-            if($item->harga_beli_1 > 0 && $item->harga_jual_1 > 0){
+            $item = MasterMaterialItem::find()
+                ->alias('a')
+                ->select(['a.*', 'b.*'])
+                ->leftJoin('master_material_item_pricelist b', 'b.item_code = a.code')
+                ->where(['code'=>$data['item_code'], 'a.status'=>1, 'status_active'=>1])
+                ->asArray()
+                ->one();
+            if($item['harga_beli_1'] > 0 && $item['harga_jual_1'] > 0){
                 $temp = new TempPurchaseOrderDetail();
                 $temp->attributes = (array)$data;
                 $temp->attributes = ($temp->item) ? $temp->item->attributes : '';
@@ -552,8 +562,14 @@ class PurchaseOrderController extends Controller
         $message = '';
         if($request->isPost){
             $data = $request->post('TempPurchaseOrderDetail');
-            $item = MasterMaterialItem::findOne(['code'=>$data['item_code'], 'status'=>1]);
-            if($item->harga_beli_1 > 0 && $item->harga_jual_1 > 0){
+            $item = MasterMaterialItem::find()
+                ->alias('a')
+                ->select(['a.*', 'b.*'])
+                ->leftJoin('master_material_item_pricelist b', 'b.item_code = a.code')
+                ->where(['code'=>$data['item_code'], 'a.status'=>1, 'status_active'=>1])
+                ->asArray()
+                ->one();
+            if($item['harga_beli_1'] > 0 && $item['harga_jual_1'] > 0){
                 $temp = $this->findTemp($data['id']);
                 $temp->attributes = (array)$data;
                 $temp->attributes = ($temp->item) ? $temp->item->attributes : '';

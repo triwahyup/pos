@@ -356,11 +356,16 @@ function select_item(code)
 		beforeSend: function(){},
         success: function(data){
             var o = $.parseJSON(data);
-            $.each(o, function(index, value){
-                $("#temppurchaseorderdetail-"+index).val(value);
-            });
-            for(var a=1;a<=o.composite;a++){
-                $("#temppurchaseorderdetail-qty_order_"+a).attr("readonly", false);
+            if(o.length !=0){
+                $.each(o, function(index, value){
+                    $("#temppurchaseorderdetail-"+index).val(value);
+                });
+                for(var a=1;a<=o.composite;a++){
+                    $("#temppurchaseorderdetail-qty_order_"+a).attr("readonly", false);
+                }
+            }else{
+                notification.open("danger", "Pricelist tidak ditemukan / belum aktif. Silakan isi pricelist / aktifkan pricelist yang akan digunakan di menu Material Item.");
+                temp.destroy();
             }
         },
         complete: function(){
@@ -494,13 +499,7 @@ function delete_temp(id)
     });
 }
 
-$(function(){
-    <?php if(!$model->isNewRecord): ?>
-        init_temp();
-    <?php endif; ?>
-});
-
-var timeOut = 3000;
+var timeOut = 6000;
 $(document).ready(function(){
     $("body").off("keydown","#temppurchaseorderdetail-item_name")
     $("body").on("keydown","#temppurchaseorderdetail-item_name", function(e){
@@ -572,5 +571,11 @@ $(document).ready(function(){
         e.preventDefault();
         delete_temp($(this).attr("data-target"));
     });
+});
+
+$(function(){
+    <?php if(!$model->isNewRecord): ?>
+        init_temp();
+    <?php endif; ?>
 });
 </script>

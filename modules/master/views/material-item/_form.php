@@ -96,6 +96,7 @@ use yii\widgets\MaskedInput;
                         </div>
                         <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padding-left-0">
                             <?= $form->field($temp, 'name')->textInput(['readonly' => true, 'placeholder' => 'Nama Pricelist', 'data-temp' => true])->label(false) ?>
+                            <?= $form->field($temp, 'id')->hiddenInput(['readonly' => true, 'data-temp' => true])->label(false) ?>
                             <?= $form->field($temp, 'item_code')->hiddenInput(['readonly' => true, 'data-temp' => true])->label(false) ?>
                         </div>
                     </div>
@@ -105,7 +106,7 @@ use yii\widgets\MaskedInput;
                             <label>UM 1:</label>
                         </div>
                         <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-left-0">
-                            <?= $form->field($temp, 'um_1')->textInput(['readonly' => true, 'placeholder' => 'UM 1', 'data-temp' => true])->label(false) ?>
+                            <?= $form->field($temp, 'um_1')->textInput(['readonly' => true, 'placeholder' => 'UM 1', 'data-temp' => (!$model->isNewRecord) ? false : true])->label(false) ?>
                         </div>
                         <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0">
                             <?= $form->field($temp, 'harga_beli_1')->widget(MaskedInput::className(), [
@@ -149,7 +150,7 @@ use yii\widgets\MaskedInput;
                             <label>UM 2:</label>
                         </div>
                         <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-left-0">
-                            <?= $form->field($temp, 'um_2')->textInput(['readonly' => true, 'placeholder' => 'UM 2', 'data-temp' => true])->label(false) ?>
+                            <?= $form->field($temp, 'um_2')->textInput(['readonly' => true, 'placeholder' => 'UM 2', 'data-temp' => (!$model->isNewRecord) ? false : true])->label(false) ?>
                         </div>
                         <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0">
                             <?= $form->field($temp, 'harga_beli_2')->widget(MaskedInput::className(), [
@@ -193,7 +194,7 @@ use yii\widgets\MaskedInput;
                             <label>UM 3:</label>
                         </div>
                         <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-left-0">
-                            <?= $form->field($temp, 'um_3')->textInput(['readonly' => true, 'placeholder' => 'UM 3', 'data-temp' => true])->label(false) ?>
+                            <?= $form->field($temp, 'um_3')->textInput(['readonly' => true, 'placeholder' => 'UM 3', 'data-temp' => (!$model->isNewRecord) ? false : true])->label(false) ?>
                         </div>
                         <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0">
                             <?= $form->field($temp, 'harga_beli_3')->widget(MaskedInput::className(), [
@@ -246,6 +247,8 @@ use yii\widgets\MaskedInput;
                                 <th class="text-center">Nama</th>
                                 <th class="text-center" colspan="3">Harga Beli (Rp)</th>
                                 <th class="text-center" colspan="3">Harga Jual (Rp)</th>
+                                <th class="text-center">Status Pricelist</th>
+                                <th class="text-center"></th>
                                 <th class="text-center">Action</th>
                             </tr>
                         </thead>
@@ -344,6 +347,15 @@ function init_temp()
         success: function(data){
             var o = $.parseJSON(data);
             $("[data-table=\"detail\"] > tbody").html(o.model);
+            
+            $.each($("[id^=\"status_active_\"]"), function(index, element){
+                var el = $(element).val();
+                if(el == 1){
+                    $(element).prop("checked", true);
+                }else{
+                    $(element).prop("checked", false);
+                }
+            });
         },
         complete: function(){
             temp.destroy();
@@ -364,6 +376,9 @@ function get_temp(id)
         beforeSend: function(){},
         success: function(data){
             var o = $.parseJSON(data);
+            $.each(o, function(index, value){
+                $("#tempmastermaterialitempricelist-"+index).val(value);
+            });
         },
         complete: function(){
             temp.init();
@@ -452,6 +467,24 @@ function delete_temp(id)
     });
 }
 
+function status_active(id)
+{
+    $.ajax({
+        url: "<?= Url::to(['material-item/status-active']) ?>",
+        type: "GET",
+        dataType: "text",
+        error: function(xhr, status, error) {},
+        beforeSend: function(){},
+        data: {
+            id: id
+        },
+        success: function(data){
+            init_temp();
+        },
+        complete: function(){}
+    });
+}
+
 var timeOut = 3000;
 $(document).ready(function(){
     $("body").off("change","#mastermaterialitem-type_code")
@@ -510,6 +543,11 @@ $(document).ready(function(){
     $("body").off("click","#delete_temporary").on("click","#delete_temporary", function(e){
         e.preventDefault();
         delete_temp($(this).attr("data-target"));
+    });
+
+    $("body").off("click","[id^=\"status_active_\"]").on("click","[id^=\"status_active_\"]", function(e){
+        var data = $(this).data();
+        status_active(data.id);
     });
 });
 

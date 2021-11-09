@@ -100,13 +100,25 @@ $this->params['breadcrumbs'][] = $this->title;
                 <tr>
                     <th class="text-center">No.</th>
                     <th class="text-center">Nama</th>
-                    <th class="text-center" colspan="3">Harga Beli</th>
-                    <th class="text-center" colspan="3">Harga Jual</th>
+                    <th class="text-center" colspan="3">Harga Beli (Rp)</th>
+                    <th class="text-center" colspan="3">Harga Jual (Rp)</th>
+                    <th class="text-center">Status Pricelist</th>
                 </tr>
             </thead>
             <tbody>
                 <?php if(count($model->pricelists) > 0): ?>
-                    <?php foreach($model->pricelists as $val): ?>
+                    <?php foreach($model->pricelists as $index=>$val): ?>
+                        <tr>
+                            <td class="text-center"><?=($index +1)?></td>
+                            <td><?=$val->name ?></td>
+                            <?php for($a=1;$a<=3;$a++): ?>
+                                <td class="text-right"><?=(!empty($val['harga_beli_'.$a])) ? number_format($val['harga_beli_'.$a]).'.- <br /><span class="text-muted font-size-10">Per '.$val['um_'.$a].'</span>' : null ?></td>
+                            <?php endfor; ?>
+                            <?php for($a=1;$a<=3;$a++): ?>
+                                <td class="text-right"><?=(!empty($val['harga_jual_'.$a])) ? number_format($val['harga_jual_'.$a]).'.- <br /><span class="text-muted font-size-10">Per '.$val['um_'.$a].'</span>' : null ?></td>
+                            <?php endfor; ?>
+                            <td class="text-center"><?=$val->statusActive ?></td>
+                        </tr>
                     <?php endforeach; ?>
                 <?php else : ?>
                     <tr>

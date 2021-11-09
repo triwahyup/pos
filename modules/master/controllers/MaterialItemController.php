@@ -46,7 +46,7 @@ class MaterialItemController extends Controller
                             'roles' => ['@'],
                         ], 
                         [
-                            'actions' => ['update', 'update-temp'],
+                            'actions' => ['update', 'update-temp', 'status-active'],
                             'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('material-item')),
                             'roles' => ['@'],
                         ], 
@@ -521,6 +521,19 @@ class MaterialItemController extends Controller
             }
         }
         return json_encode(['success'=>$success, 'message'=>$message]);
+    }
+
+    public function actionStatusActive($id)
+    {
+        $temp = $this->findTemp($id);
+        if(isset($temp)){
+            foreach($temp->tmps as $index=>$val){
+                $val->status_active=0;
+                $val->save();
+            }
+            $temp->status_active=1;
+            $temp->save();
+        }
     }
 
     protected function findTemp($id)

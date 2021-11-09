@@ -168,15 +168,16 @@ use yii\widgets\MaskedInput;
                     </div>
                     <div class="col-lg-12 col-md-12 col-xs-12">
                         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 text-right">
-                            <button class="btn btn-success margin-bottom-20 hidden" data-button="create_temp">
-                                <i class="fontello icon-plus"></i>
-                                <span>Tambah Data Detail</span>
+                            <button class="btn btn-success margin-bottom-20" data-button="create_temp">
+                                <i class="fontello icon-block"></i>
+                                <span>Disabled Button</span>
                             </button>
                         </div>
+                        <div class="margin-bottom-40"></div>
                     </div>
                 </div>
-                <div class="col-lg-12 col-md-12 col-xs-12">
-                    <div class="col-lg-12 col-md-12 col-xs-12">
+                <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
+                    <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
                         <table class="table table-bordered table-custom" data-table="detail">
                             <thead>
                                 <tr>
@@ -223,7 +224,6 @@ function init_temp()
             $("#purchaseorderinvoice-total_invoice").val(o.total_invoice);
         },
         complete: function(){
-            $("[data-button=\"create_temp\"]").removeClass("hidden").addClass("hidden");
             setTimeout(function(){
                 $("[data-temp]").val("")
             }, 400);
@@ -294,6 +294,10 @@ $(document).ready(function(){
     $("body").off("click","[data-button=\"change_temp\"]").on("click","[data-button=\"change_temp\"]", function(e){
         e.preventDefault();
         update_temp($(this));
+    });
+
+    $("body").off("click","[data-button=\"create_temp\"]").on("click","[data-button=\"create_temp\"]", function(e){
+        e.preventDefault();
     });
 });
 </script>

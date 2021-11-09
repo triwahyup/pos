@@ -127,7 +127,7 @@ class InventoryStockItem extends \yii\db\ActiveRecord
                 }
                 // LAIN2
                 else{
-                    if($item->um_1 == 'KG'){
+                    if($item->satuan->um_1 == 'KG'){
                         $result[0] = floor($qty / 1000);
                         $sisa = $qty - ($result[0] * 1000);
                         $result[1] = $sisa;
@@ -138,7 +138,7 @@ class InventoryStockItem extends \yii\db\ActiveRecord
             }
         }
         foreach($result as $index=>$val){
-            $desc .= $val .' '.$item['um_'.($index+1)].' / ';
+            $desc .= $val .' '.$item->satuan['um_'.($index+1)].' / ';
         }
         return substr($desc, 0, -2);
     }
