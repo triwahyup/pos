@@ -234,7 +234,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         </div>
                         <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
                             <?= $form->field($spkBahan, 'item_bahan_name')->textInput(['placeholder' => 'Pilih bahan tekan F4'])->label(false) ?>
-                            <?= $form->field($spkBahan, 'item_bahan_code')->hiddenInput()->label(false) ?>
+                            <?= $form->field($spkBahan, 'item_bahan_code')->textInput()->label(false) ?>
                         </div>
                     </div>
                     <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">

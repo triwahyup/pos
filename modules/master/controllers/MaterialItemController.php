@@ -421,10 +421,7 @@ class MaterialItemController extends Controller
 
     public function actionUm($code)
     {
-        $model = MasterSatuan::find()
-            ->where(['code'=>$code, 'status'=>1])
-            ->asArray()
-            ->one();
+        $model = MasterSatuan::find()->where(['code'=>$code, 'status'=>1])->asArray()->one();
         return json_encode($model);
     }
 

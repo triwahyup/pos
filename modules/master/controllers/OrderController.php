@@ -512,13 +512,14 @@ class OrderController extends Controller
         $message = '';
         if($request->isPost){
             $data = $request->post('TempMasterOrderDetail');
-            $checkTemp = TempMasterOrderDetail::find()
+            $ctemp = TempMasterOrderDetail::find()
                 ->where(['item_code'=>$data['item_code'], 'user_id'=> \Yii::$app->user->id])
                 ->one();
-            if(empty($checkTemp)){
+            if(empty($ctemp)){
                 $temp = new TempMasterOrderDetail();
                 $temp->attributes = (array)$data;
                 $temp->attributes = ($temp->item) ? $temp->item->attributes : '';
+                $temp->attributes = ($temp->item->pricelist) ? $temp->item->pricelist->attributes : '';
                 if(!empty($request->post('MasterOrder')['code'])){
                     $temp->order_code = $request->post('MasterOrder')['code'];
                 }
@@ -553,7 +554,7 @@ class OrderController extends Controller
             $data = $request->post('TempMasterOrderDetail');
             $temp = $this->findTemp($data['id']);
             $temp->attributes = (array)$data;
-            $temp->attributes = ($temp->item) ? $temp->item->attributes : '';
+            $temp->attributes = ($temp->item->pricelist) ? $temp->item->pricelist->attributes : '';
             $temp->total_order = $temp->totalOrder;
             $jumlahProses = $temp->jumlahProses();
             if($temp->save()){
@@ -608,10 +609,10 @@ class OrderController extends Controller
         if($request->isPost){
             $materialItem = MasterMaterialItem::findOne(['code'=>$request->post('item'), 'status'=>1]);
             $biayaProduksi = MasterBiayaProduksi::findOne(['code'=>$request->post('biaya'), 'status'=>1]);
-            $checkTemp = $model = TempMasterOrderDetailProduksi::find()
+            $ctemp = $model = TempMasterOrderDetailProduksi::find()
                 ->where(['biaya_produksi_code'=>$biayaProduksi->code, 'item_code'=>$materialItem->code, 'user_id'=> \Yii::$app->user->id])
                 ->one();
-            if(empty($checkTemp)){
+            if(empty($ctemp)){
                 $temp = new TempMasterOrderDetailProduksi();
                 $temp->attributes = $materialItem->attributes;
                 $temp->attributes = $biayaProduksi->attributes;

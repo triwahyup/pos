@@ -8,6 +8,7 @@ use app\modules\inventory\models\InventoryStockItem;
 use app\modules\inventory\models\InventoryStockTransaction;
 use app\modules\master\models\MasterKode;
 use app\modules\master\models\MasterMaterialItem;
+use app\modules\master\models\MasterMaterialItemPricelist;
 use app\modules\master\models\MasterMesin;
 use app\modules\produksi\models\Spk;
 use app\modules\produksi\models\SpkDetail;
@@ -165,9 +166,9 @@ class SpkController extends Controller
                 'a.*',
                 'a.code as item_bahan_code',
                 'a.name as item_bahan_name',
+                'b.*',
                 'c.code as type_bahan_code',
-                'c.name as type_bahan',
-                'b.composite'])
+                'c.name as type_bahan'])
             ->leftJoin('master_satuan b', 'b.code = a.satuan_code')
             ->leftJoin('master_material c', 'c.code = a.material_code and c.type_code = a.type_code')
             ->where(['a.code'=>$_POST['code'], 'a.status'=>1])
@@ -197,57 +198,67 @@ class SpkController extends Controller
                                 $model->qty_2 = $model->qty_2 + $data['qty_2'];
                                 $model->tgl_spk = $data['tgl_spk'];
                             }else{
-                                $model = new SpkDetailBahan();
-                                $model->attributes = (array)$data;
-                                $model->attributes = $model->itemBahan->attributes;
-                                $model->satuan_bahan_code = $model->itemBahan->satuan_code;
-                                $model->urutan = $urutan +1;
+                                $pricelist = MasterMaterialItemPricelist::findOne(['item_code'=>$data['item_bahan_code'], 'status_active'=>1]);
+                                if(isset($pricelist)){
+                                    $model = new SpkDetailBahan();
+                                    $model->attributes = (array)$data;
+                                    $model->attributes = $model->itemBahan->attributes;
+                                    $model->attributes = $pricelist->attributes;
+                                    $model->item_code = $data['item_code'];
+                                    $model->satuan_bahan_code = $model->itemBahan->satuan_code;
+                                    $model->urutan = $urutan +1;
+                                }else{
+                                    $success = false;
+                                    $message = 'Pricelist tidak ditemukan / masih kosong.';
+                                }
                             }
                             
-                            if($model->save()){
-                                // PROSES KURANG STOK
-                                $stock = $stockItem->satuanTerkecil($model->item_bahan_code, [
-                                    0=>$data['qty_1'],
-                                    1=>$data['qty_2'],
-                                ]);
-                                if($stockItem->onhand > $stock){
-                                    $stockItem->onhand = $stockItem->onhand - $stock;
-                                    $stockItem->onsales = $stockItem->onsales + $stock;
-                                    if(!$stockItem->save()){
-                                        $success = false;
-                                        $message = (count($stockItem->errors) > 0) ? 'ERROR UPDATE STOCK ITEM: ' : '';
-                                        foreach($stockItem->errors as $error => $value){
-                                            $message .= strtoupper($value[0].', ');
+                            if($success){
+                                if($model->save()){
+                                    // PROSES KURANG STOK
+                                    $stock = $stockItem->satuanTerkecil($model->item_bahan_code, [
+                                        0=>$data['qty_1'],
+                                        1=>$data['qty_2'],
+                                    ]);
+                                    if($stockItem->onhand > $stock){
+                                        $stockItem->onhand = $stockItem->onhand - $stock;
+                                        $stockItem->onsales = $stockItem->onsales + $stock;
+                                        if(!$stockItem->save()){
+                                            $success = false;
+                                            $message = (count($stockItem->errors) > 0) ? 'ERROR UPDATE STOCK ITEM: ' : '';
+                                            foreach($stockItem->errors as $error => $value){
+                                                $message .= strtoupper($value[0].', ');
+                                            }
+                                            $message = substr($message, 0, -2);
                                         }
-                                        $message = substr($message, 0, -2);
-                                    }
-                                    
-                                    $stockTransaction = new InventoryStockTransaction();
-                                    $stockTransaction->attributes = $stockItem->attributes;
-                                    $stockTransaction->no_document = $model->no_spk;
-                                    $stockTransaction->tgl_document = $model->tgl_spk;
-                                    $stockTransaction->type_document = "SPK";
-                                    $stockTransaction->status_document = "OUT";
-                                    $stockTransaction->qty_out = $stock;
-                                    if(!$stockTransaction->save()){
-                                        $success = false;
-                                        $message = (count($stockTransaction->errors) > 0) ? 'ERROR UPDATE STOCK TRANSACTION: ' : '';
-                                        foreach($stockTransaction->errors as $error => $value){
-                                            $message .= strtoupper($value[0].', ');
+                                        
+                                        $stockTransaction = new InventoryStockTransaction();
+                                        $stockTransaction->attributes = $stockItem->attributes;
+                                        $stockTransaction->no_document = $model->no_spk;
+                                        $stockTransaction->tgl_document = $model->tgl_spk;
+                                        $stockTransaction->type_document = "SPK";
+                                        $stockTransaction->status_document = "OUT";
+                                        $stockTransaction->qty_out = $stock;
+                                        if(!$stockTransaction->save()){
+                                            $success = false;
+                                            $message = (count($stockTransaction->errors) > 0) ? 'ERROR UPDATE STOCK TRANSACTION: ' : '';
+                                            foreach($stockTransaction->errors as $error => $value){
+                                                $message .= strtoupper($value[0].', ');
+                                            }
+                                            $message = substr($message, 0, -2);
                                         }
-                                        $message = substr($message, 0, -2);
+                                    }else{
+                                        $success = false;
+                                        $message = 'SISA STOCK ITEM '.$model->item_code.' TIDAK MENCUKUPI. SISA '.$stockItem->onhand;
                                     }
                                 }else{
                                     $success = false;
-                                    $message = 'SISA STOCK ITEM '.$model->item_code.' TIDAK MENCUKUPI. SISA '.$stockItem->onhand;
+                                    $message = (count($model->errors) > 0) ? 'ERROR CREATE SPK BAHAN: ' : '';
+                                    foreach($model->errors as $error => $value){
+                                        $message .= strtoupper($value[0].', ');
+                                    }
+                                    $message = substr($message, 0, -2);
                                 }
-                            }else{
-                                $success = false;
-                                $message = (count($model->errors) > 0) ? 'ERROR CREATE SPK BAHAN: ' : '';
-                                foreach($model->errors as $error => $value){
-                                    $message .= strtoupper($value[0].', ');
-                                }
-                                $message = substr($message, 0, -2);
                             }
 
                             if($success){

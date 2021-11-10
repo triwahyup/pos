@@ -129,6 +129,12 @@ class MasterMaterialItem extends \yii\db\ActiveRecord
         return $this->hasOne(MasterGroupSupplier::className(), ['code' => 'group_supplier_code']);
     }
 
+    public $status_active=1;
+    public function getPricelist()
+    {
+        return $this->hasOne(MasterMaterialItemPricelist::className(), ['item_code' => 'code', 'status_active' => 'status_active']);
+    }
+
     public function getPricelists()
     {
         return $this->hasMany(MasterMaterialItemPricelist::className(), ['item_code' => 'code']);
