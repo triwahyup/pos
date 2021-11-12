@@ -209,11 +209,11 @@ $this->params['breadcrumbs'][] = $this->title;
                 <?php endif; ?>
                 <?php if($typeApproval): ?>
                     <div class="text-right">
-                        <button data-button="popup_app" class="btn btn-success" data-code="<?=$model->no_po ?>" data-type="APPROVE">
+                        <button data-button="popup_approval" class="btn btn-success" data-code="<?=$model->no_po ?>" data-type="APPROVE">
                             <i class="fontello icon-ok"></i>
                             <span>Approve</span>
                         </button>
-                        <button data-button="popup_rjc" class="btn btn-danger" data-code="<?=$model->no_po ?>" data-type="REJECT">
+                        <button data-button="popup_reject" class="btn btn-danger" data-code="<?=$model->no_po ?>" data-type="REJECT">
                             <i class="fontello icon-reply"></i>
                             <span>Reject</span>
                         </button>
@@ -228,7 +228,6 @@ $this->params['breadcrumbs'][] = $this->title;
 function popup_approval(el)
 {
     var data = el.data();
-    console.log(data);
     $.ajax({
         type: "POST",
         url: "<?= Url::to(['purchase-order/popup']) ?>",
@@ -267,11 +266,11 @@ function approval()
 }
 
 $(document).ready(function(){
-    $("body").off("click","[data-button=\"popup_app\"]").on("click","[data-button=\"popup_app\"]", function(e){
+    $("body").off("click","[data-button=\"popup_approval\"]").on("click","[data-button=\"popup_approval\"]", function(e){
         e.preventDefault();
         popup_approval($(this));
     });
-    $("body").off("click","[data-button=\"popup_rjc\"]").on("click","[data-button=\"popup_rjc\"]", function(e){
+    $("body").off("click","[data-button=\"popup_reject\"]").on("click","[data-button=\"popup_reject\"]", function(e){
         e.preventDefault();
         popup_approval($(this));
     });

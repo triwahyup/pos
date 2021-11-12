@@ -5,86 +5,76 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 
 /* @var $this yii\web\View */
-/* @var $searchModel app\modules\master\models\MasterMesinSearch */
+/* @var $searchModel app\modules\produksi\models\SpkRequestItemSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Master Mesin';
+$this->title = 'Request Item';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="master-mesin-index">
+<div class="spk-request-item-index">
     <p class="text-right">
-        <?= Html::a('<i class="fontello icon-plus"></i><span>Create Data Mesin</span>', ['create'], ['class' => 'btn btn-success btn-flat btn-sm']) ?>
+        <?= Html::a('<i class="fontello icon-plus"></i><span>Create Request Item</span>', ['create'], ['class' => 'btn btn-success btn-flat btn-sm']) ?>
     </p>
-
+    
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
-            'name',
             [
-                'attribute' => 'type_code',
-                'value' => function($model, $index, $key){
-                    return (isset($model->typeCode)) ? $model->typeCode->name : '';
-                }
+                'attribute' => 'no_request',
+                'contentOptions' => [
+                    'class' => 'text-center',
+                ],
             ],
             [
-                'attribute' => 'created_at',
+                'attribute' => 'tgl_request',
                 'contentOptions' => [
                     'class' => 'text-center',
                 ],
                 'filter' => DatePicker::widget([
                     'model' => $searchModel, 
-                    'name' => 'created_at', 
+                    'name' => 'tgl_request', 
                     'type' => DatePicker::TYPE_COMPONENT_APPEND,
                     'pickerButton' => false,
-                    'attribute' => 'created_at',
+                    'attribute' => 'tgl_request',
                     'pluginOptions' => [
                         'format' => 'yyyy-mm-dd',
                         'autoclose' => true,
                     ],
                 ]),
-                'value' => function($model, $index, $key)
-                {
-                    return date('Y-m-d', $model->created_at);
-                }
             ],
             [
-                'attribute' => 'updated_at',
+                'attribute' => 'no_spk',
                 'contentOptions' => [
                     'class' => 'text-center',
                 ],
-                'filter' => DatePicker::widget([
-                    'model' => $searchModel, 
-                    'name' => 'updated_at', 
-                    'type' => DatePicker::TYPE_COMPONENT_APPEND,
-                    'pickerButton' => false,
-                    'attribute' => 'updated_at',
-                    'pluginOptions' => [
-                        'format' => 'yyyy-mm-dd',
-                        'autoclose' => true,
-                    ],
-                ]),
-                'value' => function($model, $index, $key)
-                {
-                    return date('Y-m-d', $model->updated_at);
+            ],
+            [
+                'attribute' => 'status_approval',
+                'contentOptions' => [
+                    'class' => 'text-center',
+                ],
+                'format' => 'raw',
+                'value' => function ($model, $index, $key) { 
+                    return $model->statusApproval;
                 }
             ],
             [
                 'buttons' => [
                     'view' => function ($url, $model) {
                         return Html::a(Helper::buttonIcons()['eye-open'],
-                            ['view', 'code'=>$model->code],
+                            ['view', 'no_request'=>$model->no_request],
                             ['title'=>'View', 'aria-label'=>'View', 'data-pjax'=>true]);
                     },
                     'update' => function ($url, $model) {
                         return Html::a(Helper::buttonIcons()['pencil'],
-                            ['update', 'code'=>$model->code],
+                            ['update', 'no_request'=>$model->no_request],
                             ['title'=>'Update', 'aria-label'=>'Update', 'data-pjax'=>true]);
                     },
                     'delete' => function ($url, $model) {
                         return Html::a(Helper::buttonIcons()['trash'],
-                            ['delete', 'code'=>$model->code],
+                            ['delete', 'no_request'=>$model->no_request],
                             [
                                 'title'=>'Delete',
                                 'aria-label'=>'Delete', 

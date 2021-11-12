@@ -1,30 +1,26 @@
 <?php
 
-namespace app\modules\purchasing\controllers;
+namespace app\modules\produksi\controllers;
 
 use app\models\Logs;
 use app\models\LogsMailSend;
 use app\models\User;
-use app\modules\master\models\MasterMaterialItem;
-use app\modules\master\models\MasterPerson;
 use app\modules\master\models\Profile;
 use app\modules\pengaturan\models\PengaturanApproval;
-use app\modules\purchasing\models\PurchaseOrder;
-use app\modules\purchasing\models\PurchaseOrderApproval;
-use app\modules\purchasing\models\PurchaseOrderDetail;
-use app\modules\purchasing\models\PurchaseOrderInvoice;
-use app\modules\purchasing\models\PurchaseOrderInvoiceDetail;
-use app\modules\purchasing\models\PurchaseOrderSearch;
-use app\modules\purchasing\models\TempPurchaseOrderDetail;
+use app\modules\produksi\models\SpkDetail;
+use app\modules\produksi\models\SpkRequestItem;
+use app\modules\produksi\models\SpkRequestItemDetail;
+use app\modules\produksi\models\SpkRequestItemApproval;
+use app\modules\produksi\models\SpkRequestItemSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 
 /**
- * PurchaseOrderController implements the CRUD actions for PurchaseOrder model.
+ * RequestItemController implements the CRUD actions for SpkRequestItem model.
  */
-class PurchaseOrderController extends Controller
+class RequestItemController extends Controller
 {
     /**
      * @inheritDoc
@@ -38,28 +34,11 @@ class PurchaseOrderController extends Controller
                     'class' => AccessControl::className(),
 				    'rules' => [
                         [
-                            'actions' => ['create', 'create-temp', 'send-approval'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('purchase-order')),
-                            'roles' => ['@'],
-                        ],
-                        [
-                            'actions' => ['index', 'view', 'list-item', 'temp', 'get-temp', 'popup', 'search', 'item', 'autocomplete'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('purchase-order')),
-                            'roles' => ['@'],
-                        ], 
-                        [
-                            'actions' => ['update', 'update-temp', 'post'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('purchase-order')),
-                            'roles' => ['@'],
-                        ], 
-                        [
-                            'actions' => ['delete', 'delete-temp'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('purchase-order')),
-                            'roles' => ['@'],
-                        ],
-                        [
-                            'actions' => ['approval'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('purchase-order')),
+                            'actions' => [
+                                'index', 'view', 'create', 'update', 'delete',
+                                'search-spk', 'popup', 'send-approval', 'approval', 'post'
+                            ],
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('request-item')),
                             'roles' => ['@'],
                         ],
                     ],
@@ -75,12 +54,12 @@ class PurchaseOrderController extends Controller
     }
 
     /**
-     * Lists all PurchaseOrder models.
+     * Lists all SpkRequestItem models.
      * @return mixed
      */
     public function actionIndex()
     {
-        $searchModel = new PurchaseOrderSearch();
+        $searchModel = new SpkRequestItemSearch();
         $dataProvider = $searchModel->search($this->request->queryParams);
 
         return $this->render('index', [
@@ -90,93 +69,90 @@ class PurchaseOrderController extends Controller
     }
 
     /**
-     * Displays a single PurchaseOrder model.
-     * @param string $no_po No Po
+     * Displays a single SpkRequestItem model.
+     * @param string $no_request No Request
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionView($no_po)
+    public function actionView($no_request)
     {
-        $model = $this->findModel($no_po);
+        $model = $this->findModel($no_request);
         $typeuser = \Yii::$app->user->identity->profile->typeUser->value;
         $sendApproval = false;
-        $postInvoice = false;
+        $postSpk = false;
         if($typeuser == 'ADMINISTRATOR' || $typeuser == 'ADMIN'){
             if($model->status_approval == 0 || $model->status_approval == 3){
                 $sendApproval = true;
             }
             if($model->status_approval == 2 && ($model->post == 0 || empty($model->post))){
-                $postInvoice = true;
+                $postSpk = true;
             }
             
         }
         $typeApproval = false;
-        $approval = PurchaseOrderApproval::findOne(['no_po'=>$no_po, 'status'=>2]);
+        $approval = SpkRequestItemApproval::findOne(['no_request'=>$no_request, 'status'=>2]);
         if(isset($approval)){
             if(($model->status_approval==1) && ($approval->user_id == \Yii::$app->user->id) || ($approval->typeuser_code == \Yii::$app->user->identity->profile->typeuser_code)){
                 $typeApproval = true;
             }
         }
-        
+
         return $this->render('view', [
             'model' => $model,
             'sendApproval' => $sendApproval,
-            'postInvoice' => $postInvoice,
+            'postSpk' => $postSpk,
             'typeApproval' => $typeApproval,
             'typeuser' => $typeuser,
         ]);
     }
 
     /**
-     * Creates a new PurchaseOrder model.
+     * Creates a new SpkRequestItem model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
     public function actionCreate()
     {
-        $supplier = MasterPerson::find()
-            ->select(['name'])
-            ->where(['type_user'=>\Yii::$app->params['TYPE_SUPPLIER'], 'status' => 1])
-            ->indexBy('code')
-            ->column();
-        $profile = Profile::find()
-            ->select(['name'])
-            ->where(['status' => 1])
-            ->indexBy('user_id')
-            ->column();
-        
         $success = true;
         $message = '';
-        $temp = new TempPurchaseOrderDetail();
-        $model = new PurchaseOrder();
-        $model->no_po = $model->generateCode();
+        $model = new SpkRequestItem();
+        $detail = new SpkRequestItemDetail();
         if ($this->request->isPost) {
-            if ($model->load($this->request->post())) {
+            if ($model->load($this->request->post()) && $detail->load($this->request->post())) {
                 $connection = \Yii::$app->db;
 			    $transaction = $connection->beginTransaction();
                 try{
-                    $model->user_id = \Yii::$app->user->id;
+                    $model->attributes = $model->attributes;
+                    $model->no_request = $model->generateCode();
+                    $model->tgl_request = date('Y-m-d');
                     if($model->save()){
-                        if(count($model->temps) > 0){
-                            foreach($model->temps as $temp){
-                                $detail = new PurchaseOrderDetail();
-                                $detail->attributes = $temp->attributes;
+                        if(!empty($detail->qty_order_1) || !empty($detail->qty_order_2)){
+                            $spkDetail = SpkDetail::findOne(['no_spk'=>$model->no_spk]);
+                            if(isset($spkDetail)){
+                                $detail = new SpkRequestItemDetail();
+                                $detail->attributes = $spkDetail->attributes;
+                                $detail->attributes = $detail->attributes;
+                                $detail->no_request = $model->no_request;
+                                $detail->urutan = $detail->count +1;
                                 if(!$detail->save()){
                                     $success = false;
-                                    $message = (count($detail->errors) > 0) ? 'ERROR CREATE PO DETAIL: ' : '';
+                                    $message = (count($detail->errors) > 0) ? 'ERROR CREATE REQUEST ITEM DETAIL: ' : '';
                                     foreach($detail->errors as $error => $value){
                                         $message .= strtoupper($value[0].', ');
                                     }
                                     $message = substr($message, 0, -2);
                                 }
+                            }else{
+                                $success = false;
+                                $message = 'DATA SPK DETAIL TIDAK DI TEMUKAN.';
                             }
                         }else{
                             $success = false;
-                            $message = 'ERROR CREATE PO: DETAIL IS EMPTY.';
+                            $message = 'QTY REQUEST KOSONG. SILAKAN ISI QTY.';
                         }
                     }else{
                         $success = false;
-                        $message = (count($model->errors) > 0) ? 'ERROR CREATE PO: ' : '';
+                        $message = (count($model->errors) > 0) ? 'ERROR CREATE REQUEST ITEM: ' : '';
                         foreach($model->errors as $error => $value){
                             $message .= $value[0].', ';
                         }
@@ -184,9 +160,8 @@ class PurchaseOrderController extends Controller
                     }
 
                     if($success){
-                        $this->emptyTemp();
                         $transaction->commit();
-                        $message = '['.$model->no_po.'] SUCCESS CREATE PO.';
+                        $message = '['.$model->no_request.'] SUCCESS CREATE REQUEST ITEM.';
                         $logs =	[
                             'type' => Logs::TYPE_USER,
                             'description' => $message,
@@ -194,7 +169,7 @@ class PurchaseOrderController extends Controller
                         Logs::addLog($logs);
 
                         \Yii::$app->session->setFlash('success', $message);
-                        return $this->redirect(['view', 'no_po' => $model->no_po]);
+                        return $this->redirect(['view', 'no_request' => $model->no_request]);
                     }else{
                         $transaction->rollBack();
                     }
@@ -212,80 +187,59 @@ class PurchaseOrderController extends Controller
             }
         } else {
             $model->loadDefaultValues();
-            $this->emptyTemp();
         }
 
         return $this->render('create', [
             'model' => $model,
-            'supplier' => $supplier,
-            'profile' => $profile,
-            'temp' => $temp,
+            'detail' => $detail,
         ]);
     }
 
     /**
-     * Updates an existing PurchaseOrder model.
+     * Updates an existing SpkRequestItem model.
      * If update is successful, the browser will be redirected to the 'view' page.
-     * @param string $no_po No Po
+     * @param string $no_request No Request
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionUpdate($no_po)
+    public function actionUpdate($no_request)
     {
-        $supplier = MasterPerson::find()
-            ->select(['name'])
-            ->where(['type_user'=>\Yii::$app->params['TYPE_SUPPLIER'], 'status' => 1])
-            ->indexBy('code')
-            ->column();
-        $profile = Profile::find()
-            ->select(['name'])
-            ->where(['status' => 1])
-            ->indexBy('user_id')
-            ->column();
-
         $success = true;
         $message = '';
-        $temp = new TempPurchaseOrderDetail();
-        $model = $this->findModel($no_po);
+        $model = $this->findModel($no_request);
+        $detail = SpkRequestItemDetail::findOne(['no_request'=>$no_request]);
         if ($this->request->isPost) {
-            if ($model->load($this->request->post())){
+            if ($model->load($this->request->post()) && $detail->load($this->request->post())){
                 $connection = \Yii::$app->db;
                 $transaction = $connection->beginTransaction();
                 try{
-                    $model->status_approval = null;
                     if($model->save()){
-                        if(count($model->temps) > 0){
-                            foreach($model->details as $empty)
-                                $empty->delete();
-                            foreach($model->temps as $temp){
-                                $detail = new PurchaseOrderDetail();
-                                $detail->attributes = $temp->attributes;
-                                if(!$detail->save()){
-                                    $success = false;
-                                    $message = (count($detail->errors) > 0) ? 'ERROR UPDATE PO DETAIL: ' : '';
-                                    foreach($detail->errors as $error => $value){
-                                        $message .= strtoupper($value[0].', ');
-                                    }
-                                    $message = substr($message, 0, -2);
+                        if(!empty($detail->qty_order_1) || !empty($detail->qty_order_2)){
+                            $detail->attributes = $detail->attributes;
+                            if(!$detail->save()){
+                                $success = false;
+                                $message = (count($detail->errors) > 0) ? 'ERROR UPDATE REQUEST ITEM DETAIL: ' : '';
+                                foreach($detail->errors as $error => $value){
+                                    $message .= strtoupper($value[0].', ');
                                 }
+                                $message = substr($message, 0, -2);
                             }
                         }else{
                             $success = false;
-                            $message = 'ERROR UPDATE PO: DETAIL IS EMPTY.';
+                            $message = 'QTY REQUEST KOSONG. SILAKAN ISI QTY.';
                         }
                     }else{
                         $success = false;
-                        $message = (count($model->errors) > 0) ? 'ERROR UPDATE PO: ' : '';
+                        $message = (count($model->errors) > 0) ? 'ERROR UPDATE DATA REQUEST ITEM: ' : '';
                         foreach($model->errors as $error => $value){
                             $message .= $value[0].', ';
                         }
                         $message = substr($message, 0, -2);
                     }
-
+                    
                     if($success){
-                        $this->emptyTemp();
                         $transaction->commit();
-                        $message = '['.$model->no_po.'] SUCCESS UPDATE PO.';
+                        $message = '['.$model->no_request.'] SUCCESS UPDATE REQUEST ITEM.';
                         $logs =	[
                             'type' => Logs::TYPE_USER,
                             'description' => $message,
@@ -293,7 +247,7 @@ class PurchaseOrderController extends Controller
                         Logs::addLog($logs);
 
                         \Yii::$app->session->setFlash('success', $message);
-                        return $this->redirect(['view', 'no_po' => $model->no_po]);
+                        return $this->redirect(['view', 'no_request' => $model->no_request]);
                     }else{
                         $transaction->rollBack();
                     }
@@ -315,53 +269,36 @@ class PurchaseOrderController extends Controller
                 return $this->redirect(['index']);
             }else{
                 if($model->post == 1){
-                    \Yii::$app->session->setFlash('error', 'Dokumen ini sudah di Invoice Order.');
+                    \Yii::$app->session->setFlash('error', 'Dokumen ini sudah di Post SPK.');
                     return $this->redirect(['index']);
-                }else{
-                    $this->emptyTemp();
-                    foreach($model->details as $detail){
-                        $temp = new TempPurchaseOrderDetail();
-                        $temp->attributes = $detail->attributes;
-                        $temp->user_id = \Yii::$app->user->id;
-                        if(!$temp->save()){
-                            $message = (count($temp->errors) > 0) ? 'ERROR LOAD PO DETAIL: ' : '';
-                            foreach($temp->errors as $error => $value){
-                                $message .= strtoupper($value[0].', ');
-                            }
-                            $message = substr($message, 0, -2);
-                            \Yii::$app->session->setFlash('error', $message);
-                        }
-                    }
                 }
             }
         }
 
         return $this->render('update', [
             'model' => $model,
-            'supplier' => $supplier,
-            'profile' => $profile,
-            'temp' => $temp,
+            'detail' => $detail,
         ]);
     }
 
     /**
-     * Deletes an existing PurchaseOrder model.
+     * Deletes an existing SpkRequestItem model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param string $no_po No Po
+     * @param string $no_request No Request
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionDelete($no_po)
+    public function actionDelete($no_request)
     {
         $success = true;
 		$message = '';
-        $model = $this->findModel($no_po);
+        $model = $this->findModel($no_request);
         if(isset($model)){
             if($model->status_approval == 1){
                 \Yii::$app->session->setFlash('error', 'Dokumen ini masih dalam proses Approval.');
             }else{
                 if($model->post == 1){
-                    \Yii::$app->session->setFlash('error', 'Dokumen ini sudah di Invoice Order.');
+                    \Yii::$app->session->setFlash('error', 'Dokumen ini sudah di Post SPK.');
                 }else{
                     $connection = \Yii::$app->db;
                     $transaction = $connection->beginTransaction();
@@ -372,7 +309,7 @@ class PurchaseOrderController extends Controller
                                 $detail->status = 0;
                                 if(!$detail->save()){
                                     $success = false;
-                                    $message = (count($detail->errors) > 0) ? 'ERROR DELETE DETAIL PO: ' : '';
+                                    $message = (count($detail->errors) > 0) ? 'ERROR DELETE DETAIL REQUEST ITEM: ' : '';
                                     foreach($detail->errors as $error => $value){
                                         $message .= $value[0].', ';
                                     }
@@ -381,7 +318,7 @@ class PurchaseOrderController extends Controller
                             }
                         }else{
                             $success = false;
-                            $message = (count($model->errors) > 0) ? 'ERROR DELETE PO: ' : '';
+                            $message = (count($model->errors) > 0) ? 'ERROR DELETE REQUEST ITEM: ' : '';
                             foreach($model->errors as $error => $value){
                                 $message .= $value[0].', ';
                             }
@@ -390,7 +327,7 @@ class PurchaseOrderController extends Controller
         
                         if($success){
                             $transaction->commit();
-                            $message = '['.$model->no_po.'] SUCCESS DELETE PO.';
+                            $message = '['.$model->no_request.'] SUCCESS DELETE REQUEST ITEM.';
                             \Yii::$app->session->setFlash('success', $message);
                         }else{
                             $transaction->rollBack();
@@ -414,252 +351,64 @@ class PurchaseOrderController extends Controller
     }
 
     /**
-     * Finds the PurchaseOrder model based on its primary key value.
+     * Finds the SpkRequestItem model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param string $no_po No Po
-     * @return PurchaseOrder the loaded model
+     * @param string $no_request No Request
+     * @return SpkRequestItem the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findModel($no_po)
+    protected function findModel($no_request)
     {
-        if (($model = PurchaseOrder::findOne($no_po)) !== null) {
+        if (($model = SpkRequestItem::findOne($no_request)) !== null) {
             return $model;
         }
 
         throw new NotFoundHttpException('The requested page does not exist.');
     }
 
-    public function actionListItem()
+    public function actionSearchSpk()
     {
-        $model = MasterMaterialItem::find()
-            ->alias('a')
-            ->select(['a.*', 'b.composite'])
-            ->leftJoin('master_satuan b', 'b.code = a.satuan_code')
-            ->where(['a.status'=>1])
-            ->orderBy(['a.code'=>SORT_ASC])
-            ->limit(10)
-            ->all();
-        return json_encode(['data'=>$this->renderPartial('_list_item', ['model'=>$model])]);
-    }
-
-    public function actionAutocomplete()
-    {
-        $model = [];
-        if(isset($_POST['search'])){
-            $model = MasterMaterialItem::find()
-                ->select(['code', 'concat(code,"-",name) label', 'concat(code,"-",name) name'])
-                ->where(['status'=>1])
-                ->andWhere('concat(code,"-",name) LIKE "%'.$_POST['search'].'%"')
-                ->asArray()
-                ->limit(10)
-                ->all();
-        }
-        return  json_encode($model);
-    }
-
-    public function actionSearch()
-    {
-        $model = [];
-        if(isset($_POST['code'])){
-            $model = MasterMaterialItem::find()
-                ->alias('a')
-                ->select(['a.*', 'b.composite'])
-                ->leftJoin('master_satuan b', 'b.code = a.satuan_code')
-                ->leftJoin('master_kode c', 'c.code = a.type_code')
-                ->where(['a.code'=>$_POST['code'], 'a.status'=>1])
-                ->all();
-        }
-        return json_encode(['data'=>$this->renderPartial('_list_item', ['model'=>$model])]);
-    }
-
-    public function actionItem()
-    {
-        $model = MasterMaterialItem::find()
-            ->alias('a')
-            ->select(['a.*', 'b.*', 'a.name as item_name', 'c.composite'])
-            ->leftJoin('master_material_item_pricelist b', 'b.item_code = a.code')
-            ->leftJoin('master_satuan c', 'c.code = a.satuan_code')
-            ->where(['a.code'=>$_POST['code'], 'a.status'=>1, 'b.status_active' => 1])
-            ->asArray()
-            ->one();
-        if(empty($model)){
-            $model = [];
-        }
-        return json_encode($model);
-    }
-
-    public function actionTemp()
-    {
-        $temps = TempPurchaseOrderDetail::findAll(['user_id'=> \Yii::$app->user->id]);
-        $total_order=0;
-        foreach($temps as $temp){
-            $total_order += $temp->total_order;
-        }
-        $model =  $this->renderAjax('_temp', [
-            'temps'=>$temps,
-        ]);
-        return json_encode(['total_order'=>number_format($total_order), 'model'=>$model]);
-    }
-
-    public function actionGetTemp($id)
-    {
-        $temp = TempPurchaseOrderDetail::find()
-            ->select(['*', 'name as item_name'])
-            ->where(['id'=>$id])
-            ->asArray()
-            ->one();
-        return json_encode($temp);
-    }
-
-    public function actionCreateTemp()
-    {
-        $request = \Yii::$app->request;
         $success = true;
         $message = '';
-        if($request->isPost){
-            $data = $request->post('TempPurchaseOrderDetail');
-            $item = MasterMaterialItem::find()
-                ->alias('a')
-                ->select(['a.*', 'b.*'])
-                ->leftJoin('master_material_item_pricelist b', 'b.item_code = a.code')
-                ->where(['code'=>$data['item_code'], 'a.status'=>1, 'status_active'=>1])
-                ->asArray()
-                ->one();
-            if($item['harga_beli_1'] > 0 && $item['harga_jual_1'] > 0){
-                $temp = new TempPurchaseOrderDetail();
-                $temp->attributes = (array)$data;
-                $temp->attributes = ($temp->item) ? $temp->item->attributes : '';
-                $temp->urutan = $temp->count +1;
-                $temp->user_id = \Yii::$app->user->id;
-                if(!empty($request->post('PurchaseOrder')['no_po'])){
-                    $temp->no_po = $request->post('PurchaseOrder')['no_po'];
-                }
-                $temp->total_order = $temp->totalBeli;
-                if($temp->save()){
-                    $message = 'CREATE TEMP SUCCESSFULLY';
-                }else{
-                    $success = false;
-                    foreach($temp->errors as $error => $value){
-                        $message = $value[0].', ';
-                    }
-                    $message = substr($message, 0, -2);
-                }
+        $model = [];
+        if(!empty($_POST['no_spk'])){
+            $spkDetail = SpkDetail::findOne(['no_spk'=>$_POST['no_spk']]);
+            if(isset($spkDetail)){
+                $model = [
+                    'item_code' => $spkDetail['item_code'],
+                    'item_name' => (isset($spkDetail->item)) ? $spkDetail->item['name'] : '',
+                ];
             }else{
                 $success = false;
-                $message = 'Harga Beli / Harga Jual masih kosong. Silakan input harga terlebih dahulu di menu Master Material Item.';
+                $message = 'No. SPK tidak ditemukan.';
             }
         }else{
-            throw new NotFoundHttpException('The requested data does not exist.');
+            $success = false;
+            $message = 'Masukkan No. SPK.';
         }
-        return json_encode(['success'=>$success, 'message'=>$message]);
+        return json_encode(['model'=>$model, 'success'=>$success, 'message'=>$message]);
     }
 
-    public function actionUpdateTemp()
-    {
-        $request = \Yii::$app->request;
-        $success = true;
-        $message = '';
-        if($request->isPost){
-            $data = $request->post('TempPurchaseOrderDetail');
-            $item = MasterMaterialItem::find()
-                ->alias('a')
-                ->select(['a.*', 'b.*'])
-                ->leftJoin('master_material_item_pricelist b', 'b.item_code = a.code')
-                ->where(['code'=>$data['item_code'], 'a.status'=>1, 'status_active'=>1])
-                ->asArray()
-                ->one();
-            if($item['harga_beli_1'] > 0 && $item['harga_jual_1'] > 0){
-                $temp = $this->findTemp($data['id']);
-                $temp->attributes = (array)$data;
-                $temp->attributes = ($temp->item) ? $temp->item->attributes : '';
-                $temp->total_order = $temp->totalBeli;
-                if($temp->save()){
-                    $message = 'UPDATE TEMP SUCCESSFULLY';
-                }else{
-                    $success = false;
-                    foreach($temp->errors as $error => $value){
-                        $message = $value[0].', ';
-                    }
-                    $message = substr($message, 0, -2);
-                }
-            }else{
-                $success = false;
-                $message = 'Harga Beli / Harga Jual masih kosong. Silakan mengisikan harga terlebih dahulu di menu Master Material Item.';
-            }
-        }else{
-            throw new NotFoundHttpException('The requested data does not exist.');
-        }
-        return json_encode(['success'=>$success, 'message'=>$message]);
-    }
-
-    public function actionDeleteTemp($id)
-    {
-        $success = true;
-        $message = '';
-        $temp = $this->findTemp($id);
-        if(isset($temp)){
-            if($temp->delete()){
-                foreach($temp->tmps as $index=>$val){
-                    $val->urutan = $index +1;
-                    if(!$val->save()){
-                        $success = false;
-                        foreach($val->errors as $error => $value){
-                            $message .= strtoupper($value[0].', ');
-                        }
-                        $message = substr($message, 0, -2);
-                    }
-                }
-                $message = 'DELETE TEMP SUCCESSFULLY';
-            }else{
-                $success = false;
-                foreach($temp->errors as $error => $value){
-                    $message = $value[0].', ';
-                }
-                $message = substr($message, 0, -2);
-            }
-        }
-        return json_encode(['success'=>$success, 'message'=>$message]);
-    }
-
-    protected function findTemp($id)
-    {
-        $temp = TempPurchaseOrderDetail::findOne(['id'=>$id, 'user_id'=>\Yii::$app->user->id]);
-        if(isset($temp)){
-            return $temp;
-        }
-        throw new NotFoundHttpException('The requested page does not exist.');
-    }
-
-    protected function emptyTemp()
-    {
-        TempPurchaseOrderDetail::deleteAll('user_id=:user_id', [':user_id'=>\Yii::$app->user->id]);
-        $temp = TempPurchaseOrderDetail::find()->all();
-        if(empty($temp)){
-            $connection = \Yii::$app->db;
-			$connection->createCommand('ALTER TABLE temp_purchase_order_detail AUTO_INCREMENT=1')->query();
-        }
-    }
-
-    public function actionSendApproval($no_po)
+    public function actionSendApproval($no_request)
     {
         $success = true;
 		$message = '';
-        $model = $this->findModel($no_po);
+        $model = $this->findModel($no_request);
         if(isset($model)){
             $connection = \Yii::$app->db;
             $transaction = $connection->beginTransaction();
             try{
                 $model->status_approval = 1;
                 if($model->save()){
-                    $approvals = (new PengaturanApproval)->approval('purchase-order');
+                    $approvals = (new PengaturanApproval)->approval('request-item');
                     if(isset($approvals)){
-                        $approvaln = PurchaseOrderApproval::findAll(['no_po'=>$no_po]);
+                        $approvaln = SpkRequestItemApproval::findAll(['no_request'=>$no_request]);
                         if(count($approvaln) > 0)
-                            PurchaseOrderApproval::deleteAll('no_po=:no_po', [':no_po'=>$no_po]);
+                            SpkRequestItemApproval::deleteAll('no_request=:no_request', [':no_request'=>$no_request]);
                         foreach($approvals as $approval){
-                            $app = new PurchaseOrderApproval();
+                            $app = new SpkRequestItemApproval();
                             $app->attributes = $approval->attributes;
-                            $app->no_po = $no_po;
+                            $app->no_request = $no_request;
                             $app->status = 1;
                             if(!$app->save()){
                                 $success = false;
@@ -671,11 +420,11 @@ class PurchaseOrderController extends Controller
                         }
                     }else{
                         $success = false;
-                        $message = 'Setting approval Purchase Order belum ada. Silakan hubungi administrator utk melakukan setting approval.';
+                        $message = 'Setting approval Request Item belum ada. Silakan hubungi administrator utk melakukan setting approval.';
                     }
                 }else{
                     $success = false;
-                    $message = (count($model->errors) > 0) ? 'ERROR UPDATE STATUS PO: ' : '';
+                    $message = (count($model->errors) > 0) ? 'ERROR UPDATE STATUS REQUEST ITEM: ' : '';
                     foreach($model->errors as $error => $value){
                         $message .= strtoupper($value[0].', ');
                     }
@@ -683,9 +432,9 @@ class PurchaseOrderController extends Controller
                 }
 
                 if($success){
-                    $mailapproval = json_decode($this->mailapproval($model->no_po));
+                    $mailapproval = json_decode($this->mailapproval($model->no_request));
                     if($mailapproval->success){
-                        $message = '['.$model->no_po.'] SUCCESS SEND APPROVAL PO.';
+                        $message = '['.$model->no_request.'] SUCCESS SEND APPROVAL REQUEST ITEM.';
                         $transaction->commit();
                         \Yii::$app->session->setFlash('success', $message);
                     }else{
@@ -702,26 +451,26 @@ class PurchaseOrderController extends Controller
             }
         }else{
             $success = false;
-            $message = 'Data Purchase Order not valid.';
+            $message = 'Data Request Item not valid.';
         }
         if(!$success){
             \Yii::$app->session->setFlash('error', $message);
         }
-        return $this->redirect(['view', 'no_po' => $model->no_po]);
+        return $this->redirect(['view', 'no_request' => $model->no_request]);
     }
 
     public function actionApproval()
     {
         $request = \Yii::$app->request;
-        $data = $request->post('PurchaseOrderApproval');
+        $data = $request->post('SpkRequestItemApproval');
         $success = true;
 		$message = '';
-        $model = $this->findModel($data['no_po']);
+        $model = $this->findModel($data['no_request']);
         if(isset($model)){
             $connection = \Yii::$app->db;
             $transaction = $connection->beginTransaction();
             try{
-                $approval = PurchaseOrderApproval::findOne(['no_po'=>$model->no_po, 'status'=>2]);
+                $approval = SpkRequestItemApproval::findOne(['no_request'=>$model->no_request, 'status'=>2]);
                 if(isset($approval)){
                     if(($approval->user_id == \Yii::$app->user->id) || ($approval->typeuser_code == \Yii::$app->user->identity->profile->typeuser_code)){
                         // APPROVE
@@ -732,11 +481,11 @@ class PurchaseOrderController extends Controller
 								$approval->user_id = \Yii::$app->user->id;
 							}
                             if($approval->save()){
-                                $mailapproval = json_decode($this->mailapproval($model->no_po));
+                                $mailapproval = json_decode($this->mailapproval($model->no_request));
                                 if($mailapproval->success){
                                     $is_akhir = true;
                                     if($mailapproval->akhir){
-                                        $mailakhir = json_decode($this->mailapproval_akhir($model->no_po, $approval->comment));
+                                        $mailakhir = json_decode($this->mailapproval_akhir($model->no_request, $approval->comment));
                                         if($mailakhir->success){
                                             $model->status_approval=2;
                                             if(!$model->save()){
@@ -752,9 +501,9 @@ class PurchaseOrderController extends Controller
                                     }
                                     if($is_akhir){
                                         $transaction->commit();
-                                        $message = '['.$model->no_po.'] SUCCESS APPROVE PO.';
+                                        $message = '['.$model->no_request.'] SUCCESS APPROVE REQUEST ITEM.';
                                         \Yii::$app->session->setFlash('success', $message);
-                                        return $this->redirect(['view', 'no_po' => $model->no_po]);
+                                        return $this->redirect(['view', 'no_request' => $model->no_request]);
                                     }else{
                                         $transaction->rollBack();
 										$message = $mailapproval->message;
@@ -792,12 +541,12 @@ class PurchaseOrderController extends Controller
 								}
 
                                 if($success){
-                                    $mailakhir = json_decode($this->mailapproval_akhir($model->no_po, $approval->comment));
+                                    $mailakhir = json_decode($this->mailapproval_akhir($model->no_request, $approval->comment));
                                     if($mailakhir->success){
                                         $transaction->commit();
-                                        $message = '['.$model->no_po.'] SUCCESS REJECT PO.';
+                                        $message = '['.$model->no_request.'] SUCCESS REJECT REQUEST ITEM.';
                                         \Yii::$app->session->setFlash('success', $message);
-                                        return $this->redirect(['view', 'no_po' => $model->no_po]);
+                                        return $this->redirect(['view', 'no_request' => $model->no_request]);
                                     }else{
                                         $success = false;
 										$message .= $mailakhir->message;
@@ -825,19 +574,19 @@ class PurchaseOrderController extends Controller
             }
         }else{
             $success = false;
-            $message = 'Data Purchase Order not valid.';
+            $message = 'Data Request Item not valid.';
         }
         if(!$success){
             \Yii::$app->session->setFlash('error', $message);
         }
-        return $this->redirect(['view', 'no_po' => $model->no_po]);
+        return $this->redirect(['view', 'no_request' => $model->no_request]);
     }
 
     public function actionPopup()
     {
         $request = \Yii::$app->request;
-        $approval = PurchaseOrderApproval::findOne(['no_po'=>$request->post('no_po'), 'status'=>2]);
-        $model = $this->findModel($request->post('no_po'));
+        $approval = SpkRequestItemApproval::findOne(['no_request'=>$request->post('no_request'), 'status'=>2]);
+        $model = $this->findModel($request->post('no_request'));
         if($request->post('type') == 'APPROVE'){
             return $this->renderPartial('_popup_approve', [
                 'model' => $model,
@@ -853,15 +602,15 @@ class PurchaseOrderController extends Controller
             ]);
         }
     }
-
-    function mailapproval($no_po)
+    
+    function mailapproval($no_request)
     {
         $success = true;
 		$message = '';
         $akhir = false;
 		$urutan = 0;
 		$profile = [];
-        $approvals = PurchaseOrderApproval::find()->where(['no_po'=>$no_po])->orderBy(['urutan'=>SORT_ASC])->all();
+        $approvals = SpkRequestItemApproval::find()->where(['no_request'=>$no_request])->orderBy(['urutan'=>SORT_ASC])->all();
         if(count($approvals) > 0){
             foreach($approvals as $approval){
                 if(!$urutan){
@@ -886,7 +635,7 @@ class PurchaseOrderController extends Controller
                 }
             }
             if($urutan){
-                $app = PurchaseOrderApproval::findOne(['no_po'=>$no_po, 'urutan'=>$urutan]);
+                $app = SpkRequestItemApproval::findOne(['no_request'=>$no_request, 'urutan'=>$urutan]);
                 if(isset($app)){
                     $name = '';
                     if(!empty($app->user_id)){
@@ -907,14 +656,14 @@ class PurchaseOrderController extends Controller
                         $body = $this->renderPartial('_mailapproval', [
                             'approval' => $app,
 							'name' => $name,
-                            'url' => \Yii::$app->params['URL'].'/purchasing/purchase-order/view&no_po='.$approval->no_po,
+                            'url' => \Yii::$app->params['URL'].'/produksi/request-item/view&no_request='.$approval->no_request,
                         ]);
                         
                         $logs_mail = new LogsMailSend();
-                        $logs_mail->type = 'APPROVAL PURCHASE ORDER';
+                        $logs_mail->type = 'APPROVAL REQUEST ITEM';
                         $logs_mail->email = substr($str_mail, 0, -2);
                         $logs_mail->bcc = '';
-                        $logs_mail->subject = 'Approval Purchase Order '. $app->no_po;
+                        $logs_mail->subject = 'Approval Request Item '. $app->no_request;
 						$logs_mail->body = $body;
 						$logs_mail->keterangan = '';
                         
@@ -963,12 +712,12 @@ class PurchaseOrderController extends Controller
         return json_encode(['success'=>$success, 'message'=>$message, 'akhir'=>$akhir]);
     }
 
-    function mailapproval_akhir($no_po, $comment=NULL)
+    function mailapproval_akhir($no_request, $comment=NULL)
     {
         $success = true;
 		$message = '';
-        $approval = PurchaseOrderApproval::find()
-            ->where(['no_po'=>$no_po])
+        $approval = SpkRequestItemApproval::find()
+            ->where(['no_request'=>$no_request])
             ->orderBy(['urutan'=>SORT_DESC])
             ->one();
         $str_mail = '';
@@ -976,14 +725,14 @@ class PurchaseOrderController extends Controller
             $body = $this->renderPartial('_mailapproval_akhir', [
                 'approval' => $approval,
 				'description' => $comment,
-                'url' => \Yii::$app->params['URL'].'/purchasing/purchase-order/view&no_po='.$approval->no_po,
+                'url' => \Yii::$app->params['URL'].'/produksi/request-item/view&no_request='.$approval->no_request,
             ]);
 
             $logs_mail = new LogsMailSend();
-            $logs_mail->type = 'APPROVAL PURCHASE ORDER';
+            $logs_mail->type = 'APPROVAL REQUEST ITEM';
             $logs_mail->email = (isset($approval->po->profile)) ? $approval->po->profile->email : '';
             $logs_mail->bcc = '';
-            $logs_mail->subject = 'Approval Purchase Order '. $approval->no_po;
+            $logs_mail->subject = 'Approval Request Item '. $approval->no_request;
             $logs_mail->body = $body;
             $logs_mail->keterangan = '';
             
@@ -1010,84 +759,5 @@ class PurchaseOrderController extends Controller
 			$message = 'Pengaturan Approval belum di setting.';
         }
         return json_encode(['success'=>$success, 'message'=>$message]);
-    }
-
-    public function actionPost($no_po)
-    {
-        $success = true;
-		$message = '';
-        $model = $this->findModel($no_po);
-        if(isset($model)){
-            $connection = \Yii::$app->db;
-            $transaction = $connection->beginTransaction();
-            try{
-                $model->post=1;
-                if($model->save()){
-                    $invoiceOrder = new PurchaseOrderInvoice();
-                    $invoiceOrder->attributes = $model->attributes;
-                    $invoiceOrder->no_invoice = $invoiceOrder->generateCode();
-                    $invoiceOrder->post=0;
-                    if($invoiceOrder->save()){
-                        foreach($model->details as $detail){
-                            $invoiceOrderDetail = new PurchaseOrderInvoiceDetail();
-                            $invoiceOrderDetail->attributes = $detail->attributes;
-                            $invoiceOrderDetail->no_invoice = $invoiceOrder->no_invoice;
-                            if(!$invoiceOrderDetail->save()){
-                                $success = false;
-                                $message = (count($invoiceOrderDetail->errors) > 0) ? 'ERROR CREATE INVOICE ORDER DETAIL: ' : '';
-                                foreach($invoiceOrderDetail->errors as $error => $value){
-                                    $message .= strtoupper($value[0].', ');
-                                }
-                                $message = substr($message, 0, -2);
-                            }
-                        }
-                    }else{
-                        $success = false;
-                        $message = (count($invoiceOrder->errors) > 0) ? 'ERROR CREATE INVOICE ORDER: ' : '';
-                        foreach($invoiceOrder->errors as $error => $value){
-                            $message .= strtoupper($value[0].', ');
-                        }
-                        $message = substr($message, 0, -2);
-                    }
-                }else{
-                    $success = false;
-                    $message = (count($model->errors) > 0) ? 'ERROR POST PO TO INVOICE ORDER: ' : '';
-                    foreach($model->errors as $error => $value){
-                        $message .= strtoupper($value[0].', ');
-                    }
-                    $message = substr($message, 0, -2);
-                }
-
-                if($success){
-                    $message = '['.$model->no_po.'] SUCCESS POST PO TO INVOICE ORDER.';
-                    $transaction->commit();
-                    $logs =	[
-                        'type' => Logs::TYPE_USER,
-                        'description' => $message,
-                    ];
-                    Logs::addLog($logs);
-                    \Yii::$app->session->setFlash('success', $message);
-                    return $this->redirect(['view', 'no_po' => $model->no_po]);
-                }else{
-                    $transaction->rollBack();
-                }
-            }catch(Exception $e){
-                $success = false;
-                $message = $e->getMessage();
-                $transaction->rollBack();
-            }
-            $logs =	[
-                'type' => Logs::TYPE_USER,
-                'description' => $message,
-            ];
-            Logs::addLog($logs);
-        }else{
-            $success = false;
-            $message = 'Data Purchase Order not valid.';
-        }
-        if(!$success){
-            \Yii::$app->session->setFlash('error', $message);
-        }
-        return $this->redirect(['view', 'no_po' => $model->no_po]);
     }
 }

@@ -96,6 +96,9 @@ button {
                 }
             }
         }
+        &.btn-default {
+            border: 1px solid @color_border;
+        }
     }
 }
 body {
@@ -1292,6 +1295,12 @@ select {
             background-color: @color_info_hover;
         }
     }
+    &.cube-drop {
+        background-color: #437a68;
+        .cube-left {
+            background-color: #438f76;
+        }
+    }
 }
 /** END CUBE CONTAINER **/
 
@@ -1378,6 +1387,10 @@ select {
     box-shadow: rgba(9, 30, 66, 0.25) 0px 4px 8px -2px, rgba(9, 30, 66, 0.08) 0px 0px 0px 1px;
     display: inline-block;
     width: 100%;
+    label {
+        font-size: 10px;
+        font-weight: 700;
+    }
 }
 [data-form="detail"] {
     background: linear-gradient(rgb(234 234 237 / 40%),rgb(247 251 255 / 80%) 100%);

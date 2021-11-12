@@ -11,6 +11,7 @@ use app\models\LoginForm;
 use app\models\Logs;
 use app\models\User;
 use app\modules\purchasing\models\PurchaseOrderApproval;
+use app\modules\produksi\models\SpkRequestItemApproval;
 
 class SiteController extends Controller
 {
@@ -88,10 +89,11 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
+        $userApproval = false;
+        // PURCHASE ORDER
         $purchaseApp = PurchaseOrderApproval::find()->where(['status'=>2])->all();
         $countPurchaseApp=0;
-        $userApproval = false;
-        $listApproval = '';
+        $listPurchaseApp = '';
         foreach($purchaseApp as $val){
             $user = '';
             if(!empty($val->user_id)){
@@ -106,18 +108,57 @@ class SiteController extends Controller
             if($val->user_id == \Yii::$app->user->id OR $val->typeuser_code == \Yii::$app->user->identity->profile->typeuser_code){
                 $userApproval = true;
                 $countPurchaseApp += 1;
-                $listApproval .= '<li><a href="'.\Yii::$app->params['URL'].'/purchasing/purchase-order/view&no_po='.$val->no_po.'">'.$countPurchaseApp.'). Approval PO: '.$val->no_po.'<i>'.$user.'</i></a></li>';
+                $listPurchaseApp .= '<li><a href="'.\Yii::$app->params['URL'].'/purchasing/purchase-order/view&no_po='.$val->no_po.'">'.$countPurchaseApp.'). Approval PO: '.$val->no_po.'<i>'.$user.'</i></a></li>';
             }else{
                 $countPurchaseApp += 1;
-                $listApproval .= '<li><span>'.$countPurchaseApp.'). Approval PO: '.$val->no_po.'<i>'.$user.'</i></span></li>';
+                $listPurchaseApp .= '<li><span>'.$countPurchaseApp.'). Approval PO: '.$val->no_po.'<i>'.$user.'</i></span></li>';
             }
         }
+        // END PURCHASE ORDER
+
+        // REQUEST ITEM
+        $requestItemApp = SpkRequestItemApproval::find()->where(['status'=>2])->all();
+        $countRequestItemApp=0;
+        $listRequestItemApp = '';
+        foreach($requestItemApp as $val){
+            $user = '';
+            if(!empty($val->user_id)){
+                if(!empty($val->user->profile)){
+                    $user = $val->user->profile->name;
+                }
+            }
+            if(!empty($val->typeuser_code)){
+                $user = $val->typeUser->name;
+            }
+            
+            if($val->user_id == \Yii::$app->user->id OR $val->typeuser_code == \Yii::$app->user->identity->profile->typeuser_code){
+                $userApproval = true;
+                $countRequestItemApp += 1;
+                $listRequestItemApp .= '<li><a href="'.\Yii::$app->params['URL'].'/produksi/request-item/view&no_request='.$val->no_request.'">'.$countRequestItemApp.'). Approval Request Item: '.$val->no_request.'<i>'.$user.'</i></a></li>';
+            }else{
+                $countRequestItemApp += 1;
+                $listRequestItemApp .= '<li><span>'.$countRequestItemApp.'). Approval Request Item: '.$val->no_request.'<i>'.$user.'</i></span></li>';
+            }
+        }
+        // END REQUEST ITEM
+        
+        // STOCK OPNAME
+        $stockOpnameApp = [];
+        $countStockOpnameApp=0;
+        $listStockOpnameApp = '';
+        // END STOCK OPNAME
         
         return $this->render('index', [
+            'userApproval' => $userApproval,
             'purchaseApp' => $purchaseApp,
             'countPurchaseApp' => $countPurchaseApp,
-            'userApproval' => $userApproval,
-            'listApproval' => $listApproval,
+            'listPurchaseApp' => $listPurchaseApp,
+            'requestItemApp' => $requestItemApp,
+            'listRequestItemApp' => $listRequestItemApp,
+            'countRequestItemApp' => $countRequestItemApp,
+            'stockOpnameApp' => $stockOpnameApp,
+            'countStockOpnameApp' => $countStockOpnameApp,
+            'listStockOpnameApp' => $listStockOpnameApp,
         ]);
     }
 

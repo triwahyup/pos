@@ -521,7 +521,7 @@ class SpkController extends Controller
                 ]);
                 $konversi = $stockItem->konversi($spkDetail->item_code, $qtyOrder);
                 $sisaProses = $qtyOrder-$qtyProses;
-                $keterangan .= 'Order '.$konversi.' ('.$qtyOrder.' LB). Dipotong menjadi '.$spkDetail->potong.'. Sisa yang belum di proses '.$sisaProses.' LB.';
+                $keterangan .= 'Order '.$konversi.' ('.$qtyOrder.' LB). Dipotong menjadi '.$spkDetail->total_potong.'. Sisa yang belum di proses '.$sisaProses.' LB.';
             }
             // CETAK
             else if($type == 2){

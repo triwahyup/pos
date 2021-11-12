@@ -85,11 +85,13 @@ class RoleController extends Controller
                         foreach($model->menu as $menu){
                             $role .= $menu.', ';
 							$getChild = $auth->getRole($menu);
+                            print_r($auth->addChild($getParent, $getChild));
                             if(!$auth->addChild($getParent, $getChild)){
                                 $success = false;
 								$message = '{code: '.$typeCode->value.'}. Insert Auth Item Child not validate';
 							}
                         }
+                        die;
                         if($success){
 							$message = '('.substr($role,0,-2).')';
 							\Yii::$app->session->setFlash('success', 'Update Rule SUKSES: '.$message);
