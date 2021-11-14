@@ -11,21 +11,23 @@ use yii\widgets\ActiveForm;
 	</div>
 	<div class="popup-form-body">
 		<?php $form = ActiveForm::begin(['id'=>'form']); ?>
-			<p class="title"><u><?='NO. Request Item: '. $model->no_request ?></u></p>
+			<p class="title"><u><?='Kode: '. $model->code ?></u></p>
 			<table class="table table-bordered">
 				<thead>
 					<tr>
+						<th class="text-center" width="100">Tgl. Opname</th>
 						<th class="text-center" width="100">Request By</th>
 					</tr>
 				</thead>
 				<tbody>
 					<tr>
+						<td class="text-center"><?=$model->date ?></td>
 						<td class="text-center"><?=(isset($model->profile)) ? $model->profile->name : '-' ?></td>	
 					</tr>
 				</tbody>
 			</table>
 			<div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
-				<?= $form->field($approval, 'no_request')->hiddenInput()->label(false) ?>
+				<?= $form->field($approval, 'code')->hiddenInput()->label(false) ?>
 				<?= $form->field($approval, 'type')->hiddenInput(['value' => 'REJECT'])->label(false) ?>
 				<?= $form->field($approval, 'comment')->textarea() ?>
 			</div>

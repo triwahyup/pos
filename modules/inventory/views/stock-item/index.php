@@ -6,7 +6,7 @@ $this->title = 'Inventory Stock Item';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="inventory-stock-index">
-<?= GridView::widget([
+    <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
@@ -15,7 +15,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'item_code',
                 'format' => 'raw',
                 'value' => function($model, $index, $key) {
-                    return (isset($model->item)) ? '<strong>'.$model->item->code.'</strong><br />'.$model->item->name : '';
+                    return (isset($model->item)) ? (Html::a('<strong>'.$model->item->code.'</strong><br />'.$model->item->name, ['view', 'item_code' => $model->item_code])) : '';
                 }
             ],
             [

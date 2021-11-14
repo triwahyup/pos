@@ -5,50 +5,48 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 
 /* @var $this yii\web\View */
-/* @var $searchModel app\modules\produksi\models\SpkRequestItemSearch */
+/* @var $searchModel app\modules\inventory\models\InventoryOpnameSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Request Item';
+$this->title = 'Opname';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="spk-request-item-index">
+<div class="inventory-opname-index">
     <p class="text-right">
-        <?= Html::a('<i class="fontello icon-plus"></i><span>Create Request Item</span>', ['create'], ['class' => 'btn btn-success btn-flat btn-sm']) ?>
+        <?= Html::a('<i class="fontello icon-plus"></i><span>Create Opname</span>', ['create'], ['class' => 'btn btn-success btn-flat btn-sm']) ?>
     </p>
-    
+
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
             [
-                'attribute' => 'no_request',
+                'attribute' => 'code',
                 'contentOptions' => [
                     'class' => 'text-center',
                 ],
             ],
             [
-                'attribute' => 'tgl_request',
+                'attribute' => 'date',
                 'contentOptions' => [
                     'class' => 'text-center',
                 ],
                 'filter' => DatePicker::widget([
                     'model' => $searchModel, 
-                    'name' => 'tgl_request', 
+                    'name' => 'date', 
                     'type' => DatePicker::TYPE_COMPONENT_APPEND,
                     'pickerButton' => false,
-                    'attribute' => 'tgl_request',
+                    'attribute' => 'date',
                     'pluginOptions' => [
                         'format' => 'yyyy-mm-dd',
                         'autoclose' => true,
                     ],
                 ]),
-            ],
-            [
-                'attribute' => 'no_spk',
-                'contentOptions' => [
-                    'class' => 'text-center',
-                ],
+                'value' => function($model, $index, $key)
+                {
+                    return date('Y-m-d', strtotime($model->date));
+                }
             ],
             [
                 'attribute' => 'status_approval',
@@ -74,17 +72,17 @@ $this->params['breadcrumbs'][] = $this->title;
                 'buttons' => [
                     'view' => function ($url, $model) {
                         return Html::a(Helper::buttonIcons()['eye-open'],
-                            ['view', 'no_request'=>$model->no_request],
+                            ['view', 'code'=>$model->code],
                             ['title'=>'View', 'aria-label'=>'View', 'data-pjax'=>true]);
                     },
                     'update' => function ($url, $model) {
                         return Html::a(Helper::buttonIcons()['pencil'],
-                            ['update', 'no_request'=>$model->no_request],
+                            ['update', 'code'=>$model->code],
                             ['title'=>'Update', 'aria-label'=>'Update', 'data-pjax'=>true]);
                     },
                     'delete' => function ($url, $model) {
                         return Html::a(Helper::buttonIcons()['trash'],
-                            ['delete', 'no_request'=>$model->no_request],
+                            ['delete', 'code'=>$model->code],
                             [
                                 'title'=>'Delete',
                                 'aria-label'=>'Delete', 
@@ -104,4 +102,6 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
         ],
     ]); ?>
+
+
 </div>

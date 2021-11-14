@@ -14,7 +14,7 @@ $this->params['breadcrumbs'][] = "Dashboard";
                     <?php if($userApproval): ?>
                         <?='<p>(Purchase Order) Anda memiliki request '.$countPurchaseApp.' approval</p>'?>
                     <?php else: ?>
-                        <p>List Request Approval:</p>
+                        <p>Purchase Order List Approval:</p>
                     <?php endif; ?>
                     <ul>
                         <?php if($countPurchaseApp > 0): ?>
@@ -39,7 +39,7 @@ $this->params['breadcrumbs'][] = "Dashboard";
                     <?php if($userApproval): ?>
                         <?='<p>(Request Item) Anda memiliki request '.$countRequestItemApp.' approval</p>'?>
                     <?php else: ?>
-                        <p>List Request Approval:</p>
+                        <p>Request Item List Approval:</p>
                     <?php endif; ?>
                     <ul>
                         <?php if($countRequestItemApp > 0): ?>
@@ -57,7 +57,7 @@ $this->params['breadcrumbs'][] = "Dashboard";
     </div>
     <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
         <!-- STOCK OPNAME -->
-        <div class="col-lg-12 -col-md-12 col-xs-12 padding-left-0 padding-right-0">
+        <div class="col-lg-6 -col-md-6 col-xs-12 padding-left-0">
             <div class="cube-container cube-warning">
                 <div class="cube-left">
                     <i class="fontello icon-info-circled-3"></i></span>
@@ -66,7 +66,7 @@ $this->params['breadcrumbs'][] = "Dashboard";
                     <?php if($userApproval): ?>
                         <?='<p>(Stock Opname) Anda memiliki request '.$countStockOpnameApp.' approval</p>'?>
                     <?php else: ?>
-                        <p>List Request Approval:</p>
+                        <p>Stock Opname List Approval:</p>
                     <?php endif; ?>
                     <ul>
                         <?php if($countStockOpnameApp > 0): ?>

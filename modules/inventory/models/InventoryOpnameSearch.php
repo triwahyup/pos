@@ -1,15 +1,15 @@
 <?php
 
-namespace app\modules\produksi\models;
+namespace app\modules\inventory\models;
 
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use app\modules\produksi\models\SpkRequestItem;
+use app\modules\inventory\models\InventoryOpname;
 
 /**
- * SpkRequestItemSearch represents the model behind the search form of `app\modules\produksi\models\SpkRequestItem`.
+ * InventoryOpnameSearch represents the model behind the search form of `app\modules\inventory\models\InventoryOpname`.
  */
-class SpkRequestItemSearch extends SpkRequestItem
+class InventoryOpnameSearch extends InventoryOpname
 {
     /**
      * {@inheritdoc}
@@ -17,8 +17,8 @@ class SpkRequestItemSearch extends SpkRequestItem
     public function rules()
     {
         return [
-            [['no_request', 'tgl_request', 'no_spk', 'keterangan'], 'safe'],
-            [['status_approval', 'status', 'created_at', 'updated_at', 'post'], 'integer'],
+            [['code', 'date', 'keterangan'], 'safe'],
+            [['post', 'status_approval', 'status', 'user_id', 'created_at', 'updated_at'], 'integer'],
         ];
     }
 
@@ -40,7 +40,7 @@ class SpkRequestItemSearch extends SpkRequestItem
      */
     public function search($params)
     {
-        $query = SpkRequestItem::find();
+        $query = InventoryOpname::find();
 
         // add conditions that should always apply here
 
@@ -58,16 +58,16 @@ class SpkRequestItemSearch extends SpkRequestItem
 
         // grid filtering conditions
         $query->andFilterWhere([
-            'tgl_request' => $this->tgl_request,
-            'status_approval' => $this->status_approval,
+            'date' => $this->date,
             'post' => $this->post,
+            'status_approval' => $this->status_approval,
             'status' => 1,
+            'user_id' => $this->user_id,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ]);
 
-        $query->andFilterWhere(['like', 'no_request', $this->no_request])
-            ->andFilterWhere(['like', 'no_spk', $this->no_spk])
+        $query->andFilterWhere(['like', 'code', $this->code])
             ->andFilterWhere(['like', 'keterangan', $this->keterangan]);
 
         return $dataProvider;

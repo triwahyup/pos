@@ -29,7 +29,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                 <span class="font-size-12 font-bold width-100"><u>Status</u></span>
                             </li>
                             <?php foreach($inProgress as $val): ?>
-                                <li>
+                                <li class="margin-bottom-5">
                                     <a href="<?=\Yii::$app->getUrlManager()->createUrl(['produksi/spk/view', 'no_spk'=>$val->no_spk]) ?>" target="_blank">
                                         <span class="font-size-12 font-bold width-100"><?=$val->no_spk ?></span>
                                     </a>

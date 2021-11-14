@@ -3,7 +3,9 @@
 namespace app\modules\inventory\controllers;
 
 use app\models\User;
+use app\modules\inventory\models\InventoryStockItem;
 use app\modules\inventory\models\InventoryStockItemSearch;
+use app\modules\inventory\models\InventoryStockTransaction;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\AccessControl;
@@ -23,7 +25,7 @@ class StockItemController extends Controller
                     'class' => AccessControl::className(),
 				    'rules' => [
                         [
-                            'actions' => ['index'],
+                            'actions' => ['index', 'view'],
                             'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('stock-item')),
                             'roles' => ['@'],
                         ],
@@ -51,6 +53,16 @@ class StockItemController extends Controller
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
+        ]);
+    }
+
+    public function actionView($item_code)
+    {
+        $model = InventoryStockItem::findOne(['item_code'=>$item_code]);
+        $transaction = InventoryStockTransaction::findAll(['item_code'=>$item_code]);
+        return $this->render('view', [
+            'model' => $model,
+            'transaction' => $transaction,
         ]);
     }
 }

@@ -5,7 +5,6 @@ namespace app\modules\pengaturan\controllers;
 use app\models\AuthItemChild;
 use app\models\User;
 use app\modules\master\models\MasterKode;
-use app\modules\master\models\Profile;
 use app\modules\pengaturan\models\PengaturanMenu;
 use app\modules\pengaturan\models\RoleForm;
 use app\modules\pengaturan\models\RoleSearch;
@@ -85,13 +84,11 @@ class RoleController extends Controller
                         foreach($model->menu as $menu){
                             $role .= $menu.', ';
 							$getChild = $auth->getRole($menu);
-                            print_r($auth->addChild($getParent, $getChild));
                             if(!$auth->addChild($getParent, $getChild)){
                                 $success = false;
 								$message = '{code: '.$typeCode->value.'}. Insert Auth Item Child not validate';
 							}
                         }
-                        die;
                         if($success){
 							$message = '('.substr($role,0,-2).')';
 							\Yii::$app->session->setFlash('success', 'Update Rule SUKSES: '.$message);

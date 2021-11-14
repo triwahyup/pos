@@ -10,6 +10,7 @@ use yii\filters\VerbFilter;
 use app\models\LoginForm;
 use app\models\Logs;
 use app\models\User;
+use app\modules\inventory\models\InventoryOpnameApproval;
 use app\modules\purchasing\models\PurchaseOrderApproval;
 use app\modules\produksi\models\SpkRequestItemApproval;
 
@@ -91,7 +92,7 @@ class SiteController extends Controller
     {
         $userApproval = false;
         // PURCHASE ORDER
-        $purchaseApp = PurchaseOrderApproval::find()->where(['status'=>2])->all();
+        $purchaseApp = PurchaseOrderApproval::findAll(['status'=>2]);
         $countPurchaseApp=0;
         $listPurchaseApp = '';
         foreach($purchaseApp as $val){
@@ -117,7 +118,7 @@ class SiteController extends Controller
         // END PURCHASE ORDER
 
         // REQUEST ITEM
-        $requestItemApp = SpkRequestItemApproval::find()->where(['status'=>2])->all();
+        $requestItemApp = SpkRequestItemApproval::findAll(['status'=>2]);
         $countRequestItemApp=0;
         $listRequestItemApp = '';
         foreach($requestItemApp as $val){
@@ -143,9 +144,29 @@ class SiteController extends Controller
         // END REQUEST ITEM
         
         // STOCK OPNAME
-        $stockOpnameApp = [];
+        $stockOpnameApp = InventoryOpnameApproval::findAll(['status'=>2]);
         $countStockOpnameApp=0;
         $listStockOpnameApp = '';
+        foreach($stockOpnameApp as $val){
+            $user = '';
+            if(!empty($val->user_id)){
+                if(!empty($val->user->profile)){
+                    $user = $val->user->profile->name;
+                }
+            }
+            if(!empty($val->typeuser_code)){
+                $user = $val->typeUser->name;
+            }
+            
+            if($val->user_id == \Yii::$app->user->id OR $val->typeuser_code == \Yii::$app->user->identity->profile->typeuser_code){
+                $userApproval = true;
+                $countStockOpnameApp += 1;
+                $listStockOpnameApp .= '<li><a href="'.\Yii::$app->params['URL'].'/inventory/opname/view&code='.$val->code.'">'.$countStockOpnameApp.'). Approval Opname: '.$val->code.'<i>'.$user.'</i></a></li>';
+            }else{
+                $countStockOpnameApp += 1;
+                $listStockOpnameApp .= '<li><span>'.$countStockOpnameApp.'). Approval Opname: '.$val->code.'<i>'.$user.'</i></span></li>';
+            }
+        }
         // END STOCK OPNAME
         
         return $this->render('index', [

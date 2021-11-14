@@ -3,6 +3,7 @@
 namespace app\modules\produksi\models;
 
 use Yii;
+use app\modules\master\models\Profile;
 use app\modules\produksi\models\SpkRequestItemApproval;
 use app\modules\produksi\models\SpkRequestItemDetail;
 use yii\behaviors\TimestampBehavior;
@@ -44,7 +45,7 @@ class SpkRequestItem extends \yii\db\ActiveRecord
         return [
             [['no_spk', 'keterangan'], 'required'],
             [['tgl_request'], 'safe'],
-            [['status_approval', 'status', 'post', 'created_at', 'updated_at'], 'integer'],
+            [['status_approval', 'status', 'post', 'created_at', 'updated_at', 'user_id'], 'integer'],
             [['no_request', 'no_spk'], 'string', 'max' => 12],
             [['keterangan'], 'string', 'max' => 128],
             [['no_request'], 'unique'],
@@ -114,5 +115,10 @@ class SpkRequestItem extends \yii\db\ActiveRecord
     public function getApprovals()
     {
         return $this->hasMany(SpkRequestItemApproval::className(), ['no_request' => 'no_request']);
+    }
+
+    public function getProfile()
+    {
+        return $this->hasOne(Profile::className(), ['user_id' => 'user_id']);
     }
 }

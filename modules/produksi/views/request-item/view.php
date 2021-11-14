@@ -41,6 +41,13 @@ $this->params['breadcrumbs'][] = $this->title;
                     }
                 ],
                 [
+                    'attribute' => 'post',
+                    'format' => 'raw',
+                    'value'=> function ($model, $index) { 
+                        return $model->statusPost;
+                    }
+                ],
+                [
                     'attribute' => 'status',
                     'value'=> function ($model, $index) { 
                         return ($model->status == 1) ? 'Active' : 'Delete';
@@ -68,15 +75,12 @@ $this->params['breadcrumbs'][] = $this->title;
         ]) ?>
     </div>
     
-    <?php if(count($model->details) > 0): 
-        $totalOrder = 0;
-        $totalBiaya = 0; ?>
+    <?php if(count($model->details) > 0): ?>
         <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0 margin-top-40">
             <h6>Detail Material</h6>
             <hr />
         </div>
-        <?php foreach($model->details as $index=>$val): 
-            $totalOrder += $val->total_order; ?>
+        <?php foreach($model->details as $index=>$val): ?>
             <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0" data-form="detail">
                 <!-- Detail Material -->
                 <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
@@ -156,21 +160,10 @@ $this->params['breadcrumbs'][] = $this->title;
                 <!-- /Detail Material -->
             </div>
         <?php endforeach; ?>
-        <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 margin-bottom-20" data-form="summary">
-            <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                <span class="text-right"><?='Total Material: Rp. '.number_format($totalOrder).'.-' ?></span>
-            </div>
-            <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                <span class="text-right"><?='Total Biaya: Rp. '.number_format($totalBiaya).'.-' ?></span>
-            </div>
-            <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                <span class="text-right"><?='Grand Total: Rp. '.number_format($totalOrder+$totalBiaya).'.-' ?></span>
-            </div>
-        </div>
     <?php endif; ?>
 
     <?php if(count($model->approvals) > 0): ?>
-        <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0 margin-top-40">
+        <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0 margin-top-20">
             <h6>Detail Approval</h6>
             <hr />
             <table class="table table-bordered table-custom">
@@ -234,7 +227,7 @@ function popup_approval(el)
         type: "POST",
         url: "<?= Url::to(['request-item/popup']) ?>",
         data: {
-            no_po: data.code,
+            no_request: data.code,
             type: data.type
         },
         dataType: "text",

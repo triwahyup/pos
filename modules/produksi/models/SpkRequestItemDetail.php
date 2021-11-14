@@ -5,6 +5,7 @@ namespace app\modules\produksi\models;
 use Yii;
 use app\modules\inventory\models\InventoryStockItem;
 use app\modules\master\models\MasterMaterialItem;
+use app\modules\produksi\models\SpkDetail;
 use yii\behaviors\TimestampBehavior;
 
 /**
@@ -133,6 +134,11 @@ class SpkRequestItemDetail extends \yii\db\ActiveRecord
         return SpkRequestItemDetail::find()->where(['no_request'=> $this->no_request])->count();
     }
 
+    public function getSpkDetail()
+    {
+        return $this->hasOne(SpkDetail::className(), ['no_spk' => 'no_spk']);
+    }
+
     public function getItem()
     {
         return $this->hasOne(MasterMaterialItem::className(), ['code' => 'item_code']);
@@ -154,5 +160,16 @@ class SpkRequestItemDetail extends \yii\db\ActiveRecord
             $type = $this->lembar_ikat.' DOS';
         }
         return $type;
+    }
+
+    public function jumlahProses()
+    {
+        $konversi = $this->stock->satuanTerkecil($this->item_code, [
+            0 => $this->qty_order_1,
+            1 => $this->qty_order_2
+        ]);
+        $this->jumlah_cetak = $konversi * $this->total_potong;
+        $this->jumlah_objek = $this->jumlah_cetak * $this->total_objek;
+        return true;
     }
 }

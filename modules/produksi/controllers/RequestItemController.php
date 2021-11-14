@@ -5,8 +5,10 @@ namespace app\modules\produksi\controllers;
 use app\models\Logs;
 use app\models\LogsMailSend;
 use app\models\User;
+use app\modules\inventory\models\InventoryStockTransaction;
 use app\modules\master\models\Profile;
 use app\modules\pengaturan\models\PengaturanApproval;
+use app\modules\produksi\models\Spk;
 use app\modules\produksi\models\SpkDetail;
 use app\modules\produksi\models\SpkRequestItem;
 use app\modules\produksi\models\SpkRequestItemDetail;
@@ -119,32 +121,30 @@ class RequestItemController extends Controller
         $detail = new SpkRequestItemDetail();
         if ($this->request->isPost) {
             if ($model->load($this->request->post()) && $detail->load($this->request->post())) {
+                $request = \Yii::$app->request;
                 $connection = \Yii::$app->db;
 			    $transaction = $connection->beginTransaction();
                 try{
                     $model->attributes = $model->attributes;
                     $model->no_request = $model->generateCode();
                     $model->tgl_request = date('Y-m-d');
+                    $model->user_id = \Yii::$app->user->id;
                     if($model->save()){
+                        $dataDetail = $request->post('SpkRequestItemDetail');
                         if(!empty($detail->qty_order_1) || !empty($detail->qty_order_2)){
-                            $spkDetail = SpkDetail::findOne(['no_spk'=>$model->no_spk]);
-                            if(isset($spkDetail)){
-                                $detail = new SpkRequestItemDetail();
-                                $detail->attributes = $spkDetail->attributes;
-                                $detail->attributes = $detail->attributes;
-                                $detail->no_request = $model->no_request;
-                                $detail->urutan = $detail->count +1;
-                                if(!$detail->save()){
-                                    $success = false;
-                                    $message = (count($detail->errors) > 0) ? 'ERROR CREATE REQUEST ITEM DETAIL: ' : '';
-                                    foreach($detail->errors as $error => $value){
-                                        $message .= strtoupper($value[0].', ');
-                                    }
-                                    $message = substr($message, 0, -2);
-                                }
-                            }else{
+                            $detail->attributes = $model->attributes;
+                            $detail->attributes = $detail->spkDetail->attributes;
+                            $detail->attributes = (array)$dataDetail;
+                            $detail->urutan = $detail->count +1;
+                            $detail->total_order = 0;
+                            $jumlahProses = $detail->jumlahProses();
+                            if(!$detail->save()){
                                 $success = false;
-                                $message = 'DATA SPK DETAIL TIDAK DI TEMUKAN.';
+                                $message = (count($detail->errors) > 0) ? 'ERROR CREATE REQUEST ITEM DETAIL: ' : '';
+                                foreach($detail->errors as $error => $value){
+                                    $message .= strtoupper($value[0].', ');
+                                }
+                                $message = substr($message, 0, -2);
                             }
                         }else{
                             $success = false;
@@ -216,6 +216,7 @@ class RequestItemController extends Controller
                     if($model->save()){
                         if(!empty($detail->qty_order_1) || !empty($detail->qty_order_2)){
                             $detail->attributes = $detail->attributes;
+                            $jumlahProses = $detail->jumlahProses();
                             if(!$detail->save()){
                                 $success = false;
                                 $message = (count($detail->errors) > 0) ? 'ERROR UPDATE REQUEST ITEM DETAIL: ' : '';
@@ -602,6 +603,139 @@ class RequestItemController extends Controller
             ]);
         }
     }
+
+    public function actionPost($no_request)
+    {
+        $success = true;
+		$message = '';
+        $model = $this->findModel($no_request);
+        if(isset($model)){
+            $connection = \Yii::$app->db;
+            $transaction = $connection->beginTransaction();
+            try{
+                $model->post=1;
+                if($model->save()){
+                    // PROSES KURANG STOK
+                    foreach($model->details as $val){
+                        $stockItem = $val->stock;
+                        if(isset($stockItem)){
+                            $stock = $stockItem->satuanTerkecil($val->item_code, [
+                                0=>$val->qty_order_1,
+                                1=>$val->qty_order_2
+                            ]);
+                            if($stockItem->onhand > $stock){
+                                $stockItem->onhand = $stockItem->onhand - $stock;
+                                $stockItem->onsales = $stockItem->onsales + $stock;
+                                if(!$stockItem->save()){
+                                    $success = false;
+                                    $message = (count($stockItem->errors) > 0) ? 'ERROR UPDATE STOCK ITEM: ' : '';
+                                    foreach($stockItem->errors as $error => $value){
+                                        $message .= strtoupper($value[0].', ');
+                                    }
+                                    $message = substr($message, 0, -2);
+                                }
+
+                                $stockTransaction = new InventoryStockTransaction();
+                                $stockTransaction->attributes = $stockItem->attributes;
+                                $stockTransaction->no_document = $model->no_request;
+                                $stockTransaction->tgl_document = $model->tgl_request;
+                                $stockTransaction->type_document = "REQUEST ITEM";
+                                $stockTransaction->status_document = "OUT";
+                                $stockTransaction->qty_out = $stock;
+                                if(!$stockTransaction->save()){
+                                    $success = false;
+                                    $message = (count($stockTransaction->errors) > 0) ? 'ERROR UPDATE STOCK TRANSACTION: ' : '';
+                                    foreach($stockTransaction->errors as $error => $value){
+                                        $message .= strtoupper($value[0].', ');
+                                    }
+                                    $message = substr($message, 0, -2);
+                                }
+                            }else{
+                                $success = false;
+                                $message = 'SISA STOCK ITEM '.$val->item_code.' TIDAK MENCUKUPI. SISA '.$stockItem->onhand;
+                            }
+                        }else{
+                            $success = false;
+                            $message = 'STOCK ITEM '.$val->item_code.' TIDAK DITEMUKAN.';
+                        }
+                    }
+                    
+                    // PROSES SIMPAN SPK
+                    $spk = Spk::findOne(['no_spk'=>$model->no_spk, 'status'=>1]);
+                    if(isset($spk)){
+                        $nspk = new Spk();
+                        $nspk->no_spk = $spk->generateCode();
+                        $nspk->tgl_spk = date('Y-m-d');
+                        $nspk->no_so = $spk->no_so;
+                        $nspk->tgl_so = $spk->tgl_so;
+                        $nspk->keterangan = 'DARI REQUEST ITEM';
+                        if($nspk->save()){
+                            foreach($model->details as $detail){
+                                $spkDetail = new SpkDetail();
+                                $spkDetail->attributes = $detail->attributes;
+                                $spkDetail->attributes = $nspk->attributes;
+                                if(!$spkDetail->save()){
+                                    $success = false;
+                                    $message = (count($spkDetail->errors) > 0) ? 'ERROR CREATE SPK DETAIL: ' : '';
+                                    foreach($spkDetail->errors as $error => $value){
+                                        $message .= strtoupper($value[0].', ');
+                                    }
+                                    $message = substr($message, 0, -2);
+                                }
+                            }
+                        }else{
+                            $success = false;
+                            $message = (count($nspk->errors) > 0) ? 'ERROR CREATE SPK: ' : '';
+                            foreach($nspk->errors as $error => $value){
+                                $message .= strtoupper($value[0].', ');
+                            }
+                            $message = substr($message, 0, -2);
+                        }
+                    }else{
+                        $success = false;
+                        $message = 'Data SPK tidak ditemukan.';
+                    }
+                }else{
+                    $success = false;
+                    $message = (count($model->errors) > 0) ? 'ERROR POST REQUEST ITEM TO SPK: ' : '';
+                    foreach($model->errors as $error => $value){
+                        $message .= strtoupper($value[0].', ');
+                    }
+                    $message = substr($message, 0, -2);
+                }
+
+                if($success){
+                    $message = '['.$model->no_request.'] SUCCESS POST REQUEST ITEM TO SPK.';
+                    $transaction->commit();
+                    $logs =	[
+                        'type' => Logs::TYPE_USER,
+                        'description' => $message,
+                    ];
+                    Logs::addLog($logs);
+                    \Yii::$app->session->setFlash('success', $message);
+                    return $this->redirect(['view', 'no_request' => $model->no_request]);
+                }else{
+                    $transaction->rollBack();
+                }
+            }catch(Exception $e){
+                $success = false;
+                $message = $e->getMessage();
+                $transaction->rollBack();
+            }
+            $logs =	[
+                'type' => Logs::TYPE_USER,
+                'description' => $message,
+            ];
+            Logs::addLog($logs);
+        }else{
+            $success = false;
+            $message = 'Data Request Item not valid.';
+        }
+        if(!$success){
+            \Yii::$app->session->setFlash('error', $message);
+        }
+        return $this->redirect(['view', 'no_request' => $model->no_request]);
+    }
     
     function mailapproval($no_request)
     {
@@ -730,7 +864,7 @@ class RequestItemController extends Controller
 
             $logs_mail = new LogsMailSend();
             $logs_mail->type = 'APPROVAL REQUEST ITEM';
-            $logs_mail->email = (isset($approval->po->profile)) ? $approval->po->profile->email : '';
+            $logs_mail->email = (isset($approval->spkRequestItem->profile)) ? $approval->spkRequestItem->profile->email : '';
             $logs_mail->bcc = '';
             $logs_mail->subject = 'Approval Request Item '. $approval->no_request;
             $logs_mail->body = $body;

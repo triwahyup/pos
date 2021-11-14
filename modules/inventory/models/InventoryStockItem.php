@@ -142,4 +142,42 @@ class InventoryStockItem extends \yii\db\ActiveRecord
         }
         return substr($desc, 0, -2);
     }
+
+    public function nKonversi($item_code, $qty)
+    {
+        $item = MasterMaterialItem::findOne($item_code);
+        $result = [];
+        if(isset($item)){
+            // KERTAS
+            if($item->type_code == '007'){
+                $result[0] = floor($qty / 500);
+                $sisa = $qty - ($result[0] * 500);
+                $result[1] = $sisa;
+            }
+            // BAHAN PEMBANTU
+            else if($item->type_code == '010'){
+                // TINTA
+                if($item->material_code == '016'){
+                    $result[0] = floor($qty / 1000);
+                    $sisa = $qty - ($result[0] * 1000);
+                    $result[1] = $sisa;
+                }
+                // BOX, TAS PLASTIK, SINGLE FACE
+                else if($item->material_code == '017' || $item->material_code == '018' || $item->material_code == '019'){
+                    $result[0] = $qty;
+                }
+                // LAIN2
+                else{
+                    if($item->satuan->um_1 == 'KG'){
+                        $result[0] = floor($qty / 1000);
+                        $sisa = $qty - ($result[0] * 1000);
+                        $result[1] = $sisa;
+                    }else{
+                        $result[0] = $qty;
+                    }
+                }
+            }
+        }
+        return $result;
+    }
 }

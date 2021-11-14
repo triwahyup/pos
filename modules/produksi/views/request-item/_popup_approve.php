@@ -15,14 +15,12 @@ use yii\widgets\ActiveForm;
 			<table class="table table-bordered">
 				<thead>
 					<tr>
-						<th class="text-center" width="100">Total Order</th>
 						<th class="text-center" width="100">Request By</th>
 					</tr>
 				</thead>
 				<tbody>
 					<tr>
-						<td class="text-right"><?='Rp. '. number_format($model->total_order, 0) .' -.'?></td>
-						<td class="text-center"><?=(isset($model->request)) ? $model->request->name : '-' ?></td>	
+						<td class="text-center"><?=(isset($model->profile)) ? $model->profile->name : '-' ?></td>	
 					</tr>
 				</tbody>
 			</table>

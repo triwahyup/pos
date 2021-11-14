@@ -121,6 +121,16 @@ $(document).ready(function(){
         e.preventDefault();
         search_spk($(this));
     });
+
+    $("body").off("input","#spkrequestitemdetail-qty_order_2");
+    $("body").on("input","#spkrequestitemdetail-qty_order_2", function(e){
+        e.preventDefault();
+        if($(this).val() >= 500){
+            $(this).val(499);
+        }else{
+            $(this).val();
+        }
+    });
 });
 
 $(function(){

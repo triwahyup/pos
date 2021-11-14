@@ -96,13 +96,14 @@ class PengaturanMenu extends \yii\db\ActiveRecord
         return $this->hasOne(MasterKode::className(), ['code' => 'type_code']);
     }
 
+    public $status_active = 1;
     public function getParent()
     {
-        return $this->hasOne(PengaturanMenu::className(), ['code' => 'parent_code']);
+        return $this->hasOne(PengaturanMenu::className(), ['code' => 'parent_code', 'status' => 'status_active']);
     }
 
     public function getChild()
     {
-        return $this->hasMany(PengaturanMenu::className(), ['parent_code' => 'code'])->orderBy(['urutan' => SORT_ASC]);
+        return $this->hasMany(PengaturanMenu::className(), ['parent_code' => 'code', 'status' => 'status_active'])->orderBy(['urutan' => SORT_ASC]);
     }
 }

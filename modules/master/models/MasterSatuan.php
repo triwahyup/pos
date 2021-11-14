@@ -43,10 +43,9 @@ class MasterSatuan extends \yii\db\ActiveRecord
             [['name', 'type_code', 'um_1', 'composite'], 'required'],
             [['keterangan'], 'string'],
             [['status', 'created_at', 'updated_at', 'composite'], 'integer'],
-            [['code'], 'string', 'max' => 3],
+            [['code', 'type_code', 'type_satuan'], 'string', 'max' => 3],
             [['um_1', 'um_2', 'um_3'], 'string', 'max' => 5],
             [['name'], 'string', 'max' => 128],
-            [['type_code'], 'string', 'max' => 8],
             [['code'], 'unique'],
             [['status'], 'default', 'value' => 1],
         ];
