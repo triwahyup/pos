@@ -29,8 +29,35 @@ $this->params['breadcrumbs'][] = "Dashboard";
             </div>
         </div>
         <!-- /PURCHASE ORDER -->
+        <!-- PO INTERNAL -->
+        <div class="col-lg-6 -col-md-6 col-xs-12 padding-left-0">
+            <div class="cube-container cube-danger">
+                <div class="cube-left">
+                    <i class="fontello icon-info-circled-3"></i></span>
+                </div>
+                <div class="cube-right">
+                    <?php if($userApproval): ?>
+                        <?='<p>(PO Internal) Anda memiliki request '.$countPoInternalApp.' approval</p>'?>
+                    <?php else: ?>
+                        <p>PO Internal List Approval:</p>
+                    <?php endif; ?>
+                    <ul>
+                        <?php if($countPoInternalApp > 0): ?>
+                            <?=$listPoInternalApp?>
+                        <?php else: ?>
+                            <li>
+                                <span>Request Approval is Empty.</span>
+                            </li>
+                        <?php endif; ?>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <!-- /PO INTERNAL -->
+    </div>
+    <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
         <!-- REQUEST ITEM -->
-        <div class="col-lg-6 -col-md-6 col-xs-12 padding-right-0">
+        <div class="col-lg-6 -col-md-6 col-xs-12 padding-left-0">
             <div class="cube-container cube-drop">
                 <div class="cube-left">
                     <i class="fontello icon-info-circled-3"></i></span>
@@ -54,8 +81,6 @@ $this->params['breadcrumbs'][] = "Dashboard";
             </div>
         </div>
         <!-- /REQUEST ITEM -->
-    </div>
-    <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
         <!-- STOCK OPNAME -->
         <div class="col-lg-6 -col-md-6 col-xs-12 padding-left-0">
             <div class="cube-container cube-warning">

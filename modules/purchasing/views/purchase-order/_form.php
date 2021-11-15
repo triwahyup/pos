@@ -572,7 +572,6 @@ $(document).ready(function(){
         delete_temp($(this).attr("data-target"));
     });
 });
-
 $(function(){
     <?php if(!$model->isNewRecord): ?>
         init_temp();

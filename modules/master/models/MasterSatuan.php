@@ -85,4 +85,9 @@ class MasterSatuan extends \yii\db\ActiveRecord
     {
         return $this->hasOne(MasterKode::className(), ['code' => 'type_code']);
     }
+
+    public function getTypeSatuan()
+    {
+        return $this->hasOne(MasterKode::className(), ['code' => 'type_satuan']);
+    }
 }

@@ -100,6 +100,11 @@ class SatuanController extends Controller
             ->where(['type'=>\Yii::$app->params['TYPE_MATERIAL'], 'status' => 1])
             ->indexBy('code')
             ->column();
+        $satuan = MasterKode::find()
+            ->select(['name'])
+            ->where(['type'=>\Yii::$app->params['TYPE_SATUAN'], 'status' => 1])
+            ->indexBy('code')
+            ->column();
 
         $success = true;
         $message = '';
@@ -152,6 +157,7 @@ class SatuanController extends Controller
         return $this->render('create', [
             'model' => $model,
             'type' => $type,
+            'satuan' => $satuan,
         ]);
     }
 
@@ -167,6 +173,11 @@ class SatuanController extends Controller
         $type = MasterKode::find()
             ->select(['name'])
             ->where(['type'=>\Yii::$app->params['TYPE_MATERIAL'], 'status' => 1])
+            ->indexBy('code')
+            ->column();
+        $satuan = MasterKode::find()
+            ->select(['name'])
+            ->where(['type'=>\Yii::$app->params['TYPE_SATUAN'], 'status' => 1])
             ->indexBy('code')
             ->column();
 
@@ -216,6 +227,7 @@ class SatuanController extends Controller
         return $this->render('update', [
             'model' => $model,
             'type' => $type,
+            'satuan' => $satuan,
         ]);
     }
 

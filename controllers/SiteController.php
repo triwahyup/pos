@@ -11,6 +11,7 @@ use app\models\LoginForm;
 use app\models\Logs;
 use app\models\User;
 use app\modules\inventory\models\InventoryOpnameApproval;
+use app\modules\purchasing\models\PurchaseInternalApproval;
 use app\modules\purchasing\models\PurchaseOrderApproval;
 use app\modules\produksi\models\SpkRequestItemApproval;
 
@@ -117,6 +118,32 @@ class SiteController extends Controller
         }
         // END PURCHASE ORDER
 
+        // PO INTERNAL
+        $poInternalApp = PurchaseInternalApproval::findAll(['status'=>2]);
+        $countPoInternalApp=0;
+        $listPoInternalApp = '';
+        foreach($poInternalApp as $val){
+            $user = '';
+            if(!empty($val->user_id)){
+                if(!empty($val->user->profile)){
+                    $user = $val->user->profile->name;
+                }
+            }
+            if(!empty($val->typeuser_code)){
+                $user = $val->typeUser->name;
+            }
+            
+            if($val->user_id == \Yii::$app->user->id OR $val->typeuser_code == \Yii::$app->user->identity->profile->typeuser_code){
+                $userApproval = true;
+                $countPoInternalApp += 1;
+                $listPoInternalApp .= '<li><a href="'.\Yii::$app->params['URL'].'/purchasing/purchase-internal/view&no_pi='.$val->no_pi.'">'.$countPoInternalApp.'). Approval PO INTERNAL: '.$val->no_pi.'<i>'.$user.'</i></a></li>';
+            }else{
+                $countPoInternalApp += 1;
+                $listPoInternalApp .= '<li><span>'.$countPoInternalApp.'). Approval PO INTERNAL: '.$val->no_pi.'<i>'.$user.'</i></span></li>';
+            }
+        }
+        // END PO INTERNAL
+
         // REQUEST ITEM
         $requestItemApp = SpkRequestItemApproval::findAll(['status'=>2]);
         $countRequestItemApp=0;
@@ -174,6 +201,9 @@ class SiteController extends Controller
             'purchaseApp' => $purchaseApp,
             'countPurchaseApp' => $countPurchaseApp,
             'listPurchaseApp' => $listPurchaseApp,
+            'poInternalApp' => $poInternalApp,
+            'countPoInternalApp' => $countPoInternalApp,
+            'listPoInternalApp' => $listPoInternalApp,
             'requestItemApp' => $requestItemApp,
             'listRequestItemApp' => $listRequestItemApp,
             'countRequestItemApp' => $countRequestItemApp,

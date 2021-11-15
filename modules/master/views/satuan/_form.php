@@ -20,6 +20,14 @@ use yii\widgets\ActiveForm;
         </div>
         <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
             <div class="col-lg-3 col-md-3 col-xs-12 padding-left-0">
+                <?= $form->field($model, 'type_satuan')->widget(Select2::classname(), [
+                        'data' => $satuan,
+                        'options' => ['placeholder' => 'Type Satuan'],
+                    ]) ?>
+            </div>
+        </div>
+        <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
+            <div class="col-lg-3 col-md-3 col-xs-12 padding-left-0">
                 <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
             </div>
         </div>

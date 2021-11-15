@@ -35,6 +35,12 @@ $this->params['breadcrumbs'][] = $this->title;
                         return (isset($model->typeCode)) ? $model->typeCode->name : '';
                     }
                 ],
+                [
+                    'attribute' => 'type_satuan',
+                    'value' => function ($model, $index) { 
+                        return (isset($model->typeSatuan)) ? $model->typeSatuan->name : '';
+                    }
+                ],
                 'composite',
                 'um_1',
                 'um_2',

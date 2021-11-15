@@ -9,6 +9,7 @@ use app\modules\master\models\MasterMaterialItem;
 use app\modules\master\models\MasterOrder;
 use app\modules\master\models\MasterOrderDetail;
 use app\modules\master\models\MasterOrderDetailProduksi;
+use app\modules\master\models\MasterSatuan;
 use app\modules\master\models\TempMasterOrderDetail;
 use app\modules\master\models\TempMasterOrderDetailProduksi;
 use app\modules\master\models\MasterOrderSearch;
@@ -100,6 +101,11 @@ class OrderController extends Controller
      */
     public function actionCreate()
     {
+        $satuan = MasterSatuan::find()
+            ->select(['name'])
+            ->indexBy('code')
+            ->column();
+        
         $success = true;
         $message = '';
         $model = new MasterOrder();
