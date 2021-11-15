@@ -40,7 +40,7 @@ class MasterSatuan extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['name', 'type_code', 'um_1', 'composite'], 'required'],
+            [['name', 'type_code', 'type_satuan', 'um_1', 'composite'], 'required'],
             [['keterangan'], 'string'],
             [['status', 'created_at', 'updated_at', 'composite'], 'integer'],
             [['code', 'type_code', 'type_satuan'], 'string', 'max' => 3],
