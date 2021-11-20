@@ -93,7 +93,7 @@
             <!-- Detail Proses -->
             <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
                 <div class="col-lg-12 col-md-12 col-xs-12 text-left padding-left-0">
-                    <a class="btn" id="list_biaya_produksi" href="javascript:void(0)" data-order="<?=$val->order_code ?>" data-item="<?=$val->item_code?>">
+                    <a class="btn" id="list_biaya_produksi" href="javascript:void(0)" data-so="<?=$val->no_so ?>" data-order="<?=$val->order_code ?>" data-item="<?=$val->item_code?>">
                         <i class="font-size-16 fontello icon-check-3"></i>
                         <span>Pilih Proses Produksi</span>
                     </a>

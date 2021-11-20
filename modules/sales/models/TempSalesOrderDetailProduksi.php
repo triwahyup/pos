@@ -79,6 +79,12 @@ class TempSalesOrderDetailProduksi extends \yii\db\ActiveRecord
         return TempSalesOrderDetailProduksi::find()->where(['user_id'=> \Yii::$app->user->id])->all();
     }
     
+    public function getOrderCode()
+    {
+        $temp = TempSalesOrderDetailProduksi::find()->where(['no_so' => $this->no_so])->one();
+        return $temp->order_code;
+    }
+    
     public function getItem()
     {
         return $this->hasOne(MasterMaterialItem::className(), ['code' => 'item_code']);

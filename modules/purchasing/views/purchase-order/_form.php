@@ -96,17 +96,17 @@ use yii\widgets\MaskedInput;
                         <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-right-0">
                             <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 padding-left-0 padding-right-0">
                                 <?= $form->field($temp, 'qty_order_1')->widget(MaskedInput::className(), [
-                                    'clientOptions' => [
-                                        'alias' => 'decimal',
-                                        'groupSeparator' => ',',
-                                        'autoGroup' => true
-                                    ],
-                                    'options' => [
-                                        'data-align' => 'text-right',
-                                        'readonly' => true,
-                                        'data-temp' => true
-                                    ]
-                                ])->label(false) ?>
+                                        'clientOptions' => [
+                                            'alias' => 'decimal',
+                                            'groupSeparator' => ',',
+                                            'autoGroup' => true
+                                        ],
+                                        'options' => [
+                                            'data-align' => 'text-right',
+                                            'readonly' => true,
+                                            'data-temp' => true
+                                        ]
+                                    ])->label(false) ?>
                             </div>
                             <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 padding-left-0 padding-right-0">
                                 <?= $form->field($temp, 'um_1')->textInput(['readonly' => true, 'data-align' => 'text-right', 'data-temp' => true])->label(false) ?>
@@ -115,18 +115,18 @@ use yii\widgets\MaskedInput;
                         <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-right-0">
                             <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 padding-left-0 padding-right-0">
                                 <?= $form->field($temp, 'qty_order_2')->widget(MaskedInput::className(), [
-                                    'clientOptions' => [
-                                        'alias' =>  'decimal',
-                                        'groupSeparator' => ',',
-                                        'autoGroup' => true,
-                                    ],
-                                    'options' => [
-                                        'data-align' => 'text-right',
-                                        'data-temp' => true,
-                                        'readonly' => true,
-                                        'maxlength' => 3,
-                                    ]
-                                ])->label(false) ?>
+                                        'clientOptions' => [
+                                            'alias' =>  'decimal',
+                                            'groupSeparator' => ',',
+                                            'autoGroup' => true,
+                                        ],
+                                        'options' => [
+                                            'data-align' => 'text-right',
+                                            'data-temp' => true,
+                                            'readonly' => true,
+                                            'maxlength' => 3,
+                                        ]
+                                    ])->label(false) ?>
                             </div>
                             <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 padding-left-0 padding-right-0">
                                 <?= $form->field($temp, 'um_2')->textInput(['readonly' => true, 'data-align' => 'text-right', 'data-temp' => true])->label(false) ?>

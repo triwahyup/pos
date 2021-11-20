@@ -94,7 +94,7 @@ $this->params['breadcrumbs'][] = $this->title;
             $totalOrder = 0;
             $totalBiaya = 0; ?>
             <div class="document-container">
-                <div class="document-header">Order Name: <?=$model->name ?></div>
+                <div class="document-header">Job: <?=$model->name ?></div>
                 <div class="document-body">
                     <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
                         <h6>Detail Material</h6>

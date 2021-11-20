@@ -4,6 +4,7 @@ use kartik\widgets\Select2;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\ActiveForm;
+use yii\widgets\MaskedInput;
 
 /* @var $this yii\web\View */
 /* @var $model app\modules\sales\models\SalesOrder */
@@ -53,9 +54,33 @@ use yii\widgets\ActiveForm;
             </div>
             <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
                 <div class="col-lg-5 col-md-5 col-xs-12 padding-left-0">
-                    <?= $form->field($model, 'ppn')->textInput() ?>
+                    <?= $form->field($model, 'ekspedisi_name')->textInput(['maxlength' => true]) ?>
                 </div>
                 <div class="col-lg-5 col-md-5 col-xs-12 padding-left-0">
+                    <?= $form->field($model, 'biaya_pengiriman')->widget(MaskedInput::className(), [
+                            'clientOptions' => [
+                                'alias' => 'decimal',
+                                'groupSeparator' => ',',
+                                'autoGroup' => true
+                            ],
+                            'options' => [
+                                'data-align' => 'text-right',
+                                'data-name' => 'iconbox',
+                                'data-icons' => 'rupiah',
+                            ]
+                        ]) ?>
+                </div>
+            </div>
+            <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
+                <div class="col-lg-5 col-md-5 col-xs-12 padding-left-0">
+                    <?= $form->field($model, 'up_produksi')->dropDownList(['5' => '5%', '10' => '10%'], ['prompt'=>'Produksi Up (%)']) ?>
+                </div>
+                <div class="col-lg-5 col-md-5 col-xs-12 padding-left-0">
+                    <?= $form->field($model, 'ppn')->textInput() ?>
+                </div>
+            </div>
+            <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
+                <div class="col-lg-10 col-md-10 col-xs-12 padding-left-0">
                     <?= $form->field($model, 'keterangan')->textarea(['rows' => 2]) ?>
                 </div>
             </div>
@@ -126,7 +151,7 @@ function load_biaya_produksi(el)
         url: "<?=Url::to(['sales-order/list-biaya'])?>",
 		type: "GET",
         data: {
-            no_so: data.no_so,
+            no_so: data.so,
             order_code: data.order,
             item_code: data.item,
         },
@@ -270,9 +295,8 @@ function init_temp()
     });
 }
 
-function create_temp_produksi(code, biaya, item)
+function create_temp_produksi(so, code, biaya, item)
 {
-    var no_so = "<?=(isset($_GET['no_so'])) ? $_GET['no_so'] : '' ?>"
     $.ajax({
         url: "<?= Url::to(['sales-order/create-temp-produksi']) ?>",
         type: "POST",
@@ -285,13 +309,11 @@ function create_temp_produksi(code, biaya, item)
             code: code,
             biaya: biaya,
             item: item,
-            no_so: no_so,
+            no_so: so,
         },
         success: function(data){
             var o = $.parseJSON(data);
-            if(o.success == true){
-                notification.open("success", o.message, timeOut);
-            }else{
+            if(!o.success == true){
                 notification.open("danger", o.message, timeOut);
             }
             init_temp();
@@ -317,9 +339,7 @@ function delete_temp_produksi(id)
         },
         success: function(data){
             var o = $.parseJSON(data);
-            if(o.success == true){
-                notification.open("success", o.message, timeOut);
-            }else{
+            if(!o.success == true){
                 notification.open("danger", o.message, timeOut);
             }
             init_temp();
@@ -344,7 +364,8 @@ $(document).ready(function(){
         }
     });
 
-    $("body").off("click","[data-id=\"popup\"] table > tbody tr").on("click","[data-id=\"popup\"] table > tbody tr", function(e){
+    $("body").off("click","[data-id=\"popup\"] table > tbody tr[data-code]")
+    $("body").on("click","[data-id=\"popup\"] table > tbody tr[data-code]", function(e){
         e.preventDefault();
         var data = $(this).data();
         select_order(data.code);
@@ -354,7 +375,7 @@ $(document).ready(function(){
         var prop = $(this).prop("checked"), 
             id = $(this).attr("id").split("_")[1]+'_'+$(this).attr("id").split("_")[2];
         if(prop == true){
-            create_temp_produksi($("#code_"+id).val(), $("#biaya_"+id).val(), $("#item_"+id).val());
+            create_temp_produksi($("#so_"+id).val(), $("#code_"+id).val(), $("#biaya_"+id).val(), $("#item_"+id).val());
         }else{
             delete_temp_produksi($(this).attr("data-id"));
         }

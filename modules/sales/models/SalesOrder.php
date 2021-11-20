@@ -50,13 +50,13 @@ class SalesOrder extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['tgl_so', 'customer_code', 'nama_order'], 'required'],
-            [['tgl_so', 'tgl_po', 'total_order', 'total_biaya', 'grand_total'], 'safe'],
+            [['tgl_so', 'customer_code', 'nama_order', 'ekspedisi_name', 'biaya_pengiriman'], 'required'],
+            [['tgl_so', 'tgl_po', 'total_order', 'total_biaya', 'grand_total', 'biaya_pengiriman'], 'safe'],
             [['ppn'], 'number'],
-            [['status', 'created_at', 'updated_at', 'type_order', 'post'], 'integer'],
+            [['status', 'created_at', 'updated_at', 'type_order', 'post', 'up_produksi'], 'integer'],
             [['no_so', 'no_po'], 'string', 'max' => 12],
             [['customer_code', 'outsource_code', 'order_code'], 'string', 'max' => 3],
-            [['keterangan', 'nama_order'], 'string', 'max' => 128],
+            [['keterangan', 'nama_order', 'ekspedisi_name'], 'string', 'max' => 128],
             [['no_so'], 'unique'],
             [['status'], 'default', 'value' => 1],
         ];
@@ -82,6 +82,8 @@ class SalesOrder extends \yii\db\ActiveRecord
             'updated_at' => 'Updated At',
             'outsource_code' => 'Jasa / Outsourcing',
             'nama_order' => 'Nama Job (Order)',
+            'ekspedisi_name' => 'Ekspedisi',
+            'up_produksi' => 'Produksi Up (%)',
         ];
     }
 

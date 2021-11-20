@@ -688,6 +688,7 @@ class SalesOrderController extends Controller
                 foreach($model->details as $detail){
                     $tempDetails = new TempSalesOrderDetail();
                     $tempDetails->attributes = $detail->attributes;
+                    $tempDetails->no_so = 'tmp';
                     $tempDetails->user_id = \Yii::$app->user->id;
                     if(!$tempDetails->save()){
                         $success = false;
@@ -703,6 +704,7 @@ class SalesOrderController extends Controller
                 foreach($model->detailsProduksi as $detail){
                     $tempProduksi = new TempSalesOrderDetailProduksi();
                     $tempProduksi->attributes = $detail->attributes;
+                    $tempProduksi->no_so = 'tmp';
                     $tempProduksi->user_id = \Yii::$app->user->id;
                     if(!$tempProduksi->save()){
                         $success = false;
@@ -776,11 +778,13 @@ class SalesOrderController extends Controller
                 $temp->attributes = $biayaProduksi->attributes;
                 $temp->biaya_produksi_code = $biayaProduksi->code;
                 $temp->item_code = $materialItem->code;
-                $temp->no_so = $request->post('no_so');
                 $temp->total_biaya = $temp->totalBiaya();
-                if(!empty($request->post('code'))){
-                    $temp->order_code = $request->post('code');
+                if(!empty($request->post('no_so'))){
+                    $temp->no_so = $request->post('no_so');
+                }else{
+                    $temp->no_so = 'tmp';
                 }
+                $temp->order_code = $temp->orderCode;
                 $temp->urutan = $temp->count +1;
                 $temp->user_id = \Yii::$app->user->id;
                 if($temp->save()){

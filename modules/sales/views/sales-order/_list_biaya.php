@@ -21,6 +21,7 @@
                         <?php else: ?>
                             <input type="checkbox" name="item" value="<?=$val['name'] ?>" id="proses_<?=$val['biaya'].'_'.$val['item'] ?>">
                         <?php endif; ?>
+                        <input type="hidden" id="so_<?=$val['biaya'].'_'.$val['item'] ?>" value="<?=$val['no_so'] ?>">
                         <input type="hidden" id="code_<?=$val['biaya'].'_'.$val['item'] ?>" value="<?=$val['order'] ?>">
                         <input type="hidden" id="biaya_<?=$val['biaya'].'_'.$val['item'] ?>" value="<?=$val['biaya'] ?>">
                         <input type="hidden" id="item_<?=$val['biaya'].'_'.$val['item'] ?>" value="<?=$val['item'] ?>">
