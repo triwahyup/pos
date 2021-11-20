@@ -48,10 +48,10 @@ class MasterOrderDetail extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['urutan', 'total_potong', 'total_objek', 'total_warna', 'lembar_ikat', 'status', 'created_at', 'updated_at', 'lembar_ikat_type'], 'integer'],
+            [['urutan', 'total_potong', 'total_objek', 'total_warna', 'lembar_ikat_1', 'lembar_ikat_2', 'lembar_ikat_3', 'status', 'created_at', 'updated_at'], 'integer'],
             [['panjang', 'lebar', 'harga_cetak', 'harga_beli_1', 'harga_beli_2', 'harga_beli_3', 'harga_jual_1', 'harga_jual_2', 'harga_jual_3', 'qty_order_1', 'qty_order_2', 'qty_order_3', 'jumlah_cetak', 'jumlah_objek', 'total_order'], 'number'],
-            [['order_code', 'satuan_code', 'type_code', 'material_code', 'group_material_code', 'group_supplier_code'], 'string', 'max' => 3],
-            [['um_1', 'um_2', 'um_3'], 'string', 'max' => 5],
+            [['order_code', 'satuan_code', 'satuan_ikat_code', 'type_code', 'material_code', 'group_material_code', 'group_supplier_code'], 'string', 'max' => 3],
+            [['um_1', 'um_2', 'um_3', 'lembar_ikat_um_1', 'lembar_ikat_um_2', 'lembar_ikat_um_3'], 'string', 'max' => 5],
             [['item_code'], 'string', 'max' => 7],
             [['order_code', 'urutan'], 'unique', 'targetAttribute' => ['order_code', 'urutan']],
             [['status'], 'default', 'value' => 1],
@@ -95,18 +95,5 @@ class MasterOrderDetail extends \yii\db\ActiveRecord
     public function getDetailsProduksi()
     {
         return $this->hasMany(MasterOrderDetailProduksi::className(), ['order_code' => 'order_code', 'item_code' => 'item_code']);
-    }
-
-    public function getTypeIkat()
-    {
-        $type = '';
-        if($this->lembar_ikat_type==1){
-            $type = $this->lembar_ikat.' SAP';
-        }else if($this->lembar_ikat_type==2){
-            $type = $this->lembar_ikat.' IKAT';
-        }else if($this->lembar_ikat_type==3){
-            $type = $this->lembar_ikat.' DOS';
-        }
-        return $type;
     }
 }

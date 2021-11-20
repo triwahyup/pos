@@ -3,14 +3,14 @@
     $totalBiaya = 0; ?>
     <?php foreach($temps as $index=>$val): 
         $totalOrder += $val->total_order; ?>
-        <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0" data-form="detail">
+        <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0" render="detail">
             <!-- Button Edit/Delete -->
             <div class="col-lg-12 col-md-12 col-xs-12 text-right padding-right-0">
-                <a class="custom-btn" href="javascript:void(0)" data-id="<?=$val->id ?>" data-button="update_temp">
+                <a class="custom-btn btn btn-warning" href="javascript:void(0)" data-id="<?=$val->id ?>" data-button="update_temp">
                     <i class="fontello icon-pencil"></i>
                     <span>Update</span>
                 </a>
-                <a class="custom-btn" href="javascript:void(0)" data-id="<?=$val->id ?>" data-button="delete_temp">
+                <a class="custom-btn btn btn-danger" href="javascript:void(0)" data-id="<?=$val->id ?>" data-button="delete_temp">
                     <i class="fontello icon-trash"></i>
                     <span>Hapus</span>
                 </a>
@@ -49,8 +49,8 @@
                         <strong class="font-size-12">
                             <?php for($a=1;$a<3;$a++): ?>
                                 <?=(!empty($val['harga_jual_'.$a])) ? 
-                                    'Rp.'.number_format($val['harga_jual_'.$a]).'.-
-                                    <span class="text-muted font-size-10">(Per '.$val['um_'.$a].')</span><br />' 
+                                    '<span class="text-money">Rp.'.number_format($val['harga_jual_'.$a]).'.-</span>
+                                    <span class="text-muted font-size-10">(Per Lembar '.$val['um_'.$a].')</span><br />' 
                                     : null ?>
                             <?php endfor; ?>
                         </strong>
@@ -82,10 +82,22 @@
                 </div>
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
                     <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
-                        <label class="font-size-12">Total Warna / Lb.Ikat</label>
+                        <label class="font-size-12">Total Warna</label>
                     </div>
                     <div class="col-lg-8 col-md-8 col-sm-12 col-xs-12 padding-right-0">
-                        <strong class="font-size-12"><?=$val->total_warna.' / '.$val->typeIkat ?></strong>
+                        <strong class="font-size-12"><?=$val->total_warna ?></strong>
+                    </div>
+                </div>
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
+                    <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
+                        <label class="font-size-12">Lembar Ikat</label>
+                    </div>
+                    <div class="col-lg-8 col-md-8 col-sm-12 col-xs-12 padding-right-0">
+                        <strong class="font-size-12">
+                            <?=(!empty($val->lembar_ikat_1) ? number_format($val->lembar_ikat_1) .' '.$val->lembar_ikat_um_1 .' / ' : '') ?>
+                            <?=(!empty($val->lembar_ikat_2) ? number_format($val->lembar_ikat_2) .' '.$val->lembar_ikat_um_2 .' / ' : '') ?>
+                            <?=(!empty($val->lembar_ikat_3) ? number_format($val->lembar_ikat_3) .' '.$val->lembar_ikat_um_3 : '') ?>
+                        </strong>
                     </div>
                 </div>
             </div>
@@ -93,12 +105,10 @@
             <!-- Detail Proses -->
             <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
                 <div class="col-lg-12 col-md-12 col-xs-12 text-left padding-left-0">
-                    <?php foreach($biaya as $v): ?>
-                        <input type="checkbox" name="item" value="<?=$v->name ?>" id="proses_<?=$v->code.'_'.$val->item_code ?>" data-type="pizza" data-title="<?=$v->name ?>">
-                        <input type="hidden" name="biaya" id="biaya_<?=$v->code.'_'.$val->item_code ?>" value="<?=$v->code ?>">
-                        <input type="hidden" name="item" id="item_<?=$v->code.'_'.$val->item_code ?>" value="<?=$val->item_code ?>">
-                        <input type="hidden" name="code" id="code_<?=$v->code.'_'.$val->item_code ?>" value="<?=$val->order_code ?>">
-                    <?php endforeach; ?>
+                    <a class="btn" id="list_biaya_produksi" href="javascript:void(0)" data-order="<?=$val->order_code ?>" data-item="<?=$val->item_code?>">
+                        <i class="font-size-16 fontello icon-check-3"></i>
+                        <span>Pilih Proses Produksi</span>
+                    </a>
                     <hr />
                     <?php if(count($val->detailsProduksi) > 0):
                         $total_biaya=0;?>
@@ -122,7 +132,7 @@
             <!-- /Detail Proses -->
         </div>
     <?php endforeach; ?>
-    <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0" data-form="summary">
+    <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0" render="summary">
         <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
             <span class="text-right"><?='Total Material: Rp. '.number_format($totalOrder).'.-' ?></span>
         </div>

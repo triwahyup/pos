@@ -18,7 +18,6 @@ use app\modules\master\models\TempMasterOrderDetailProduksi;
  * @property float|null $panjang
  * @property float|null $lebar
  * @property int|null $total_warna
- * @property int|null $lembar_ikat
  * @property float|null $harga_jual
  * @property float|null $harga_cetak
  * @property int|null $user_id
@@ -41,11 +40,11 @@ class TempMasterOrderDetail extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['urutan', 'user_id', 'lembar_ikat_type'], 'integer'],
-            [['panjang', 'lebar', 'harga_cetak', 'harga_beli_1', 'harga_beli_2', 'harga_beli_3', 'harga_jual_1', 'harga_jual_2', 'harga_jual_3', 'total_potong', 'total_objek', 'total_warna', 'lembar_ikat', 'qty_order_1', 'qty_order_2', 'qty_order_3', 'total_order'], 'safe'],
-            [['order_code', 'satuan_code', 'type_code', 'material_code', 'group_material_code', 'group_supplier_code'], 'string', 'max' => 3],
+            [['urutan', 'user_id'], 'integer'],
+            [['panjang', 'lebar', 'harga_cetak', 'harga_beli_1', 'harga_beli_2', 'harga_beli_3', 'harga_jual_1', 'harga_jual_2', 'harga_jual_3', 'total_potong', 'total_objek', 'total_warna', 'lembar_ikat_1', 'lembar_ikat_2', 'lembar_ikat_3', 'qty_order_1', 'qty_order_2', 'qty_order_3', 'total_order'], 'safe'],
+            [['order_code', 'satuan_code', 'satuan_ikat_code', 'type_code', 'material_code', 'group_material_code', 'group_supplier_code'], 'string', 'max' => 3],
             [['jumlah_cetak', 'jumlah_objek'], 'number'],
-            [['um_1', 'um_2', 'um_3'], 'string', 'max' => 5],
+            [['um_1', 'um_2', 'um_3', 'lembar_ikat_um_1', 'lembar_ikat_um_2', 'lembar_ikat_um_3'], 'string', 'max' => 5],
             [['item_code'], 'string', 'max' => 7],
         ];
     }
@@ -66,7 +65,6 @@ class TempMasterOrderDetail extends \yii\db\ActiveRecord
             'total_potong' => 'Potong',
             'total_objek' => 'Objek',
             'total_warna' => 'Jumlah Warna',
-            'lembar_ikat' => 'Lembar Ikat',
             'harga_jual' => 'Harga Jual',
             'harga_cetak' => 'Harga Cetak',
             'user_id' => 'User ID',
@@ -79,7 +77,9 @@ class TempMasterOrderDetail extends \yii\db\ActiveRecord
         $this->qty_order_1 = str_replace(',', '', $this->qty_order_1);
         $this->qty_order_2 = str_replace(',', '', $this->qty_order_2);
         $this->total_warna = str_replace(',', '', $this->total_warna);
-        $this->lembar_ikat = str_replace(',', '', $this->lembar_ikat);
+        $this->lembar_ikat_1 = str_replace(',', '', $this->lembar_ikat_1);
+        $this->lembar_ikat_2 = str_replace(',', '', $this->lembar_ikat_2);
+        $this->lembar_ikat_3 = str_replace(',', '', $this->lembar_ikat_3);
         $this->total_potong = str_replace(',', '', $this->total_potong);
         $this->total_objek = str_replace(',', '', $this->total_objek);
         $this->total_order = str_replace(',', '', $this->total_order);
@@ -142,18 +142,5 @@ class TempMasterOrderDetail extends \yii\db\ActiveRecord
         }else{
             return $this->hasMany(TempMasterOrderDetailProduksi::className(), ['item_code' => 'item_code', 'user_id'=> 'user_id']);
         }
-    }
-
-    public function getTypeIkat()
-    {
-        $type = '';
-        if($this->lembar_ikat_type==1){
-            $type = $this->lembar_ikat.' SAP';
-        }else if($this->lembar_ikat_type==2){
-            $type = $this->lembar_ikat.' IKAT';
-        }else if($this->lembar_ikat_type==3){
-            $type = $this->lembar_ikat.' DOS';
-        }
-        return $type;
     }
 }

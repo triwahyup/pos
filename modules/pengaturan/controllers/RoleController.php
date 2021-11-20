@@ -65,7 +65,8 @@ class RoleController extends Controller
         $parent = str_replace(' ','-', $typeCode->value);
         if($typeCode !== NULL){
             $menus = PengaturanMenu::find()
-                ->where(['level'=>1, 'type_code'=>\Yii::$app->params['NAVBAR_LEFT']])
+                ->leftJoin('master_kode', 'master_kode.code = pengaturan_menu.type_code')
+                ->where(['level'=>1, 'value'=>\Yii::$app->params['TYPE_MENU_LEFT']])
                 ->orderBy(['type_code'=>SORT_DESC, 'urutan'=>SORT_ASC])
                 ->all();
 

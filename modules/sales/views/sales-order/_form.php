@@ -119,6 +119,39 @@ use yii\widgets\ActiveForm;
 </div>
 <div data-popup="popup"></div>
 <script>
+function load_biaya_produksi(el)
+{
+    data = el.data();
+    $.ajax({
+        url: "<?=Url::to(['sales-order/list-biaya'])?>",
+		type: "GET",
+        data: {
+            no_so: data.no_so,
+            order_code: data.order,
+            item_code: data.item,
+        },
+		dataType: "text",
+        error: function(xhr, status, error) {},
+		beforeSend: function (data){
+            el.loader("load");
+        },
+        success: function(data){
+            var o = $.parseJSON(data);
+            $("[data-popup=\"popup\"]").html(o.data);
+            $("[data-popup=\"popup\"]").popup("open", {
+				container: "popup",
+				title: 'List Biaya Produksi',
+				styleOptions: {
+					width: 600
+				}
+			});
+        },
+        complete: function(){
+            el.loader("destroy");
+        }
+    });
+}
+
 function load_data_order(code)
 {
     $.ajax({
@@ -232,13 +265,6 @@ function init_temp()
             $("#salesorder-total_order").val(o.total_order);
             $("#salesorder-total_biaya").val(o.total_biaya);
             $("#salesorder-grand_total").val(o.grand_total);
-
-            checkbox.init();
-            $.each(o.temps_produksi, function(index, value){
-                $("#proses_"+value.biaya_produksi_code+'_'+value.item_code).prop("checked", true);
-                $("#proses_"+value.biaya_produksi_code+'_'+value.item_code).next().find("i").removeClass("icon-ok").addClass("icon-ok");
-                $("#proses_"+value.biaya_produksi_code+'_'+value.item_code).attr("data-id", value.id);
-            });
         },
         complete: function(){}
     });
@@ -252,7 +278,9 @@ function create_temp_produksi(code, biaya, item)
         type: "POST",
         dataType: "text",
         error: function(xhr, status, error) {},
-        beforeSend: function(){},
+        beforeSend: function(){
+            popup.close();
+        },
         data: {
             code: code,
             biaya: biaya,
@@ -268,7 +296,9 @@ function create_temp_produksi(code, biaya, item)
             }
             init_temp();
         },
-        complete: function(){}
+        complete: function(){
+            load_biaya_produksi($("#list_biaya_produksi"));
+        }
     });
 }
 
@@ -280,7 +310,7 @@ function delete_temp_produksi(id)
         dataType: "text",
         error: function(xhr, status, error) {},
         beforeSend: function(){
-            loading.open("loading bars");
+            popup.close();
         },
         data: {
             id: id
@@ -295,19 +325,18 @@ function delete_temp_produksi(id)
             init_temp();
         },
         complete: function(){
-			loading.close();
+			load_biaya_produksi($("#list_biaya_produksi"));
         }
     });
 }
 
-$(function(){
-    <?php if(!$model->isNewRecord): ?>
-        init_temp();
-    <?php endif; ?>
-});
-
 var timeOut = 3000;
 $(document).ready(function(){
+    $("body").off("click","#list_biaya_produksi").on("click","#list_biaya_produksi", function(e){
+        e.preventDefault();
+        load_biaya_produksi($(this));
+    });
+
     $("body").off("keydown","#salesorder-nama_order").on("keydown","#salesorder-nama_order", function(e){
         var key = e.charCode ? e.charCode : e.keyCode ? e.keyCode : 0;
         if(key == KEY.F4){
@@ -325,12 +354,20 @@ $(document).ready(function(){
         var prop = $(this).prop("checked"), 
             id = $(this).attr("id").split("_")[1]+'_'+$(this).attr("id").split("_")[2];
         if(prop == true){
-            console.log("Add Proses "+id);
             create_temp_produksi($("#code_"+id).val(), $("#biaya_"+id).val(), $("#item_"+id).val());
         }else{
-            console.log("Delete Proses "+id);
             delete_temp_produksi($(this).attr("data-id"));
         }
     });
+
+    $("body").off("click","[data-button=\"close\"]").on("click","[data-button=\"close\"]", function(e){
+        e.preventDefault();
+        $("#btn-remove").trigger("click");
+    });
+});
+$(function(){
+    <?php if(!$model->isNewRecord): ?>
+        init_temp();
+    <?php endif; ?>
 });
 </script>

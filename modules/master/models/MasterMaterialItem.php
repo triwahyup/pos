@@ -97,7 +97,8 @@ class MasterMaterialItem extends \yii\db\ActiveRecord
             $model = MasterMaterialItem::find()->where(['type_code'=>$type])->orderBy(['code'=>SORT_DESC])->one();
             $total = (int)substr($model->code, -6);
         }
-        if($type == \Yii::$app->params['MATERIAL_KERTAS_CODE']){
+        $kode = MasterKode::findOne(['code'=>$type]);
+        if($kode->value == \Yii::$app->params['TYPE_MATERIAL_KERTAS']){
             return (string)'1'.sprintf('%06s', ($total+1));
         }else{
             return (string)'2'.sprintf('%06s', ($total+1));

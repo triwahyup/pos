@@ -40,7 +40,7 @@ class OrderController extends Controller
                             'roles' => ['@'],
                         ],
                         [
-                            'actions' => ['index', 'view', 'list-item', 'temp', 'get-temp', 'search', 'item', 'autocomplete'],
+                            'actions' => ['index', 'view', 'list-item', 'temp', 'get-temp', 'search', 'item', 'autocomplete', 'list-biaya'],
                             'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-order')),
                             'roles' => ['@'],
                         ], 
@@ -101,9 +101,11 @@ class OrderController extends Controller
      */
     public function actionCreate()
     {
-        $satuan = MasterSatuan::find()
-            ->select(['name'])
-            ->indexBy('code')
+        $typeSatuan = MasterSatuan::find()
+            ->select(['master_satuan.name'])
+            ->leftJoin('master_kode', 'master_kode.code = master_satuan.type_satuan')
+            ->where(['master_kode.value'=>\Yii::$app->params['TYPE_SATUAN_PRODUKSI'], 'master_satuan.status'=>1])
+            ->indexBy('master_satuan.code')
             ->column();
         
         $success = true;
@@ -198,6 +200,7 @@ class OrderController extends Controller
         return $this->render('create', [
             'model' => $model,
             'temp' => $temp,
+            'typeSatuan' => $typeSatuan,
         ]);
     }
 
@@ -210,6 +213,13 @@ class OrderController extends Controller
      */
     public function actionUpdate($code)
     {
+        $typeSatuan = MasterSatuan::find()
+            ->select(['master_satuan.name'])
+            ->leftJoin('master_kode', 'master_kode.code = master_satuan.type_satuan')
+            ->where(['master_kode.value'=>\Yii::$app->params['TYPE_SATUAN_PRODUKSI'], 'master_satuan.status'=>1])
+            ->indexBy('master_satuan.code')
+            ->column();
+
         $success = true;
         $message = '';
         $model = $this->findModel($code);
@@ -328,6 +338,7 @@ class OrderController extends Controller
         return $this->render('update', [
             'model' => $model,
             'temp' => $temp,
+            'typeSatuan' => $typeSatuan,
         ]);
     }
 
@@ -419,13 +430,43 @@ class OrderController extends Controller
         throw new NotFoundHttpException('The requested page does not exist.');
     }
 
+    public function actionListBiaya($order_code, $item_code)
+    {
+        $data = [];
+        $model = MasterBiayaProduksi::find()->where(['status'=>1])->all();
+        foreach($model as $val){
+            $data[$val->code] = [
+                'name' => $val->name,
+                'biaya' => $val->code,
+                'type' => $val->type,
+                'order' => $order_code,
+                'item' => $item_code,
+            ];
+        }
+        $temps = TempMasterOrderDetailProduksi::findAll(['order_code'=>$order_code, 'item_code'=>$item_code, 'user_id'=>\Yii::$app->user->id]);
+        if(count($temps) > 0){
+            foreach($temps as $val){
+                $data[$val->biaya_produksi_code] = [
+                    'id' => $val->id,
+                    'order' => $order_code,
+                    'name' => $val->name,
+                    'biaya' => $val->biaya_produksi_code,
+                    'item' => $val->item_code,
+                    'type' => $val->type,
+                ];
+            }
+        }
+        return json_encode(['data'=>$this->renderPartial('_list_biaya', ['data'=>$data])]);
+    }
+
     public function actionListItem()
     {
         $model = MasterMaterialItem::find()
             ->alias('a')
             ->select(['a.*', 'b.composite'])
             ->leftJoin('master_satuan b', 'b.code = a.satuan_code')
-            ->where(['a.type_code'=>\Yii::$app->params['MATERIAL_KERTAS_CODE'], 'a.status'=>1])
+            ->leftJoin('master_kode c', 'c.code = a.type_code')
+            ->where(['c.value'=>\Yii::$app->params['TYPE_MATERIAL_KERTAS'], 'a.status'=>1])
             ->orderBy(['a.code'=>SORT_ASC])
             ->limit(10)
             ->all();
@@ -437,9 +478,11 @@ class OrderController extends Controller
         $model = [];
         if(isset($_POST['search'])){
             $model = MasterMaterialItem::find()
-                ->select(['code', 'concat(code,"-",name) label', 'concat(code,"-",name) name'])
-                ->where(['type_code'=>\Yii::$app->params['MATERIAL_KERTAS_CODE'], 'status'=>1])
-                ->andWhere('concat(code,"-",name) LIKE "%'.$_POST['search'].'%"')
+                ->alias('a')
+                ->select(['a.code', 'concat(a.code,"-",a.name) label', 'concat(a.code,"-",a.name) name'])
+                ->leftJoin('master_kode b', 'b.code = a.type_code')
+                ->where(['b.value'=>\Yii::$app->params['TYPE_MATERIAL_KERTAS'], 'a.status'=>1])
+                ->andWhere('concat(a.code,"-",a.name) LIKE "%'.$_POST['search'].'%"')
                 ->asArray()
                 ->limit(10)
                 ->all();
@@ -522,24 +565,56 @@ class OrderController extends Controller
                 ->where(['item_code'=>$data['item_code'], 'user_id'=> \Yii::$app->user->id])
                 ->one();
             if(empty($ctemp)){
-                $temp = new TempMasterOrderDetail();
-                $temp->attributes = (array)$data;
-                $temp->attributes = ($temp->item) ? $temp->item->attributes : '';
-                $temp->attributes = ($temp->item->pricelist) ? $temp->item->pricelist->attributes : '';
-                if(!empty($request->post('MasterOrder')['code'])){
-                    $temp->order_code = $request->post('MasterOrder')['code'];
-                }
-                $temp->urutan = $temp->count +1;
-                $temp->total_order = $temp->totalOrder;
-                $jumlahProses = $temp->jumlahProses();
-                if($temp->save()){
-                    $message = 'CREATE TEMP SUCCESSFULLY';
-                }else{
-                    $success = false;
-                    foreach($temp->errors as $error => $value){
-                        $message = $value[0].', ';
+                $connection = \Yii::$app->db;
+			    $transaction = $connection->beginTransaction();
+                try{
+                    $temp = new TempMasterOrderDetail();
+                    $temp->attributes = (array)$data;
+                    $temp->attributes = ($temp->item) ? $temp->item->attributes : '';
+                    $temp->attributes = ($temp->item->pricelist) ? $temp->item->pricelist->attributes : '';
+                    if(!empty($request->post('MasterOrder')['code'])){
+                        $temp->order_code = $request->post('MasterOrder')['code'];
+                    }else{
+                        $temp->order_code = 'tmp';
                     }
-                    $message = substr($message, 0, -2);
+                    $temp->urutan = $temp->count +1;
+                    $temp->total_order = $temp->totalOrder;
+                    $jumlahProses = $temp->jumlahProses();
+                    if($temp->save()){
+                        $dataProduksi = MasterBiayaProduksi::findAll(['type'=>2]);
+                        foreach($dataProduksi as $index=>$produksi){
+                            $tempProduksi = new TempMasterOrderDetailProduksi();
+                            $tempProduksi->attributes = $temp->attributes;
+                            $tempProduksi->attributes = $produksi->attributes;
+                            $tempProduksi->biaya_produksi_code = $produksi->code;
+                            $tempProduksi->urutan = $index +1;
+                            $tempProduksi->user_id = \Yii::$app->user->id;
+                            if(!$tempProduksi->save()){
+                                $success = false;
+                                foreach($tempProduksi->errors as $error => $value){
+                                    $message = $value[0].', ';
+                                }
+                                $message = substr($message, 0, -2);
+                            }
+                        }
+                    }else{
+                        $success = false;
+                        foreach($temp->errors as $error => $value){
+                            $message = $value[0].', ';
+                        }
+                        $message = substr($message, 0, -2);
+                    }
+
+                    if($success){
+                        $transaction->commit();
+                        $message = 'CREATE TEMP SUCCESSFULLY';
+                    }else{
+                        $transaction->rollBack();
+                    }
+                }catch(\Exception $e){
+                    $success = false;
+                    $message = $e->getMessage();
+				    $transaction->rollBack();
                 }
             }else{
                 $success = false;
@@ -584,24 +659,39 @@ class OrderController extends Controller
         $message = '';
         $temp = $this->findTemp($id);
         if(isset($temp)){
-            if($temp->delete()){
-                foreach($temp->tmps as $index=>$val){
-                    $val->urutan = $index +1;
-                    if(!$val->save()){
-                        $success = false;
-                        foreach($val->errors as $error => $value){
-                            $message .= strtoupper($value[0].', ');
+            $connection = \Yii::$app->db;
+            $transaction = $connection->beginTransaction();
+            try{
+                if($temp->delete()){
+                    foreach($temp->tmps as $index=>$val){
+                        $val->urutan = $index +1;
+                        if(!$val->save()){
+                            $success = false;
+                            foreach($val->errors as $error => $value){
+                                $message .= strtoupper($value[0].', ');
+                            }
+                            $message = substr($message, 0, -2);
                         }
-                        $message = substr($message, 0, -2);
                     }
+                    TempMasterOrderDetailProduksi::deleteAll('order_code=:order and item_code=:item and user_id=:user', [
+                        ':order'=>$temp->order_code, ':item'=>$temp->item_code, ':user'=>$temp->user_id]);
+                    if($success){
+                        $transaction->commit();
+                        $message = 'DELETE TEMP SUCCESSFULLY';
+                    }else{
+                        $transaction->rollBack();
+                    }
+                }else{
+                    $success = false;
+                    foreach($temp->errors as $error => $value){
+                        $message = $value[0].', ';
+                    }
+                    $message = substr($message, 0, -2);
                 }
-                $message = 'DELETE TEMP SUCCESSFULLY';
-            }else{
+            }catch(\Exception $e){
                 $success = false;
-                foreach($temp->errors as $error => $value){
-                    $message = $value[0].', ';
-                }
-                $message = substr($message, 0, -2);
+                $message = $e->getMessage();
+                $transaction->rollBack();
             }
         }
         return json_encode(['success'=>$success, 'message'=>$message]);
@@ -627,6 +717,8 @@ class OrderController extends Controller
                 $temp->total_biaya = $temp->totalBiaya();
                 if(!empty($request->post('code'))){
                     $temp->order_code = $request->post('code');
+                }else{
+                    $temp->order_code = 'tmp';
                 }
                 $temp->urutan = $temp->count +1;
                 $temp->user_id = \Yii::$app->user->id;

@@ -30,7 +30,7 @@ $this->params['breadcrumbs'][] = "Dashboard";
         </div>
         <!-- /PURCHASE ORDER -->
         <!-- PO INTERNAL -->
-        <div class="col-lg-6 -col-md-6 col-xs-12 padding-left-0">
+        <div class="col-lg-6 -col-md-6 col-xs-12 padding-left-0 padding-right-0">
             <div class="cube-container cube-danger">
                 <div class="cube-left">
                     <i class="fontello icon-info-circled-3"></i></span>
@@ -82,7 +82,7 @@ $this->params['breadcrumbs'][] = "Dashboard";
         </div>
         <!-- /REQUEST ITEM -->
         <!-- STOCK OPNAME -->
-        <div class="col-lg-6 -col-md-6 col-xs-12 padding-left-0">
+        <div class="col-lg-6 -col-md-6 col-xs-12 padding-left-0 padding-right-0">
             <div class="cube-container cube-warning">
                 <div class="cube-left">
                     <i class="fontello icon-info-circled-3"></i></span>

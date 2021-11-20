@@ -284,8 +284,9 @@ class SiteController extends Controller
     {
         $menuItems = [];
         $querys = \Yii::$app->db->createCommand("
-            SELECT * FROM pengaturan_menu
-            WHERE status=1 AND type_code='".\Yii::$app->params['NAVBAR_LEFT']."' 
+            SELECT pengaturan_menu.* FROM pengaturan_menu
+            LEFT JOIN master_kode ON master_kode.code = pengaturan_menu.type_code
+            WHERE pengaturan_menu.status=1 AND value='".\Yii::$app->params['TYPE_MENU_LEFT']."' 
             ".(( \Yii::$app->user->identity->getIsDeveloper()) ? '' : " AND (
                 slug IN (
                     SELECT item_name FROM auth_assignment WHERE user_id = '".\Yii::$app->user->id."'

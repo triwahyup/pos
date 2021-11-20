@@ -48,7 +48,7 @@ class SalesOrderController extends Controller
                             'roles' => ['@'],
                         ],
                         [
-                            'actions' => ['index', 'view', 'list-order', 'load-order', 'temp', 'search', 'select-order', 'autocomplete'],
+                            'actions' => ['index', 'view', 'list-order', 'load-order', 'temp', 'search', 'select-order', 'autocomplete', 'list-biaya'],
                             'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('sales-order')),
                             'roles' => ['@'],
                         ], 
@@ -596,6 +596,37 @@ class SalesOrderController extends Controller
             \Yii::$app->session->setFlash('error', $message);
         }
         return $this->redirect(['view', 'no_so' => $model->no_so]);
+    }
+
+    public function actionListBiaya($no_so, $order_code, $item_code)
+    {
+        $data = [];
+        $model = MasterBiayaProduksi::find()->where(['status'=>1])->all();
+        foreach($model as $val){
+            $data[$val->code] = [
+                'name' => $val->name,
+                'biaya' => $val->code,
+                'type' => $val->type,
+                'no_so' => $no_so,
+                'order' => $order_code,
+                'item' => $item_code,
+            ];
+        }
+        $temps = TempSalesOrderDetailProduksi::findAll(['no_so'=>$no_so, 'order_code'=>$order_code, 'item_code'=>$item_code, 'user_id'=>\Yii::$app->user->id]);
+        if(count($temps) > 0){
+            foreach($temps as $val){
+                $data[$val->biaya_produksi_code] = [
+                    'id' => $val->id,
+                    'order' => $order_code,
+                    'name' => $val->name,
+                    'biaya' => $val->biaya_produksi_code,
+                    'no_so' => $no_so,
+                    'item' => $val->item_code,
+                    'type' => $val->type,
+                ];
+            }
+        }
+        return json_encode(['data'=>$this->renderPartial('_list_biaya', ['data'=>$data])]);
     }
 
     public function actionListOrder()

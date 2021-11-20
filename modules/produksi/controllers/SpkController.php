@@ -115,9 +115,11 @@ class SpkController extends Controller
         $model = [];
         if(isset($_POST['search'])){
             $model = MasterMaterialItem::find()
-                ->select(['code', 'concat(code,"-",name) label', 'concat(code,"-",name) name'])
-                ->where(['type_code'=>\Yii::$app->params['MATERIAL_BP_CODE'], 'status'=>1])
-                ->andWhere('concat(code,"-",name) LIKE "%'.$_POST['search'].'%"')
+                ->alias('a')
+                ->select(['a.code', 'concat(a.code,"-",a.name) label', 'concat(a.code,"-",a.name) name'])
+                ->leftJoin('master_kode b', 'b.code = a.type_code')
+                ->where(['b.value'=>\Yii::$app->params['TYPE_MATERIAL_BP'], 'a.status'=>1])
+                ->andWhere('concat(a.code,"-",a.name) LIKE "%'.$_POST['search'].'%"')
                 ->asArray()
                 ->limit(10)
                 ->all();
@@ -133,7 +135,8 @@ class SpkController extends Controller
             ->leftJoin('inventory_stock_item b', 'b.item_code = a.code')
             ->leftJoin('master_satuan c', 'c.code = a.satuan_code')
             ->leftJoin('master_material d', 'd.code = a.material_code')
-            ->where(['a.type_code'=>\Yii::$app->params['MATERIAL_BP_CODE'], 'a.status'=>1])
+            ->leftJoin('master_kode e', 'e.code = a.type_code')
+            ->where(['e.value'=>\Yii::$app->params['TYPE_MATERIAL_BP'], 'a.status'=>1])
             ->orderBy(['a.code'=>SORT_ASC])
             ->limit(10)
             ->asArray()
