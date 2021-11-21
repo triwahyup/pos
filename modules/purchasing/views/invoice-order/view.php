@@ -161,7 +161,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <p class="text-right">
         <?php if($model->status_terima==0): ?>
             <?= Html::a('<i class="fontello icon-pencil"></i><span>Update</span>', ['update', 'no_invoice' => $model->no_invoice], ['class' => 'btn btn-warning btn-flat btn-sm']) ?>
-            <?= Html::a('<i class="fontello icon-ok"></i><span>Konfirmasi Terima Item Material</span>', ['terima', 'no_invoice' => $model->no_invoice], ['class' => 'btn btn-success btn-flat btn-sm']) ?>
+            <?= Html::a('<i class="fontello icon-ok"></i><span>Konfirmasi Terima Item Material</span>', ['terima', 'no_invoice' => $model->no_invoice], ['class' => 'btn btn-primary btn-flat btn-sm']) ?>
         <?php endif; ?>
     </p>
 </div>

@@ -14,7 +14,7 @@ class MasterMaterialItemSearch extends MasterMaterialItem
     public function rules()
     {
         return [
-            [['name', 'type_code', 'satuan_code', 'group_material_code', 'group_supplier_code', 'material_code'], 'safe'],
+            [['code', 'name', 'type_code', 'satuan_code', 'group_material_code', 'group_supplier_code', 'material_code'], 'safe'],
         ];
     }
 
@@ -75,7 +75,8 @@ class MasterMaterialItemSearch extends MasterMaterialItem
         if(!empty($this->material_code)){
             $query->andWhere('f.name LIKE "%'.$this->material_code.'%"');
         }
-        $query->andFilterWhere(['like', 'a.name', $this->name]);
+        $query->andFilterWhere(['like', 'a.name', $this->name])
+            ->andFilterWhere(['like', 'a.code', $this->code]);
 
         return $dataProvider;
     }

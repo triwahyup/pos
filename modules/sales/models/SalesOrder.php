@@ -102,12 +102,16 @@ class SalesOrder extends \yii\db\ActiveRecord
     {
         $this->total_order = str_replace(',', '', $this->total_order);
         $this->total_biaya = str_replace(',', '', $this->total_biaya);
+        $this->biaya_pengiriman = str_replace(',', '', $this->biaya_pengiriman);
         return parent::beforeSave($attribute);
     }
 
     public function grand_total()
     {
         $grand_total = str_replace(',', '', $this->grand_total);
+        if(!empty($this->biaya_pengiriman)){
+            $grand_total += str_replace(',', '', $this->biaya_pengiriman);
+        }
         if(!empty($this->ppn)){
             $ppn = $grand_total / ($this->ppn*100);
             $grand_total += $ppn;

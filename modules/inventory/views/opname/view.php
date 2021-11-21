@@ -151,12 +151,12 @@ $this->params['breadcrumbs'][] = $this->title;
                 <?php endif; ?>
                 <?php if($sendApproval): ?>
                     <div class="text-right">
-                        <?= Html::a('<i class="fontello icon-paper-plane-1"></i><span>Send Approval</span>', ['send-approval', 'code'=>$model->code], ['class' => 'btn btn-info btn-flat btn-sm']) ?>
+                        <?= Html::a('<i class="fontello icon-paper-plane-1"></i><span>Send Approval</span>', ['send-approval', 'code'=>$model->code], ['class' => 'btn btn-primary btn-flat btn-sm']) ?>
                     </div>
                 <?php endif; ?>
                 <?php if($post): ?>
                     <div class="text-right">
-                        <?= Html::a('<i class="fontello icon-ok"></i><span>Post to Stock Gudang</span>', ['post', 'code'=>$model->code], ['class' => 'btn btn-info btn-flat btn-sm']) ?>
+                        <?= Html::a('<i class="fontello icon-ok"></i><span>Post to Stock Gudang</span>', ['post', 'code'=>$model->code], ['class' => 'btn btn-primary btn-flat btn-sm']) ?>
                     </div>
                 <?php endif; ?>
                 <?php if($typeApproval): ?>

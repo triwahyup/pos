@@ -90,7 +90,7 @@ class InventoryStockItem extends \yii\db\ActiveRecord
                 }
                 // LAIN2
                 else{
-                    if($item->um_1 == 'KG'){
+                    if($item->satuan->um_1 == 'KG'){
                         $total_material = ($qty[0] * 1000) + $qty[1];
                     }else{
                         $total_material = $qty[0];

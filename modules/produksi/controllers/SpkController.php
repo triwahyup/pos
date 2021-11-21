@@ -86,11 +86,19 @@ class SpkController extends Controller
         $spkProses = new SpkDetailProses();
         $spkDetail = SpkDetail::findOne(['no_spk'=>$no_spk]);
         
+        $dataProses = [];
+        foreach($model->details as $details){
+            foreach($details->detailsProses as $val){
+                $dataProses[$val->typeProses()][] = ['data'=>$val];
+            }
+        }
+
         return $this->render('view', [
             'model' => $model,
             'spkBahan' => $spkBahan,
             'spkProses' => $spkProses,
             'spkDetail' => $spkDetail,
+            'dataProses' => $dataProses,
         ]);
     }
 

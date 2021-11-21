@@ -135,7 +135,8 @@ $this->params['breadcrumbs'][] = $this->title;
         <div class="margin-top-20"></div>
         <?php if(count($model->details) > 0): 
             $totalOrder = 0;
-            $totalBiaya = 0; ?>
+            $totalBiaya = 0;
+            $totalMaterial = 0; ?>
             <div class="document-container">
                 <div class="document-header">Job / Type: <?=(isset($model->order)) ? $model->order->name .' ('.(($model->type_order==1) ? 'Produk' : 'Jasa / Outsourcing').')' : '' ?></div>
                 <div class="document-body">
@@ -144,7 +145,10 @@ $this->params['breadcrumbs'][] = $this->title;
                         <hr />
                     </div>
                     <?php foreach($model->details as $index=>$val): 
-                        $totalOrder += $val->total_order; ?>
+                        $totalOrder += $val->total_order;
+                        $totalMaterial = $val->inventoryStock->satuanTerkecil($val->item_code, [
+                            0=>$val->qty_order_1, 
+                            1=>$val->qty_order_2]); ?>
                         <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0" render="detail">
                             <!-- Detail Material -->
                             <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
@@ -167,7 +171,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                             <?php endfor; ?>
                                         </strong>
                                         <span class="text-muted font-size-12">
-                                            <?='('.$val->inventoryStock->satuanTerkecil($val->item_code, [0=>$val->qty_order_1, 1=>$val->qty_order_2]).' LEMBAR)' ?>
+                                            <?='('.$totalMaterial.' LEMBAR)' ?>
                                         </span>
                                     </div>
                                 </div>
@@ -259,32 +263,66 @@ $this->params['breadcrumbs'][] = $this->title;
                             <!-- /Detail Proses -->
                         </div>
                     <?php endforeach; ?>
-                    <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0" render="summary">
-                        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                            <span class="text-right"><?='Total Material: Rp. '.number_format($totalOrder).'.-' ?></span>
+                    <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 text-right" render="summary">
+                        <div class="col-lg-12 col-md-12 col-xs-12">
+                            <div class="col-lg-10 col-md-10 col-xs-12">
+                                <span class="label-summary">Total Material</span>
+                            </div>
+                            <div class="col-lg-2 col-md-2 col-xs-12">
+                                <span class="value-summary"><?='Rp. '.number_format($totalOrder).'.-' ?></span>
+                            </div>
                         </div>
-                        <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                            <span class="text-right"><?='Total Biaya: Rp. '.number_format($totalBiaya).'.-' ?></span>
+                        <div class="col-lg-12 col-md-12 col-xs-12">
+                            <div class="col-lg-10 col-md-10 col-xs-12">
+                                <span class="label-summary">Total Biaya</span>
+                            </div>
+                            <div class="col-lg-2 col-md-2 col-xs-12">
+                                <span class="value-summary"><?=' Rp. '.number_format($totalBiaya).'.-' ?>
+                            </div>
                         </div>
-                        <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                            <?php
-                                if(!empty($model->ppn) || $model->ppn !=0){
-                                    $ppn = ($totalOrder+$totalBiaya) / ($model->ppn*100);
-                                    $grandTotal = number_format($totalOrder+$totalBiaya+$ppn).'.- (PPN '.$model->ppn.'%)';
-                                }else{
-                                    $grandTotal = number_format($totalOrder+$totalBiaya).'.-';
-                                }
-                            ?>
-                            <span class="text-right"><?='Grand Total: Rp. '.$grandTotal ?></span>
+                        <div class="col-lg-12 col-md-12 col-xs-12">
+                            <div class="col-lg-10 col-md-10 col-xs-12">
+                                <span class="label-summary">Biaya Pengiriman</span>
+                            </div>
+                            <div class="col-lg-2 col-md-2 col-xs-12">
+                                <span class="value-summary"><?=' Rp. '.number_format($model->biaya_pengiriman).'.-' ?>
+                            </div>
+                        </div>
+                        <div class="col-lg-12 col-md-12 col-xs-12">
+                            <div class="col-lg-10 col-md-10 col-xs-12">
+                                <span class="label-summary">PPN (%)</span>
+                            </div>
+                            <div class="col-lg-2 col-md-2 col-xs-12">
+                                <span class="value-summary"><?=(!empty($model->ppn)) ? $model->ppn.' %' : '-' ?>
+                            </div>
+                        </div>
+                        <div class="col-lg-12 col-md-12 col-xs-12">
+                            <div class="col-lg-10 col-md-10 col-xs-12">
+                                <span class="label-summary">Grand Total</span>
+                            </div>
+                            <div class="col-lg-2 col-md-2 col-xs-12">
+                                <span class="value-summary"><?=' Rp. '.number_format($model->grand_total).'.-' ?>
+                            </div>
                         </div>
                     </div>
+                    <?php if(!empty($model->up_produksi) || $model->up_produksi !=0): ?>
+                        <div class="col-lg-12 col-md-12 col-xs-12">
+                            <p class="font-bold margin-bottom-0 margin-top-10 text-right">Keterangan: </p>
+                            <p class="font-bold margin-bottom-0 text-danger text-right">
+                                <i>
+                                    Up Produksi sebesar <?=$model->up_produksi .'%.' ?>
+                                    Tambahan QTY Material sebanyak <?=$totalMaterial*($model->up_produksi/100) ?> Lembar Plano.
+                                </i>
+                            </p>
+                        </div>
+                    <?php endif; ?>
                 </div>
             </div>
         <?php endif; ?>
     </div>
     <?php if($model->post==0): ?>
         <div class="col-lg-12 col-md-12 col-xs-12 text-right padding-right-0">
-            <?= Html::a('<i class="fontello icon-ok"></i><span>Post to SPK</span>', ['post', 'no_so'=>$model->no_so], ['class' => 'btn btn-info btn-flat btn-sm']) ?>
+            <?= Html::a('<i class="fontello icon-ok"></i><span>Post to SPK</span>', ['post', 'no_so'=>$model->no_so], ['class' => 'btn btn-primary btn-flat btn-sm']) ?>
         </div>
     <?php endif; ?>
 </div>

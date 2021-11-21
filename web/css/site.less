@@ -132,6 +132,9 @@ p, span {
     font-size: 16px !important;
 }
 
+.margin-bottom-0 {
+    margin-bottom: 0;
+}
 .margin-bottom-5 {
     margin-bottom: 5px;
 }
@@ -170,7 +173,7 @@ p, span {
     padding: 20px;
 }
 .padding-left-0 {
-    padding-left: 0px;
+    padding-left: 0px !important;
 }
 .padding-right-0 {
     padding-right: 0px;
@@ -251,24 +254,6 @@ p, span {
             display: inline-block;
             i {
                 left: -15px;
-            }
-        }
-        a {
-            &[data-button]{
-                display: inline-block;
-                height: 20px;
-                position: relative;
-                top: 5px;
-                width: 20px;
-                span {
-                    display: inline-block;
-                    height: 20px;
-                    width: 20px;
-                    i {
-                        left: 50%;
-                        top: 50%;
-                    }
-                }
             }
         }
     }
@@ -1332,6 +1317,16 @@ textarea {
 		padding: 20px;
 		position: relative;
 		width: 100%;
+        .document-li {
+            display: inline-block;
+            [class^="col-lg-"] {
+                height: 18px;
+                line-height: 18px;
+                label {
+                    margin-bottom: 0 !important;
+                }
+            }
+        }
         .beauty-line {
 			border-top: 1px solid #cfcdd8;
 			display: inline-block;
@@ -1491,13 +1486,30 @@ textarea {
     display: inline-block;
     padding: 5px 15px;
     width: 100%;
+    [class^=col-lg-] {
+        line-height: 16px;
+    }
     span {
         color: @color_default;
         display: block;
         font-size: 12px;
         font-weight: 700;
+        &.label-summary {
+            display: inline-block;
+            min-width: 120px;
+            position: relative;
+            text-align: left;
+            &::before {
+                content: ":";
+                position: absolute;
+                right: 0;
+            }
+        }
+        &.value-summary {
+            display: inline-block;
+        }
     }
-}
+} 
 [data-align="text-right"] {
     text-align: right;
 }

@@ -473,6 +473,7 @@ class SalesOrderController extends Controller
                 $model->post=1;
                 if($model->save()){
                     // PROSES KURANG STOK
+                    $stock = 0;
                     foreach($model->details as $val){
                         $stockItem = $val->inventoryStock;
                         if(isset($stockItem)){
@@ -516,16 +517,58 @@ class SalesOrderController extends Controller
                             $message = 'STOCK ITEM '.$val->item_code.' TIDAK DITEMUKAN.';
                         }
                     }
+                    // PROSES KURANG STOK UP PRODUKSI (%)
+                    if(!empty($model->up_produksi) || $model->up_produksi != 0){
+                        $upproduksi = $stock * ($model->up_produksi/100);
+                        if($stockItem->onhand > $upproduksi){
+                            $stockItem->onhand = $stockItem->onhand - $upproduksi;
+                            $stockItem->onsales = $stockItem->onsales + $upproduksi;
+                            if(!$stockItem->save()){
+                                $success = false;
+                                $message = (count($stockItem->errors) > 0) ? 'ERROR UPDATE STOCK ITEM (UP PRODUKSI): ' : '';
+                                foreach($stockItem->errors as $error => $value){
+                                    $message .= strtoupper($value[0].', ');
+                                }
+                                $message = substr($message, 0, -2);
+                            }
+
+                            $stockTransaction = new InventoryStockTransaction();
+                            $stockTransaction->attributes = $stockItem->attributes;
+                            $stockTransaction->no_document = $model->no_so;
+                            $stockTransaction->tgl_document = $model->tgl_so;
+                            $stockTransaction->type_document = "SALES ORDER";
+                            $stockTransaction->status_document = "OUT (UP PRODUKSI ".$model->up_produksi." %)";
+                            $stockTransaction->qty_out = $upproduksi;
+                            if(!$stockTransaction->save()){
+                                $success = false;
+                                $message = (count($stockTransaction->errors) > 0) ? 'ERROR UPDATE STOCK TRANSACTION (UP PRODUKSI): ' : '';
+                                foreach($stockTransaction->errors as $error => $value){
+                                    $message .= strtoupper($value[0].', ');
+                                }
+                                $message = substr($message, 0, -2);
+                            }
+                        }else{
+                            $success = false;
+                            $message = 'SISA STOCK ITEM '.$stockItem->item_code.' TIDAK MENCUKUPI. SISA '.$stockItem->onhand;
+                        }
+                    }
                     // PROSES SIMPAN SPK
                     $spk = new Spk();
                     $spk->attributes = $model->attributes;
                     $spk->no_spk = $spk->generateCode();
                     $spk->tgl_spk = date('Y-m-d');
                     if($spk->save()){
+                        $stockPlusUpProduksi = $stock+$upproduksi;
                         foreach($model->details as $detail){
                             $spkDetail = new SpkDetail();
                             $spkDetail->attributes = $spk->attributes;
                             $spkDetail->attributes = $detail->attributes;
+                            
+                            $nKonversi = $spkDetail->stock->nKonversi($detail->item_code, $stockPlusUpProduksi);
+                            $spkDetail->qty_order_1 = $nKonversi[0];
+                            $spkDetail->qty_order_2 = $nKonversi[1];
+                            $spkDetail->jumlah_cetak = $stockPlusUpProduksi * $spkDetail->total_potong;
+                            $spkDetail->jumlah_objek = $spkDetail->jumlah_cetak * $spkDetail->total_objek;
                             if(!$spkDetail->save()){
                                 $success = false;
                                 $message = (count($spkDetail->errors) > 0) ? 'ERROR CREATE SPK DETAIL: ' : '';

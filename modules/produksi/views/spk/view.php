@@ -94,11 +94,24 @@ $this->params['breadcrumbs'][] = $this->title;
                         </div>
                         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
                             <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
-                                <label class="font-size-12">Total Warna / Lb.Ikat</label>
+                                <label class="font-size-12">Total Warna</label>
                             </div>
                             <div class="col-lg-8 col-md-8 col-sm-12 col-xs-12 padding-right-0">
                                 <span class="font-size-12">:</span>
-                                <strong class="font-size-12"><?=$val->total_warna.' / '.$val->typeIkat ?></strong>
+                                <strong class="font-size-12"><?=$val->total_warna ?></strong>
+                            </div>
+                        </div>
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
+                            <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
+                                <label class="font-size-12">Lembar Ikat</label>
+                            </div>
+                            <div class="col-lg-8 col-md-8 col-sm-12 col-xs-12 padding-right-0">
+                                <span class="font-size-12">:</span>
+                                <strong class="font-size-12">
+                                    <?=(!empty($val->lembar_ikat_1) ? number_format($val->lembar_ikat_1) .' '.$val->lembar_ikat_um_1 .' / ' : '') ?>
+                                    <?=(!empty($val->lembar_ikat_2) ? number_format($val->lembar_ikat_2) .' '.$val->lembar_ikat_um_2 .' / ' : '') ?>
+                                    <?=(!empty($val->lembar_ikat_3) ? number_format($val->lembar_ikat_3) .' '.$val->lembar_ikat_um_3 : '') ?>
+                                </strong>
                             </div>
                         </div>
                     </div>
@@ -154,44 +167,106 @@ $this->params['breadcrumbs'][] = $this->title;
                     <!-- DETAIL PROSES -->
                     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
                         <div class="margin-top-40"></div>
-                        <?php if(count($val->detailsProses) > 0): ?>
+                        <?php if(count($dataProses) > 0): ?>
                             <h6 class="font-size-16"><strong>Proses Pengerjaan:</strong></h6>
-                            <ul class="custom-detail">
-                                <?php foreach($val->detailsProses as $v): ?>
-                                    <li>
-                                        <span class="font-size-12">
-                                            <i class="fontello icon-progress-5 text-warning"></i>
-                                            <?=
-                                                $v->typeProses().' <i class="text-muted">(QTY: '.$v->qty_proses.')</i>'
-                                                    .' / '.$v->mesin->name.' <i class="text-muted">('.$v->mesin->typeCode->value.')</i>'
-                                            ?>
-                                        </span>
-                                        <?php if($model->status_produksi==2 && $v->status_proses==1): ?>
-                                            <a class="text-danger"
-                                                href="javascript:void(0)" 
-                                                data-button="delete_proses"
-                                                data-spk="<?=$v->no_spk?>"
-                                                data-urutan="<?=$v->urutan?>"
-                                                data-item="<?=$v->item_code?>"
-                                                title="Hapus Proses">
-                                                <span>
-                                                    <i class="fontello icon-cancel-circled"></i>
-                                                </span>
-                                            </a>
-                                        <?php endif; ?>
-                                        <span><?=$v->statusProses() ?></span>
-                                    </li>
-                                    <li>
-                                        <?php if($v->status_proses==3): ?>
-                                            <span class="font-size-12 font-bold text-success"><?='Hasil Produksi: '.$v->qty_hasil ?></span>
-                                        <?php endif; ?>
-                                        <?php if($v->status_proses==4): ?>
-                                            <?=
-                                                '<span class="font-size-12 font-bold text-success">Hasil Produksi: '.$v->qty_hasil.', </span>
-                                                <span class="font-size-12 font-bold text-danger">QTY Rusak: '.($v->qty_proses - $v->qty_hasil).'</span>'
-                                            ?>
-                                        <?php endif; ?>
-                                    </li>
+                            <ul class="custom-detail padding-left-0">
+                                <?php foreach($dataProses as $proses=>$data): ?>
+                                    <div class="document-container">
+                                        <div class="document-header"><?=$proses ?></div>
+                                        <div class="document-body">
+                                            <?php foreach($data as $v): ?>
+                                                <li class="document-li">
+                                                    <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
+                                                        <div class="col-lg-2 col-md-2 col-xs-12  padding-left-0">
+                                                            <label class="font-size-12">Mesin</label>
+                                                        </div>
+                                                        <div class="col-lg-3 col-md-3 col-xs-12 padding-left-0">
+                                                            <span>:</span>
+                                                            <span class="font-size-12"><?=(isset($v['data']->mesin)) ? $v['data']->mesin->name : '' ?></span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
+                                                        <div class="col-lg-2 col-md-2 col-xs-12  padding-left-0">
+                                                            <label class="font-size-12">Jenis Mesin</label>
+                                                        </div>
+                                                        <div class="col-lg-3 col-md-3 col-xs-12 padding-left-0">
+                                                            <span>:</span>
+                                                            <span class="font-size-12"><?=(isset($v['data']->mesin)) ? (isset($v['data']->mesin->typeCode)) ? $v['data']->mesin->typeCode->value : '' : '' ?></span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
+                                                        <div class="col-lg-2 col-md-2 col-xs-12  padding-left-0">
+                                                            <label class="font-size-12">QTY Proses</label>
+                                                        </div>
+                                                        <div class="col-lg-3 col-md-3 col-xs-12 padding-left-0">
+                                                            <span>:</span>
+                                                            <span class="font-size-12"><i class="text-muted"><?=number_format($v['data']['qty_proses']) ?> Lembar Plano</i></span>
+                                                        </div>
+                                                        <?php if($model->status_produksi==2 && $v['data']['status_proses']==1): ?>
+                                                            <a class="text-danger" href="javascript:void(0)" data-button="delete_proses" data-spk="<?=$v['data']['no_spk'] ?>" data-urutan="<?=$v['data']['urutan'] ?>" data-item="<?=$v['data']['item_code'] ?>" title="Hapus Proses">
+                                                                <u>Hapus Proses</u>
+                                                            </a>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                    <?php if($v['data']['status_proses']==3): ?>
+                                                        <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
+                                                            <div class="col-lg-2 col-md-2 col-xs-12  padding-left-0">
+                                                                <label class="font-size-12">Hasil Produksi</label>
+                                                            </div>
+                                                            <div class="col-lg-4 col-md-4 col-xs-12 padding-left-0">
+                                                                <span>:</span>
+                                                                <span class="font-size-12"><i class="text-muted"><?=number_format($v['data']['qty_hasil']) ?> Lembar Plano</i></span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
+                                                            <div class="col-lg-2 col-md-2 col-xs-12  padding-left-0">
+                                                                <label class="font-size-12">Status</label>
+                                                            </div>
+                                                            <div class="col-lg-3 col-md-3 col-xs-12 padding-left-0">
+                                                                <span></span>
+                                                                <span></span>
+                                                                <?= $v['data']->statusProses() ?>
+                                                            </div>
+                                                        </div>
+                                                    <?php endif; ?>
+                                                    <?php if($v['data']['status_proses']==4): ?>
+                                                        <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
+                                                            <div class="col-lg-2 col-md-2 col-xs-12  padding-left-0">
+                                                                <label class="font-size-12">Hasil Produksi</label>
+                                                            </div>
+                                                            <div class="col-lg-3 col-md-3 col-xs-12 padding-left-0">
+                                                                <span>:</span>
+                                                                <span class="font-size-12"><i class="text-muted"><?=number_format($v['data']['qty_hasil']) ?> Lembar Plano</i></span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
+                                                            <div class="col-lg-2 col-md-2 col-xs-12  padding-left-0">
+                                                                <label class="font-size-12">Keterangan</label>
+                                                            </div>
+                                                            <div class="col-lg-4 col-md-4 col-xs-12 padding-left-0">
+                                                                <span>:</span>
+                                                                <span class="font-size-12">
+                                                                    <i class="text-muted"><?='Rusak '.number_format($v['data']['qty_proses'] - $v['data']['qty_hasil']) ?> Lembar Plano</i>
+                                                                    <span class="font-size-12 text-danger"><?=' ('.$v['data']['keterangan'].')'?></span>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
+                                                            <div class="col-lg-2 col-md-2 col-xs-12  padding-left-0">
+                                                                <label class="font-size-12">Status</label>
+                                                            </div>
+                                                            <div class="col-lg-3 col-md-3 col-xs-12 padding-left-0">
+                                                                <span></span>
+                                                                <span></span>
+                                                                <?= $v['data']->statusProses() ?>
+                                                            </div>
+                                                        </div>
+                                                    <?php endif; ?>
+                                                </li>
+                                                <hr />
+                                            <?php endforeach; ?>
+                                        </div>
+                                    </div>
                                 <?php endforeach; ?>
                             </ul>
                         <?php endif; ?>
