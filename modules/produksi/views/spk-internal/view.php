@@ -164,6 +164,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             </ul>
                         <?php endif; ?>
                     </div>
+                    <!-- /DETAIL BAHAN -->
                     <!-- DETAIL PROSES -->
                     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
                         <div class="margin-top-40"></div>
@@ -180,7 +181,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                                         <div class="col-lg-2 col-md-2 col-xs-12  padding-left-0">
                                                             <label class="font-size-12">Mesin</label>
                                                         </div>
-                                                        <div class="col-lg-3 col-md-3 col-xs-12 padding-left-0">
+                                                        <div class="col-lg-4 col-md-4 col-xs-12 padding-left-0">
                                                             <span>:</span>
                                                             <span class="font-size-12"><?=(isset($v['data']->mesin)) ? $v['data']->mesin->name : '' ?></span>
                                                         </div>
@@ -189,7 +190,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                                         <div class="col-lg-2 col-md-2 col-xs-12  padding-left-0">
                                                             <label class="font-size-12">Jenis Mesin</label>
                                                         </div>
-                                                        <div class="col-lg-3 col-md-3 col-xs-12 padding-left-0">
+                                                        <div class="col-lg-4 col-md-4 col-xs-12 padding-left-0">
                                                             <span>:</span>
                                                             <span class="font-size-12"><?=(isset($v['data']->mesin)) ? (isset($v['data']->mesin->typeCode)) ? $v['data']->mesin->typeCode->value : '' : '' ?></span>
                                                         </div>
@@ -198,7 +199,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                                         <div class="col-lg-2 col-md-2 col-xs-12  padding-left-0">
                                                             <label class="font-size-12">QTY Proses</label>
                                                         </div>
-                                                        <div class="col-lg-3 col-md-3 col-xs-12 padding-left-0">
+                                                        <div class="col-lg-4 col-md-4 col-xs-12 padding-left-0">
                                                             <span>:</span>
                                                             <span class="font-size-12"><i class="text-muted"><?=number_format($v['data']['qty_proses']) ?> Lembar Plano</i></span>
                                                         </div>
@@ -222,7 +223,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                                             <div class="col-lg-2 col-md-2 col-xs-12  padding-left-0">
                                                                 <label class="font-size-12">Status</label>
                                                             </div>
-                                                            <div class="col-lg-3 col-md-3 col-xs-12 padding-left-0">
+                                                            <div class="col-lg-4 col-md-4 col-xs-12 padding-left-0">
                                                                 <span></span>
                                                                 <span></span>
                                                                 <?= $v['data']->statusProses() ?>
@@ -234,7 +235,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                                             <div class="col-lg-2 col-md-2 col-xs-12  padding-left-0">
                                                                 <label class="font-size-12">Hasil Produksi</label>
                                                             </div>
-                                                            <div class="col-lg-3 col-md-3 col-xs-12 padding-left-0">
+                                                            <div class="col-lg-4 col-md-4 col-xs-12 padding-left-0">
                                                                 <span>:</span>
                                                                 <span class="font-size-12"><i class="text-muted"><?=number_format($v['data']['qty_hasil']) ?> Lembar Plano</i></span>
                                                             </div>
@@ -255,7 +256,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                                             <div class="col-lg-2 col-md-2 col-xs-12  padding-left-0">
                                                                 <label class="font-size-12">Status</label>
                                                             </div>
-                                                            <div class="col-lg-3 col-md-3 col-xs-12 padding-left-0">
+                                                            <div class="col-lg-4 col-md-4 col-xs-12 padding-left-0">
                                                                 <span></span>
                                                                 <span></span>
                                                                 <?= $v['data']->statusProses() ?>
@@ -271,6 +272,58 @@ $this->params['breadcrumbs'][] = $this->title;
                             </ul>
                         <?php endif; ?>
                     </div>
+                    <!-- /DETAIL PROSES -->
+                    <!-- HASIL PRODUKSI -->
+                    <?php if($model->status_produksi==3 && $v['data']['status_proses']==2): ?>
+                        <div class="document-container">
+                            <div class="document-header">Hasil Produksi</div>
+                            <div class="document-body">
+                                <?php $form = ActiveForm::begin(['id'=>'hasil_produksi']); ?>
+                                    <?php foreach($hasilProduksi as $produksi): ?>
+                                        <div class="col-lg-12 col-md-12 col-xs-12">
+                                            <h6><strong><u><?=$produksi->typeProses() ?></u></strong></h6>
+                                        </div>
+                                        <div class="col-lg-12 col-md-12 col-xs-12">
+                                            <?= $form->field($spkProses, 'no_spk[]')->hiddenInput(['value'=>$produksi->no_spk])->label(false) ?>
+                                            <?= $form->field($spkProses, 'urutan[]')->hiddenInput(['value'=>$produksi->urutan])->label(false) ?>
+                                        </div>
+                                        <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
+                                            <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
+                                                <span class="font-size-12">QTY <?=$produksi->mesin->name ?> :</span>
+                                                <?= $form->field($spkProses, 'qty_proses[]')->textInput(['readonly' => true, 'value' => number_format($produksi->qty_proses), 'data-align' => 'text-right'])->label(false) ?>
+                                            </div>
+                                            <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
+                                                <span class="font-size-12">Hasil <?=$produksi->mesin->name ?> :</span>
+                                                <?= $form->field($spkProses, 'qty_hasil[]')->widget(MaskedInput::className(), [
+                                                        'clientOptions' => [
+                                                            'alias' =>  'decimal',
+                                                            'groupSeparator' => ',',
+                                                            'autoGroup' => true,
+                                                        ],
+                                                        'options' => [
+                                                            'data-align' => 'text-right',
+                                                            'value' => number_format($produksi->qty_proses),
+                                                        ]
+                                                    ])->label(false) ?>
+                                            </div>
+                                            <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
+                                                <span class="font-size-12">Keterangan :</span>
+                                                <?= $form->field($spkProses, 'keterangan[]')->textarea(['placeholder' => 'Masukkan keterangan'])->label(false) ?>
+                                            </div>
+                                        </div>
+                                    <?php endforeach; ?>
+                                    <div class="col-lg-12 col-md-12 col-xs-12 text-right">
+                                        <p class="text-danger font-size-12">NB: Keterangan wajib diisi jika QTY hasil lebih kecil dari QTY Proses.</p>
+                                        <button class="btn btn-success margin-bottom-20" data-button="update_proses">
+                                            <i class="fontello icon-plus"></i>
+                                            <span>Update Proses</span>
+                                        </button>
+                                    </div>
+                                <?php ActiveForm::end(); ?>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+                    <!-- /HASIL PRODUKSI -->
                     <div class="margin-bottom-20"></div>
                 <?php endforeach; ?>
             <?php endif; ?>
@@ -441,7 +494,7 @@ $this->params['breadcrumbs'][] = $this->title;
 function load_bahan()
 {
     $.ajax({
-        url: "<?=Url::to(['spk/list-bahan'])?>",
+        url: "<?=Url::to(['spk-internal/list-bahan'])?>",
 		type: "GET",
 		dataType: "text",
         error: function(xhr, status, error) {},
@@ -464,7 +517,7 @@ function load_bahan()
 function search_bahan(code)
 {
     $.ajax({
-        url: "<?=Url::to(['spk/search-bahan'])?>",
+        url: "<?=Url::to(['spk-internal/search-bahan'])?>",
 		type: "POST",
         data: {
             code: code,
@@ -491,7 +544,7 @@ function search_bahan(code)
 function item_bahan(code)
 {
     $.ajax({
-        url: "<?=Url::to(['spk/item-bahan'])?>",
+        url: "<?=Url::to(['spk-internal/item-bahan'])?>",
 		type: "POST",
         data: {
             code: code,
@@ -520,7 +573,7 @@ function item_bahan(code)
 function create_bahan(el)
 {
     $.ajax({
-        url: "<?= Url::to(['spk/create-bahan']) ?>",
+        url: "<?= Url::to(['spk-internal/create-bahan']) ?>",
         type: "POST",
         data: $("#form").serialize(),
         dataType: "text",
@@ -549,7 +602,7 @@ function delete_bahan(el)
 {
     data = el.data();
     $.ajax({
-        url: "<?= Url::to(['spk/delete-bahan']) ?>",
+        url: "<?= Url::to(['spk-internal/delete-bahan']) ?>",
         type: "POST",
         dataType: "text",
         error: function(xhr, status, error) {},
@@ -582,7 +635,7 @@ function delete_bahan(el)
 function list_mesin(no_spk, item_code, type)
 {
     $.ajax({
-        url: "<?=Url::to(['spk/list-mesin'])?>",
+        url: "<?=Url::to(['spk-internal/list-mesin'])?>",
 		type: "GET",
         data: {
             no_spk: no_spk,
@@ -614,7 +667,7 @@ function list_mesin(no_spk, item_code, type)
 function create_proses(el)
 {
     $.ajax({
-        url: "<?= Url::to(['spk/create-proses']) ?>",
+        url: "<?= Url::to(['spk-internal/create-proses']) ?>",
         type: "POST",
         dataType: "text",
         error: function(xhr, status, error) {},
@@ -643,7 +696,7 @@ function delete_proses(el)
 {
     data = el.data();
     $.ajax({
-        url: "<?= Url::to(['spk/delete-proses']) ?>",
+        url: "<?= Url::to(['spk-internal/delete-proses']) ?>",
         type: "POST",
         dataType: "text",
         error: function(xhr, status, error) {},
@@ -654,6 +707,34 @@ function delete_proses(el)
             no_spk: data.spk,
             urutan: data.urutan,
             item_code: data.item,
+        },
+        success: function(data){
+            var o = $.parseJSON(data);
+            if(o.success == true){
+                notification.open("success", o.message, timeOut);
+                setTimeout(function(){
+                    location.reload();
+                }, 500);
+            }else{
+                notification.open("danger", o.message, timeOut);
+            }
+        },
+        complete: function(){
+            el.loader("destroy");
+        }
+    });
+}
+
+function hasil_produksi(el)
+{
+    $.ajax({
+        url: "<?= Url::to(['spk-internal/hasil-produksi']) ?>",
+        type: "POST",
+        data: $("#hasil_produksi").serialize(),
+        dataType: "text",
+        error: function(xhr, status, error) {},
+        beforeSend: function(){
+            el.loader("load");
         },
         success: function(data){
             var o = $.parseJSON(data);
@@ -733,6 +814,11 @@ $(document).ready(function(){
     $("body").off("click","[data-button=\"delete_proses\"]").on("click","[data-button=\"delete_proses\"]", function(e){
         e.preventDefault();
         delete_proses($(this));
+    });
+
+    $("body").off("click","[data-button=\"update_proses\"]").on("click","[data-button=\"update_proses\"]", function(e){
+        e.preventDefault();
+        hasil_produksi($(this));
     });
 });
 </script>

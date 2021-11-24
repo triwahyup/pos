@@ -23,7 +23,7 @@ use yii\filters\VerbFilter;
 /**
  * SpkController implements the CRUD actions for Spk model.
  */
-class SpkController extends Controller
+class SpkInternalController extends Controller
 {
     /**
      * @inheritDoc
@@ -42,8 +42,9 @@ class SpkController extends Controller
                                 'list-bahan', 'search-bahan', 'item-bahan', 'create-bahan', 'delete-bahan',
                                 'lock-bahan', 'lock-proses',
                                 'list-mesin', 'create-proses', 'delete-proses',
+                                'hasil-produksi'
                             ],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('spk')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('spk-internal')),
                             'roles' => ['@'],
                         ],
                     ],
@@ -92,6 +93,7 @@ class SpkController extends Controller
                 $dataProses[$val->typeProses()][] = ['data'=>$val];
             }
         }
+        $hasilProduksi = SpkDetailProses::findAll(['no_spk'=>$no_spk, 'status_proses'=>2]);
 
         return $this->render('view', [
             'model' => $model,
@@ -99,6 +101,7 @@ class SpkController extends Controller
             'spkProses' => $spkProses,
             'spkDetail' => $spkDetail,
             'dataProses' => $dataProses,
+            'hasilProduksi' => $hasilProduksi,
         ]);
     }
 
@@ -706,6 +709,94 @@ class SpkController extends Controller
             }else{
                 $success = false;
                 $message = 'SPK SUDAH DI PROSES. TIDAK BISA MENGHAPUS PROSES.';
+            }
+        }else{
+            throw new NotFoundHttpException('The requested data does not exist.');
+        }
+        return json_encode(['success'=>$success, 'message'=>$message]);
+    }
+
+    public function actionHasilProduksi()
+    {
+        $request = \Yii::$app->request;
+        $success = true;
+        $message = '';
+        if($request->isPost){
+            $data = $request->post('SpkDetailProses');
+            $model = Spk::findOne(['no_spk'=>$data['no_spk'], 'status_produksi'=>3]);
+            if(isset($model)){
+                $connection = \Yii::$app->db;
+                $transaction = $connection->beginTransaction();
+                try{
+                    $model->status_produksi = 1;
+                    if($model->save()){
+                        foreach($data['urutan'] as $index=>$urutan){
+                            $spkProses = SpkDetailProses::findOne(['no_spk'=>$data['no_spk'], 'urutan'=>$urutan, 'status_proses'=>2]);
+                            if(isset($spkProses)){
+                                $qtyHasil = str_replace(',','', $data['qty_hasil'][$index]);
+                                if($qtyHasil <= $spkProses->qty_proses){
+                                    $spkProses->qty_hasil = $qtyHasil;
+                                    $spkProses->keterangan = $data['keterangan'][$index];
+                                    if($spkProses->qty_proses > $spkProses->qty_hasil){
+                                        if(!empty($spkProses->keterangan)){
+                                            $spkProses->status_proses = 4;
+                                        }else{
+                                            $success = false;
+                                            $message = 'Keterangan untuk '.$spkProses->typeProses() .' ('.$spkProses->mesin->name.') wajib diisi.';
+                                        }
+                                    }else{
+                                        $spkProses->status_proses = 3;
+                                    }
+                                    if(!$spkProses->save()){
+                                        $success = false;
+                                        $message = (count($spkProses->errors) > 0) ? 'ERROR CREATE HASIL PRODUKSI: ' : '';
+                                        foreach($spkProses->errors as $error => $value){
+                                            $message .= strtoupper($value[0].', ');
+                                        }
+                                        $message = substr($message, 0, -2);
+                                    }
+                                }else{
+                                    $success = false;
+                                    $message = 'QTY Hasil tidak boleh lebih besar dari QTY Proses.';
+                                }
+                            }else{
+                                $success = false;
+                                $message = 'DATA SPK PROSES NOT VALID.';
+                            }
+                        }
+                    }else{
+                        $success = false;
+                        $message = (count($model->errors) > 0) ? 'ERROR UPDATE SPK: ' : '';
+                        foreach($model->errors as $error => $value){
+                            $message .= strtoupper($value[0].', ');
+                        }
+                        $message = substr($message, 0, -2);
+                    }
+
+                    if($success){
+                        $message = '['.$model->no_spk.'] SUCCESS CREATE HASIL PRODUKSI.';
+                        $transaction->commit();
+                        $logs =	[
+                            'type' => Logs::TYPE_USER,
+                            'description' => $message,
+                        ];
+                        Logs::addLog($logs);
+                    }else{
+                        $transaction->rollBack();
+                    }
+                }catch(Exception $e){
+                    $success = false;
+                    $message = $e->getMessage();
+                    $transaction->rollBack();
+                }
+                $logs =	[
+                    'type' => Logs::TYPE_USER,
+                    'description' => $message,
+                ];
+                Logs::addLog($logs);
+            }else{
+                $success = false;
+                $message = 'DATA SPK NOT VALID.';
             }
         }else{
             throw new NotFoundHttpException('The requested data does not exist.');
