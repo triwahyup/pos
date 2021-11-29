@@ -5,7 +5,6 @@ use app\modules\inventory\models\InventoryStockItem;
 use app\modules\master\models\MasterMaterialItem;
 use app\modules\sales\models\SalesOrderDetailProduksi;
 use yii\behaviors\TimestampBehavior;
-
 use Yii;
 
 /**
@@ -50,6 +49,13 @@ class SalesOrderDetail extends \yii\db\ActiveRecord
     public static function tableName()
     {
         return 'sales_order_detail';
+    }
+
+    public function behaviors()
+	{
+        return [
+            TimestampBehavior::className(),
+        ];
     }
 
     /**

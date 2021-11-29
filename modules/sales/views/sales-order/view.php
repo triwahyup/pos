@@ -156,7 +156,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0" render="detail">
                             <!-- Detail Material -->
                             <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-right-0">
                                     <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
                                         <label class="font-size-12">Material</label>
                                     </div>
@@ -164,7 +164,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                         <span class="font-size-12"><?=$val->item_code.' - '.$val->item->name ?></span>
                                     </div>
                                 </div>
-                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-right-0">
                                     <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
                                         <label class="font-size-12">QTY Order</label>
                                     </div>
@@ -179,7 +179,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                         </span>
                                     </div>
                                 </div>
-                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-left-0 padding-right-0 margin-bottom-20">
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-right-0 margin-bottom-20">
                                     <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
                                         <label class="font-size-12">Harga Jual (Rp)</label>
                                     </div>
@@ -194,7 +194,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                         </strong>
                                     </div>
                                 </div>
-                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-right-0">
                                     <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
                                         <label class="font-size-12">P x L</label>
                                     </div>
@@ -202,7 +202,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                         <strong class="font-size-12"><?=$val->panjang.' x '.$val->lebar ?></strong>
                                     </div>
                                 </div>
-                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-right-0">
                                     <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
                                         <label class="font-size-12">Total Potong</label>
                                     </div>
@@ -210,7 +210,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                         <strong class="font-size-12"><?=$val->total_potong.' <span class="text-muted font-size-10">(Jumlah cetak '.number_format($val['jumlah_cetak']).')</span>' ?></strong>
                                     </div>
                                 </div>
-                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-right-0">
                                     <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
                                         <label class="font-size-12">Total Objek</label>
                                     </div>
@@ -218,7 +218,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                         <strong class="font-size-12"><?=$val->total_objek.' <span class="text-muted font-size-10">(Jumlah objek '.number_format($val['jumlah_objek']).')</span>' ?></strong>
                                     </div>
                                 </div>
-                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-right-0">
                                     <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
                                         <label class="font-size-12">Total Warna</label>
                                     </div>
@@ -226,7 +226,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                         <strong class="font-size-12"><?=$val->total_warna ?></strong>
                                     </div>
                                 </div>
-                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-right-0">
                                     <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
                                         <label class="font-size-12">Lembar Ikat</label>
                                     </div>
@@ -262,6 +262,23 @@ $this->params['breadcrumbs'][] = $this->title;
                                             </li>
                                         </ul>
                                     <?php endif; ?>
+                                </div>
+                                <div class="col-lg-12 col-md-12 col-xs-12 text-left padding-left-0">
+                                    <hr />
+                                    <ul class="text-right">
+                                        <li>
+                                            <span class="label">Total Order Material</span>
+                                            <span class="currency font-bold"><?='Rp. '.number_format($val->total_order).'.-' ?></span>
+                                        </li>
+                                        <li>
+                                            <span class="label">Total Biaya Produksi</span>
+                                            <span class="currency font-bold"><?='Rp. '.number_format($total_biaya).'.-' ?></span>
+                                        </li>
+                                        <li>
+                                            <span class="label">Grand Total</span>
+                                            <span class="currency font-bold"><?='Rp. '.number_format($val->total_order+$total_biaya).'.-' ?></span>
+                                        </li>
+                                    </ul>
                                 </div>
                             </div>
                             <!-- /Detail Proses -->

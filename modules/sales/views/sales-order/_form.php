@@ -292,7 +292,6 @@ function init_temp()
             $("#salesorder-total_order").val(o.total_order);
             $("#salesorder-total_biaya").val(o.total_biaya);
             $("#salesorder-grand_total").val(o.grand_total);
-            console.log(o);
         },
         complete: function(){}
     });

@@ -3,6 +3,7 @@
 namespace app\modules\sales\models;
 
 use Yii;
+use yii\behaviors\TimestampBehavior;
 
 /**
  * This is the model class for table "sales_order_detail_produksi".
@@ -28,6 +29,13 @@ class SalesOrderDetailProduksi extends \yii\db\ActiveRecord
     public static function tableName()
     {
         return 'sales_order_detail_produksi';
+    }
+
+    public function behaviors()
+	{
+        return [
+            TimestampBehavior::className(),
+        ];
     }
 
     /**
