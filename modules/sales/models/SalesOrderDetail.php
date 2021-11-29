@@ -117,7 +117,7 @@ class SalesOrderDetail extends \yii\db\ActiveRecord
 
     public function getDetailsProduksi()
     {
-        return $this->hasMany(SalesOrderDetailProduksi::className(), ['no_so' => 'no_so', 'item_code' => 'item_code']);
+        return $this->hasMany(SalesOrderDetailProduksi::className(), ['no_so' => 'no_so', 'item_code' => 'item_code', 'detail_urutan' => 'urutan']);
     }
 
     public function getInventoryStock()

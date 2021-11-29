@@ -18,8 +18,6 @@ use app\modules\master\models\MasterMaterialItem;
  * @property float|null $panjang
  * @property float|null $lebar
  * @property int|null $type
- * @property float|null $index
- * @property float|null $total_biaya
  * @property int|null $user_id
  */
 class TempSalesOrderDetailProduksi extends \yii\db\ActiveRecord
@@ -38,8 +36,8 @@ class TempSalesOrderDetailProduksi extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['urutan', 'type', 'user_id'], 'integer'],
-            [['panjang', 'lebar', 'index', 'total_biaya'], 'number'],
+            [['detail_urutan', 'urutan', 'type', 'user_id'], 'integer'],
+            [['panjang', 'lebar', 'harga'], 'number'],
             [['no_so'], 'string', 'max' => 12],
             [['order_code', 'biaya_produksi_code'], 'string', 'max' => 3],
             [['name'], 'string', 'max' => 128],
@@ -63,20 +61,18 @@ class TempSalesOrderDetailProduksi extends \yii\db\ActiveRecord
             'panjang' => 'Panjang',
             'lebar' => 'Lebar',
             'type' => 'Type',
-            'index' => 'Index',
-            'total_biaya' => 'Total Biaya',
             'user_id' => 'User ID',
         ];
     }
 
     public function getCount()
     {
-        return TempSalesOrderDetailProduksi::find()->where(['user_id'=> \Yii::$app->user->id])->count();
+        return TempSalesOrderDetailProduksi::find()->where(['detail_urutan' => $this->detail_urutan, 'user_id'=> \Yii::$app->user->id])->count();
     }
 
     public function getTmps()
     {
-        return TempSalesOrderDetailProduksi::find()->where(['user_id'=> \Yii::$app->user->id])->all();
+        return TempSalesOrderDetailProduksi::find()->where(['detail_urutan' => $this->detail_urutan, 'user_id'=> \Yii::$app->user->id])->all();
     }
     
     public function getOrderCode()
@@ -88,11 +84,5 @@ class TempSalesOrderDetailProduksi extends \yii\db\ActiveRecord
     public function getItem()
     {
         return $this->hasOne(MasterMaterialItem::className(), ['code' => 'item_code']);
-    }
-
-    public function totalBiaya()
-    {
-        $total = $this->item->panjang * $this->item->lebar * $this->index * 500;
-        return ceil($total);
     }
 }

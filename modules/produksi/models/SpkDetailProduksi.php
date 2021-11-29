@@ -17,7 +17,6 @@ use yii\behaviors\TimestampBehavior;
  * @property float|null $panjang
  * @property float|null $lebar
  * @property int|null $type
- * @property float|null $index
  * @property float|null $total_biaya
  * @property int|null $status
  * @property int|null $created_at
@@ -46,14 +45,14 @@ class SpkDetailProduksi extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['no_spk', 'urutan', 'order_code'], 'required'],
-            [['urutan', 'type', 'status', 'created_at', 'updated_at'], 'integer'],
-            [['panjang', 'lebar', 'index', 'total_biaya'], 'number'],
+            [['no_spk', 'detail_urutan', 'urutan', 'order_code'], 'required'],
+            [['detail_urutan', 'urutan', 'type', 'status', 'created_at', 'updated_at'], 'integer'],
+            [['panjang', 'lebar', 'total_biaya'], 'number'],
             [['no_spk'], 'string', 'max' => 12],
             [['order_code', 'biaya_produksi_code'], 'string', 'max' => 3],
             [['name'], 'string', 'max' => 128],
             [['item_code'], 'string', 'max' => 7],
-            [['no_spk', 'urutan'], 'unique', 'targetAttribute' => ['no_spk', 'urutan']],
+            [['no_spk', 'detail_urutan', 'urutan'], 'unique', 'targetAttribute' => ['no_spk', 'detail_urutan', 'urutan']],
         ];
     }
 
@@ -72,7 +71,6 @@ class SpkDetailProduksi extends \yii\db\ActiveRecord
             'panjang' => 'Panjang',
             'lebar' => 'Lebar',
             'type' => 'Type',
-            'index' => 'Index',
             'total_biaya' => 'Total Biaya',
             'status' => 'Status',
             'created_at' => 'Created At',

@@ -24,12 +24,7 @@ use yii\widgets\MaskedInput;
                             'class' => 'select2',
                         ],
                     ]) ?>
-                <?= $form->field($model, 'index')->textInput() ?>
                 <?= $form->field($model, 'keterangan')->textarea(['rows' => 2]) ?>
-                
-                <div class="form-group margin-top-20">
-                    <p class="font-size-10 text-danger">Harga diisi hanya untuk ketentuan berlaku. Misal order kurang dari 20 RIM.</p>
-                </div>
                 <?= $form->field($model, 'harga')->widget(MaskedInput::className(), [
                         'clientOptions' => [
                             'alias' => 'decimal',

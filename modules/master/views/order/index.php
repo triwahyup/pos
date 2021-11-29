@@ -31,6 +31,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [
                 'attribute' => 'total_order',
+                'label' => '(Rp.) Total Order Material',
                 'contentOptions' => [
                     'class' => 'text-right',
                 ],
@@ -41,6 +42,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [
                 'attribute' => 'total_biaya',
+                'label' => '(Rp.) Total Biaya Produksi',
                 'contentOptions' => [
                     'class' => 'text-right',
                 ],
@@ -51,6 +53,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [
                 'attribute' => 'grand_total',
+                'label' => '(Rp.) Grand Total',
                 'contentOptions' => [
                     'class' => 'text-right',
                 ],

@@ -137,10 +137,6 @@ class TempMasterOrderDetail extends \yii\db\ActiveRecord
 
     public function getDetailsProduksi()
     {
-        if(!empty($this->order_code)){
-            return $this->hasMany(TempMasterOrderDetailProduksi::className(), ['order_code' => 'order_code', 'item_code' => 'item_code']);
-        }else{
-            return $this->hasMany(TempMasterOrderDetailProduksi::className(), ['item_code' => 'item_code', 'user_id'=> 'user_id']);
-        }
+        return $this->hasMany(TempMasterOrderDetailProduksi::className(), ['order_code' => 'order_code', 'item_code' => 'item_code', 'detail_urutan' => 'urutan']);
     }
 }

@@ -27,21 +27,18 @@ $this->params['breadcrumbs'][] = $this->title;
                 'contentOptions' => [
                     'class' => 'text-center',
                 ],
-                'value'=> function ($model, $index) { 
+                'value' => function ($model, $index) { 
                     return $model->typeOngkos;
                 }
-            ],
-            [
-                'attribute' => 'index',
-                'contentOptions' => [
-                    'class' => 'text-center',
-                ],
             ],
             [
                 'attribute' => 'harga',
                 'contentOptions' => [
                     'class' => 'text-right',
                 ],
+                'value' => function ($model, $index) { 
+                    return number_format($model->harga).'.-';
+                }
             ],
             [
                 'attribute' => 'created_at',

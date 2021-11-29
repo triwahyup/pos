@@ -119,9 +119,27 @@ class TempSalesOrderDetail extends \yii\db\ActiveRecord
     public function getDetailsProduksi()
     {
         if(!empty($this->no_so)){
-            return $this->hasMany(TempSalesOrderDetailProduksi::className(), ['no_so' => 'no_so', 'item_code' => 'item_code']);
+            return $this->hasMany(TempSalesOrderDetailProduksi::className(), ['no_so' => 'no_so', 'item_code' => 'item_code', 'detail_urutan' => 'urutan']);
         }else{
-            return $this->hasMany(TempSalesOrderDetailProduksi::className(), ['item_code' => 'item_code', 'user_id'=> 'user_id']);
+            return $this->hasMany(TempSalesOrderDetailProduksi::className(), ['item_code' => 'item_code', 'detail_urutan' => 'urutan', 'user_id'=> 'user_id']);
         }
+    }
+
+    public function getTotalOrder()
+    {
+        $total_order=0;
+        if(!empty($this->qty_order_1)){
+            $harga_jual_1 = str_replace(',', '', $this->harga_jual_1);
+            $total_order += $this->qty_order_1 * $harga_jual_1;
+        }
+        if(!empty($this->qty_order_2)){
+            $harga_jual_2 = str_replace(',', '', $this->harga_jual_2);
+            $total_order += $this->qty_order_2 * $harga_jual_2;
+        }
+        if(!empty($this->qty_order_3)){
+            $harga_jual_3 = str_replace(',', '', $this->harga_jual_3);
+            $total_order += $this->qty_order_3 * $harga_jual_3;
+        }
+        return $total_order;
     }
 }

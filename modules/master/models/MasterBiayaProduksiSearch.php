@@ -17,7 +17,7 @@ class MasterBiayaProduksiSearch extends MasterBiayaProduksi
     public function rules()
     {
         return [
-            [['name', 'type','index', 'harga', 'created_at', 'updated_at'], 'safe'],
+            [['name', 'type', 'harga', 'created_at', 'updated_at'], 'safe'],
         ];
     }
 
@@ -68,7 +68,6 @@ class MasterBiayaProduksiSearch extends MasterBiayaProduksi
 			$query->andWhere('updated_at >='.$t1.' and updated_at <'.$t2);
         }
         $query->andFilterWhere([
-            'index' => $this->index,
             'harga' => $this->harga,
             'status' => $this->status
         ]);

@@ -16,8 +16,6 @@ use Yii;
  * @property float|null $panjang
  * @property float|null $lebar
  * @property int|null $type
- * @property float|null $index
- * @property float|null $total_biaya
  * @property int|null $status
  * @property int|null $created_at
  * @property int|null $updated_at
@@ -38,14 +36,14 @@ class SalesOrderDetailProduksi extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['no_so', 'urutan', 'order_code'], 'required'],
-            [['urutan', 'type', 'status', 'created_at', 'updated_at'], 'integer'],
-            [['panjang', 'lebar', 'index', 'total_biaya'], 'number'],
+            [['no_so', 'detail_urutan', 'urutan', 'order_code'], 'required'],
+            [['detail_urutan', 'urutan', 'type', 'status', 'created_at', 'updated_at'], 'integer'],
+            [['panjang', 'lebar', 'harga'], 'number'],
             [['no_so'], 'string', 'max' => 12],
             [['order_code', 'biaya_produksi_code'], 'string', 'max' => 3],
             [['name'], 'string', 'max' => 128],
             [['item_code'], 'string', 'max' => 7],
-            [['no_so', 'urutan'], 'unique', 'targetAttribute' => ['no_so', 'urutan']],
+            [['no_so', 'detail_urutan', 'urutan'], 'unique', 'targetAttribute' => ['no_so', 'detail_urutan', 'urutan']],
         ];
     }
 
@@ -64,8 +62,6 @@ class SalesOrderDetailProduksi extends \yii\db\ActiveRecord
             'panjang' => 'Panjang',
             'lebar' => 'Lebar',
             'type' => 'Type',
-            'index' => 'Index',
-            'total_biaya' => 'Total Biaya',
             'status' => 'Status',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',

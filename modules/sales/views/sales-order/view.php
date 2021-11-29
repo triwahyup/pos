@@ -46,6 +46,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     [
                         'attribute' => 'biaya_pengiriman',
                         'format' => 'raw',
+                        'label' => '(Rp.) Biaya Kirim',
                         'value' => function($model, $key)
                         {
                             return (!empty($model->biaya_pengiriman)) ? '<strong>Rp.'.number_format($model->biaya_pengiriman).'</strong>' : null;
@@ -81,6 +82,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     [
                         'attribute' => 'total_order',
                         'format' => 'raw',
+                        'label' => '(Rp.) Total Order Material',
                         'value' => function($model, $key)
                         {
                             return '<strong>Rp.'.number_format($model->total_order).'</strong>';
@@ -89,6 +91,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     [
                         'attribute' => 'total_biaya',
                         'format' => 'raw',
+                        'label' => '(Rp.) Total Biaya Produksi',
                         'value' => function($model, $key)
                         {
                             return '<strong>Rp.'.number_format($model->total_biaya).'</strong>';
@@ -97,6 +100,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     [
                         'attribute' => 'grand_total',
                         'format' => 'raw',
+                        'label' => '(Rp.) Grand Total',
                         'value' => function($model, $key)
                         {
                             return '<strong>Rp.'.number_format($model->grand_total).'</strong>';
@@ -243,13 +247,13 @@ $this->params['breadcrumbs'][] = $this->title;
                                     <hr />
                                     <?php if(count($val->detailsProduksi) > 0):
                                         $total_biaya=0;?>
-                                        <ul>
+                                        <ul class="text-right">
                                             <?php foreach($val->detailsProduksi as $v):
-                                                $total_biaya += $v->total_biaya;
-                                                $totalBiaya += $v->total_biaya; ?>
+                                                $total_biaya += $v->harga;
+                                                $totalBiaya += $v->harga; ?>
                                                 <li>
                                                     <span class="label"><?=$v->name ?></span>
-                                                    <span class="currency"><?='Rp. '.number_format($v->total_biaya).'.-' ?></span>
+                                                    <span class="currency"><?='Rp. '.number_format($v->harga).'.-' ?></span>
                                                 </li>
                                             <?php endforeach; ?>
                                             <li>
@@ -264,40 +268,40 @@ $this->params['breadcrumbs'][] = $this->title;
                         </div>
                     <?php endforeach; ?>
                     <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 text-right" render="summary">
-                        <div class="col-lg-12 col-md-12 col-xs-12">
-                            <div class="col-lg-10 col-md-10 col-xs-12">
-                                <span class="label-summary">Total Material</span>
+                        <div class="col-lg-12 col-md-12 col-xs-12 padding-right-0">
+                            <div class="col-lg-10 col-md-10 col-xs-12 padding-right-0">
+                                <span class="label-summary">Total Order Material</span>
                             </div>
                             <div class="col-lg-2 col-md-2 col-xs-12">
                                 <span class="value-summary"><?='Rp. '.number_format($totalOrder).'.-' ?></span>
                             </div>
                         </div>
-                        <div class="col-lg-12 col-md-12 col-xs-12">
-                            <div class="col-lg-10 col-md-10 col-xs-12">
-                                <span class="label-summary">Total Biaya</span>
+                        <div class="col-lg-12 col-md-12 col-xs-12 padding-right-0">
+                            <div class="col-lg-10 col-md-10 col-xs-12 padding-right-0">
+                                <span class="label-summary">Total Biaya Produksi</span>
                             </div>
                             <div class="col-lg-2 col-md-2 col-xs-12">
                                 <span class="value-summary"><?=' Rp. '.number_format($totalBiaya).'.-' ?>
                             </div>
                         </div>
-                        <div class="col-lg-12 col-md-12 col-xs-12">
-                            <div class="col-lg-10 col-md-10 col-xs-12">
+                        <div class="col-lg-12 col-md-12 col-xs-12 padding-right-0">
+                            <div class="col-lg-10 col-md-10 col-xs-12 padding-right-0">
                                 <span class="label-summary">Biaya Pengiriman</span>
                             </div>
                             <div class="col-lg-2 col-md-2 col-xs-12">
                                 <span class="value-summary"><?=' Rp. '.number_format($model->biaya_pengiriman).'.-' ?>
                             </div>
                         </div>
-                        <div class="col-lg-12 col-md-12 col-xs-12">
-                            <div class="col-lg-10 col-md-10 col-xs-12">
+                        <div class="col-lg-12 col-md-12 col-xs-12 padding-right-0">
+                            <div class="col-lg-10 col-md-10 col-xs-12 padding-right-0">
                                 <span class="label-summary">PPN (%)</span>
                             </div>
                             <div class="col-lg-2 col-md-2 col-xs-12">
-                                <span class="value-summary"><?=(!empty($model->ppn)) ? $model->ppn.' %' : '-' ?>
+                                <span class="value-summary"><?=(!empty($model->ppn)) ? 'Rp. '.number_format(($totalOrder+$totalBiaya)*($model->ppn/100)).' ('.$model->ppn.'%)' : '-' ?>
                             </div>
                         </div>
-                        <div class="col-lg-12 col-md-12 col-xs-12">
-                            <div class="col-lg-10 col-md-10 col-xs-12">
+                        <div class="col-lg-12 col-md-12 col-xs-12 padding-right-0">
+                            <div class="col-lg-10 col-md-10 col-xs-12 padding-right-0">
                                 <span class="label-summary">Grand Total</span>
                             </div>
                             <div class="col-lg-2 col-md-2 col-xs-12">

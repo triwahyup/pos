@@ -35,8 +35,12 @@ $this->params['breadcrumbs'][] = $this->title;
                             return $model->typeOngkos;
                         }
                     ],
-                    'index',
-                    'harga',
+                    [
+                        'attribute' => 'harga',
+                        'value'=> function ($model, $index) { 
+                            return number_format($model->harga).'.-';
+                        }
+                    ],
                     'keterangan',
                     [
                         'attribute' => 'status',

@@ -154,6 +154,7 @@ function load_biaya_produksi(el)
             no_so: data.so,
             order_code: data.order,
             item_code: data.item,
+            urutan: data.urutan,
         },
 		dataType: "text",
         error: function(xhr, status, error) {},
@@ -162,6 +163,7 @@ function load_biaya_produksi(el)
         },
         success: function(data){
             var o = $.parseJSON(data);
+            $(".popup").remove();
             $("[data-popup=\"popup\"]").html(o.data);
             $("[data-popup=\"popup\"]").popup("open", {
 				container: "popup",
@@ -290,27 +292,21 @@ function init_temp()
             $("#salesorder-total_order").val(o.total_order);
             $("#salesorder-total_biaya").val(o.total_biaya);
             $("#salesorder-grand_total").val(o.grand_total);
+            console.log(o);
         },
         complete: function(){}
     });
 }
 
-function create_temp_produksi(so, code, biaya, item)
+function create_temp_produksi()
 {
     $.ajax({
         url: "<?= Url::to(['sales-order/create-temp-produksi']) ?>",
         type: "POST",
         dataType: "text",
         error: function(xhr, status, error) {},
-        beforeSend: function(){
-            popup.close();
-        },
-        data: {
-            code: code,
-            biaya: biaya,
-            item: item,
-            no_so: so,
-        },
+        beforeSend: function(){},
+        data: $("#form_biaya").serialize(),
         success: function(data){
             var o = $.parseJSON(data);
             if(!o.success == true){
@@ -319,33 +315,34 @@ function create_temp_produksi(so, code, biaya, item)
             init_temp();
         },
         complete: function(){
-            load_biaya_produksi($("#list_biaya_produksi"));
+            popup.close();
         }
     });
 }
 
-function delete_temp_produksi(id)
+function update_harga(el)
 {
+    data = el.data();
+    harga_jual_1 = $("#price1_"+data.id).val();
+    harga_jual_2 = $("#price2_"+data.id).val();
     $.ajax({
-        url: "<?= Url::to(['sales-order/delete-temp-produksi']) ?>",
-        type: "GET",
+        url: "<?= Url::to(['sales-order/update-harga']) ?>",
+        type: "POST",
+        data: {
+            id: data.id,
+            harga_jual_1: harga_jual_1,
+            harga_jual_2: harga_jual_2,
+        },
         dataType: "text",
         error: function(xhr, status, error) {},
         beforeSend: function(){
-            popup.close();
-        },
-        data: {
-            id: id
+            el.loader("load");
         },
         success: function(data){
-            var o = $.parseJSON(data);
-            if(!o.success == true){
-                notification.open("danger", o.message, timeOut);
-            }
             init_temp();
         },
         complete: function(){
-			load_biaya_produksi($("#list_biaya_produksi"));
+            el.loader("destroy");
         }
     });
 }
@@ -371,19 +368,15 @@ $(document).ready(function(){
         select_order(data.code);
     });
 
-    $("body").off("click","[id^=\"proses_\"]").on("click","[id^=\"proses_\"]", function(e){
-        var prop = $(this).prop("checked"), 
-            id = $(this).attr("id").split("_")[1]+'_'+$(this).attr("id").split("_")[2];
-        if(prop == true){
-            create_temp_produksi($("#so_"+id).val(), $("#code_"+id).val(), $("#biaya_"+id).val(), $("#item_"+id).val());
-        }else{
-            delete_temp_produksi($(this).attr("data-id"));
-        }
+    $("body").off("click","[data-button=\"create_biaya_produksi\"]");
+    $("body").on("click","[data-button=\"create_biaya_produksi\"]", function(e){
+        e.preventDefault();
+        create_temp_produksi();
     });
 
-    $("body").off("click","[data-button=\"close\"]").on("click","[data-button=\"close\"]", function(e){
+    $("body").off("click","[data-button=\"update_harga\"]").on("click","[data-button=\"update_harga\"]", function(e){
         e.preventDefault();
-        $("#btn-remove").trigger("click");
+        update_harga($(this));
     });
 });
 $(function(){

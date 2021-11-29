@@ -105,7 +105,7 @@
             <!-- Detail Proses -->
             <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
                 <div class="col-lg-12 col-md-12 col-xs-12 text-left padding-left-0">
-                    <a class="btn" id="list_biaya_produksi" href="javascript:void(0)" data-order="<?=$val->order_code ?>" data-item="<?=$val->item_code?>">
+                    <a class="btn" id="list_biaya_produksi" href="javascript:void(0)" data-order="<?=$val->order_code ?>" data-item="<?=$val->item_code?>" data-urutan="<?=$val->urutan?>">
                         <i class="font-size-16 fontello icon-check-3"></i>
                         <span>Pilih Proses Produksi</span>
                     </a>
@@ -114,11 +114,11 @@
                         $total_biaya=0;?>
                         <ul class="text-right">
                             <?php foreach($val->detailsProduksi as $v):
-                                $total_biaya += $v->total_biaya;
-                                $totalBiaya += $v->total_biaya; ?>
+                                $total_biaya += $v->harga;
+                                $totalBiaya += $v->harga; ?>
                                 <li>
                                     <span class="label"><?=$v->name ?></span>
-                                    <span class="currency"><?='Rp. '.number_format($v->total_biaya).'.-' ?></span>
+                                    <span class="currency"><?='Rp. '.number_format($v->harga).'.-' ?></span>
                                 </li>
                             <?php endforeach; ?>
                             <li>
@@ -132,15 +132,30 @@
             <!-- /Detail Proses -->
         </div>
     <?php endforeach; ?>
-    <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0" render="summary">
-        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-            <span class="text-right"><?='Total Material: Rp. '.number_format($totalOrder).'.-' ?></span>
+    <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 text-right" render="summary">
+        <div class="col-lg-12 col-md-12 col-xs-12 padding-right-0">
+            <div class="col-lg-10 col-md-10 col-xs-12 padding-right-0">
+                <span class="label-summary">Total Order Material</span>
+            </div>
+            <div class="col-lg-2 col-md-2 col-xs-12">
+                <span class="value-summary"><?='Rp. '.number_format($totalOrder).'.-' ?></span>
+            </div>
         </div>
-        <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-            <span class="text-right"><?='Total Biaya: Rp. '.number_format($totalBiaya).'.-' ?></span>
+        <div class="col-lg-12 col-md-12 col-xs-12 padding-right-0">
+            <div class="col-lg-10 col-md-10 col-xs-12 padding-right-0">
+                <span class="label-summary">Total Biaya Produksi</span>
+            </div>
+            <div class="col-lg-2 col-md-2 col-xs-12">
+                <span class="value-summary"><?=' Rp. '.number_format($totalBiaya).'.-' ?>
+            </div>
         </div>
-        <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-            <span class="text-right"><?='Grand Total: Rp. '.number_format($totalOrder+$totalBiaya).'.-' ?></span>
+        <div class="col-lg-12 col-md-12 col-xs-12 padding-right-0">
+            <div class="col-lg-10 col-md-10 col-xs-12 padding-right-0">
+                <span class="label-summary">Grand Total</span>
+            </div>
+            <div class="col-lg-2 col-md-2 col-xs-12">
+                <span class="value-summary"><?=' Rp. '.number_format($totalOrder+$totalBiaya).'.-' ?>
+            </div>
         </div>
     </div>
 <?php endif; ?>

@@ -16,8 +16,7 @@ use app\modules\master\models\MasterMaterialItem;
  * @property float|null $panjang
  * @property float|null $lebar
  * @property int|null $type
- * @property float|null $index
- * @property float|null $total_biaya
+ * @property float|null $harga
  * @property int|null $user_id
  */
 class TempMasterOrderDetailProduksi extends \yii\db\ActiveRecord
@@ -36,8 +35,8 @@ class TempMasterOrderDetailProduksi extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['urutan', 'type', 'user_id'], 'integer'],
-            [['panjang', 'lebar', 'index', 'total_biaya'], 'number'],
+            [['urutan', 'detail_urutan', 'type', 'user_id'], 'integer'],
+            [['panjang', 'lebar', 'harga'], 'number'],
             [['order_code', 'biaya_produksi_code'], 'string', 'max' => 3],
             [['item_code'], 'string', 'max' => 7],
             [['name'], 'string', 'max' => 128],
@@ -58,30 +57,23 @@ class TempMasterOrderDetailProduksi extends \yii\db\ActiveRecord
             'panjang' => 'Panjang',
             'lebar' => 'Lebar',
             'type' => 'Type',
-            'index' => 'Index',
-            'total_biaya' => 'Total Biaya',
+            'harga' => 'Harga',
             'user_id' => 'User ID',
         ];
     }
 
     public function getCount()
     {
-        return TempMasterOrderDetailProduksi::find()->where(['user_id'=> \Yii::$app->user->id])->count();
+        return TempMasterOrderDetailProduksi::find()->where(['detail_urutan' => $this->detail_urutan, 'user_id'=> \Yii::$app->user->id])->count();
     }
 
     public function getTmps()
     {
-        return TempMasterOrderDetailProduksi::find()->where(['user_id'=> \Yii::$app->user->id])->all();
+        return TempMasterOrderDetailProduksi::find()->where(['detail_urutan' => $this->detail_urutan, 'user_id'=> \Yii::$app->user->id])->all();
     }
 
     public function getItem()
     {
         return $this->hasOne(MasterMaterialItem::className(), ['code' => 'item_code']);
-    }
-
-    public function totalBiaya()
-    {
-        $total = $this->item->panjang * $this->item->lebar * $this->index * 500;
-        return ceil($total);
     }
 }

@@ -94,6 +94,6 @@ class MasterOrderDetail extends \yii\db\ActiveRecord
 
     public function getDetailsProduksi()
     {
-        return $this->hasMany(MasterOrderDetailProduksi::className(), ['order_code' => 'order_code', 'item_code' => 'item_code']);
+        return $this->hasMany(MasterOrderDetailProduksi::className(), ['order_code' => 'order_code', 'item_code' => 'item_code', 'detail_urutan' => 'urutan']);
     }
 }

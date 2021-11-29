@@ -284,6 +284,7 @@ function load_biaya_produksi(el)
         data: {
             order_code: data.order,
             item_code: data.item,
+            urutan: data.urutan,
         },
 		dataType: "text",
         error: function(xhr, status, error) {},
@@ -515,21 +516,15 @@ function delete_temp(id)
     });
 }
 
-function create_temp_produksi(code, biaya, item)
+function create_temp_produksi()
 {
     $.ajax({
         url: "<?= Url::to(['order/create-temp-produksi']) ?>",
         type: "POST",
         dataType: "text",
         error: function(xhr, status, error) {},
-        beforeSend: function(){
-            popup.close();
-        },
-        data: {
-            code: code,
-            biaya: biaya,
-            item: item,
-        },
+        beforeSend: function(){},
+        data: $("#form_biaya").serialize(),
         success: function(data){
             var o = $.parseJSON(data);
             if(!o.success == true){
@@ -538,33 +533,7 @@ function create_temp_produksi(code, biaya, item)
             init_temp();
         },
         complete: function(){
-            load_biaya_produksi($("#list_biaya_produksi"));
-        }
-    });
-}
-
-function delete_temp_produksi(id)
-{
-    $.ajax({
-        url: "<?= Url::to(['order/delete-temp-produksi']) ?>",
-        type: "GET",
-        dataType: "text",
-        error: function(xhr, status, error) {},
-        beforeSend: function(){
             popup.close();
-        },
-        data: {
-            id: id
-        },
-        success: function(data){
-            var o = $.parseJSON(data);
-            if(!o.success == true){
-                notification.open("danger", o.message, timeOut);
-            }
-            init_temp();
-        },
-        complete: function(){
-			load_biaya_produksi($("#list_biaya_produksi"));
         }
     });
 }
@@ -667,19 +636,10 @@ $(document).ready(function(){
         delete_temp($(this).attr("data-target"));
     });
 
-    $("body").off("click","[id^=\"proses_\"]").on("click","[id^=\"proses_\"]", function(e){
-        var prop = $(this).prop("checked"), 
-            id = $(this).attr("id").split("_")[1]+'_'+$(this).attr("id").split("_")[2];
-        if(prop == true){
-            create_temp_produksi($("#code_"+id).val(), $("#biaya_"+id).val(), $("#item_"+id).val());
-        }else{
-            delete_temp_produksi($(this).attr("data-id"));
-        }
-    });
-
-    $("body").off("click","[data-button=\"close\"]").on("click","[data-button=\"close\"]", function(e){
+    $("body").off("click","[data-button=\"create_biaya_produksi\"]");
+    $("body").on("click","[data-button=\"create_biaya_produksi\"]", function(e){
         e.preventDefault();
-        $("#btn-remove").trigger("click");
+        create_temp_produksi();
     });
 });
 $(function(){

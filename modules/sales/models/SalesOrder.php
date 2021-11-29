@@ -113,7 +113,7 @@ class SalesOrder extends \yii\db\ActiveRecord
             $grand_total += str_replace(',', '', $this->biaya_pengiriman);
         }
         if(!empty($this->ppn)){
-            $ppn = $grand_total / ($this->ppn*100);
+            $ppn = $grand_total * ($this->ppn/100);
             $grand_total += $ppn;
         }
         return $grand_total;

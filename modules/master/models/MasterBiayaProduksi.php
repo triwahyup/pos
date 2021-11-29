@@ -10,7 +10,6 @@ use yii\behaviors\TimestampBehavior;
  *
  * @property string $code
  * @property string|null $name
- * @property float|null $index
  * @property float|null $harga
  * @property int|null $status
  * @property int|null $created_at
@@ -39,8 +38,8 @@ class MasterBiayaProduksi extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['name', 'type', 'index'], 'required'],
-            [['index', 'harga'], 'number'],
+            [['name', 'type', 'harga'], 'required'],
+            [['harga'], 'safe'],
             [['status', 'created_at', 'updated_at', 'type'], 'integer'],
             [['code'], 'string', 'max' => 3],
             [['name', 'keterangan'], 'string', 'max' => 128],
@@ -57,7 +56,6 @@ class MasterBiayaProduksi extends \yii\db\ActiveRecord
         return [
             'code' => 'Code',
             'name' => 'Name',
-            'index' => 'Index',
             'harga' => 'Harga',
             'status' => 'Status',
             'created_at' => 'Created At',
@@ -79,5 +77,11 @@ class MasterBiayaProduksi extends \yii\db\ActiveRecord
     public function getTypeOngkos()
     {
         return ($this->type == 1) ? 'Cetak' : 'Pond';
+    }
+
+    public function beforeSave($attribute)
+    {
+        $this->harga = str_replace(',', '', $this->harga);
+        return parent::beforeSave($attribute);
     }
 }

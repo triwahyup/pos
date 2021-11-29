@@ -15,8 +15,7 @@ use yii\behaviors\TimestampBehavior;
  * @property float|null $panjang
  * @property float|null $lebar
  * @property int|null $type
- * @property float|null $index
- * @property float|null $total_biaya
+ * @property float|null $harga
  * @property int|null $status
  * @property int|null $created_at
  * @property int|null $updated_at
@@ -44,13 +43,13 @@ class MasterOrderDetailProduksi extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['order_code', 'urutan'], 'required'],
-            [['urutan', 'type', 'status', 'created_at', 'updated_at'], 'integer'],
-            [['panjang', 'lebar', 'index', 'total_biaya'], 'number'],
+            [['order_code', 'urutan', 'detail_urutan'], 'required'],
+            [['detail_urutan', 'urutan', 'type', 'status', 'created_at', 'updated_at'], 'integer'],
+            [['panjang', 'lebar', 'harga'], 'number'],
             [['order_code', 'biaya_produksi_code'], 'string', 'max' => 3],
             [['item_code'], 'string', 'max' => 7],
             [['name'], 'string', 'max' => 128],
-            [['order_code', 'urutan'], 'unique', 'targetAttribute' => ['order_code', 'urutan']],
+            [['order_code', 'detail_urutan', 'urutan'], 'unique', 'targetAttribute' => ['order_code', 'detail_urutan', 'urutan']],
             [['status'], 'default', 'value' => 1],
         ];
     }
@@ -68,8 +67,7 @@ class MasterOrderDetailProduksi extends \yii\db\ActiveRecord
             'panjang' => 'Panjang',
             'lebar' => 'Lebar',
             'type' => 'Type',
-            'index' => 'Index',
-            'total_biaya' => 'Total Biaya',
+            'harga' => 'Harga',
             'status' => 'Status',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
