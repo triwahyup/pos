@@ -83,25 +83,22 @@ class SpkInternalController extends Controller
     public function actionView($no_spk)
     {
         $model = $this->findModel($no_spk);
-        $spkBahan = new SpkDetailBahan();
-        $spkProses = new SpkDetailProses();
-        $spkDetail = SpkDetail::findOne(['no_spk'=>$no_spk]);
-        
         $dataProses = [];
-        foreach($model->details as $details){
-            foreach($details->detailsProses as $val){
-                $dataProses[$val->typeProses()][] = ['data'=>$val];
+        foreach($model->details as $detail){
+            foreach($detail->detailsProses as $proses){
+                $dataProses[$proses->typeProses()][$proses->detail_urutan][] = [
+                    'nama_mesin' => $proses->mesin->name,
+                    'jenis_mesin' => $proses->mesin->typeCode->value,
+                    'proses' => $proses,
+                ];
             }
         }
-        $hasilProduksi = SpkDetailProses::findAll(['no_spk'=>$no_spk, 'status_proses'=>2]);
-
         return $this->render('view', [
             'model' => $model,
-            'spkBahan' => $spkBahan,
-            'spkProses' => $spkProses,
-            'spkDetail' => $spkDetail,
             'dataProses' => $dataProses,
-            'hasilProduksi' => $hasilProduksi,
+            'spkBahan' => new SpkDetailBahan(),
+            'spkProses' => new SpkDetailProses(),
+            'spkDetail' => SpkDetail::findOne(['no_spk'=>$no_spk]),
         ]);
     }
 
@@ -198,15 +195,15 @@ class SpkInternalController extends Controller
         $message = '';
         if($request->isPost){
             $data = $request->post('SpkDetailBahan');
-            if(!empty($data['item_name']) && !empty($data['item_bahan_name'])){
+            if(!empty($data['item_bahan_name'])){
                 $stockItem = InventoryStockItem::findOne(['item_code'=>$data['item_bahan_code']]);
                 if($stockItem->onhand > 0){
                     if(!empty($data['qty_1']) || !empty($data['qty_2'])){
                         $connection = \Yii::$app->db;
                         $transaction = $connection->beginTransaction();
                         try{
-                            $model = SpkDetailBahan::findOne(['no_spk'=>$data['no_spk'], 'item_code'=>$data['item_code'], 'item_bahan_code'=>$data['item_bahan_code']]);
-                            $urutan = SpkDetailBahan::find()->where(['no_spk'=>$data['no_spk'], 'item_code'=>$data['item_code']])->count();
+                            $model = SpkDetailBahan::findOne(['no_spk'=>$data['no_spk'], 'item_code'=>$data['item_code'], 'item_bahan_code'=>$data['item_bahan_code'], 'detail_urutan'=>$data['detail_urutan']]);
+                            $urutan = SpkDetailBahan::find()->where(['no_spk'=>$data['no_spk'], 'item_code'=>$data['item_code'], 'detail_urutan'=>$data['detail_urutan']])->count();
                             if(isset($model)){
                                 $model->qty_1 = $model->qty_1 + $data['qty_1'];
                                 $model->qty_2 = $model->qty_2 + $data['qty_2'];
@@ -306,7 +303,7 @@ class SpkInternalController extends Controller
                 }
             }else{
                 $success = false;
-                $message = 'Material dan Bahan wajib diisi.';
+                $message = 'Bahan Belum diisi.';
             }
         }else{
             throw new NotFoundHttpException('The requested data does not exist.');
@@ -321,12 +318,13 @@ class SpkInternalController extends Controller
         $message = '';
         if($request->isPost){
             $noSpk = $request->post('no_spk');
+            $detailUrutan = $request->post('detail_urutan');
             $urutan = $request->post('urutan');
             $itemCode = $request->post('item_code');
             $itemBahanCode = $request->post('item_bahan_code');
             $prosesSpk = $this->findModel($noSpk);
             if($prosesSpk->status_produksi == 1){
-                $model = SpkDetailBahan::findOne(['no_spk'=>$noSpk, 'urutan'=>$urutan, 'item_code'=>$itemCode, 'item_bahan_code'=>$itemBahanCode]);
+                $model = SpkDetailBahan::findOne(['no_spk'=>$noSpk, 'detail_urutan'=>$detailUrutan, 'urutan'=>$urutan, 'item_code'=>$itemCode, 'item_bahan_code'=>$itemBahanCode]);
                 if(isset($model)){
                     $connection = \Yii::$app->db;
                     $transaction = $connection->beginTransaction();
@@ -513,13 +511,13 @@ class SpkInternalController extends Controller
         return $this->redirect(['view', 'no_spk' => $model->no_spk]);
     }
 
-    public function actionListMesin($no_spk, $item_code, $type)
+    public function actionListMesin($no_spk, $item_code, $urutan, $type)
     {
         $keterangan = 'Keterangan: ';
         $sisaProses = 0;
         $stockItem = InventoryStockItem::findOne(['item_code'=>$item_code, 'status'=>1]);
         if(isset($stockItem)){
-            $spkDetail = SpkDetail::findOne(['no_spk'=>$no_spk, 'item_code'=>$item_code]);
+            $spkDetail = SpkDetail::findOne(['no_spk'=>$no_spk, 'item_code'=>$item_code, 'urutan'=>$urutan]);
             $qtyProses = 0;
             if(count($spkDetail->detailsProses($type)) > 0){
                 foreach($spkDetail->detailsProses($type) as $val){
@@ -550,7 +548,7 @@ class SpkInternalController extends Controller
         }
         
         $andWhere = '';
-        if($type == 1){            
+        if($type == 1){
             $andWhere = 'type_code="014"';
         }else if($type == 2){
             $andWhere = 'type_code="012"';
@@ -578,19 +576,18 @@ class SpkInternalController extends Controller
         $message = '';
         if($request->isPost){
             $data = $request->post('SpkDetailProses');
-            
-            $spkDetail = SpkDetail::findOne(['no_spk'=>$data['no_spk'], 'item_code'=>$data['item_code']]);
+            $spkDetail = SpkDetail::findOne(['no_spk'=>$data['no_spk'], 'item_code'=>$data['item_code'], 'urutan'=>$data['detail_urutan']]);
             if(isset($spkDetail)){
                 $qtyProses = 0;
-                if(count($spkDetail->detailsProses($data['type_proses'])) > 0){
-                    foreach($spkDetail->detailsProses($data['type_proses']) as $val){
+                if(count($spkDetail->detailsProses($data['type_proses'][$data['detail_urutan']])) > 0){
+                    foreach($spkDetail->detailsProses($data['type_proses'][$data['detail_urutan']]) as $val){
                         $qtyProses += $val->qty_proses;
                     }
                 }
                 
                 $totalQTY = 0;
                 // POTONG
-                if($data['type_proses'] == 1){
+                if($data['type_proses'][$data['detail_urutan']] == 1){
                     $stockItem = InventoryStockItem::findOne(['item_code'=>$spkDetail->item_code]);
                     $qtyOrder = 0;
                     if(isset($stockItem)){
@@ -602,11 +599,11 @@ class SpkInternalController extends Controller
                     $totalQTY = $qtyOrder-$qtyProses;
                 }
                 // CETAK
-                else if($data['type_proses'] == 2){
+                else if($data['type_proses'][$data['detail_urutan']] == 2){
                     $totalQTY = $spkDetail->jumlah_cetak-$qtyProses;
                 }
                 // POND
-                else if($data['type_proses'] == 3){
+                else if($data['type_proses'][$data['detail_urutan']] == 3){
                     $totalQTY = $spkDetail->jumlah_objek-$qtyProses;
                 }
                 
@@ -616,13 +613,15 @@ class SpkInternalController extends Controller
                             $filter = [
                                 'no_spk'=>$data['no_spk'],
                                 'item_code'=>$data['item_code'],
-                                'mesin_code'=>$data['mesin_code'],
-                                'type_proses'=>$data['type_proses']
+                                'mesin_code'=>$data['mesin_code'][$data['detail_urutan']],
+                                'type_proses'=>$data['type_proses'][$data['detail_urutan']]
                             ];
                             $spkProses = SpkDetailProses::findOne($filter);
                             if(empty($spkProses)){
                                 $spkProses = new SpkDetailProses();
                                 $spkProses->attributes = (array)$data;
+                                $spkProses->type_proses = $data['type_proses'][$data['detail_urutan']];
+                                $spkProses->mesin_code = $data['mesin_code'][$data['detail_urutan']];
                                 $spkProses->urutan = count($spkDetail->detailsProses) +1;
                                 $spkProses->mesin_type_code = $spkProses->mesin->type_code;
                                 $spkProses->status_proses = 1; // IN PROGRESS
@@ -676,10 +675,11 @@ class SpkInternalController extends Controller
         if($request->isPost){
             $noSpk = $request->post('no_spk');
             $urutan = $request->post('urutan');
+            $detailUrutan = $request->post('detail_urutan');
             $itemCode = $request->post('item_code');
             $prosesSpk = $this->findModel($noSpk);
             if($prosesSpk->status_produksi == 2){
-                $model = SpkDetailProses::findOne(['no_spk'=>$noSpk, 'urutan'=>$urutan, 'item_code'=>$itemCode]);
+                $model = SpkDetailProses::findOne(['no_spk'=>$noSpk, 'urutan'=>$urutan, 'detail_urutan'=>$detailUrutan,'item_code'=>$itemCode]);
                 if($model->delete()){
                     foreach($model->datas as $index=>$val){
                         $val->urutan = $index +1;
@@ -728,7 +728,7 @@ class SpkInternalController extends Controller
                 $connection = \Yii::$app->db;
                 $transaction = $connection->beginTransaction();
                 try{
-                    $model->status_produksi = 1;
+                    $model->status_produksi=1;
                     if($model->save()){
                         foreach($data['urutan'] as $index=>$urutan){
                             $spkProses = SpkDetailProses::findOne(['no_spk'=>$data['no_spk'], 'urutan'=>$urutan, 'status_proses'=>2]);

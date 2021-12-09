@@ -47,11 +47,11 @@ class SpkDetailProses extends \yii\db\ActiveRecord
         return [
             [['no_spk', 'order_code', 'item_code', 'type_proses', 'mesin_code', 'qty_proses'], 'required'],
             [['qty_proses', 'qty_hasil', 'keterangan'], 'safe'],
-            [['urutan', 'type_proses', 'status_proses', 'status', 'created_at', 'updated_at'], 'integer'],
+            [['detail_urutan', 'urutan', 'type_proses', 'status_proses', 'status', 'created_at', 'updated_at'], 'integer'],
             [['no_spk'], 'string', 'max' => 12],
             [['order_code', 'mesin_code', 'mesin_type_code'], 'string', 'max' => 3],
             [['item_code'], 'string', 'max' => 7],
-            [['no_spk', 'urutan', 'order_code', 'item_code', 'type_proses'], 'unique', 'targetAttribute' => ['no_spk', 'urutan', 'order_code', 'item_code', 'type_proses']],
+            [['no_spk', 'detail_urutan', 'urutan', 'item_code', 'type_proses'], 'unique', 'targetAttribute' => ['no_spk', 'detail_urutan', 'urutan', 'item_code', 'type_proses']],
             [['status'], 'default', 'value' => 1],
         ];
     }
@@ -108,6 +108,6 @@ class SpkDetailProses extends \yii\db\ActiveRecord
 
     public function getDatas()
     {
-        return SpkDetailProses::find()->where(['no_spk'=> $this->no_spk, 'item_code' => $this->item_code])->all();
+        return SpkDetailProses::find()->where(['no_spk'=> $this->no_spk, 'item_code' => $this->item_code, 'detail_urutan' => $this->detail_urutan])->all();
     }
 }

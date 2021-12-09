@@ -32,14 +32,15 @@
 </table>
 <script>
 $(document).ready(function(){
+    data = $("#search").data();
 	$("#search").autocomplete({
         minLength: 1,
         select: function(event, value){
-			search_bahan(value.item.code);
+            search_bahan(value.item.code, data.urutan);
         },
         source: function(request, response){
             $.ajax({
-                url: "<?=Url::to(['spk/autocomplete'])?>",
+                url: "<?=Url::to(['spk-internal/autocomplete'])?>",
                 type: "POST",
                 dataType: "text",
                 error: function(xhr, status, error) {},

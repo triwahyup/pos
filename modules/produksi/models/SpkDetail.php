@@ -71,7 +71,7 @@ class SpkDetail extends \yii\db\ActiveRecord
     {
         return [
             [['no_spk', 'urutan', 'order_code'], 'required'],
-            [['urutan', 'total_potong', 'total_objek', 'total_warna', 'lembar_ikat_1', 'lembar_ikat_2', 'lembar_ikat_3', 'status', 'created_at', 'updated_at'], 'integer'],
+            [['urutan', 'total_potong', 'total_objek', 'total_warna', 'lembar_ikat_1', 'lembar_ikat_2', 'lembar_ikat_3', 'status', 'status_produksi', 'created_at', 'updated_at'], 'integer'],
             [['panjang', 'lebar', 'harga_beli_1', 'harga_beli_2', 'harga_beli_3', 'harga_jual_1', 'harga_jual_2', 'harga_jual_3', 'harga_cetak', 'qty_order_1', 'qty_order_2', 'qty_order_3', 'jumlah_cetak', 'jumlah_objek', 'total_order'], 'number'],
             [['no_spk'], 'string', 'max' => 12],
             [['order_code', 'satuan_code', 'satuan_ikat_code', 'material_code', 'type_code', 'group_supplier_code', 'group_material_code'], 'string', 'max' => 3],
@@ -140,22 +140,35 @@ class SpkDetail extends \yii\db\ActiveRecord
 
     public function getDetailsBahan()
     {
-        return $this->hasMany(SpkDetailBahan::className(), ['no_spk' => 'no_spk', 'item_code' => 'item_code']);
+        return $this->hasMany(SpkDetailBahan::className(), ['no_spk' => 'no_spk', 'item_code' => 'item_code', 'detail_urutan' => 'urutan']);
     }
     
     public function getDetailsProduksi()
     {
-        return $this->hasMany(SpkDetailProduksi::className(), ['no_spk' => 'no_spk', 'item_code' => 'item_code']);
+        return $this->hasMany(SpkDetailProduksi::className(), ['no_spk' => 'no_spk', 'item_code' => 'item_code', 'detail_urutan' => 'urutan']);
     }
 
     public function getDetailsProses()
     {
-        return $this->hasMany(SpkDetailProses::className(), ['no_spk' => 'no_spk', 'item_code' => 'item_code']);
+        return $this->hasMany(SpkDetailProses::className(), ['no_spk' => 'no_spk', 'item_code' => 'item_code', 'detail_urutan' => 'urutan']);
     }
 
     public function detailsProses($type)
     {
-        $model = SpkDetailProses::findAll(['no_spk'=>$this->no_spk, 'item_code'=>$this->item_code, 'type_proses'=>$type]);
+        $model = SpkDetailProses::findAll(['no_spk'=>$this->no_spk, 'item_code'=>$this->item_code, 'detail_urutan'=>$this->urutan, 'type_proses'=>$type]);
         return $model;
+    }
+
+    public function statusProduksi()
+    {
+        $message = '';
+        if($this->status_produksi == 0){
+            $message = '<span class="text-label text-primary font-size-10"><strong>Input Bahan</strong></span>';
+        }else if($this->status_produksi == 1){
+            $message = '<span class="text-label text-primary font-size-10"><strong>In Progress</strong></span>';
+        }else if($this->status_produksi == 2){
+            $message = '<span class="text-label text-success font-size-10"><strong>Done</strong></span>';
+        }
+        return $message;
     }
 }

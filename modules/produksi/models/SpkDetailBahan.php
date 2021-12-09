@@ -62,14 +62,14 @@ class SpkDetailBahan extends \yii\db\ActiveRecord
         return [
             [['item_code', 'item_bahan_code'], 'required'],
             [['tgl_spk'], 'safe'],
-            [['urutan', 'status', 'created_at', 'updated_at'], 'integer'],
+            [['detail_urutan', 'urutan', 'status', 'created_at', 'updated_at'], 'integer'],
             [['harga_beli_1', 'harga_beli_2', 'harga_beli_3', 'harga_jual_1', 'harga_jual_2', 'harga_jual_3', 'qty_1', 'qty_2', 'qty_3'], 'number'],
             [['item_bahan_name'], 'string', 'max' => 128],
             [['no_spk'], 'string', 'max' => 12],
             [['order_code', 'satuan_bahan_code', 'type_bahan_code'], 'string', 'max' => 3],
             [['item_code', 'item_bahan_code'], 'string', 'max' => 7],
             [['um_1', 'um_2', 'um_3'], 'string', 'max' => 5],
-            [['no_spk', 'urutan', 'order_code', 'item_code'], 'unique', 'targetAttribute' => ['no_spk', 'urutan', 'order_code', 'item_code']],
+            [['no_spk', 'detail_urutan', 'urutan', 'item_code'], 'unique', 'targetAttribute' => ['no_spk', 'detail_urutan', 'urutan', 'item_code']],
             [['status'], 'default', 'value' => 1],
         ];
     }
