@@ -43,13 +43,13 @@ class MasterOrderDetailProduksi extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['order_code', 'urutan', 'detail_urutan'], 'required'],
-            [['detail_urutan', 'urutan', 'type', 'status', 'created_at', 'updated_at'], 'integer'],
+            [['order_code', 'urutan'], 'required'],
+            [['urutan', 'type', 'status', 'created_at', 'updated_at'], 'integer'],
             [['panjang', 'lebar', 'harga'], 'number'],
             [['order_code', 'biaya_produksi_code'], 'string', 'max' => 3],
             [['item_code'], 'string', 'max' => 7],
             [['name'], 'string', 'max' => 128],
-            [['order_code', 'detail_urutan', 'urutan'], 'unique', 'targetAttribute' => ['order_code', 'detail_urutan', 'urutan']],
+            [['order_code', 'urutan', 'item_code'], 'unique', 'targetAttribute' => ['order_code', 'urutan', 'item_code']],
             [['status'], 'default', 'value' => 1],
         ];
     }

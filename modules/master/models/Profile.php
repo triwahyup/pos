@@ -78,7 +78,7 @@ class Profile extends \yii\db\ActiveRecord
             [['kecamatan_id'], 'string', 'max' => 7],
             [['kelurahan_id'], 'string', 'max' => 10],
             [['kode_pos'], 'string', 'max' => 8],
-            [['phone_1', 'phone_2'], 'string', 'max' => 16],
+            [['phone_1', 'phone_2', 'npwp'], 'string', 'max' => 16],
             [['password', 'new_password', 'retype_new_password'], 'string', 'max' => 18],
             [['golongan'], 'string', 'max' => 5],
             [['typeuser_code'], 'string', 'max' => 3],

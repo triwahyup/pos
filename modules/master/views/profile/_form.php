@@ -33,6 +33,7 @@ use yii\widgets\MaskedInput;
                             'format' => 'yyyy-mm-dd',
                         ]]) ?>
                     <?= $form->field($model, 'tempat_lahir')->textInput(['maxlength' => true]) ?>
+                    <?= $form->field($model, 'npwp')->textInput(['maxlength' => true]) ?>
                 </div>
                 <div class="col-lg-1 col-md-1 col-sm-12 col-xs-12">
                 </div>
@@ -40,11 +41,23 @@ use yii\widgets\MaskedInput;
                     <div class="form-group-layer margin-bottom-20">
                         <?= $form->field($model, 'username')->textInput(['maxlength' => true]) ?>
                         <?php if($model->isNewRecord): ?>
-                            <?= $form->field($model, 'password')->passwordInput(['maxlength' => true]) ?>
+                            <?= $form->field($model, 'password', [
+                                'template' => '{input}
+                                    <a class="plain-text" href="javascript:void(0)" data-button="plain_text">
+                                        <span class="glyphicon glyphicon-eye-open"></span>
+                                    </a>
+                                    {error}{hint}'])
+                                ->passwordInput(['maxlength' => true]) ?>
                         <?php endif; ?>
                         <?php if(!$model->isNewRecord): ?>
                             <label class="text-danger">Masukkan password anda jika ingin merubah password baru.</label>
-                            <?= $form->field($model, 'current_password')->passwordInput(['maxlength' => true]) ?>
+                            <?= $form->field($model, 'current_password',[
+                                    'template' => '{input}
+                                    <a class="plain-text" href="javascript:void(0)" data-button="plain_text">
+                                        <span class="glyphicon glyphicon-eye-open"></span>
+                                    </a>
+                                    {error}{hint}'])
+                                ->passwordInput(['maxlength' => true]) ?>
                             <?= $form->field($model, 'new_password')->passwordInput(['maxlength' => true]) ?>
                             <?= $form->field($model, 'retype_new_password')->passwordInput(['maxlength' => true]) ?>
                         <?php endif; ?>
@@ -231,5 +244,17 @@ $(document).ready(function(){
         e.preventDefault();
         listKelurahan($(this).val());
     });
+
+    $("body").off("click","[data-button=\"plain_text\"]").on("click","[data-button=\"plain_text\"]", function(e){
+		e.preventDefault();
+		$("#profile-password, #profile-current_password").toggleClass("open-text");
+		if($("#profile-password, #profile-current_password").hasClass("open-text")){
+			$("#profile-password, #profile-current_password").attr("type", "text");
+			$(".glyphicon-eye-open").removeClass("glyphicon-eye-open").addClass("glyphicon-eye-close");
+		}else{
+			$("#profile-password, #profile-current_password").attr("type", "password");
+			$(".glyphicon-eye-close").removeClass("glyphicon-eye-close").addClass("glyphicon-eye-open");
+		}
+	});
 });
 </script>

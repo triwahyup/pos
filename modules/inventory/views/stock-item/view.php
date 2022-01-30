@@ -1,5 +1,4 @@
 <?php
-
 $this->title = 'Item: '.$model->item->code .' - '.$model->item->name;
 $this->params['breadcrumbs'][] = ['label' => 'History In Out Material', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
@@ -36,11 +35,11 @@ $this->params['breadcrumbs'][] = $this->title;
                             <td class="text-center"><?=$val->no_document ?></td>
                             <td class="text-center"><?=date('d-m-Y', strtotime($val->tgl_document)) ?></td>
                             <td class="text-center"><?=$val->status_document ?></td>
-                            <td class="text-right"><?=number_format($val->qty_in) ?></td>
-                            <td class="text-right"><?=number_format($val->qty_out) ?></td>
-                            <td class="text-right"><?=number_format($val->qty_retur) ?></td>
-                            <td class="text-right"><?=number_format($val->onhand) ?></td>
-                            <td class="text-right"><?=number_format($val->onsales) ?></td>
+                            <td class="text-right"><?='<strong>'.number_format($val->qty_in).'</strong><br /><span class="font-size-10">'. $val->konversi($val->item, $val->qty_in).'</span>' ?></td>
+                            <td class="text-right"><?='<strong>'.number_format($val->qty_out).'</strong><br /><span class="font-size-10">'. $val->konversi($val->item, $val->qty_out).'</span>' ?></td>
+                            <td class="text-right"><?='<strong>'.number_format($val->qty_retur).'</strong><br /><span class="font-size-10">'. $val->konversi($val->item, $val->qty_retur).'</span>' ?></td>
+                            <td class="text-right"><?='<strong>'.number_format($val->onhand).'</strong><br /><span class="font-size-10">'. $val->konversi($val->item, $val->onhand).'</span>' ?></td>
+                            <td class="text-right"><?='<strong>'.number_format($val->onsales).'</strong><br /><span class="font-size-10">'. $val->konversi($val->item, $val->onsales).'</span>' ?></td>
                         </tr>
                     <?php endforeach; ?>
                 <?php else: ?>

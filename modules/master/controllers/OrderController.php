@@ -117,6 +117,7 @@ class OrderController extends Controller
                 $connection = \Yii::$app->db;
 			    $transaction = $connection->beginTransaction();
                 try{
+                    $model->attributes = $model->item->attributes;
                     $model->code = $model->generateCode();
                     if($model->save()){
                         if(count($model->temps()) > 0){
@@ -445,7 +446,7 @@ class OrderController extends Controller
                 'harga' => $val->harga,
             ];
         }
-        $temps = TempMasterOrderDetailProduksi::findAll(['order_code'=>$order_code, 'item_code'=>$item_code, 'detail_urutan'=>$urutan, 'user_id'=>\Yii::$app->user->id]);
+        $temps = TempMasterOrderDetailProduksi::findAll(['order_code'=>$order_code, 'item_code'=>$item_code, 'user_id'=>\Yii::$app->user->id]);
         if(count($temps) > 0){
             foreach($temps as $val){
                 $data[$val->biaya_produksi_code] = [
@@ -513,7 +514,7 @@ class OrderController extends Controller
     {
         $model = MasterMaterialItem::find()
             ->alias('a')
-            ->select(['a.*', 'a.code as item_code', 'a.name as item_name', 'b.composite'])
+            ->select(['a.code as item_code', 'a.name as item_name', 'b.composite'])
             ->leftJoin('master_satuan b', 'b.code = a.satuan_code')
             ->where(['a.code'=>$_POST['code'], 'a.status'=>1])
             ->asArray()
@@ -527,13 +528,13 @@ class OrderController extends Controller
         $total_order=0;
         $total_biaya=0;
         $temps_produksi=[];
-        foreach($temps as $temp){
-            $total_order += $temp->total_order;
-            foreach($temp->detailsProduksi as $val){
-                $total_biaya += $val->harga;
-            }
-            $temps_produksi = $temp->detailsProduksi;
-        }
+        // foreach($temps as $temp){
+        //     $total_order += $temp->total_order;
+        //     foreach($temp->detailsProduksi as $val){
+        //         $total_biaya += $val->harga;
+        //     }
+        //     $temps_produksi = $temp->detailsProduksi;
+        // }
         $grand_total = $total_order+$total_biaya;
         
         $biaya = MasterBiayaProduksi::findAll(['status'=>1]);
@@ -549,13 +550,7 @@ class OrderController extends Controller
 
     public function actionGetTemp($id)
     {
-        $temp = TempMasterOrderDetail::find()
-            ->alias('a')
-            ->select(['a.*', 'b.name as item_name'])
-            ->leftJoin('master_material_item b', 'b.code = a.item_code')
-            ->where(['id'=>$id])
-            ->asArray()
-            ->one();
+        $temp = TempMasterOrderDetail::find()->where(['id'=>$id])->asArray()->one();
         return json_encode($temp);
     }
 
@@ -565,41 +560,38 @@ class OrderController extends Controller
         $success = true;
         $message = '';
         if($request->isPost){
-            $data = $request->post('TempMasterOrderDetail');
+            $dataHeader = $request->post('MasterOrder');;
+            $dataDetail = $request->post('TempMasterOrderDetail');
             $connection = \Yii::$app->db;
             $transaction = $connection->beginTransaction();
             try{
                 $temp = new TempMasterOrderDetail();
-                $temp->attributes = (array)$data;
-                $temp->attributes = ($temp->item) ? $temp->item->attributes : '';
-                $temp->attributes = ($temp->item->pricelist) ? $temp->item->pricelist->attributes : '';
-                $temp->attributes = (array)$data;
-                if(!empty($request->post('MasterOrder')['code'])){
-                    $temp->order_code = $request->post('MasterOrder')['code'];
+                $temp->attributes = (array)$dataDetail;
+                if(!empty($dataHeader['code'])){
+                    $temp->order_code = $dataHeader['code'];
                 }else{
                     $temp->order_code = 'tmp';
                 }
                 $temp->urutan = $temp->count +1;
-                $temp->total_order = $temp->totalOrder;
-                $jumlahProses = $temp->jumlahProses();
+                $jumlahProses = $temp->jumlahProses(
+                    $dataHeader['item_code'], $dataHeader['qty_order_1'], $dataHeader['qty_order_2']);
                 if($temp->save()){
-                    $dataProduksi = MasterBiayaProduksi::findAll(['type'=>2]);
-                    foreach($dataProduksi as $index=>$produksi){
-                        $tempProduksi = new TempMasterOrderDetailProduksi();
-                        $tempProduksi->attributes = $temp->attributes;
-                        $tempProduksi->attributes = $produksi->attributes;
-                        $tempProduksi->biaya_produksi_code = $produksi->code;
-                        $tempProduksi->urutan = $index +1;
-                        $tempProduksi->detail_urutan = $temp->urutan;
-                        $tempProduksi->user_id = \Yii::$app->user->id;
-                        if(!$tempProduksi->save()){
-                            $success = false;
-                            foreach($tempProduksi->errors as $error => $value){
-                                $message = $value[0].', ';
-                            }
-                            $message = substr($message, 0, -2);
-                        }
-                    }
+                    // $dataProduksi = MasterBiayaProduksi::findAll(['type'=>2]);
+                    // foreach($dataProduksi as $index=>$produksi){
+                    //     $tempProduksi = new TempMasterOrderDetailProduksi();
+                    //     $tempProduksi->attributes = $temp->attributes;
+                    //     $tempProduksi->attributes = $produksi->attributes;
+                    //     $tempProduksi->biaya_produksi_code = $produksi->code;
+                    //     $tempProduksi->urutan = $index +1;
+                    //     $tempProduksi->user_id = \Yii::$app->user->id;
+                    //     if(!$tempProduksi->save()){
+                    //         $success = false;
+                    //         foreach($tempProduksi->errors as $error => $value){
+                    //             $message = $value[0].', ';
+                    //         }
+                    //         $message = substr($message, 0, -2);
+                    //     }
+                    // }
                 }else{
                     $success = false;
                     foreach($temp->errors as $error => $value){
@@ -631,15 +623,13 @@ class OrderController extends Controller
         $success = true;
         $message = '';
         if($request->isPost){
-            $data = $request->post('TempMasterOrderDetail');
-            $temp = $this->findTemp($data['id']);
-            $urutan = $temp->urutan;
+            $dataHeader = $request->post('MasterOrder');;
+            $dataDetail = $request->post('TempMasterOrderDetail');
             
-            $temp->attributes = (array)$data;
-            $temp->attributes = ($temp->item->pricelist) ? $temp->item->pricelist->attributes : '';
-            $temp->urutan = $urutan;
-            $temp->total_order = $temp->totalOrder;
-            $jumlahProses = $temp->jumlahProses();
+            $temp = $this->findTemp($dataDetail['id']);
+            $temp->attributes = (array)$dataDetail;
+            $jumlahProses = $temp->jumlahProses(
+                $dataHeader['item_code'], $dataHeader['qty_order_1'], $dataHeader['qty_order_2']);
             if($temp->save()){
                 $message = 'UPDATE TEMP SUCCESSFULLY';
             }else{
@@ -675,8 +665,8 @@ class OrderController extends Controller
                             $message = substr($message, 0, -2);
                         }
                     }
-                    TempMasterOrderDetailProduksi::deleteAll('order_code=:order and item_code=:item and user_id=:user', [
-                        ':order'=>$temp->order_code, ':item'=>$temp->item_code, ':user'=>$temp->user_id]);
+                    TempMasterOrderDetailProduksi::deleteAll('order_code=:order and user_id=:user', [
+                        ':order'=>$temp->order_code, ':user'=>$temp->user_id]);
                     if($success){
                         $transaction->commit();
                         $message = 'DELETE TEMP SUCCESSFULLY';
@@ -708,13 +698,12 @@ class OrderController extends Controller
         if($request->isPost){
             $data = $request->post();
             $tmp = $request->post('Temp');
-            TempMasterOrderDetailProduksi::deleteAll('order_code=:order and detail_urutan=:detail and item_code=:item and user_id=:user and type=1', [
+            TempMasterOrderDetailProduksi::deleteAll('order_code=:order and item_code=:item and user_id=:user and type=1', [
                 ':order'=>$tmp['order_code'],
-                ':detail'=>$tmp['detail_urutan'],
                 ':item'=>$tmp['item_code'],
                 ':user'=>\Yii::$app->user->id,
             ]);
-            $detail = TempMasterOrderDetail::findOne(['order_code'=>$tmp['order_code'], 'item_code'=>$tmp['item_code'], 'urutan'=>$tmp['detail_urutan']]);
+            $detail = TempMasterOrderDetail::findOne(['order_code'=>$tmp['order_code'], 'item_code'=>$tmp['item_code'], 'urutan'=>$tmp['urutan']]);
             foreach($data['biaya'] as $val){
                 $temp = new TempMasterOrderDetailProduksi();
                 $biaya = MasterBiayaProduksi::findOne(['code'=>$val, 'status'=>1]);

@@ -4,7 +4,6 @@ namespace app\modules\master\models;
 
 use Yii;
 use app\modules\inventory\models\InventoryStockItem;
-use app\modules\master\models\MasterMaterialItem;
 use app\modules\master\models\TempMasterOrderDetailProduksi;
 
 /**
@@ -13,12 +12,9 @@ use app\modules\master\models\TempMasterOrderDetailProduksi;
  * @property int $id
  * @property string|null $order_code
  * @property int|null $urutan
- * @property string|null $item_code
- * @property string|null $satuan
  * @property float|null $panjang
  * @property float|null $lebar
  * @property int|null $total_warna
- * @property float|null $harga_jual
  * @property float|null $harga_cetak
  * @property int|null $user_id
  */
@@ -41,11 +37,11 @@ class TempMasterOrderDetail extends \yii\db\ActiveRecord
     {
         return [
             [['urutan', 'user_id'], 'integer'],
-            [['panjang', 'lebar', 'harga_cetak', 'harga_beli_1', 'harga_beli_2', 'harga_beli_3', 'harga_jual_1', 'harga_jual_2', 'harga_jual_3', 'total_potong', 'total_objek', 'total_warna', 'lembar_ikat_1', 'lembar_ikat_2', 'lembar_ikat_3', 'qty_order_1', 'qty_order_2', 'qty_order_3', 'total_order'], 'safe'],
-            [['order_code', 'satuan_code', 'satuan_ikat_code', 'type_code', 'material_code', 'group_material_code', 'group_supplier_code'], 'string', 'max' => 3],
+            [['panjang', 'lebar', 'harga_cetak', 'total_potong', 'total_objek', 'total_warna', 'lembar_ikat_1', 'lembar_ikat_2', 'lembar_ikat_3'], 'safe'],
+            [['order_code', 'satuan_ikat_code'], 'string', 'max' => 3],
             [['jumlah_cetak', 'jumlah_objek'], 'number'],
-            [['um_1', 'um_2', 'um_3', 'lembar_ikat_um_1', 'lembar_ikat_um_2', 'lembar_ikat_um_3'], 'string', 'max' => 5],
-            [['item_code'], 'string', 'max' => 7],
+            [['lembar_ikat_um_1', 'lembar_ikat_um_2', 'lembar_ikat_um_3'], 'string', 'max' => 5],
+            [['keterangan_cetak', 'keterangan_potong', 'keterangan_pond'], 'string', 'max' => 128],
         ];
     }
 
@@ -58,14 +54,11 @@ class TempMasterOrderDetail extends \yii\db\ActiveRecord
             'id' => 'ID',
             'order_code' => 'Order Code',
             'urutan' => 'Urutan',
-            'item_code' => 'Material',
-            'satuan_code' => 'Satuan',
             'panjang' => 'Panjang',
             'lebar' => 'Lebar',
             'total_potong' => 'Potong',
             'total_objek' => 'Objek',
             'total_warna' => 'Jumlah Warna',
-            'harga_jual' => 'Harga Jual',
             'harga_cetak' => 'Harga Cetak',
             'user_id' => 'User ID',
         ];
@@ -74,35 +67,16 @@ class TempMasterOrderDetail extends \yii\db\ActiveRecord
     public function beforeSave($attribute)
     {
         $this->harga_cetak = str_replace(',', '', $this->harga_cetak);
-        $this->qty_order_1 = str_replace(',', '', $this->qty_order_1);
-        $this->qty_order_2 = str_replace(',', '', $this->qty_order_2);
         $this->total_warna = str_replace(',', '', $this->total_warna);
         $this->lembar_ikat_1 = str_replace(',', '', $this->lembar_ikat_1);
         $this->lembar_ikat_2 = str_replace(',', '', $this->lembar_ikat_2);
         $this->lembar_ikat_3 = str_replace(',', '', $this->lembar_ikat_3);
         $this->total_potong = str_replace(',', '', $this->total_potong);
         $this->total_objek = str_replace(',', '', $this->total_objek);
-        $this->total_order = str_replace(',', '', $this->total_order);
         return parent::beforeSave($attribute);
     }
 
-    public function getTotalOrder()
-    {
-        $total_order=0;
-        if(!empty($this->qty_order_1)){
-            $harga_jual_1 = str_replace(',', '', $this->harga_jual_1);
-            $total_order += $this->qty_order_1 * $harga_jual_1;
-        }
-        if(!empty($this->qty_order_2)){
-            $harga_jual_2 = str_replace(',', '', $this->harga_jual_2);
-            $total_order += $this->qty_order_2 * $harga_jual_2;
-        }
-        if(!empty($this->qty_order_3)){
-            $harga_jual_3 = str_replace(',', '', $this->harga_jual_3);
-            $total_order += $this->qty_order_3 * $harga_jual_3;
-        }
-        return $total_order;
-    }
+    
 
     public function getCount()
     {
@@ -114,21 +88,12 @@ class TempMasterOrderDetail extends \yii\db\ActiveRecord
         return TempMasterOrderDetail::find()->where(['user_id'=> \Yii::$app->user->id])->all();
     }
 
-    public function getItem()
+    public function jumlahProses($item_code, $qty_order_1, $qty_order_2)
     {
-        return $this->hasOne(MasterMaterialItem::className(), ['code' => 'item_code']);
-    }
-
-    public function getInventoryStock()
-    {
-        return $this->hasOne(InventoryStockItem::className(), ['item_code' => 'item_code']);
-    }
-
-    public function jumlahProses()
-    {
-        $konversi = $this->inventoryStock->satuanTerkecil($this->item_code, [
-            0 => $this->qty_order_1,
-            1 => $this->qty_order_2
+        $inventoryStock = InventoryStockItem::findOne(['item_code'=>$item_code]);
+        $konversi = $inventoryStock->satuanTerkecil($item_code, [
+            0 => $qty_order_1,
+            1 => $qty_order_2
         ]);
         $this->jumlah_cetak = $konversi * $this->total_potong;
         $this->jumlah_objek = $this->jumlah_cetak * $this->total_objek;
@@ -137,6 +102,6 @@ class TempMasterOrderDetail extends \yii\db\ActiveRecord
 
     public function getDetailsProduksi()
     {
-        return $this->hasMany(TempMasterOrderDetailProduksi::className(), ['order_code' => 'order_code', 'item_code' => 'item_code', 'detail_urutan' => 'urutan']);
+        return $this->hasMany(TempMasterOrderDetailProduksi::className(), ['order_code' => 'order_code']);
     }
 }

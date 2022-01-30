@@ -26,7 +26,6 @@
                             <?php endif; ?>
                             <input type="hidden" name="Temp[order_code]" value="<?=$val['order'] ?>">
                             <input type="hidden" name="Temp[item_code]" value="<?=$val['item'] ?>">
-                            <input type="hidden" name="Temp[detail_urutan]" value="<?=$val['urutan'] ?>">
                         </td>
                         <td class="text-center"><?=$no++ ?></td>
                         <td><?=$val['name'] ?></td>

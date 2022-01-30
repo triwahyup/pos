@@ -1,21 +1,16 @@
 <?php
-use app\commands\Helper;
 use kartik\date\DatePicker;
 use yii\helpers\Html;
 use yii\grid\GridView;
 
 /* @var $this yii\web\View */
-/* @var $searchModel app\modules\produksi\models\SpkInternalSearch */
+/* @var $searchModel app\modules\produksi\models\SpkSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Surat Perintah Kerja';
+$this->title = 'Spk';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="spk-internal-index">
-    <p class="text-right">
-        <?= Html::a('<i class="fontello icon-plus"></i><span>Create Surat Perintah Kerja</span>', ['create'], ['class' => 'btn btn-success btn-flat btn-sm']) ?>
-    </p>
-
+<div class="spk-index">
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
@@ -26,6 +21,10 @@ $this->params['breadcrumbs'][] = $this->title;
                 'contentOptions' => [
                     'class' => 'text-center',
                 ],
+                'format' => 'raw',
+                'value' => function($model, $index, $key) {
+                    return Html::a($model->no_spk, ['view', 'no_spk' => $model->no_spk]);
+                }
             ],
             [
                 'attribute' => 'tgl_spk',
@@ -67,38 +66,15 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                 ]),
             ],
-            'status_produksi',
             [
-                'buttons' => [
-                    'view' => function ($url, $model) {
-                        return Html::a(Helper::buttonIcons()['eye-open'],
-                            ['view', 'no_spk'=>$model->no_spk],
-                            ['title'=>'View', 'aria-label'=>'View', 'data-pjax'=>true]);
-                    },
-                    'update' => function ($url, $model) {
-                        return Html::a(Helper::buttonIcons()['pencil'],
-                            ['update', 'no_spk'=>$model->no_spk],
-                            ['title'=>'Update', 'aria-label'=>'Update', 'data-pjax'=>true]);
-                    },
-                    'delete' => function ($url, $model) {
-                        return Html::a(Helper::buttonIcons()['trash'],
-                            ['delete', 'no_spk'=>$model->no_spk],
-                            [
-                                'title'=>'Delete',
-                                'aria-label'=>'Delete', 
-                                'data-pjax'=>true,
-                                'data' => [
-                                    'confirm' => 'Are you sure you want to delete this item?',
-                                    'method' => 'post',
-                                ],
-                            ]);
-                    },
-                ],
-                'class' => 'yii\grid\ActionColumn',
+                'attribute' => 'status_produksi',
                 'contentOptions' => [
-                    'class' => 'text-center column-action',
+                    'class' => 'text-center',
                 ],
-                'template' => '{view} {update} {delete}',
+                'format' => 'raw',
+                'value' => function($model, $index, $key) {
+                    return $model->statusProduksi();
+                }
             ],
         ],
     ]); ?>

@@ -150,6 +150,12 @@ p, span {
 .margin-left-5 {
     margin-left: 5px;
 }
+.margin-left-15 {
+    margin-left: 15px;
+}
+.margin-left-30 {
+    margin-left: 30px;
+}
 .margin-top-5 {
     margin-top: 5px;
 }
@@ -1043,6 +1049,7 @@ p, span {
 
 form {
     .form-group {
+        position: relative;
         label {
             font-size: 12px;
             font-weight: 700;
@@ -1052,6 +1059,12 @@ form {
             font-size: 12px;
             height: 30px;
             padding: 5px 10px;
+            +.plain-text {
+                color: #444343;
+                position: absolute;
+                right: 10px;
+                top: 8px;
+            }
         }
         &[data-parent="1"] {
             margin-bottom: 0;
@@ -1173,18 +1186,19 @@ textarea {
     background-color: @color_header;
     display: inline-block;
     height: 100%;
-    text-align: center;
+    text-align: right;
     padding: 20px;
     width: 100%;
     .title {
-        font-size: 16px;
+        font-size: 14px;
         font-weight: 700;
+        margin-bottom: 0;
     }
     input[type="text"] {
-        font-size: 40px !important;
+        font-size: 20px !important;
         font-weight: 700;
-        height: 60px !important;
-        text-align: center;
+        height: 40px !important;
+        text-align: right;
     }
 }
 /** END BOARD CONTAINER **/
@@ -1400,6 +1414,9 @@ textarea {
     label {
         font-size: 10px;
         font-weight: 700;
+    }
+    &.no-background {
+        background: transparent;
     }
 }
 [render="detail"] {

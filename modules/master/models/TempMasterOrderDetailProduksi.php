@@ -35,10 +35,9 @@ class TempMasterOrderDetailProduksi extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['urutan', 'detail_urutan', 'type', 'user_id'], 'integer'],
+            [['urutan', 'type', 'user_id'], 'integer'],
             [['panjang', 'lebar', 'harga'], 'number'],
             [['order_code', 'biaya_produksi_code'], 'string', 'max' => 3],
-            [['item_code'], 'string', 'max' => 7],
             [['name'], 'string', 'max' => 128],
         ];
     }
@@ -64,16 +63,11 @@ class TempMasterOrderDetailProduksi extends \yii\db\ActiveRecord
 
     public function getCount()
     {
-        return TempMasterOrderDetailProduksi::find()->where(['detail_urutan' => $this->detail_urutan, 'user_id'=> \Yii::$app->user->id])->count();
+        return TempMasterOrderDetailProduksi::find()->where(['user_id'=> \Yii::$app->user->id])->count();
     }
 
     public function getTmps()
     {
-        return TempMasterOrderDetailProduksi::find()->where(['detail_urutan' => $this->detail_urutan, 'user_id'=> \Yii::$app->user->id])->all();
-    }
-
-    public function getItem()
-    {
-        return $this->hasOne(MasterMaterialItem::className(), ['code' => 'item_code']);
+        return TempMasterOrderDetailProduksi::find()->where(['user_id'=> \Yii::$app->user->id])->all();
     }
 }

@@ -29,6 +29,7 @@ use yii\widgets\MaskedInput;
                         'type' => DatePicker::TYPE_INPUT,
                         'options' => [
                             'placeholder' => 'yyyy-mm-dd',
+                            'value' => date('Y-m-d'),
                         ],
                         'pluginOptions' => [
                             'autoclose' => true,

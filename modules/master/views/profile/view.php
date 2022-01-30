@@ -31,6 +31,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'name',
                 'nik',
                 'nip',
+                'npwp',
                 'tgl_lahir',
                 'tempat_lahir',
                 'alamat',

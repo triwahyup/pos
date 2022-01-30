@@ -55,6 +55,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     }
                 ],
                 'contact_person',
+                'npwp',
                 'kode_pos',
                 'phone_1',
                 'phone_2',
