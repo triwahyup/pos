@@ -15,18 +15,18 @@ $this->params['breadcrumbs'][] = $this->title;
     <p class="text-right">
         <?= Html::a('<i class="fontello icon-plus"></i><span>Create Sales Order</span>', ['create'], ['class' => 'btn btn-success btn-flat btn-sm']) ?>
     </p>
+
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
             [
-                'attribute' => 'code',
+                'attribute' => 'no_so',
                 'contentOptions' => [
                     'class' => 'text-center',
                 ],
             ],
-            'name',
             [
                 'attribute' => 'tgl_so',
                 'contentOptions' => [
@@ -118,6 +118,4 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
         ],
     ]); ?>
-
-
 </div>

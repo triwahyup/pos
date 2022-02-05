@@ -35,6 +35,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             return $model->typeOngkos;
                         }
                     ],
+                    'index',
                     [
                         'attribute' => 'harga',
                         'value'=> function ($model, $index) { 

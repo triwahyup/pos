@@ -17,7 +17,7 @@ class SalesOrderSearch extends SalesOrder
     public function rules()
     {
         return [
-            [['no_so', 'tgl_so', 'no_po', 'tgl_po', 'customer_code', 'total_order', 'grand_total'], 'safe'],
+            [['name', 'code', 'tgl_so', 'no_po', 'tgl_po', 'customer_code', 'total_order', 'grand_total'], 'safe'],
         ];
     }
 
@@ -61,7 +61,7 @@ class SalesOrderSearch extends SalesOrder
         $query->where(['a.status'=>1]);
         $query->andFilterWhere([
             'tgl_so' => $this->tgl_so,
-            'tgl_po' => $this->tgl_po,
+            'tgl_po' => $this->tgl_po
         ]);
 
         if(!empty($this->customer_code)){
@@ -71,7 +71,8 @@ class SalesOrderSearch extends SalesOrder
             $query->andWhere('total_order LIKE "%'.str_replace(',','', $this->total_order).'%"');
         }
 
-        $query->andFilterWhere(['like', 'no_so', $this->no_so])
+        $query->andFilterWhere(['like', 'a.code', $this->code])
+            ->andFilterWhere(['like', 'a.name', $this->name])
             ->andFilterWhere(['like', 'no_po', $this->no_po])
             ->andFilterWhere(['like', 'grand_total', $this->grand_total]);
 

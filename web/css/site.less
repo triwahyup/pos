@@ -178,11 +178,20 @@ p, span {
 .padding-20 {
     padding: 20px;
 }
+.padding-bottom-5 {
+    padding-bottom: 5px !important;
+}
+.padding-bottom-15 {
+    padding-bottom: 15px;
+}
 .padding-left-0 {
     padding-left: 0px !important;
 }
 .padding-right-0 {
     padding-right: 0px;
+}
+.padding-top-15 {
+    padding-top: 15px;
 }
 
 .width-100 {
@@ -884,6 +893,7 @@ p, span {
             th {
                 background-color: @color_header_table;
                 text-align: center;
+                vertical-align: middle;
                 a {
                     color: @color_text;
                 }
@@ -1049,7 +1059,6 @@ p, span {
 
 form {
     .form-group {
-        position: relative;
         label {
             font-size: 12px;
             font-weight: 700;
@@ -1493,6 +1502,8 @@ textarea {
     }
     .custom-btn {
         display: inline-block;
+        height: 12px;
+        line-height: 12px;
         padding: 0 15px;
         position: relative;
         text-decoration: underline;

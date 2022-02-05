@@ -17,7 +17,7 @@ class MasterBiayaProduksiSearch extends MasterBiayaProduksi
     public function rules()
     {
         return [
-            [['name', 'type', 'harga', 'created_at', 'updated_at'], 'safe'],
+            [['name', 'type', 'harga', 'index', 'created_at', 'updated_at'], 'safe'],
         ];
     }
 
@@ -69,6 +69,7 @@ class MasterBiayaProduksiSearch extends MasterBiayaProduksi
         }
         $query->andFilterWhere([
             'harga' => $this->harga,
+            'index' => $this->index,
             'status' => $this->status
         ]);
 

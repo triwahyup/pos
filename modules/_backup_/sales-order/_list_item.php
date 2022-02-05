@@ -1,13 +1,12 @@
 <?php use yii\helpers\Url; ?>
-<input type="text" name="search" id="search" class="form-control" placeholder="Cari berdasarkan Kode dan Nama Material ...">
+<input type="text" name="search" id="search" class="form-control" placeholder="Cari berdasarkan Kode dan Nama Order (Job) ...">
 <table class="table table-bordered table-custom margin-top-10">
 	<thead>
 		<tr>
 			<th class="text-center">No.</th>
-			<th class="text-center">Kode Item</th>
-			<th class="text-center">Nama Item</th>
-			<th class="text-center">Type</th>
-			<th class="text-center">UM</th>
+			<th class="text-center">Kode Order</th>
+			<th class="text-center">Nama Job (Order)</th>
+			<th class="text-center">Type Order</th>
 		</tr>
 	</thead>
 	<tbody>
@@ -17,8 +16,7 @@
                     <td class="text-center"><?=($index+1) ?></td>
                     <td class="text-center"><?=$val->code ?></td>
                     <td><?=$val->name ?></td>
-                    <td><?=(isset($val->typeCode)) ? $val->typeCode->name : '' ?></td>
-                    <td><?=(isset($val->satuan)) ? $val->satuan->name : '' ?></td>
+                    <td class="text-center"><?=($val->type_order==1) ? 'Produk' : 'Jasa' ?></td>
                 </tr>
 			<?php endforeach; ?>
 		<?php else : ?>

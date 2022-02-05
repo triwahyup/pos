@@ -3,32 +3,38 @@
 namespace app\modules\sales\models;
 
 use Yii;
-use app\modules\master\models\MasterOrder;
+use yii\behaviors\TimestampBehavior;
 use app\modules\master\models\MasterPerson;
 use app\modules\sales\models\SalesOrderDetail;
-use app\modules\sales\models\SalesOrderDetailProduksi;
+use app\modules\sales\models\SalesOrderItem;
 use app\modules\sales\models\TempSalesOrderDetail;
-use app\modules\sales\models\TempSalesOrderDetailProduksi;
-use yii\behaviors\TimestampBehavior;
+use app\modules\sales\models\TempSalesOrderItem;
 
 /**
  * This is the model class for table "sales_order".
  *
- * @property string $no_so
+ * @property string $code
+ * @property string|null $name
  * @property string|null $tgl_so
  * @property string|null $no_po
  * @property string|null $tgl_po
  * @property string|null $customer_code
+ * @property int|null $type_order
+ * @property int|null $up_produksi
+ * @property string|null $ekspedisi_name
+ * @property float|null $biaya_pengiriman
  * @property float|null $ppn
  * @property float|null $total_order
+ * @property float|null $total_biaya_produksi
+ * @property float|null $grand_total
+ * @property string|null $keterangan
+ * @property int|null $post
  * @property int|null $status
  * @property int|null $created_at
  * @property int|null $updated_at
  */
 class SalesOrder extends \yii\db\ActiveRecord
 {
-    public $nama_order;
-
     /**
      * {@inheritdoc}
      */
@@ -50,14 +56,14 @@ class SalesOrder extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['tgl_so', 'customer_code', 'nama_order', 'ekspedisi_name', 'biaya_pengiriman'], 'required'],
-            [['tgl_so', 'tgl_po', 'total_order', 'total_biaya', 'grand_total', 'biaya_pengiriman'], 'safe'],
-            [['ppn'], 'number'],
-            [['status', 'created_at', 'updated_at', 'type_order', 'post', 'up_produksi'], 'integer'],
-            [['no_so', 'no_po'], 'string', 'max' => 12],
-            [['customer_code', 'outsource_code', 'order_code'], 'string', 'max' => 3],
-            [['keterangan', 'nama_order', 'ekspedisi_name'], 'string', 'max' => 128],
-            [['no_so'], 'unique'],
+            [['name', 'type_order', 'customer_code', 'no_po', 'ekspedisi_name', 'biaya_pengiriman'], 'required'],
+            [['tgl_so', 'tgl_po'], 'safe'],
+            [['type_order', 'up_produksi', 'post', 'status', 'created_at', 'updated_at'], 'integer'],
+            [['biaya_pengiriman', 'ppn', 'total_order', 'total_biaya_produksi', 'grand_total'], 'number'],
+            [['code', 'no_po'], 'string', 'max' => 12],
+            [['name', 'ekspedisi_name', 'keterangan'], 'string', 'max' => 128],
+            [['customer_code'], 'string', 'max' => 3],
+            [['code'], 'unique'],
             [['status'], 'default', 'value' => 1],
         ];
     }
@@ -68,22 +74,25 @@ class SalesOrder extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'no_so' => 'No. So',
-            'tgl_so' => 'Tgl. So',
-            'no_po' => 'No. Po',
-            'tgl_po' => 'Tgl. Po',
+            'code' => 'Code',
+            'name' => 'Nama Job',
+            'tgl_so' => 'Tgl So',
+            'no_po' => 'No Po',
+            'tgl_po' => 'Tgl Po',
             'customer_code' => 'Customer',
-            'ppn' => 'Ppn (%)',
-            'total_biaya' => 'Total Biaya',
+            'type_order' => 'Type Order',
+            'up_produksi' => 'Up Produksi',
+            'ekspedisi_name' => 'Ekspedisi Name',
+            'biaya_pengiriman' => 'Biaya Pengiriman',
+            'ppn' => 'Ppn',
             'total_order' => 'Total Order',
+            'total_biaya_produksi' => 'Total Biaya Produksi',
             'grand_total' => 'Grand Total',
+            'keterangan' => 'Keterangan',
+            'post' => 'Post',
             'status' => 'Status',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
-            'outsource_code' => 'Jasa / Outsourcing',
-            'nama_order' => 'Nama Job (Order)',
-            'ekspedisi_name' => 'Ekspedisi',
-            'up_produksi' => 'Produksi Up (%)',
         ];
     }
 
@@ -92,61 +101,16 @@ class SalesOrder extends \yii\db\ActiveRecord
         $model = SalesOrder::find()->count();
         $total=0;
         if($model > 0){
-            $model = SalesOrder::find()->orderBy(['no_so'=>SORT_DESC])->one();
-            $total = (int)substr($model->no_so, -4);
+            $model = SalesOrder::find()->orderBy(['code'=>SORT_DESC])->one();
+            $total = (int)substr($model->code, -4);
         }
         return (string)date('Ymd').sprintf('%04s', ($total+1));
     }
 
     public function beforeSave($attribute)
     {
-        $this->total_order = str_replace(',', '', $this->total_order);
-        $this->total_biaya = str_replace(',', '', $this->total_biaya);
         $this->biaya_pengiriman = str_replace(',', '', $this->biaya_pengiriman);
         return parent::beforeSave($attribute);
-    }
-
-    public function grand_total()
-    {
-        $grand_total = str_replace(',', '', $this->grand_total);
-        if(!empty($this->biaya_pengiriman)){
-            $grand_total += str_replace(',', '', $this->biaya_pengiriman);
-        }
-        if(!empty($this->ppn)){
-            $ppn = $grand_total * ($this->ppn/100);
-            $grand_total += $ppn;
-        }
-        return $grand_total;
-    }
-
-    public function getDetails()
-    {
-        return $this->hasMany(SalesOrderDetail::className(), ['no_so' => 'no_so']);
-    }
-
-    public function getTemps()
-    {
-        return $this->hasMany(TempSalesOrderDetail::className(), ['no_so' => 'no_so']);
-    }
-
-    public function temps()
-    {
-        return TempSalesOrderDetail::find()->where(['user_id' => \Yii::$app->user->id])->all();
-    }
-
-    public function getDetailsProduksi()
-    {
-        return $this->hasMany(SalesOrderDetailProduksi::className(), ['no_so' => 'no_so']);
-    }
-
-    public function getTempsProduksi()
-    {
-        return $this->hasMany(TempSalesOrderDetailProduksi::className(), ['no_so' => 'no_so']);
-    }
-
-    public function tempsProduksi()
-    {
-        return TempSalesOrderDetailProduksi::find()->where(['user_id' => \Yii::$app->user->id])->all();
     }
 
     public function getCustomer()
@@ -154,21 +118,61 @@ class SalesOrder extends \yii\db\ActiveRecord
         return $this->hasOne(MasterPerson::className(), ['code' => 'customer_code']);
     }
 
-    public function getOutsource()
+    public $type_material = '007';
+    public function getItemsMaterial()
     {
-        return $this->hasOne(MasterPerson::className(), ['code' => 'outsource_code']);
+        return $this->hasMany(SalesOrderItem::className(), ['code' => 'code', 'type_code' => 'type_material']);
     }
 
-    public function getPerson()
+    public function getItemsNonMaterial()
     {
-        return $this->hasOne(MasterPerson::className(), ['code' => 'customer_code']);
+        return SalesOrderItem::find()
+            ->where(['code' => $this->code])
+            ->andWhere('type_code <> "'.$this->type_material.'"')
+            ->all();
     }
 
-    public function getOrder()
+    public function getItems()
     {
-        return $this->hasOne(MasterOrder::className(), ['code' => 'order_code']);
+        return $this->hasMany(SalesOrderItem::className(), ['code' => 'code']);
     }
 
+    public function getDetails()
+    {
+        return $this->hasMany(SalesOrderDetail::className(), ['code' => 'code']);
+    }
+
+    public function getDetailTemps()
+    {
+        return $this->hasMany(TempSalesOrderDetail::className(), ['code' => 'code']);
+    }
+
+    public function getItemTemps()
+    {
+        return $this->hasMany(TempSalesOrderItem::className(), ['code' => 'code']);
+    }
+
+    public function detailTemps()
+    {
+        return TempSalesOrderDetail::findAll(['user_id' => \Yii::$app->user->id]);
+    }
+
+    public function itemTemps()
+    {
+        return TempSalesOrderItem::findAll(['user_id' => \Yii::$app->user->id]);
+    }
+
+    public function getTypeOrder()
+    {
+        $message = '';
+        if($this->type_order == 1){
+            $message = 'Produksi';
+        }else{
+            $message = 'Jasa';
+        }
+        return $message;
+    }
+    
     public function getStatusPost()
     {
         $message = '';

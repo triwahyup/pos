@@ -39,7 +39,7 @@ class MasterBiayaProduksi extends \yii\db\ActiveRecord
     {
         return [
             [['name', 'type', 'harga'], 'required'],
-            [['harga'], 'safe'],
+            [['harga', 'index'], 'safe'],
             [['status', 'created_at', 'updated_at', 'type'], 'integer'],
             [['code'], 'string', 'max' => 3],
             [['name', 'keterangan'], 'string', 'max' => 128],

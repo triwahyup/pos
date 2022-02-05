@@ -32,6 +32,12 @@ $this->params['breadcrumbs'][] = $this->title;
                 }
             ],
             [
+                'attribute' => 'index',
+                'contentOptions' => [
+                    'class' => 'text-center',
+                ],
+            ],
+            [
                 'attribute' => 'harga',
                 'contentOptions' => [
                     'class' => 'text-right',

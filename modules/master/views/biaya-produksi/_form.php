@@ -25,6 +25,7 @@ use yii\widgets\MaskedInput;
                         ],
                     ]) ?>
                 <?= $form->field($model, 'keterangan')->textarea(['rows' => 2]) ?>
+                <?= $form->field($model, 'index')->textInput() ?>
                 <?= $form->field($model, 'harga')->widget(MaskedInput::className(), [
                         'clientOptions' => [
                             'alias' => 'decimal',

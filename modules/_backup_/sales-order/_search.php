@@ -15,9 +15,7 @@ use yii\widgets\ActiveForm;
         'method' => 'get',
     ]); ?>
 
-    <?= $form->field($model, 'code') ?>
-
-    <?= $form->field($model, 'nama_order') ?>
+    <?= $form->field($model, 'no_so') ?>
 
     <?= $form->field($model, 'tgl_so') ?>
 
@@ -25,27 +23,11 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'tgl_po') ?>
 
-    <?php // echo $form->field($model, 'customer_code') ?>
-
-    <?php // echo $form->field($model, 'type_order') ?>
-
-    <?php // echo $form->field($model, 'up_produksi') ?>
-
-    <?php // echo $form->field($model, 'ekspedisi_name') ?>
-
-    <?php // echo $form->field($model, 'biaya_pengiriman') ?>
+    <?= $form->field($model, 'customer_code') ?>
 
     <?php // echo $form->field($model, 'ppn') ?>
 
     <?php // echo $form->field($model, 'total_order') ?>
-
-    <?php // echo $form->field($model, 'total_biaya_produksi') ?>
-
-    <?php // echo $form->field($model, 'grand_total') ?>
-
-    <?php // echo $form->field($model, 'keterangan') ?>
-
-    <?php // echo $form->field($model, 'post') ?>
 
     <?php // echo $form->field($model, 'status') ?>
 
