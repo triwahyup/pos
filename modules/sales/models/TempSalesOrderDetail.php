@@ -4,6 +4,7 @@ namespace app\modules\sales\models;
 
 use Yii;
 use app\modules\inventory\models\InventoryStockItem;
+use app\modules\sales\models\TempSalesOrderProses;
 
 /**
  * This is the model class for table "temp_sales_order_detail".
@@ -105,6 +106,13 @@ class TempSalesOrderDetail extends \yii\db\ActiveRecord
     public function getCountTemp()
     {
         return TempSalesOrderDetail::find()->where(['item_code'=>$this->item_code, 'user_id'=> \Yii::$app->user->id])->count();
+    }
+
+    public function getProsesTemps()
+    {
+        return TempSalesOrderProses::find()
+            ->where(['code'=>$this->code, 'item_code'=>$this->item_code, 'detail_id'=>$this->urutan, 'user_id'=> \Yii::$app->user->id])
+            ->all();
     }
 
     public function jumlahProses($item_code, $qty_order_1, $qty_order_2)

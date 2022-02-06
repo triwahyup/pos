@@ -834,6 +834,11 @@ p, span {
 /** END CUSTOM FIELDSET **/
 
 /** POPUP FORM **/
+.popup-remove {
+    .fontello {
+        font-size: 12px;
+    }
+}
 .popup-form {
     .boxShadow(0 6px 12px rgb(0 0 0 / 18%));
     left: 50%;
@@ -1068,12 +1073,6 @@ form {
             font-size: 12px;
             height: 30px;
             padding: 5px 10px;
-            +.plain-text {
-                color: #444343;
-                position: absolute;
-                right: 10px;
-                top: 8px;
-            }
         }
         &[data-parent="1"] {
             margin-bottom: 0;
@@ -1327,93 +1326,6 @@ textarea {
 }
 /** END CUBE CONTAINER **/
 
-/** DOCUMENT CONTAINER **/
-.document-container {
-    border: 1px dotted @color_border;
-	display: inline-block;
-	height: 100%;
-	margin-bottom: 20px;
-	width: 100%;
-    .document-header {
-        background-color: @color_header;
-        font-size: 14px;
-		font-weight: 700;
-		height: 30px;
-		line-height: 30px;
-		padding: 0 20px;
-    }
-    .document-body {
-        display: inline-block;
-		padding: 20px;
-		position: relative;
-		width: 100%;
-        .document-li {
-            display: inline-block;
-            width: 100%;
-            [class^="col-lg-"] {
-                height: 18px;
-                line-height: 18px;
-                label {
-                    margin-bottom: 0 !important;
-                }
-            }
-        }
-        .beauty-line {
-			border-top: 1px solid #cfcdd8;
-			display: inline-block;
-			margin-top: 40px;
-			position: relative;
-			width: 50%;
-			&:before {
-				color: #cfcdd8;
-				content: '||';
-				background-color: #fff;
-				height: 20px;
-				left: 50%;
-				position: absolute;
-				text-align: center;
-				top: -2px;
-				width: 20px;
-				.transform(translate(-50%, -50%));
-			}
-		}
-        &:nth-last-child(1){
-			.beauty-line {
-				display: none;
-			}
-		}
-    }
-    .div-label{
-		display: table-cell;
-        font-size: 12px;
-		font-weight: 300;
-        margin-bottom: 0;
-		min-width: 100px;
-		position: relative;
-		&:before {
-			content: ':';
-			position: absolute;
-			right: 0;
-		}
-	}
-	strong {
-		display: table-cell;
-		font-size: 12px;
-	}
-    table {
-        tbody {
-            tr {
-                td {
-                    strong {
-                        display: inline-block;
-                    }
-                }
-            }
-        }
-    }
-}
-/** END DOCUMENT CONTAINER **/
-
 /** FORM CONTAINER **/
 .form-container {
     background: linear-gradient(rgb(222 222 222 / 40%),rgb(255 255 255 / 80%) 100%);
@@ -1466,37 +1378,6 @@ textarea {
             }
             label {
                 font-size: 12px;
-            }
-        }
-    }
-    ul {
-        margin-top: 20px;
-        padding-left: 20px;
-        li {
-            line-height: 16px;
-            span {
-                color: @color_text;
-                display: inline-block;
-                text-align: left;
-                &.label {
-                    font-weight: 700;
-                    padding-right: 10px;
-                    position: relative;
-                    width: 200px;
-                    &:before {
-                        content: ":";
-                        font-size: 12px;
-                        position: absolute;
-                        right: 0;
-                    }
-                }
-                &.summary {
-                    border-top: 1px solid @color_border;
-                }
-                &.currency {
-                    text-align: right;
-                    width: 100px;
-                }
             }
         }
     }
@@ -1659,3 +1540,18 @@ textarea {
     
 }
 /** END MOBILE STYLE **/
+
+/** BY PASS **/
+form {
+    .form-group {
+        &.field-profile-password, &.field-profile-current_password, &.field-profile-new_password, &.field-profile-retype_new_password {
+            position: relative;
+        }
+        .plain-text {
+            position: absolute;
+            right: 10px;
+            top: 30px;
+        }
+    }
+}
+/** END BY PASS **/

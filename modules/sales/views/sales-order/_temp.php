@@ -20,7 +20,7 @@ use yii\helpers\Html; ?>
                 </a>
             </div>
         </div>
-        <div class="col-lg-12 col-md-12 col-xs-12">
+        <div class="col-lg-12 col-md-12 col-xs-12 padding-right-0">
             <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
                 <label class="font-size-12">QTY Order</label>
             </div>
@@ -39,11 +39,11 @@ use yii\helpers\Html; ?>
             <table class="table table-bordered table-custom margin-top-10">
                 <thead>
                     <tr>
-                        <th class="text-center">#</th>
+                        <th class="text-center">No.</th>
                         <th class="text-center">PxL</th>
-                        <th class="text-center">Potong</th>
-                        <th class="text-center">Objek</th>
-                        <th class="text-center">Warna</th>
+                        <th class="text-center">Total Warna</th>
+                        <th class="text-center">Total Potong</th>
+                        <th class="text-center">Total Objek</th>
                         <th class="text-center">Lb. Ikat</th>
                         <th class="text-center">Action</th>
                     </tr>
@@ -51,22 +51,18 @@ use yii\helpers\Html; ?>
                 <tbody>
                     <?php foreach($item->details as $no=>$val): ?>
                         <tr>
-                            <td class="text-center">
-                                <a href="javascript:void(0)" class="custom-btn" data-event="expand_<?=$val->id ?>">
-                                    <i class="fontello icon-plus"></i>
-                                </a>
-                            </td>
-                            <td class="text-center"><?=$val->panjang.'x'.$val->lebar ?></td>
-                            <td class="text-right">
+                            <td class="text-center" rowspan="<?=count($val->prosesTemps)+1 ?>"><?=$no+1 ?></td>
+                            <td class="text-center" rowspan="<?=count($val->prosesTemps)+1 ?>"><?=$val->panjang.'x'.$val->lebar ?></td>
+                            <td class="text-center" rowspan="<?=count($val->prosesTemps)+1 ?>"><?=$val->total_warna ?></td>
+                            <td class="text-right" rowspan="<?=count($val->prosesTemps)+1 ?>">
                                 <?=$val->total_potong .'
                                     <span class="text-muted font-size-10">('.number_format($val->jumlah_cetak).' cetak)</span>' ?>
                             </td>
-                            <td class="text-right">
+                            <td class="text-right" rowspan="<?=count($val->prosesTemps)+1 ?>">
                                 <?=$val->total_objek .'
                                     <span class="text-muted font-size-10">('.number_format($val->jumlah_objek).' objek)</span>' ?>
                             </td>
-                            <td class="text-center"><?=$val->total_warna ?></td>
-                            <td class="text-right">
+                            <td class="text-right" rowspan="<?=count($val->prosesTemps)+1 ?>">
                                 <span class="font-size-10">
                                     <?=(!empty($val->lembar_ikat_1) ? number_format($val->lembar_ikat_1) .' '.$val->lembar_ikat_um_1 .' / ' : '') ?>
                                     <?=(!empty($val->lembar_ikat_2) ? number_format($val->lembar_ikat_2) .' '.$val->lembar_ikat_um_2 .' / ' : '') ?>
@@ -74,7 +70,7 @@ use yii\helpers\Html; ?>
                                 </strong>
                             </td>
                             <td class="text-center">
-                                <a class="custom-btn" href="javascript:void(0)" data-button="create_biaya_produksi_temp">
+                                <a class="custom-btn" href="javascript:void(0)" data-button="create_proses_temp" data-id="<?=$val->id ?>">
                                     <i class="fontello icon-plus"></i>
                                     <span>Add Proses Produksi</span>
                                 </a>
@@ -84,6 +80,15 @@ use yii\helpers\Html; ?>
                                 </a>
                             </td>
                         </tr>
+                        <?php if(count($val->prosesTemps) > 0): ?>
+                            <?php foreach($val->prosesTemps as $dataProses): ?>
+                                <tr>
+                                    <td class="text-muted text-left">
+                                        <?='<i>'.$dataProses->biayaProduksi->name.'</i>' ?>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
                     <?php endforeach; ?>
                 </tbody>
             </table>

@@ -42,8 +42,8 @@ use yii\widgets\MaskedInput;
                         <?= $form->field($model, 'username')->textInput(['maxlength' => true]) ?>
                         <?php if($model->isNewRecord): ?>
                             <?= $form->field($model, 'password', [
-                                'template' => '{input}
-                                    <a class="plain-text" href="javascript:void(0)" data-button="plain_text">
+                                'template' => '{label}{input}
+                                    <a class="plain-text" href="javascript:void(0)" data-button="plaintext" data-field="profile-password">
                                         <span class="glyphicon glyphicon-eye-open"></span>
                                     </a>
                                     {error}{hint}'])
@@ -52,14 +52,23 @@ use yii\widgets\MaskedInput;
                         <?php if(!$model->isNewRecord): ?>
                             <label class="text-danger">Masukkan password anda jika ingin merubah password baru.</label>
                             <?= $form->field($model, 'current_password',[
-                                    'template' => '{input}
-                                    <a class="plain-text" href="javascript:void(0)" data-button="plain_text">
+                                    'template' => '{label}{input}
+                                    <a class="plain-text" href="javascript:void(0)" data-button="plaintext" data-field="profile-current_password">
                                         <span class="glyphicon glyphicon-eye-open"></span>
                                     </a>
-                                    {error}{hint}'])
-                                ->passwordInput(['maxlength' => true]) ?>
-                            <?= $form->field($model, 'new_password')->passwordInput(['maxlength' => true]) ?>
-                            <?= $form->field($model, 'retype_new_password')->passwordInput(['maxlength' => true]) ?>
+                                    {error}{hint}'])->passwordInput(['maxlength' => true]) ?>
+                            <?= $form->field($model, 'new_password', [
+                                    'template' => '{label}{input}
+                                    <a class="plain-text" href="javascript:void(0)" data-button="plaintext" data-field="profile-new_password">
+                                        <span class="glyphicon glyphicon-eye-open"></span>
+                                    </a>
+                                    {error}{hint}'])->passwordInput(['maxlength' => true]) ?>
+                            <?= $form->field($model, 'retype_new_password', [
+                                    'template' => '{label}{input}
+                                    <a class="plain-text" href="javascript:void(0)" data-button="plaintext" data-field="profile-retype_new_password">
+                                        <span class="glyphicon glyphicon-eye-open"></span>
+                                    </a>
+                                    {error}{hint}'])->passwordInput(['maxlength' => true]) ?>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -229,6 +238,13 @@ function listKelurahan(kelurahanId)
 }
 
 $(document).ready(function(){
+    <?php if($model->isNewRecord): ?>
+        setTimeout(function(){
+            $("#profile-username").val(null);
+            $("#profile-password").val(null);
+        }, 1000);
+    <?php endif; ?>
+
     // load list kabupaten
     $("body").off("change","#profile-provinsi_id").on("change","#profile-provinsi_id", function(e){
         e.preventDefault();
@@ -245,15 +261,16 @@ $(document).ready(function(){
         listKelurahan($(this).val());
     });
 
-    $("body").off("click","[data-button=\"plain_text\"]").on("click","[data-button=\"plain_text\"]", function(e){
+    $("body").off("click","[data-button=\"plaintext\"]").on("click","[data-button=\"plaintext\"]", function(e){
 		e.preventDefault();
-		$("#profile-password, #profile-current_password").toggleClass("open-text");
-		if($("#profile-password, #profile-current_password").hasClass("open-text")){
-			$("#profile-password, #profile-current_password").attr("type", "text");
-			$(".glyphicon-eye-open").removeClass("glyphicon-eye-open").addClass("glyphicon-eye-close");
+        data = $(this).data();
+        $("#"+data.field).toggleClass("open-text");
+		if($("#"+data.field).hasClass("open-text")){
+			$("#"+data.field).attr("type", "text");
+			$(this).find(".glyphicon-eye-open").removeClass("glyphicon-eye-open").addClass("glyphicon-eye-close");
 		}else{
-			$("#profile-password, #profile-current_password").attr("type", "password");
-			$(".glyphicon-eye-close").removeClass("glyphicon-eye-close").addClass("glyphicon-eye-open");
+			$("#"+data.field).attr("type", "password");
+			$(this).find(".glyphicon-eye-close").removeClass("glyphicon-eye-close").addClass("glyphicon-eye-open");
 		}
 	});
 });

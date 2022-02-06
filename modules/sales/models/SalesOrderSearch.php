@@ -17,7 +17,7 @@ class SalesOrderSearch extends SalesOrder
     public function rules()
     {
         return [
-            [['name', 'code', 'tgl_so', 'no_po', 'tgl_po', 'customer_code', 'total_order', 'grand_total'], 'safe'],
+            [['name', 'code', 'tgl_so', 'no_po', 'tgl_po', 'customer_code', 'post'], 'safe'],
         ];
     }
 
@@ -74,7 +74,7 @@ class SalesOrderSearch extends SalesOrder
         $query->andFilterWhere(['like', 'a.code', $this->code])
             ->andFilterWhere(['like', 'a.name', $this->name])
             ->andFilterWhere(['like', 'no_po', $this->no_po])
-            ->andFilterWhere(['like', 'grand_total', $this->grand_total]);
+            ->andFilterWhere(['like', 'post', $this->post]);
 
         return $dataProvider;
     }

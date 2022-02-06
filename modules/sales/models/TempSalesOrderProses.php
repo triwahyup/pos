@@ -4,11 +4,12 @@ namespace app\modules\sales\models;
 
 use Yii;
 use app\modules\master\models\MasterBiayaProduksi;
+use app\modules\sales\models\TempSalesOrderDetail;
+use app\modules\sales\models\TempSalesOrderItem;
 
 /**
  * This is the model class for table "temp_sales_order_proses".
  *
- * @property int $id
  * @property string $code
  * @property string $item_code
  * @property int $detail_id
@@ -35,13 +36,12 @@ class TempSalesOrderProses extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id', 'code', 'item_code', 'detail_id', 'biaya_code'], 'required'],
-            [['id', 'detail_id', 'type', 'user_id'], 'integer'],
+            [['code', 'item_code', 'detail_id', 'biaya_code'], 'required'],
+            [['detail_id', 'type', 'user_id'], 'integer'],
             [['index', 'harga', 'total_biaya'], 'number'],
             [['code'], 'string', 'max' => 12],
             [['item_code'], 'string', 'max' => 7],
             [['biaya_code'], 'string', 'max' => 3],
-            [['id'], 'unique'],
         ];
     }
 
@@ -51,7 +51,6 @@ class TempSalesOrderProses extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
             'code' => 'Code',
             'item_code' => 'Item Code',
             'detail_id' => 'Detail ID',
@@ -67,5 +66,30 @@ class TempSalesOrderProses extends \yii\db\ActiveRecord
     public function getTemps()
     {
         return TempSalesOrderProses::find()->where(['code'=>$this->code, 'item_code'=>$this->item_code, 'detail_id'=>$this->detail_id, 'user_id'=> \Yii::$app->user->id])->all();
+    }
+
+    public function getBiayaProduksi()
+    {
+        return $this->hasOne(MasterBiayaProduksi::className(), ['code' => 'biaya_code']);
+    }
+    
+    public function biayaProduksi($biaya_code)
+    {
+        return MasterBiayaProduksi::findOne(['code'=>$biaya_code]);
+    }
+
+    public function totalBiaya($model)
+    {
+        $tempDetail = TempSalesOrderDetail::findOne(['code'=>$model['code'], 'item_code'=>$model['item_code'], 'urutan'=>$model['urutan']]);
+        $tempItem = TempSalesOrderItem::findOne(['code'=>$model['code'], 'item_code'=>$model['item_code']]);
+        if($this->type == 1){
+            $konversi = $tempItem->inventoryStock->satuanTerkecil($tempItem->item_code, [
+                0 => $tempItem->qty_order_1,
+                1 => $tempItem->qty_order_2]);
+            $this->total_biaya = $tempDetail->panjang * $tempDetail->lebar * $this->index * $konversi;
+        }else{
+            $this->total_biaya = $this->harga;
+        }
+        return true;
     }
 }

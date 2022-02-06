@@ -75,30 +75,31 @@ $this->params['breadcrumbs'][] = $this->title;
                 }
             ],
             [
-                'attribute' => 'grand_total',
+                'attribute' => 'post',
+                'format' => 'raw',
                 'contentOptions' => [
-                    'class' => 'text-right',
+                    'class' => 'text-center',
                 ],
                 'value' => function($model, $index, $key)
                 {
-                    return number_format($model->grand_total).'.-';
+                    return $model->statusPost;
                 }
             ],
             [
                 'buttons' => [
                     'view' => function ($url, $model) {
                         return Html::a(Helper::buttonIcons()['eye-open'],
-                            ['view', 'no_so'=>$model->no_so],
+                            ['view', 'code'=>$model->code],
                             ['title'=>'View', 'aria-label'=>'View', 'data-pjax'=>true]);
                     },
                     'update' => function ($url, $model) {
                         return Html::a(Helper::buttonIcons()['pencil'],
-                            ['update', 'no_so'=>$model->no_so],
+                            ['update', 'code'=>$model->code],
                             ['title'=>'Update', 'aria-label'=>'Update', 'data-pjax'=>true]);
                     },
                     'delete' => function ($url, $model) {
                         return Html::a(Helper::buttonIcons()['trash'],
-                            ['delete', 'no_so'=>$model->no_so],
+                            ['delete', 'code'=>$model->code],
                             [
                                 'title'=>'Delete',
                                 'aria-label'=>'Delete', 

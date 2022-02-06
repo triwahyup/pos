@@ -66,6 +66,13 @@ $(document).ready(function(){
                 }else if($parent.attr("data-parent") == 2){
                     $this.parent().siblings("[data-parent=\"3\"]").find("input[type=\"checkbox\"]").prop("checked", 1);
                     $this.parent().siblings("[data-parent=\"3\"]").find("i").removeClass("icon-ok").addClass("icon-ok");
+                    $this.parents("[data-parent=\"2\"]").siblings(".checkbox-container").find("input[type=\"checkbox\"]").prop("checked", 1);
+                    $this.parents("[data-parent=\"2\"]").siblings(".checkbox-container").find("i").removeClass("icon-ok").addClass("icon-ok");
+                }else if($parent.attr("data-parent") == 3){
+                    $this.parents("[data-parent=\"2\"]").siblings(".checkbox-container").find("input[type=\"checkbox\"]").prop("checked", 1);
+                    $this.parents("[data-parent=\"2\"]").siblings(".checkbox-container").find("i").removeClass("icon-ok").addClass("icon-ok");
+                    $this.parents("[data-parent=\"3\"]").siblings(".checkbox-container").find("input[type=\"checkbox\"]").prop("checked", 1);
+                    $this.parents("[data-parent=\"3\"]").siblings(".checkbox-container").find("i").removeClass("icon-ok").addClass("icon-ok");
                 }
             }else{
                 if($parent.attr("data-parent") == 1){

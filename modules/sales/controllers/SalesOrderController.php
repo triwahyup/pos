@@ -12,9 +12,11 @@ use app\modules\master\models\MasterSatuan;
 use app\modules\sales\models\SalesOrder;
 use app\modules\sales\models\SalesOrderDetail;
 use app\modules\sales\models\SalesOrderItem;
+use app\modules\sales\models\SalesOrderProses;
 use app\modules\sales\models\SalesOrderSearch;
 use app\modules\sales\models\TempSalesOrderDetail;
 use app\modules\sales\models\TempSalesOrderItem;
+use app\modules\sales\models\TempSalesOrderProses;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\AccessControl;
@@ -41,7 +43,7 @@ class SalesOrderController extends Controller
                                 'index', 'view', 'create', 'update', 'delete', 
                                 'list-item', 'autocomplete', 'search', 'item', 'temp',
                                 'create-temp', 'delete-temp-item', 'delete-temp-detail',
-                                'list-proses-produksi',
+                                'list-proses', 'create-proses', 'invoice', 'post'
                             ],
                             'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('sales-order')),
                             'roles' => ['@'],
@@ -117,6 +119,7 @@ class SalesOrderController extends Controller
                 try{
                     $model->attributes = $model->attributes;
                     $model->code = $model->generateCode();
+                    $totalOrder = $model->totalOrder;
                     if($model->save()){
                         if(count($model->itemTemps()) > 0){
                             foreach($model->itemTemps() as $temp){
@@ -154,6 +157,25 @@ class SalesOrderController extends Controller
                         }else{
                             $success = false;
                             $message = 'ERROR CREATE SALES ORDER: DETAIL IS EMPTY.';
+                        }
+
+                        if(count($model->prosesTemps()) >0){
+                            foreach($model->prosesTemps() as $temp){
+                                $salesProses = new SalesOrderProses();
+                                $salesProses->attributes = $temp->attributes;
+                                $salesProses->code = $model->code;
+                                if(!$salesProses->save()){
+                                    $success = false;
+                                    $message = (count($salesProses->errors) > 0) ? 'ERROR CREATE SALES ORDER PROSES PRODUKSI: ' : '';
+                                    foreach($salesProses->errors as $error => $value){
+                                        $message .= strtoupper($value[0].', ');
+                                    }
+                                    $message = substr($message, 0, -2);
+                                }
+                            }
+                        }else{
+                            $success = false;
+                            $message = 'ERROR CREATE SALES ORDER: PROSES PRODUKSI IS EMPTY.';
                         }
                     }else{
                         $success = false;
@@ -236,6 +258,7 @@ class SalesOrderController extends Controller
 			    $transaction = $connection->beginTransaction();
                 try{
                     $model->attributes = $model->attributes;
+                    $totalOrder = $model->totalOrder;
                     if($model->save()){
                         if(count($model->itemTemps) > 0){
                             foreach($model->items as $empty)
@@ -254,7 +277,7 @@ class SalesOrderController extends Controller
                             }
                         }else{
                             $success = false;
-                            $message = 'ERROR CREATE SALES ORDER: ITEM IS EMPTY.';
+                            $message = 'ERROR UPDATE SALES ORDER: ITEM IS EMPTY.';
                         }
 
                         if(count($model->detailTemps) > 0){
@@ -274,7 +297,27 @@ class SalesOrderController extends Controller
                             }
                         }else{
                             $success = false;
-                            $message = 'ERROR CREATE SALES ORDER: DETAIL IS EMPTY.';
+                            $message = 'ERROR UPDATE SALES ORDER: DETAIL IS EMPTY.';
+                        }
+
+                        if(count($model->prosesTemps) >0){
+                            foreach($model->proses as $empty)
+                                $empty->delete();
+                            foreach($model->prosesTemps as $temp){
+                                $salesProses = new SalesOrderProses();
+                                $salesProses->attributes = $temp->attributes;
+                                if(!$salesProses->save()){
+                                    $success = false;
+                                    $message = (count($salesProses->errors) > 0) ? 'ERROR UPDATE SALES ORDER PROSES PRODUKSI: ' : '';
+                                    foreach($salesProses->errors as $error => $value){
+                                        $message .= strtoupper($value[0].', ');
+                                    }
+                                    $message = substr($message, 0, -2);
+                                }
+                            }
+                        }else{
+                            $success = false;
+                            $message = 'ERROR UPDATE SALES ORDER: PROSES PRODUKSI IS EMPTY.';
                         }
                     }else{
                         $success = false;
@@ -343,6 +386,19 @@ class SalesOrderController extends Controller
                         \Yii::$app->session->setFlash('error', $message);
                     }
                 }
+                foreach($model->proses as $detail){
+                    $tempProses = new TempSalesOrderProses();
+                    $tempProses->attributes = $detail->attributes;
+                    $tempProses->user_id = \Yii::$app->user->id;
+                    if(!$tempProses->save()){
+                        $message = (count($tempProses->errors) > 0) ? 'ERROR LOAD SALES ORDER PROSES PRODUKSI: ' : '';
+                        foreach($tempProses->errors as $error => $value){
+                            $message .= strtoupper($value[0].', ');
+                        }
+                        $message = substr($message, 0, -2);
+                        \Yii::$app->session->setFlash('error', $message);
+                    }
+                }
             }
         }
 
@@ -395,6 +451,17 @@ class SalesOrderController extends Controller
                             $message = substr($message, 0, -2);
                         }
                     }
+                    foreach($model->proses as $detail){
+                        $detail->status = 0;
+                        if(!$detail->save()){
+                            $success = false;
+                            $message = (count($detail->errors) > 0) ? 'ERROR DELETE PROSES PRODUKSI SALES ORDER: ' : '';
+                            foreach($detail->errors as $error => $value){
+                                $message .= $value[0].', ';
+                            }
+                            $message = substr($message, 0, -2);
+                        }
+                    }
                 }else{
                     $success = false;
                     $message = (count($model->errors) > 0) ? 'ERROR DELETE SALES ORDER: ' : '';
@@ -426,7 +493,6 @@ class SalesOrderController extends Controller
         }
         return $this->redirect(['index']);
     }
-
 
     public function actionListItem()
     {
@@ -683,10 +749,73 @@ class SalesOrderController extends Controller
         return json_encode(['success'=>$success, 'message'=>$message]);
     }
 
-    public function actionListProsesProduksi()
+    public function actionListProses($id)
     {
+        $data = [];
         $model = MasterBiayaProduksi::findAll(['status'=>1]);
-        return json_encode(['data'=>$this->renderPartial('_list_proses', ['model'=>$model])]);
+        $tempDetail = TempSalesOrderDetail::findOne(['id'=>$id]);
+        foreach($model as $val){
+            $data[$val->code] = [
+                'name' => $val->name,
+                'biaya_code' => $val->code,
+                'code' => $tempDetail->code,
+                'item_code' => $tempDetail->item_code,
+                'detail_id' => $tempDetail->urutan,
+            ];
+        }
+        if(count($tempDetail->prosesTemps) > 0){
+            foreach($tempDetail->prosesTemps as $val){
+                $data[$val->biaya_code] = [
+                    'id' => $val->id,
+                    'name' => (isset($val->biayaProduksi)) ? $val->biayaProduksi->name : '-',
+                    'biaya_code' => $val->biaya_code,
+                    'code' => $val->code,
+                    'item_code' => $val->item_code,
+                    'detail_id' => $val->detail_id,
+                ];
+            }
+        }
+        return json_encode(['data'=>$this->renderPartial('_list_proses', [
+            'data'=>$data,
+            'tempDetail'=>$tempDetail])
+        ]);
+    }
+
+    public function actionCreateProses()
+    {
+        $request = \Yii::$app->request;
+        $success = true;
+        $message = '';
+        if($request->isPost){
+            $dataProses = $request->post('TempSalesOrderProses');
+            if(!empty($dataProses['biaya_code'])){
+                TempSalesOrderProses::deleteAll('code=:code and item_code=:item_code and detail_id=:urutan and user_id=:user_id', [
+                    ':code'=>$dataProses['code'], ':item_code'=>$dataProses['item_code'], ':urutan'=>$dataProses['urutan'], ':user_id'=>\Yii::$app->user->id]);
+                foreach($dataProses['biaya_code'] as $val){
+                    $tempProses = new TempSalesOrderProses();
+                    $biayaProduksi = $tempProses->biayaProduksi($val);
+                    $tempProses->attributes = $biayaProduksi->attributes;
+                    $tempProses->attributes = (array)$dataProses;
+                    $tempProses->detail_id = $dataProses['urutan'];
+                    $tempProses->biaya_code = $val;
+                    $tempProses->user_id = \Yii::$app->user->id;
+                    $totalBiaya = $tempProses->totalBiaya($dataProses);
+                    if(!$tempProses->save()){
+                        $success = false;
+                        foreach($tempProses->errors as $error => $value){
+                            $message = $value[0].', ';
+                        }
+                        $message = substr($message, 0, -2);
+                    }
+                }
+            }else{
+                $success = false;
+                $message = 'Pilih salah satu proses.';
+            }
+        }else{
+            throw new NotFoundHttpException('The requested data does not exist.');
+        }
+        return json_encode(['success'=>$success, 'message'=>$message]);
     }
 
     /**
@@ -721,5 +850,166 @@ class SalesOrderController extends Controller
 			$connection->createCommand('ALTER TABLE temp_sales_order_detail AUTO_INCREMENT=1')->query();
         }
 
+        TempSalesOrderProses::deleteAll('user_id=:user_id', [':user_id'=>\Yii::$app->user->id]);
+        $prosesTemp = TempSalesOrderProses::find()->all();
+        if(empty($prosesTemp)){
+            $connection = \Yii::$app->db;
+			$connection->createCommand('ALTER TABLE temp_sales_order_proses AUTO_INCREMENT=1')->query();
+        }
+    }
+
+    public function actionInvoice($code)
+    {
+        return $this->render('_invoice', [
+            'model' => $this->findModel($code),
+        ]);
+    }
+
+    public function actionPost($code)
+    {
+        $success = true;
+		$message = '';
+        $model = $this->findModel($code);
+        if(isset($model)){
+            $connection = \Yii::$app->db;
+            $transaction = $connection->beginTransaction();
+            try{
+                $model->post=1;
+                if($model->save()){
+                    // PROSES KURANG STOK
+                    $stock = 0;
+                    foreach($model->items as $val){
+                        $stockItem = $val->inventoryStock;
+                        if(isset($stockItem)){
+                            $stock = $stockItem->satuanTerkecil($val->item_code, [
+                                0=>$val->qty_order_1,
+                                1=>$val->qty_order_2
+                            ]);
+                            if($stockItem->onhand > $stock){
+                                $stockItem->onhand = $stockItem->onhand - $stock;
+                                $stockItem->onsales = $stockItem->onsales + $stock;
+                                if(!$stockItem->save()){
+                                    $success = false;
+                                    $message = (count($stockItem->errors) > 0) ? 'ERROR UPDATE STOCK ITEM: ' : '';
+                                    foreach($stockItem->errors as $error => $value){
+                                        $message .= strtoupper($value[0].', ');
+                                    }
+                                    $message = substr($message, 0, -2);
+                                }
+                                
+                                $stockTransaction = new InventoryStockTransaction();
+                                $stockTransaction->attributes = $stockItem->attributes;
+                                $stockTransaction->no_document = $model->code;
+                                $stockTransaction->tgl_document = $model->tgl_so;
+                                $stockTransaction->type_document = "SALES ORDER";
+                                $stockTransaction->status_document = "OUT";
+                                $stockTransaction->qty_out = $stock;
+                                if(!$stockTransaction->save()){
+                                    $success = false;
+                                    $message = (count($stockTransaction->errors) > 0) ? 'ERROR UPDATE STOCK TRANSACTION: ' : '';
+                                    foreach($stockTransaction->errors as $error => $value){
+                                        $message .= strtoupper($value[0].', ');
+                                    }
+                                    $message = substr($message, 0, -2);
+                                }
+                            }else{
+                                $success = false;
+                                $message = 'SISA STOCK ITEM '.$val->item_code.' TIDAK MENCUKUPI. SISA '.$stockItem->onhand;
+                            }
+                        }else{
+                            $success = false;
+                            $message = 'STOCK ITEM '.$val->item_code.' TIDAK DITEMUKAN.';
+                        }
+                    }
+                    // PROSES KURANG STOK UP PRODUKSI (%)
+                    if(!empty($model->up_produksi) || $model->up_produksi != 0){
+                        $upproduksi = $stock * ($model->up_produksi/100);
+                        if($stockItem->onhand > $upproduksi){
+                            $stockItem->onhand = $stockItem->onhand - $upproduksi;
+                            $stockItem->onsales = $stockItem->onsales + $upproduksi;
+                            if(!$stockItem->save()){
+                                $success = false;
+                                $message = (count($stockItem->errors) > 0) ? 'ERROR UPDATE STOCK ITEM (UP PRODUKSI): ' : '';
+                                foreach($stockItem->errors as $error => $value){
+                                    $message .= strtoupper($value[0].', ');
+                                }
+                                $message = substr($message, 0, -2);
+                            }
+
+                            $stockTransaction = new InventoryStockTransaction();
+                            $stockTransaction->attributes = $stockItem->attributes;
+                            $stockTransaction->no_document = $model->code;
+                            $stockTransaction->tgl_document = $model->tgl_so;
+                            $stockTransaction->type_document = "SALES ORDER";
+                            $stockTransaction->status_document = "OUT (UP PRODUKSI ".$model->up_produksi." %)";
+                            $stockTransaction->qty_out = $upproduksi;
+                            if(!$stockTransaction->save()){
+                                $success = false;
+                                $message = (count($stockTransaction->errors) > 0) ? 'ERROR UPDATE STOCK TRANSACTION (UP PRODUKSI): ' : '';
+                                foreach($stockTransaction->errors as $error => $value){
+                                    $message .= strtoupper($value[0].', ');
+                                }
+                                $message = substr($message, 0, -2);
+                            }
+                        }else{
+                            $success = false;
+                            $message = 'SISA STOCK ITEM '.$stockItem->item_code.' TIDAK MENCUKUPI. SISA '.$stockItem->onhand;
+                        }
+                    }
+                    // PROSES SIMPAN SPK
+                    $spk = new Spk();
+                    $spk->attributes = $model->attributes;
+                    $spk->no_spk = $spk->generateCode();
+                    $spk->tgl_spk = date('Y-m-d');
+                    if($spk->save()){
+
+                    }else{
+                        $success = false;
+                        $message = (count($spk->errors) > 0) ? 'ERROR CREATE SPK: ' : '';
+                        foreach($spk->errors as $error => $value){
+                            $message .= strtoupper($value[0].', ');
+                        }
+                        $message = substr($message, 0, -2);
+                    }
+                }else{
+                    $success = false;
+                    $message = (count($model->errors) > 0) ? 'ERROR POST SALES ORDER TO SPK: ' : '';
+                    foreach($model->errors as $error => $value){
+                        $message .= strtoupper($value[0].', ');
+                    }
+                    $message = substr($message, 0, -2);
+                }
+
+                if($success){
+                    $message = '['.$model->code.'] SUCCESS POST SALES ORDER TO SPK.';
+                    $transaction->commit();
+                    $logs =	[
+                        'type' => Logs::TYPE_USER,
+                        'description' => $message,
+                    ];
+                    Logs::addLog($logs);
+                    \Yii::$app->session->setFlash('success', $message);
+                    return $this->redirect(['view', 'code' => $model->code]);
+                }else{
+                    $transaction->rollBack();
+                }
+            }catch(Exception $e){
+                $success = false;
+                $message = $e->getMessage();
+                $transaction->rollBack();
+            }
+            $logs =	[
+                'type' => Logs::TYPE_USER,
+                'description' => $message,
+            ];
+            Logs::addLog($logs);
+        }else{
+            $success = false;
+            $message = 'Data Sales Order not valid.';
+        }
+        if(!$success){
+            \Yii::$app->session->setFlash('error', $message);
+        }
+        return $this->redirect(['view', 'code' => $model->code]);
     }
 }

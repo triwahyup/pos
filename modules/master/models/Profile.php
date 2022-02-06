@@ -83,7 +83,7 @@ class Profile extends \yii\db\ActiveRecord
             [['golongan'], 'string', 'max' => 5],
             [['typeuser_code'], 'string', 'max' => 3],
             [['user_id'], 'unique'],
-            ['password', 'validatePassword'],
+            // ['password', 'validatePassword'],
             [['status'], 'default', 'value' => 1],
         ];
     }

@@ -593,14 +593,17 @@ function delete_temp_detail(id)
     });
 }
 
-function load_proses_produksi()
+function load_proses(id)
 {
     $.ajax({
-        url: "<?=Url::to(['sales-order/list-proses-produksi'])?>",
-		type: "POST",
+        url: "<?=Url::to(['sales-order/list-proses'])?>",
+		type: "GET",
+        data: {
+            id: id
+        },
 		dataType: "text",
         error: function(xhr, status, error) {},
-		beforeSend: function (data){},
+		beforeSend: function (){},
         success: function(data){
             var o = $.parseJSON(data);
             $("[data-popup=\"popup\"]").html(o.data);
@@ -613,6 +616,28 @@ function load_proses_produksi()
 			});
         },
         complete: function(){}
+    });
+}
+
+function create_proses()
+{
+    $.ajax({
+        url: "<?= Url::to(['sales-order/create-proses']) ?>",
+        type: "POST",
+        dataType: "text",
+        error: function(xhr, status, error) {},
+        beforeSend: function(){},
+        data: $("#form_biaya").serialize(),
+        success: function(data){
+            var o = $.parseJSON(data);
+            if(!o.success == true){
+                notification.open("danger", o.message, timeOut);
+            }
+            init_temp();
+        },
+        complete: function(){
+            popup.close();
+        }
     });
 }
 
@@ -730,10 +755,16 @@ $(document).ready(function(){
         delete_temp_detail($(this).attr("data-target"));
     });
 
-    $("body").off("click","[data-button=\"create_biaya_produksi_temp\"]");
-    $("body").on("click","[data-button=\"create_biaya_produksi_temp\"]", function(e){
+    $("body").off("click","[data-button=\"create_proses_temp\"]");
+    $("body").on("click","[data-button=\"create_proses_temp\"]", function(e){
         e.preventDefault();
-        load_proses_produksi();
+        data = $(this).data();
+        load_proses(data.id);
+    });
+
+    $("body").off("click","[data-button=\"create_proses\"]").on("click","[data-button=\"create_proses\"]", function(e){
+        e.preventDefault();
+        create_proses();
     });
 });
 

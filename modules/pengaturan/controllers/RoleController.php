@@ -2,7 +2,9 @@
 
 namespace app\modules\pengaturan\controllers;
 
+use app\models\AuthAssignment;
 use app\models\AuthItemChild;
+use app\models\Profile;
 use app\models\User;
 use app\modules\master\models\MasterKode;
 use app\modules\pengaturan\models\PengaturanMenu;
@@ -80,16 +82,40 @@ class RoleController extends Controller
                     if(count($model->menu) > 0){
                         AuthItemChild::deleteAll('parent =:parent', [':parent'=>$parent]);
                         $auth = \Yii::$app->authManager;
-                        $getParent = $auth->getRole($parent);
+                        $authParent = $auth->getRole($parent);
+                        if(empty($authParent))
+                            $authParent = $auth->createRole($parent);
                         $role = '';
                         foreach($model->menu as $menu){
                             $role .= $menu.', ';
 							$getChild = $auth->getRole($menu);
-                            if(!$auth->addChild($getParent, $getChild)){
+                            if(!$auth->addChild($authParent, $getChild)){
                                 $success = false;
 								$message = '{code: '.$typeCode->value.'}. Insert Auth Item Child not validate';
-							}
+                            }
                         }
+
+                        $authItems = AuthItemChild::findAll(['parent'=>$parent]);
+                        if(count($authItems) > 0){
+                            foreach($authItems as $authItem){
+                                $profiles = Profile::findAll(['typeuser_code'=>$typeCode, 'status'=>1]);
+                                foreach($profiles as $profile){
+                                    $authAssignment = new AuthAssignment();
+                                    $authAssignment->item_name = $authItem->child;
+                                    $authAssignment->user_id = $profile->user_id;
+                                    $authAssignment->created_at = time();
+                                    if(!$authAssignment->save()){
+                                        $success = false;
+                                        $message = (count($authAssignment->errors) > 0) ? 'ERROR UPDATE AUTH : ' : '';
+                                        foreach($authAssignment->errors as $error => $value){
+                                            $message .= $value[0].', ';
+                                        }
+                                        $message = substr($message, 0, -2);
+                                    }
+                                }
+                            }
+                        }
+
                         if($success){
 							$message = '('.substr($role,0,-2).')';
 							\Yii::$app->session->setFlash('success', 'Update Rule SUKSES: '.$message);

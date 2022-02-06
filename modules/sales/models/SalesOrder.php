@@ -9,6 +9,7 @@ use app\modules\sales\models\SalesOrderDetail;
 use app\modules\sales\models\SalesOrderItem;
 use app\modules\sales\models\TempSalesOrderDetail;
 use app\modules\sales\models\TempSalesOrderItem;
+use app\modules\sales\models\TempSalesOrderProses;
 
 /**
  * This is the model class for table "sales_order".
@@ -24,7 +25,7 @@ use app\modules\sales\models\TempSalesOrderItem;
  * @property string|null $ekspedisi_name
  * @property float|null $biaya_pengiriman
  * @property float|null $ppn
- * @property float|null $total_order
+ * @property float|null $total_order_material
  * @property float|null $total_biaya_produksi
  * @property float|null $grand_total
  * @property string|null $keterangan
@@ -57,9 +58,9 @@ class SalesOrder extends \yii\db\ActiveRecord
     {
         return [
             [['name', 'type_order', 'customer_code', 'no_po', 'ekspedisi_name', 'biaya_pengiriman'], 'required'],
-            [['tgl_so', 'tgl_po'], 'safe'],
+            [['tgl_so', 'tgl_po', 'biaya_pengiriman'], 'safe'],
             [['type_order', 'up_produksi', 'post', 'status', 'created_at', 'updated_at'], 'integer'],
-            [['biaya_pengiriman', 'ppn', 'total_order', 'total_biaya_produksi', 'grand_total'], 'number'],
+            [['ppn', 'total_order_material', 'total_order_bahan', 'total_biaya_produksi', 'total_ppn', 'grand_total'], 'number'],
             [['code', 'no_po'], 'string', 'max' => 12],
             [['name', 'ekspedisi_name', 'keterangan'], 'string', 'max' => 128],
             [['customer_code'], 'string', 'max' => 3],
@@ -85,7 +86,7 @@ class SalesOrder extends \yii\db\ActiveRecord
             'ekspedisi_name' => 'Ekspedisi Name',
             'biaya_pengiriman' => 'Biaya Pengiriman',
             'ppn' => 'Ppn',
-            'total_order' => 'Total Order',
+            'total_order_material' => 'Total Order',
             'total_biaya_produksi' => 'Total Biaya Produksi',
             'grand_total' => 'Grand Total',
             'keterangan' => 'Keterangan',
@@ -126,10 +127,7 @@ class SalesOrder extends \yii\db\ActiveRecord
 
     public function getItemsNonMaterial()
     {
-        return SalesOrderItem::find()
-            ->where(['code' => $this->code])
-            ->andWhere('type_code <> "'.$this->type_material.'"')
-            ->all();
+        return SalesOrderItem::find()->where(['code' => $this->code])->andWhere('type_code <> "'.$this->type_material.'"')->all();
     }
 
     public function getItems()
@@ -142,6 +140,11 @@ class SalesOrder extends \yii\db\ActiveRecord
         return $this->hasMany(SalesOrderDetail::className(), ['code' => 'code']);
     }
 
+    public function getProses()
+    {
+        return $this->hasMany(SalesOrderProses::className(), ['code' => 'code']);
+    }
+
     public function getDetailTemps()
     {
         return $this->hasMany(TempSalesOrderDetail::className(), ['code' => 'code']);
@@ -152,6 +155,11 @@ class SalesOrder extends \yii\db\ActiveRecord
         return $this->hasMany(TempSalesOrderItem::className(), ['code' => 'code']);
     }
 
+    public function getProsesTemps()
+    {
+        return $this->hasMany(TempSalesOrderProses::className(), ['code' => 'code']);
+    }
+
     public function detailTemps()
     {
         return TempSalesOrderDetail::findAll(['user_id' => \Yii::$app->user->id]);
@@ -160,6 +168,21 @@ class SalesOrder extends \yii\db\ActiveRecord
     public function itemTemps()
     {
         return TempSalesOrderItem::findAll(['user_id' => \Yii::$app->user->id]);
+    }
+
+    public function prosesTemps()
+    {
+        return TempSalesOrderProses::findAll(['user_id' => \Yii::$app->user->id]);
+    }
+
+    public function itemsMaterialTemps()
+    {
+        return TempSalesOrderItem::findAll(['type_code'=>$this->type_material, 'user_id' => \Yii::$app->user->id]);
+    }
+
+    public function itemsNonMaterialTemps()
+    {
+        return TempSalesOrderItem::find()->where('type_code <> "'.$this->type_material.'"')->all();
     }
 
     public function getTypeOrder()
@@ -182,5 +205,33 @@ class SalesOrder extends \yii\db\ActiveRecord
             $message = '<span class="text-label text-default">Belum Post</span>';
         }
         return $message;
+    }
+
+    public function getTotalOrder()
+    {
+        $total_order_material=0;
+        foreach($this->itemsMaterialTemps() as $val){
+            $total_order_material += $val->total_order;
+        }
+        $this->total_order_material = $total_order_material;
+        $total_order_bahan=0;
+        foreach($this->itemsNonMaterialTemps() as $val){
+            $total_order_bahan += $val->total_order;
+        }
+        $this->total_order_bahan = $total_order_bahan;
+        $total_biaya_produksi=0;
+        foreach($this->prosesTemps() as $val){
+            $total_biaya_produksi += $val->total_biaya;
+        }
+        $this->total_biaya_produksi = $total_biaya_produksi;
+        
+        $total = $total_order_material + $total_order_bahan + $total_biaya_produksi;
+        $total_ppn=0;
+        if(!empty($this->ppn)){
+            $total_ppn = ceil($total * ($this->ppn / 100));
+        }
+        $this->total_ppn = $total_ppn;
+        $this->grand_total = $total+$total_ppn+$this->biaya_pengiriman;
+        return true;
     }
 }

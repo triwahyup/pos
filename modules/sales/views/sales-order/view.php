@@ -1,13 +1,11 @@
 <?php
-
 use yii\helpers\Html;
-use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
 /* @var $model app\modules\sales\models\SalesOrder */
 
 $this->title = 'Nama Job: '.$model->name;
-$this->params['breadcrumbs'][] = ['label' => 'Sales Orders', 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => 'Sales Order', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
 ?>
@@ -100,7 +98,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     <label>Biaya Pengiriman</label>
                 </div>
                 <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                    <span><?=$model->biaya_pengiriman ?></span>
+                    <span><?=(!empty($model->biaya_pengiriman)) ? number_format($model->biaya_pengiriman).'.-' : '-' ?></span>
                 </div>
             </div>
             <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
@@ -108,7 +106,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     <label>Up Produksi</label>
                 </div>
                 <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                    <span><?=$model->up_produksi ?></span>
+                    <span><?=(!empty($model->up_produksi)) ? $model->up_produksi.'%' : '-' ?></span>
                 </div>
             </div>
             <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
@@ -116,7 +114,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     <label>PPN</label>
                 </div>
                 <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                    <span><?=$model->ppn ?></span>
+                    <span><?=(!empty($model->ppn)) ? $model->ppn.'%' : '-' ?></span>
                 </div>
             </div>
             <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
@@ -133,7 +131,7 @@ $this->params['breadcrumbs'][] = $this->title;
             <hr />
         </div>
         <?php foreach($model->itemsMaterial as $item): ?>
-            <div class="col-lg-8 col-md-8 col-xs-12">
+            <div class="col-lg-12 col-md-12 col-xs-12">
                 <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
                     <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
                         <label class="font-size-12">Material</label>
@@ -163,17 +161,18 @@ $this->params['breadcrumbs'][] = $this->title;
                             <tr>
                                 <th class="text-center">No.</th>
                                 <th class="text-center">PxL</th>
-                                <th class="text-center">Potong</th>
-                                <th class="text-center">Objek</th>
-                                <th class="text-center">Warna</th>
+                                <th class="text-center">Total Warna</th>
+                                <th class="text-center">Total Potong</th>
+                                <th class="text-center">Total Objek</th>
                                 <th class="text-center">Lb. Ikat</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php foreach($item->details as $no=>$val): ?>
                                 <tr>
-                                    <td class="text-center"><?=$no+1 ?></td>
-                                    <td class="text-center"><?=$val->panjang.'x'.$val->lebar ?></td>
+                                    <td class="text-center" rowspan="<?=count($val->proses)+1 ?>"><?=$no+1 ?></td>
+                                    <td class="text-center" rowspan="<?=count($val->proses)+1 ?>"><?=$val->panjang.'x'.$val->lebar ?></td>
+                                    <td class="text-center" rowspan="<?=count($val->proses)+1 ?>"><?=$val->total_warna ?></td>
                                     <td class="text-right">
                                         <?=$val->total_potong .'
                                             <span class="text-muted font-size-10">('.number_format($val->jumlah_cetak).' cetak)</span>' ?>
@@ -182,8 +181,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                         <?=$val->total_objek .'
                                             <span class="text-muted font-size-10">('.number_format($val->jumlah_objek).' objek)</span>' ?>
                                     </td>
-                                    <td class="text-center"><?=$val->total_warna ?></td>
-                                    <td class="text-right">
+                                    <td class="text-right" rowspan="<?=count($val->proses)+1 ?>">
                                         <span class="font-size-10">
                                             <?=(!empty($val->lembar_ikat_1) ? number_format($val->lembar_ikat_1) .' '.$val->lembar_ikat_um_1 .' / ' : '') ?>
                                             <?=(!empty($val->lembar_ikat_2) ? number_format($val->lembar_ikat_2) .' '.$val->lembar_ikat_um_2 .' / ' : '') ?>
@@ -191,6 +189,15 @@ $this->params['breadcrumbs'][] = $this->title;
                                         </strong>
                                     </td>
                                 </tr>
+                                <?php if(count($val->proses) > 0): ?>
+                                    <?php foreach($val->proses as $dataProses): ?>
+                                        <tr>
+                                            <td class="text-muted text-left" colspan="2">
+                                                <?='<i>'.$dataProses->biayaProduksi->name.'</i>' ?>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
                             <?php endforeach; ?>
                         </tbody>
                     </table>
@@ -201,7 +208,7 @@ $this->params['breadcrumbs'][] = $this->title;
             <h6>Detail Bahan Pembantu</h6>
             <hr />
         </div>
-        <div class="col-lg-8 col-md-8 col-xs-12">
+        <div class="col-lg-12 col-md-12 col-xs-12">
             <table class="table table-bordered table-custom margin-top-10">
                 <thead>
                     <tr>
@@ -241,7 +248,9 @@ $this->params['breadcrumbs'][] = $this->title;
         </div>
     </div>
     <div class="col-lg-12 col-md-12 col-xs-12 text-right padding-right-0">
-        <?= Html::a('<i class="fontello icon-list"></i><span>Invoice Sales Order</span>', ['post', 'code'=>$model->code], ['class' => 'btn btn-warning btn-flat btn-sm']) ?>
+        <?php if(\Yii::$app->user->identity->profile->typeUser->value == 'ADMINISTRATOR' || \Yii::$app->user->identity->profile->typeUser->value == 'OWNER'): ?>
+            <?= Html::a('<i class="fontello icon-list"></i><span>Invoice Sales Order</span>', ['invoice', 'code'=>$model->code], ['class' => 'btn btn-warning btn-flat btn-sm']) ?>
+        <?php endif; ?>
         <?php if($model->post==0): ?>
             <?= Html::a('<i class="fontello icon-ok"></i><span>Post to SPK</span>', ['post', 'code'=>$model->code], ['class' => 'btn btn-primary btn-flat btn-sm']) ?>
         <?php endif; ?>

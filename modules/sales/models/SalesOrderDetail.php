@@ -3,6 +3,7 @@
 namespace app\modules\sales\models;
 
 use Yii;
+use app\modules\sales\models\SalesOrderProses;
 use yii\behaviors\TimestampBehavior;
 
 /**
@@ -95,5 +96,10 @@ class SalesOrderDetail extends \yii\db\ActiveRecord
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
         ];
+    }
+
+    public function getProses()
+    {
+        return $this->hasMany(SalesOrderProses::className(), ['code' => 'code', 'item_code' => 'item_code', 'detail_id' => 'urutan']);
     }
 }

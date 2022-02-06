@@ -9,14 +9,19 @@
             </tr>
         </thead>
         <tbody>
-            <?php if(count($model) > 0): ?>
-                <?php foreach($model as $index=>$val) : ?>
+            <?php if(count($data) > 0):
+                $no=1; ?>
+                <?php foreach($data as $index=>$val) : ?>
                     <tr>
                         <td>
-                            <input type="checkbox" name="proses[]" id="proses_<?=$index ?>">
+                            <?php if(isset($val['id'])): ?>
+                                <input type="checkbox" name="TempSalesOrderProses[biaya_code][]" value="<?=$val['biaya_code'] ?>" checked>
+                                <?php else: ?>
+                                    <input type="checkbox" name="TempSalesOrderProses[biaya_code][]" value="<?=$val['biaya_code'] ?>">
+                                <?php endif; ?>
                         </td>
-                        <td class="text-center"><?=$index+1 ?></td>
-                        <td><?=$val->name ?></td>
+                        <td class="text-center"><?=$no++ ?></td>
+                        <td><?=$val['name'] ?></td>
                     </tr>
                 <?php endforeach; ?>
             <?php else : ?>
@@ -27,7 +32,10 @@
         </tbody>
     </table>
     <div class="col-lg-12 col-md-12 col-xs-12 text-right padding-right-0">
-        <button class="btn btn-primary" data-button="create_biaya_produksi">
+        <input type="hidden" name="TempSalesOrderProses[code]" value="<?=$tempDetail->code ?>">
+        <input type="hidden" name="TempSalesOrderProses[item_code]" value="<?=$tempDetail->item_code ?>">
+        <input type="hidden" name="TempSalesOrderProses[urutan]" value="<?=$tempDetail->urutan ?>">
+        <button class="btn btn-primary" data-button="create_proses">
             <i class="fontello icon-floppy"></i>
             <span>Simpan</span>
         </button>
