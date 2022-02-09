@@ -124,6 +124,14 @@ class Profile extends \yii\db\ActiveRecord
         ];
     }
 
+    public function beforeSave($attribute)
+    {
+        $this->tgl_lahir = date('Y-m-d', strtotime($this->tgl_lahir));
+        $this->tgl_masuk = date('Y-m-d', strtotime($this->tgl_masuk));
+        $this->tgl_keluar = date('Y-m-d', strtotime($this->tgl_keluar));
+        return parent::beforeSave($attribute);
+    }
+
     public function getTypeUser()
     {
         return $this->hasOne(MasterKode::className(), ['code' => 'typeuser_code']);

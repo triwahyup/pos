@@ -3,6 +3,7 @@
 namespace app\modules\produksi\models;
 
 use Yii;
+use yii\behaviors\TimestampBehavior;
 
 /**
  * This is the model class for table "spk_internal".
@@ -11,9 +12,7 @@ use Yii;
  * @property string|null $tgl_spk
  * @property string|null $no_so
  * @property string|null $tgl_so
- * @property string|null $keterangan_cetak
- * @property string|null $keterangan_potong
- * @property string|null $keterangan_pond
+ * @property string|null $keterangan
  * @property int|null $status
  * @property int|null $status_produksi
  * @property int|null $created_at
@@ -29,6 +28,13 @@ class SpkInternal extends \yii\db\ActiveRecord
         return 'spk_internal';
     }
 
+    public function behaviors()
+	{
+        return [
+            TimestampBehavior::className(),
+        ];
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -39,8 +45,9 @@ class SpkInternal extends \yii\db\ActiveRecord
             [['tgl_spk', 'tgl_so'], 'safe'],
             [['status', 'status_produksi', 'created_at', 'updated_at'], 'integer'],
             [['no_spk', 'no_so'], 'string', 'max' => 12],
-            [['keterangan_cetak', 'keterangan_potong', 'keterangan_pond'], 'string', 'max' => 128],
+            [['keterangan'], 'string', 'max' => 128],
             [['no_spk'], 'unique'],
+            [['status'], 'default', 'value' => 1],
         ];
     }
 
@@ -54,13 +61,22 @@ class SpkInternal extends \yii\db\ActiveRecord
             'tgl_spk' => 'Tgl Spk',
             'no_so' => 'No So',
             'tgl_so' => 'Tgl So',
-            'keterangan_cetak' => 'Keterangan Cetak',
-            'keterangan_potong' => 'Keterangan Potong',
-            'keterangan_pond' => 'Keterangan Pond',
+            'keterangan' => 'Keterangan',
             'status' => 'Status',
             'status_produksi' => 'Status Produksi',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
         ];
+    }
+
+    public function generateCode()
+    {
+        $model = SpkInternal::find()->count();
+        $total=0;
+        if($model > 0){
+            $model = SpkInternal::find()->orderBy(['no_spk'=>SORT_DESC])->one();
+            $total = (int)substr($model->no_spk, -4);
+        }
+        return (string)date('Ymd').sprintf('%04s', ($total+1));
     }
 }

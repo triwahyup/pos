@@ -145,29 +145,29 @@ class SiteController extends Controller
         // END PO INTERNAL
 
         // REQUEST ITEM
-        $requestItemApp = SpkRequestItemApproval::findAll(['status'=>2]);
-        $countRequestItemApp=0;
-        $listRequestItemApp = '';
-        foreach($requestItemApp as $val){
-            $user = '';
-            if(!empty($val->user_id)){
-                if(!empty($val->user->profile)){
-                    $user = $val->user->profile->name;
-                }
-            }
-            if(!empty($val->typeuser_code)){
-                $user = $val->typeUser->name;
-            }
+        // $requestItemApp = SpkRequestItemApproval::findAll(['status'=>2]);
+        // $countRequestItemApp=0;
+        // $listRequestItemApp = '';
+        // foreach($requestItemApp as $val){
+        //     $user = '';
+        //     if(!empty($val->user_id)){
+        //         if(!empty($val->user->profile)){
+        //             $user = $val->user->profile->name;
+        //         }
+        //     }
+        //     if(!empty($val->typeuser_code)){
+        //         $user = $val->typeUser->name;
+        //     }
             
-            if($val->user_id == \Yii::$app->user->id OR $val->typeuser_code == \Yii::$app->user->identity->profile->typeuser_code){
-                $userApproval = true;
-                $countRequestItemApp += 1;
-                $listRequestItemApp .= '<li><a href="'.\Yii::$app->params['URL'].'/produksi/request-item/view&no_request='.$val->no_request.'">'.$countRequestItemApp.'). Approval Request Item: '.$val->no_request.'<i>'.$user.'</i></a></li>';
-            }else{
-                $countRequestItemApp += 1;
-                $listRequestItemApp .= '<li><span>'.$countRequestItemApp.'). Approval Request Item: '.$val->no_request.'<i>'.$user.'</i></span></li>';
-            }
-        }
+        //     if($val->user_id == \Yii::$app->user->id OR $val->typeuser_code == \Yii::$app->user->identity->profile->typeuser_code){
+        //         $userApproval = true;
+        //         $countRequestItemApp += 1;
+        //         $listRequestItemApp .= '<li><a href="'.\Yii::$app->params['URL'].'/produksi/request-item/view&no_request='.$val->no_request.'">'.$countRequestItemApp.'). Approval Request Item: '.$val->no_request.'<i>'.$user.'</i></a></li>';
+        //     }else{
+        //         $countRequestItemApp += 1;
+        //         $listRequestItemApp .= '<li><span>'.$countRequestItemApp.'). Approval Request Item: '.$val->no_request.'<i>'.$user.'</i></span></li>';
+        //     }
+        // }
         // END REQUEST ITEM
         
         // STOCK OPNAME
@@ -204,9 +204,9 @@ class SiteController extends Controller
             'poInternalApp' => $poInternalApp,
             'countPoInternalApp' => $countPoInternalApp,
             'listPoInternalApp' => $listPoInternalApp,
-            'requestItemApp' => $requestItemApp,
-            'listRequestItemApp' => $listRequestItemApp,
-            'countRequestItemApp' => $countRequestItemApp,
+            'requestItemApp' => [],
+            'listRequestItemApp' => [],
+            'countRequestItemApp' => 0,
             'stockOpnameApp' => $stockOpnameApp,
             'countStockOpnameApp' => $countStockOpnameApp,
             'listStockOpnameApp' => $listStockOpnameApp,

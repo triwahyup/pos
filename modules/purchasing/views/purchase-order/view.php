@@ -32,8 +32,18 @@ $this->params['breadcrumbs'][] = $this->title;
                 'model' => $model,
                 'attributes' => [
                     'no_po',
-                    'tgl_po',
-                    'tgl_kirim',
+                    [
+                        'attribute' => 'tgl_po',
+                        'value' => function($model, $value) {
+                            return date('d-m-Y', strtotime($model->tgl_po));
+                        }
+                    ],
+                    [
+                        'attribute' => 'tgl_kirim',
+                        'value' => function($model, $value) {
+                            return date('d-m-Y', strtotime($model->tgl_kirim));
+                        }
+                    ],
                     [
                         'attribute' => 'term_in',
                         'value' => function($model, $value) {
@@ -185,7 +195,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                 <?php foreach($model->approvals as $index=>$approval): ?>
                                     <tr>
                                         <td class="text-center"><?=$index+1 ?></td>
-                                        <td class="text-center"><?=($approval->status == 3 || $approval->status == 4) ? date('Y-m-d', $approval->updated_at) : '-' ?></td>
+                                        <td class="text-center"><?=($approval->status == 3 || $approval->status == 4) ? date('d-m-Y', $approval->updated_at) : '-' ?></td>
                                         <td class="text-center"><?=$approval->urutan ?></td>
                                         <td><?=(!empty($approval->user_id)) ? (isset($approval->name)) ? $approval->name->name : '' : '' ?></td>
                                         <td><?=(!empty($approval->typeuser_code)) ? (isset($approval->typeUser)) ? $approval->typeUser->name : '' : '' ?></td>

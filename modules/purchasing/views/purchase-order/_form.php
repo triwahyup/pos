@@ -21,12 +21,12 @@ use yii\widgets\MaskedInput;
                     <?= $form->field($model, 'tgl_po')->widget(DatePicker::classname(), [
                         'type' => DatePicker::TYPE_INPUT,
                         'options' => [
-                            'placeholder' => 'yyyy-mm-dd',
-                            'value' => date('Y-m-d'),
+                            'placeholder' => 'dd-mm-yyyy',
+                            'value' => date('d-m-Y'),
                         ],
                         'pluginOptions' => [
                             'autoclose' => true,
-                            'format' => 'yyyy-mm-dd',
+                            'format' => 'dd-mm-yyyy',
                         ]]) ?>
                 </div>
             </div>
@@ -47,11 +47,11 @@ use yii\widgets\MaskedInput;
                     <?= $form->field($model, 'tgl_kirim')->widget(DatePicker::classname(), [
                         'type' => DatePicker::TYPE_INPUT,
                         'options' => [
-                            'placeholder' => 'yyyy-mm-dd',
+                            'placeholder' => 'dd-mm-yyyy',
                         ],
                         'pluginOptions' => [
                             'autoclose' => true,
-                            'format' => 'yyyy-mm-dd',
+                            'format' => 'dd-mm-yyyy',
                             ]]) ?>
                 </div>
                 <div class="col-lg-5 col-md-5 col-sm-12 col-xs-12 padding-left-0">

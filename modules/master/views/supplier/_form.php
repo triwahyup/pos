@@ -38,11 +38,11 @@ use yii\widgets\MaskedInput;
                     <?= $form->field($model, 'tgl_jatuh_tempo')->widget(DatePicker::classname(), [
                         'type' => DatePicker::TYPE_INPUT,
                         'options' => [
-                            'placeholder' => 'yyyy-mm-dd',
+                            'placeholder' => 'dd-mm-yyyy',
                         ],
                         'pluginOptions' => [
                             'autoclose' => true,
-                            'format' => 'yyyy-mm-dd',
+                            'format' => 'dd-mm-yyyy',
                         ]]) ?>
                 </div>
             </div>

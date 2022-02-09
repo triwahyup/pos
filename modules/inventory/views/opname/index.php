@@ -39,13 +39,13 @@ $this->params['breadcrumbs'][] = $this->title;
                     'pickerButton' => false,
                     'attribute' => 'date',
                     'pluginOptions' => [
-                        'format' => 'yyyy-mm-dd',
+                        'format' => 'dd-mm-yyyy',
                         'autoclose' => true,
                     ],
                 ]),
                 'value' => function($model, $index, $key)
                 {
-                    return date('Y-m-d', strtotime($model->date));
+                    return date('d-m-Y', strtotime($model->date));
                 }
             ],
             [

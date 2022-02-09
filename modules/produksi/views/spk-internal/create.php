@@ -12,6 +12,5 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="spk-internal-create">
     <?= $this->render('_form', [
         'model' => $model,
-        'detail' => $detail,
     ]) ?>
 </div>

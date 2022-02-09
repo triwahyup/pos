@@ -17,7 +17,12 @@ $this->params['breadcrumbs'][] = $this->title;
                 'model' => $model,
                 'attributes' => [
                     'no_invoice',
-                    'tgl_invoice',
+                    [
+                        'attribute' => 'tgl_invoice',
+                        'value' => function($model, $value) {
+                            return date('d-m-Y', strtotime($model->tgl_invoice));
+                        }
+                    ],
                     'no_bukti',
                 ],
             ]) ?>
@@ -77,11 +82,11 @@ $this->params['breadcrumbs'][] = $this->title;
                         </div>
                         <div class="row">
                             <label class="div-label">Tgl. PO</label>
-                            <strong><?=$model->tgl_po ?></strong>
+                            <strong><?=date('d-m-Y', strtotime($model->tgl_po)) ?></strong>
                         </div>
                         <div class="row">
                             <label class="div-label">Tgl. Kirim</label>
-                            <strong><?=$model->tgl_kirim ?></strong>
+                            <strong><?=date('d-m-Y', strtotime($model->tgl_kirim)) ?></strong>
                         </div>
                         <div class="row">
                             <label class="div-label">Term IN</label>

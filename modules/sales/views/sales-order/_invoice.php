@@ -93,7 +93,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     <label>Tgl. SO</label>
                 </div>
                 <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                    <span><?=$model->tgl_so ?></span>
+                    <span><?=date('d-m-Y', strtotime($model->tgl_so)) ?></span>
                 </div>
             </div>
             <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
@@ -117,7 +117,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     <label>Tgl. PO</label>
                 </div>
                 <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                    <span><?=$model->tgl_po ?></span>
+                    <span><?=date('d-m-Y', strtotime($model->tgl_po)) ?></span>
                 </div>
             </div>
         </div>

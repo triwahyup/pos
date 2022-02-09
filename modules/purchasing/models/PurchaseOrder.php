@@ -87,6 +87,8 @@ class PurchaseOrder extends \yii\db\ActiveRecord
 
     public function beforeSave($attribute)
     {
+        $this->tgl_po = date('Y-m-d', strtotime($this->tgl_po));
+        $this->tgl_kirim = date('Y-m-d', strtotime($this->tgl_kirim));
         $this->total_order = str_replace(',', '', $this->total_order);
         return parent::beforeSave($attribute);
     }

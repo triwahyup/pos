@@ -72,10 +72,11 @@ class MasterSupplierSearch extends MasterPerson
         if(!empty($this->group_supplier_code)){
             $query->andWhere('b.code LIKE "%'.$this->group_supplier_code.'%" OR b.name LIKE "%'.$this->group_supplier_code.'%"');
         }
-        
-        $query->andFilterWhere([
-            'tgl_jatuh_tempo' => $this->tgl_jatuh_tempo
-        ]);
+        if(!empty($this->tgl_jatuh_tempo)){
+            $query->andFilterWhere([
+                'tgl_jatuh_tempo' => date('Y-m-d', strtotime($this->tgl_jatuh_tempo))
+            ]);
+        }
 
         $query->andFilterWhere(['like', 'a.name', $this->name])
             ->andFilterWhere(['like', 'contact_person', $this->contact_person])

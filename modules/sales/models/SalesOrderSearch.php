@@ -59,11 +59,12 @@ class SalesOrderSearch extends SalesOrder
 
         // grid filtering conditions
         $query->where(['a.status'=>1]);
-        $query->andFilterWhere([
-            'tgl_so' => $this->tgl_so,
-            'tgl_po' => $this->tgl_po
-        ]);
-
+        if(!empty($this->tgl_so)){
+            $query->andFilterWhere(['tgl_so' => date('Y-m-d', strtotime($this->tgl_so))]);
+        }
+        if(!empty($this->tgl_po)){
+            $query->andFilterWhere(['tgl_so' => date('Y-m-d', strtotime($this->tgl_po))]);
+        }
         if(!empty($this->customer_code)){
             $query->andWhere('b.code LIKE "%'.$this->customer_code.'%" OR b.name LIKE "%'.$this->customer_code.'%"');
         }

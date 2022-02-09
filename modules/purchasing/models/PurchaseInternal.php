@@ -78,6 +78,7 @@ class PurchaseInternal extends \yii\db\ActiveRecord
 
     public function beforeSave($attribute)
     {
+        $this->tgl_pi = date('Y-m-d', strtotime($this->tgl_pi));
         $this->total_order = str_replace(',', '', $this->total_order);
         return parent::beforeSave($attribute);
     }

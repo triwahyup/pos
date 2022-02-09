@@ -17,8 +17,7 @@ class SpkInternalSearch extends SpkInternal
     public function rules()
     {
         return [
-            [['no_spk', 'tgl_spk', 'no_so', 'tgl_so', 'keterangan_cetak', 'keterangan_potong', 'keterangan_pond'], 'safe'],
-            [['status', 'status_produksi', 'created_at', 'updated_at'], 'integer'],
+            [['no_spk', 'tgl_spk', 'no_so', 'tgl_so'], 'safe'],
         ];
     }
 
@@ -60,17 +59,10 @@ class SpkInternalSearch extends SpkInternal
         $query->andFilterWhere([
             'tgl_spk' => $this->tgl_spk,
             'tgl_so' => $this->tgl_so,
-            'status' => $this->status,
-            'status_produksi' => $this->status_produksi,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
         ]);
 
         $query->andFilterWhere(['like', 'no_spk', $this->no_spk])
-            ->andFilterWhere(['like', 'no_so', $this->no_so])
-            ->andFilterWhere(['like', 'keterangan_cetak', $this->keterangan_cetak])
-            ->andFilterWhere(['like', 'keterangan_potong', $this->keterangan_potong])
-            ->andFilterWhere(['like', 'keterangan_pond', $this->keterangan_pond]);
+            ->andFilterWhere(['like', 'no_so', $this->no_so]);
 
         return $dataProvider;
     }

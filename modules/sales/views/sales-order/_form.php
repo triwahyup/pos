@@ -71,12 +71,12 @@ use yii\widgets\MaskedInput;
                         <?= $form->field($model, 'tgl_so')->widget(DatePicker::classname(), [
                             'type' => DatePicker::TYPE_INPUT,
                             'options' => [
-                                'placeholder' => 'yyyy-mm-dd',
-                                'value' => date('Y-m-d'),
+                                'placeholder' => 'dd-mm-yyyy',
+                                'value' => (!$model->isNewRecord) ? date('d-m-Y', strtotime($model->tgl_so)) : date('d-m-Y'),
                             ],
                             'pluginOptions' => [
                                 'autoclose' => true,
-                                'format' => 'yyyy-mm-dd',
+                                'format' => 'dd-mm-yyyy',
                             ]])->label(false) ?>
                     </div>
                 </div>
@@ -98,12 +98,12 @@ use yii\widgets\MaskedInput;
                         <?= $form->field($model, 'tgl_po')->widget(DatePicker::classname(), [
                             'type' => DatePicker::TYPE_INPUT,
                             'options' => [
-                                'placeholder' => 'yyyy-mm-dd',
-                                'value' => date('Y-m-d'),
+                                'placeholder' => 'dd-mm-yyyy',
+                                'value' => (!$model->isNewRecord) ? date('d-m-Y', strtotime($model->tgl_po)) : date('d-m-Y'),
                             ],
                             'pluginOptions' => [
                                 'autoclose' => true,
-                                'format' => 'yyyy-mm-dd',
+                                'format' => 'dd-mm-yyyy',
                             ]])->label(false) ?>
                     </div>
                 </div>

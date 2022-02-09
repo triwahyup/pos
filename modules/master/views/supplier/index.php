@@ -42,10 +42,14 @@ $this->params['breadcrumbs'][] = $this->title;
                     'pickerButton' => false,
                     'attribute' => 'tgl_jatuh_tempo',
                     'pluginOptions' => [
-                        'format' => 'yyyy-mm-dd',
+                        'format' => 'dd-mm-yyyy',
                         'autoclose' => true,
                     ],
                 ]),
+                'value' => function($model, $index, $key)
+                {
+                    return !empty($model->tgl_jatuh_tempo) ? date('d-m-Y', strtotime($model->tgl_jatuh_tempo)) : null;
+                }
             ],
             [
                 'attribute' => 'group_supplier_code',

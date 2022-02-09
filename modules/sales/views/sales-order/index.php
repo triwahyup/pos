@@ -39,10 +39,13 @@ $this->params['breadcrumbs'][] = $this->title;
                     'pickerButton' => false,
                     'attribute' => 'tgl_so',
                     'pluginOptions' => [
-                        'format' => 'yyyy-mm-dd',
+                        'format' => 'dd-mm-yyyy',
                         'autoclose' => true,
                     ],
                 ]),
+                'value' => function($model, $index, $key){
+                    return date('d-m-Y', strtotime($model->tgl_so));
+                }
             ],
             [
                 'attribute' => 'no_po',
@@ -62,10 +65,13 @@ $this->params['breadcrumbs'][] = $this->title;
                     'pickerButton' => false,
                     'attribute' => 'tgl_po',
                     'pluginOptions' => [
-                        'format' => 'yyyy-mm-dd',
+                        'format' => 'dd-mm-yyyy',
                         'autoclose' => true,
                     ],
                 ]),
+                'value' => function($model, $index, $key){
+                    return date('d-m-Y', strtotime($model->tgl_po));
+                }
             ],
             [
                 'attribute' => 'customer_code',

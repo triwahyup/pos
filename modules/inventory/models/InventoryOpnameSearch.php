@@ -58,7 +58,6 @@ class InventoryOpnameSearch extends InventoryOpname
 
         // grid filtering conditions
         $query->andFilterWhere([
-            'date' => $this->date,
             'post' => $this->post,
             'status_approval' => $this->status_approval,
             'status' => 1,
@@ -66,6 +65,9 @@ class InventoryOpnameSearch extends InventoryOpname
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ]);
+        if(!empty($this->date)){
+            $query->andFilterWhere(['date' => date('Y-m-d', strtotime($this->date))]);
+        }
 
         $query->andFilterWhere(['like', 'code', $this->code])
             ->andFilterWhere(['like', 'keterangan', $this->keterangan]);

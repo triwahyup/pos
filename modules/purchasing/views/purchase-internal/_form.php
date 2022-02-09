@@ -23,12 +23,12 @@ use yii\widgets\MaskedInput;
                     <?= $form->field($model, 'tgl_pi')->widget(DatePicker::classname(), [
                         'type' => DatePicker::TYPE_INPUT,
                         'options' => [
-                            'placeholder' => 'yyyy-mm-dd',
-                            'value' => date('Y-m-d'),
+                            'placeholder' => 'dd-mm-yyyy',
+                            'value' => date('d-m-Y'),
                         ],
                         'pluginOptions' => [
                             'autoclose' => true,
-                            'format' => 'yyyy-mm-dd',
+                            'format' => 'dd-mm-yyyy',
                         ]])->label(false) ?>
                     <?= $form->field($model, 'no_pi')->hiddenInput()->label(false) ?>
                 </div>

@@ -13,6 +13,5 @@ $this->params['breadcrumbs'][] = 'Update';
 <div class="spk-internal-update">
     <?= $this->render('_form', [
         'model' => $model,
-        'detail' => $detail,
     ]) ?>
 </div>

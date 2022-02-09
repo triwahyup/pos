@@ -62,7 +62,6 @@ class PurchaseOrderSearch extends PurchaseOrder
         // grid filtering conditions
         $query->where(['a.status'=>1]);
         $query->andFilterWhere([
-            'tgl_po' => $this->tgl_po,
             'tgl_kirim' => $this->tgl_kirim,
             'term_in' => $this->term_in,
             'total_order' => $this->total_order,
@@ -73,7 +72,9 @@ class PurchaseOrderSearch extends PurchaseOrder
         if(!empty($this->supplier_code)){
             $query->andWhere('b.code LIKE "%'.$this->supplier_code.'%" OR b.name LIKE "%'.$this->supplier_code.'%"');
         }
-
+        if(!empty($this->tgl_po)){
+            $query->andFilterWhere(['tgl_po' => date('Y-m-d', strtotime($this->tgl_po))]);
+        }
         $query->andFilterWhere(['like', 'no_po', $this->no_po]);
 
         return $dataProvider;

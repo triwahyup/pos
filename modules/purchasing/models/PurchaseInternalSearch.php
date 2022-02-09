@@ -59,7 +59,6 @@ class PurchaseInternalSearch extends PurchaseInternal
 
         // grid filtering conditions
         $query->andFilterWhere([
-            'tgl_pi' => $this->tgl_pi,
             'total_order' => $this->total_order,
             'user_id' => $this->user_id,
             'user_request' => $this->user_request,
@@ -68,6 +67,9 @@ class PurchaseInternalSearch extends PurchaseInternal
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ]);
+        if(!empty($this->tgl_pi)){
+            $query->andFilterWhere(['tgl_pi' => date('Y-m-d', strtotime($this->tgl_pi))]);
+        }
 
         $query->andFilterWhere(['like', 'no_pi', $this->no_pi])
             ->andFilterWhere(['like', 'keterangan', $this->keterangan]);

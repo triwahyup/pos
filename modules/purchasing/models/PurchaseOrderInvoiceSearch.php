@@ -61,15 +61,13 @@ class PurchaseOrderInvoiceSearch extends PurchaseOrderInvoice
 
         // grid filtering conditions
         $query->where(['a.status'=>1]);
-        $query->andFilterWhere([
-            'tgl_invoice' => $this->tgl_invoice,
-            'total_invoice' => $this->total_invoice,
-            'post' => $this->post,
-        ]);
+        $query->andFilterWhere(['total_invoice' => $this->total_invoice, 'post' => $this->post]);
         if(!empty($this->supplier_code)){
             $query->andWhere('b.code LIKE "%'.$this->supplier_code.'%" OR b.name LIKE "%'.$this->supplier_code.'%"');
         }
-
+        if(!empty($this->tgl_invoice)){
+            $query->andFilterWhere(['tgl_invoice' => date('Y-m-d', strtotime($this->tgl_invoice))]);
+        }
         $query->andFilterWhere(['like', 'no_invoice', $this->no_invoice])
             ->andFilterWhere(['like', 'no_bukti', $this->no_bukti])
             ->andFilterWhere(['like', 'no_po', $this->no_po]);

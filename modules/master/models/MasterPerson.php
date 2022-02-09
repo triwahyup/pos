@@ -102,6 +102,12 @@ class MasterPerson extends \yii\db\ActiveRecord
         ];
     }
 
+    public function beforeSave($attribute)
+    {
+        $this->tgl_jatuh_tempo = date('Y-m-d', strtotime($this->tgl_jatuh_tempo));
+        return parent::beforeSave($attribute);
+    }
+
     public function generateCode()
     {
         $model = MasterPerson::find()->count();

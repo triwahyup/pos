@@ -23,11 +23,7 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'tgl_so') ?>
 
-    <?= $form->field($model, 'keterangan_cetak') ?>
-
-    <?php // echo $form->field($model, 'keterangan_potong') ?>
-
-    <?php // echo $form->field($model, 'keterangan_pond') ?>
+    <?= $form->field($model, 'keterangan') ?>
 
     <?php // echo $form->field($model, 'status') ?>
 

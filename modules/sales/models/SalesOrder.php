@@ -110,6 +110,8 @@ class SalesOrder extends \yii\db\ActiveRecord
 
     public function beforeSave($attribute)
     {
+        $this->tgl_so = date('Y-m-d', strtotime($this->tgl_so));
+        $this->tgl_po = date('Y-m-d', strtotime($this->tgl_po));
         $this->biaya_pengiriman = str_replace(',', '', $this->biaya_pengiriman);
         return parent::beforeSave($attribute);
     }

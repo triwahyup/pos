@@ -32,7 +32,12 @@ $this->params['breadcrumbs'][] = $this->title;
                 'nik',
                 'nip',
                 'npwp',
-                'tgl_lahir',
+                [
+                    'attribute' => 'tgl_lahir',
+                    'value'=> function ($model, $index) {
+                        return (!empty($model->tgl_lahir)) ? date('d-m-Y', strtotime($model->tgl_lahir)) : null;
+                    }
+                ],
                 'tempat_lahir',
                 'alamat',
                 [
@@ -64,8 +69,18 @@ $this->params['breadcrumbs'][] = $this->title;
                 'phone_2',
                 'email:email',
                 'keterangan',
-                'tgl_masuk',
-                'tgl_keluar',
+                [
+                    'attribute' => 'tgl_masuk',
+                    'value'=> function ($model, $index) {
+                        return (!empty($model->tgl_masuk)) ? date('d-m-Y', strtotime($model->tgl_masuk)) : null;
+                    }
+                ],
+                [
+                    'attribute' => 'tgl_keluar',
+                    'value'=> function ($model, $index) {
+                        return (!empty($model->tgl_keluar)) ? date('d-m-Y', strtotime($model->tgl_keluar)) : null;
+                    }
+                ],
                 'golongan',
                 [
                     'attribute' => 'typeuser_code',

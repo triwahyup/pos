@@ -62,7 +62,12 @@ $this->params['breadcrumbs'][] = $this->title;
                 'email:email',
                 'fax',
                 'keterangan:ntext',
-                'tgl_jatuh_tempo',
+                [
+                    'attribute' => 'tgl_jatuh_tempo',
+                    'value'=> function ($model, $index) {
+                        return (!empty($model->tgl_jatuh_tempo)) ? date('d-m-Y', strtotime($model->tgl_jatuh_tempo)) : null;
+                    }
+                ],
                 [
                     'attribute' => 'group_supplier_code',
                     'value'=> function ($model, $index) {

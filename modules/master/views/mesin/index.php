@@ -40,13 +40,13 @@ $this->params['breadcrumbs'][] = $this->title;
                     'pickerButton' => false,
                     'attribute' => 'created_at',
                     'pluginOptions' => [
-                        'format' => 'yyyy-mm-dd',
+                        'format' => 'dd-mm-yyyy',
                         'autoclose' => true,
                     ],
                 ]),
                 'value' => function($model, $index, $key)
                 {
-                    return date('Y-m-d', $model->created_at);
+                    return date('d-m-Y', $model->created_at);
                 }
             ],
             [
@@ -61,13 +61,13 @@ $this->params['breadcrumbs'][] = $this->title;
                     'pickerButton' => false,
                     'attribute' => 'updated_at',
                     'pluginOptions' => [
-                        'format' => 'yyyy-mm-dd',
+                        'format' => 'dd-mm-yyyy',
                         'autoclose' => true,
                     ],
                 ]),
                 'value' => function($model, $index, $key)
                 {
-                    return date('Y-m-d', $model->updated_at);
+                    return date('d-m-Y', $model->updated_at);
                 }
             ],
             [

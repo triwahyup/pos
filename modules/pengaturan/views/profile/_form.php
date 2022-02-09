@@ -26,11 +26,12 @@ use yii\widgets\MaskedInput;
                     <?= $form->field($model, 'tgl_lahir')->widget(DatePicker::classname(), [
                         'type' => DatePicker::TYPE_INPUT,
                         'options' => [
-                            'placeholder' => 'yyyy-mm-dd',
+                            'placeholder' => 'dd-mm-yyyy',
+                            'value' => (!empty($model->tgl_lahir)) ? date('d-m-Y', strtotime($model->tgl_lahir)) : null,
                         ],
                         'pluginOptions' => [
                             'autoclose' => true,
-                            'format' => 'yyyy-mm-dd',
+                            'format' => 'dd-mm-yyyy',
                         ]]) ?>
                     <?= $form->field($model, 'tempat_lahir')->textInput(['maxlength' => true]) ?>
                 </div>
@@ -100,20 +101,22 @@ use yii\widgets\MaskedInput;
                     <?= $form->field($model, 'tgl_masuk')->widget(DatePicker::classname(), [
                         'type' => DatePicker::TYPE_INPUT,
                         'options' => [
-                            'placeholder' => 'yyyy-mm-dd',
+                            'placeholder' => 'dd-mm-yyyy',
+                            'value' => (!empty($model->tgl_masuk)) ? date('d-m-Y', strtotime($model->tgl_masuk)) : null,
                         ],
                         'pluginOptions' => [
                             'autoclose' => true,
-                            'format' => 'yyyy-mm-dd',
+                            'format' => 'dd-mm-yyyy',
                         ]]) ?>
                     <?= $form->field($model, 'tgl_keluar')->widget(DatePicker::classname(), [
                         'type' => DatePicker::TYPE_INPUT,
                         'options' => [
-                            'placeholder' => 'yyyy-mm-dd',
+                            'placeholder' => 'dd-mm-yyyy',
+                            'value' => (!empty($model->tgl_keluar)) ? date('d-m-Y', strtotime($model->tgl_keluar)) : null,
                         ],
                         'pluginOptions' => [
                             'autoclose' => true,
-                            'format' => 'yyyy-mm-dd',
+                            'format' => 'dd-mm-yyyy',
                         ]]) ?>
                 </div>
                 <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">

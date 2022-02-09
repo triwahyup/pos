@@ -94,11 +94,13 @@ class RoleController extends Controller
 								$message = '{code: '.$typeCode->value.'}. Insert Auth Item Child not validate';
                             }
                         }
-
+                        
+                        $profiles = Profile::findAll(['typeuser_code'=>$typeCode, 'status'=>1]);
+                        foreach($profiles as $empty)
+                            AuthAssignment::deleteAll('user_id=:user_id', [':user_id'=>$empty->user_id]);
                         $authItems = AuthItemChild::findAll(['parent'=>$parent]);
                         if(count($authItems) > 0){
                             foreach($authItems as $authItem){
-                                $profiles = Profile::findAll(['typeuser_code'=>$typeCode, 'status'=>1]);
                                 foreach($profiles as $profile){
                                     $authAssignment = new AuthAssignment();
                                     $authAssignment->item_name = $authItem->child;
@@ -115,7 +117,7 @@ class RoleController extends Controller
                                 }
                             }
                         }
-
+                        
                         if($success){
 							$message = '('.substr($role,0,-2).')';
 							\Yii::$app->session->setFlash('success', 'Update Rule SUKSES: '.$message);

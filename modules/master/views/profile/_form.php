@@ -26,11 +26,11 @@ use yii\widgets\MaskedInput;
                     <?= $form->field($model, 'tgl_lahir')->widget(DatePicker::classname(), [
                         'type' => DatePicker::TYPE_INPUT,
                         'options' => [
-                            'placeholder' => 'yyyy-mm-dd',
+                            'placeholder' => 'dd-mm-yyyy',
                         ],
                         'pluginOptions' => [
                             'autoclose' => true,
-                            'format' => 'yyyy-mm-dd',
+                            'format' => 'dd-mm-yyyy',
                         ]]) ?>
                     <?= $form->field($model, 'tempat_lahir')->textInput(['maxlength' => true]) ?>
                     <?= $form->field($model, 'npwp')->textInput(['maxlength' => true]) ?>
@@ -122,20 +122,20 @@ use yii\widgets\MaskedInput;
                     <?= $form->field($model, 'tgl_masuk')->widget(DatePicker::classname(), [
                         'type' => DatePicker::TYPE_INPUT,
                         'options' => [
-                            'placeholder' => 'yyyy-mm-dd',
+                            'placeholder' => 'dd-mm-yyyy',
                         ],
                         'pluginOptions' => [
                             'autoclose' => true,
-                            'format' => 'yyyy-mm-dd',
+                            'format' => 'dd-mm-yyyy',
                         ]]) ?>
                     <?= $form->field($model, 'tgl_keluar')->widget(DatePicker::classname(), [
                         'type' => DatePicker::TYPE_INPUT,
                         'options' => [
-                            'placeholder' => 'yyyy-mm-dd',
+                            'placeholder' => 'dd-mm-yyyy',
                         ],
                         'pluginOptions' => [
                             'autoclose' => true,
-                            'format' => 'yyyy-mm-dd',
+                            'format' => 'dd-mm-yyyy',
                         ]]) ?>
                 </div>
                 <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
@@ -146,7 +146,7 @@ use yii\widgets\MaskedInput;
                 <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
                     <?= $form->field($model, 'typeuser_code')->widget(Select2::classname(), [
                             'data' => $typeUser,
-                            'options' => ['placeholder' => 'Kabupaten'],
+                            'options' => ['placeholder' => 'Type User'],
                         ]) ?>
                     <?= $form->field($model, 'keterangan')->textarea(['rows' => 4]) ?>
                 </div>

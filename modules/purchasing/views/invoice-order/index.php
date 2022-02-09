@@ -38,10 +38,13 @@ $this->params['breadcrumbs'][] = $this->title;
                     'pickerButton' => false,
                     'attribute' => 'tgl_invoice',
                     'pluginOptions' => [
-                        'format' => 'yyyy-mm-dd',
+                        'format' => 'dd-mm-yyyy',
                         'autoclose' => true,
                     ],
                 ]),
+                'value' => function($model, $index, $key) {
+                    return date('d-m-Y', strtotime($model->tgl_invoice));
+                }
             ],
             [
                 'attribute' => 'no_bukti',
