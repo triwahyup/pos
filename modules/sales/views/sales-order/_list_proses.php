@@ -32,9 +32,9 @@
         </tbody>
     </table>
     <div class="col-lg-12 col-md-12 col-xs-12 text-right padding-right-0">
-        <input type="hidden" name="TempSalesOrderProses[code]" value="<?=$tempDetail->code ?>">
-        <input type="hidden" name="TempSalesOrderProses[item_code]" value="<?=$tempDetail->item_code ?>">
-        <input type="hidden" name="TempSalesOrderProses[urutan]" value="<?=$tempDetail->urutan ?>">
+        <input type="hidden" name="TempSalesOrderProses[code]" value="<?=$tempPotong->code ?>">
+        <input type="hidden" name="TempSalesOrderProses[item_code]" value="<?=$tempPotong->item_code ?>">
+        <input type="hidden" name="TempSalesOrderProses[urutan]" value="<?=$tempPotong->urutan ?>">
         <button class="btn btn-primary" data-button="create_proses">
             <i class="fontello icon-floppy"></i>
             <span>Simpan</span>

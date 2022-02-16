@@ -11,7 +11,7 @@ use yii\behaviors\TimestampBehavior;
  *
  * @property string $code
  * @property string $item_code
- * @property int $detail_id
+ * @property int $potong_id
  * @property string $biaya_code
  * @property int|null $type 1: Cetak; 2: Potong;
  * @property float|null $index
@@ -44,13 +44,13 @@ class SalesOrderProses extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['code', 'item_code', 'detail_id', 'biaya_code'], 'required'],
-            [['detail_id', 'type', 'status', 'created_at', 'updated_at'], 'integer'],
+            [['code', 'item_code', 'potong_id', 'biaya_code'], 'required'],
+            [['potong_id', 'type', 'status', 'created_at', 'updated_at'], 'integer'],
             [['index', 'harga', 'total_biaya'], 'number'],
             [['code'], 'string', 'max' => 12],
             [['item_code'], 'string', 'max' => 7],
             [['biaya_code'], 'string', 'max' => 3],
-            [['code', 'item_code', 'detail_id', 'biaya_code'], 'unique', 'targetAttribute' => ['code', 'item_code', 'detail_id', 'biaya_code']],
+            [['code', 'item_code', 'potong_id', 'biaya_code'], 'unique', 'targetAttribute' => ['code', 'item_code', 'potong_id', 'biaya_code']],
         ];
     }
 
@@ -62,7 +62,7 @@ class SalesOrderProses extends \yii\db\ActiveRecord
         return [
             'code' => 'Code',
             'item_code' => 'Item Code',
-            'detail_id' => 'Detail ID',
+            'potong_id' => 'Potong ID',
             'biaya_code' => 'Biaya Code',
             'type' => 'Type',
             'index' => 'Index',

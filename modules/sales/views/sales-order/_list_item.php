@@ -1,5 +1,5 @@
 <?php use yii\helpers\Url; ?>
-<input type="text" name="search" id="search" class="form-control" placeholder="Cari berdasarkan Kode dan Nama Material ...">
+<input type="text" name="search" id="search" class="form-control" placeholder="Cari berdasarkan Kode dan Nama Material ..." data-type="<?=$type ?>">
 <table class="table table-bordered table-custom margin-top-10">
 	<thead>
 		<tr>
@@ -13,7 +13,7 @@
 	<tbody>
 		<?php if(count($model) > 0): ?>
 			<?php foreach($model as $index=>$val) : ?>
-				<tr data-code="<?=$val->code ?>">
+				<tr data-code="<?=$val->code ?>" data-type="<?=$type ?>">
                     <td class="text-center"><?=($index+1) ?></td>
                     <td class="text-center"><?=$val->code ?></td>
                     <td><?=$val->name ?></td>
@@ -29,20 +29,22 @@
 	</tbody>
 </table>
 <script>
+var type = $("#search").data().type;
 $(document).ready(function(){
 	$("#search").autocomplete({
         minLength: 1,
         select: function(event, value){
-			search_item(value.item.code);
+			search_item(value.item.code, type);
         },
         source: function(request, response){
             $.ajax({
-                url: "<?=Url::to(['sales-order/autocomplete'])?>",
+                url: "<?=Url::to(['sales-order/autocomplete-item'])?>",
                 type: "POST",
                 dataType: "text",
                 error: function(xhr, status, error) {},
                 data: {
                     search: request.term,
+                    type: type,
                 },
                 beforeSend: function (data){
                     $("#search").loader("load");

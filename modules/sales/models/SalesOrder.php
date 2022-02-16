@@ -5,9 +5,9 @@ namespace app\modules\sales\models;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use app\modules\master\models\MasterPerson;
-use app\modules\sales\models\SalesOrderDetail;
 use app\modules\sales\models\SalesOrderItem;
-use app\modules\sales\models\TempSalesOrderDetail;
+use app\modules\sales\models\SalesOrderPotong;
+use app\modules\sales\models\TempSalesOrderPotong;
 use app\modules\sales\models\TempSalesOrderItem;
 use app\modules\sales\models\TempSalesOrderProses;
 
@@ -137,9 +137,9 @@ class SalesOrder extends \yii\db\ActiveRecord
         return $this->hasMany(SalesOrderItem::className(), ['code' => 'code']);
     }
 
-    public function getDetails()
+    public function getPotongs()
     {
-        return $this->hasMany(SalesOrderDetail::className(), ['code' => 'code']);
+        return $this->hasMany(SalesOrderPotong::className(), ['code' => 'code']);
     }
 
     public function getProses()
@@ -147,9 +147,9 @@ class SalesOrder extends \yii\db\ActiveRecord
         return $this->hasMany(SalesOrderProses::className(), ['code' => 'code']);
     }
 
-    public function getDetailTemps()
+    public function getPotongTemps()
     {
-        return $this->hasMany(TempSalesOrderDetail::className(), ['code' => 'code']);
+        return $this->hasMany(TempSalesOrderPotong::className(), ['code' => 'code']);
     }
 
     public function getItemTemps()
@@ -162,9 +162,9 @@ class SalesOrder extends \yii\db\ActiveRecord
         return $this->hasMany(TempSalesOrderProses::className(), ['code' => 'code']);
     }
 
-    public function detailTemps()
+    public function potongTemps()
     {
-        return TempSalesOrderDetail::findAll(['user_id' => \Yii::$app->user->id]);
+        return TempSalesOrderPotong::findAll(['user_id' => \Yii::$app->user->id]);
     }
 
     public function itemTemps()

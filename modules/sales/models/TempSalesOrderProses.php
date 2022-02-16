@@ -4,7 +4,7 @@ namespace app\modules\sales\models;
 
 use Yii;
 use app\modules\master\models\MasterBiayaProduksi;
-use app\modules\sales\models\TempSalesOrderDetail;
+use app\modules\sales\models\TempSalesOrderPotong;
 use app\modules\sales\models\TempSalesOrderItem;
 
 /**
@@ -12,7 +12,7 @@ use app\modules\sales\models\TempSalesOrderItem;
  *
  * @property string $code
  * @property string $item_code
- * @property int $detail_id
+ * @property int $potong_id
  * @property string $biaya_code
  * @property int|null $type 1: Cetak; 2: Potong;
  * @property float|null $index
@@ -36,8 +36,8 @@ class TempSalesOrderProses extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['code', 'item_code', 'detail_id', 'biaya_code'], 'required'],
-            [['detail_id', 'type', 'user_id'], 'integer'],
+            [['code', 'item_code', 'potong_id', 'biaya_code'], 'required'],
+            [['potong_id', 'type', 'user_id'], 'integer'],
             [['index', 'harga', 'total_biaya'], 'number'],
             [['code'], 'string', 'max' => 12],
             [['item_code'], 'string', 'max' => 7],
@@ -53,7 +53,7 @@ class TempSalesOrderProses extends \yii\db\ActiveRecord
         return [
             'code' => 'Code',
             'item_code' => 'Item Code',
-            'detail_id' => 'Detail ID',
+            'potong_id' => 'Potong ID',
             'biaya_code' => 'Biaya Code',
             'type' => 'Type',
             'index' => 'Index',
@@ -65,7 +65,7 @@ class TempSalesOrderProses extends \yii\db\ActiveRecord
 
     public function getTemps()
     {
-        return TempSalesOrderProses::find()->where(['code'=>$this->code, 'item_code'=>$this->item_code, 'detail_id'=>$this->detail_id, 'user_id'=> \Yii::$app->user->id])->all();
+        return TempSalesOrderProses::find()->where(['code'=>$this->code, 'item_code'=>$this->item_code, 'potong_id'=>$this->potong_id, 'user_id'=> \Yii::$app->user->id])->all();
     }
 
     public function getBiayaProduksi()
@@ -80,13 +80,13 @@ class TempSalesOrderProses extends \yii\db\ActiveRecord
 
     public function totalBiaya($model)
     {
-        $tempDetail = TempSalesOrderDetail::findOne(['code'=>$model['code'], 'item_code'=>$model['item_code'], 'urutan'=>$model['urutan']]);
+        $tempPotong = TempSalesOrderPotong::findOne(['code'=>$model['code'], 'item_code'=>$model['item_code'], 'urutan'=>$model['urutan']]);
         $tempItem = TempSalesOrderItem::findOne(['code'=>$model['code'], 'item_code'=>$model['item_code']]);
         if($this->type == 1){
             $konversi = $tempItem->inventoryStock->satuanTerkecil($tempItem->item_code, [
                 0 => $tempItem->qty_order_1,
                 1 => $tempItem->qty_order_2]);
-            $this->total_biaya = $tempDetail->panjang * $tempDetail->lebar * $this->index * $konversi;
+            $this->total_biaya = $tempPotong->panjang * $tempPotong->lebar * $this->index * $konversi;
         }else{
             $this->total_biaya = $this->harga;
         }

@@ -1012,6 +1012,7 @@ p, span {
     .boxShadow(inset 0 0 20px 1px #c7c7c4);
     background: linear-gradient(rgb(251 247 247 / 40%),#fff 100%);
     display: inline-flex;
+    margin-top: 0;
     padding: 5px 15px;
     width: 100%;
     li {
@@ -1030,15 +1031,27 @@ p, span {
             line-height: 21px;
             text-align: center;
             width: 20px;
+            // bypass assets
+            background-color: unset !important;
+            border: unset !important;
+            border-top-left-radius: 50% !important;
+            border-bottom-left-radius: 50% !important;
+            border-top-right-radius: 50% !important;
+            border-bottom-right-radius: 50% !important;
+            float: unset !important;
+            margin-left: unset !important;
+            padding: unset !important;
+            position: unset !important;
+            text-decoration: unset !important;
         }
         &.disabled {
-            background-color: @color_header;
+            background-color: @color_header !important;
         }
         &.active {
-            background-color: @color_btnPagination_active;
+            background-color: @color_btnPagination_active !important;
         }
         &:hover {
-            background-color: @color_btnPagination_hover;
+            background-color: @color_btnPagination_hover !important;
         }
     }
 }

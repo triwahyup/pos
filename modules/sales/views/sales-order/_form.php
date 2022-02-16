@@ -20,6 +20,39 @@ use yii\widgets\MaskedInput;
                 <hr />
             </div>
             <div class="col-lg-6 col-md-6 col-xs-12">
+                <!-- Tgl. SO -->
+                <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
+                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
+                        <label>Tgl SO:</label>
+                    </div>
+                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
+                        <?= $form->field($model, 'tgl_so')->widget(DatePicker::classname(), [
+                            'type' => DatePicker::TYPE_INPUT,
+                            'options' => [
+                                'placeholder' => 'dd-mm-yyyy',
+                                'value' => (!$model->isNewRecord) ? date('d-m-Y', strtotime($model->tgl_so)) : date('d-m-Y'),
+                            ],
+                            'pluginOptions' => [
+                                'autoclose' => true,
+                                'format' => 'dd-mm-yyyy',
+                            ]])->label(false) ?>
+                    </div>
+                </div>
+                <!-- Customer -->
+                <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
+                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
+                        <label>Customer:</label>
+                    </div>
+                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
+                        <?= $form->field($model, 'customer_code')->widget(Select2::classname(), [
+                                'data' => $customer,
+                                'options' => [
+                                    'placeholder' => 'Pilih Customer',
+                                    'class' => 'select2',
+                                ],
+                            ])->label(false) ?>
+                    </div>
+                </div>
                 <!-- Nama Job -->
                 <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
                     <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
@@ -45,39 +78,6 @@ use yii\widgets\MaskedInput;
                                     'class' => 'select2',
                                 ],
                             ])->label(false) ?>
-                    </div>
-                </div>
-                <!-- Customer -->
-                <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
-                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                        <label>Customer:</label>
-                    </div>
-                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                        <?= $form->field($model, 'customer_code')->widget(Select2::classname(), [
-                                'data' => $customer,
-                                'options' => [
-                                    'placeholder' => 'Pilih Customer',
-                                    'class' => 'select2',
-                                ],
-                            ])->label(false) ?>
-                    </div>
-                </div>
-                <!-- Tgl. SO -->
-                <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
-                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                        <label>Tgl SO:</label>
-                    </div>
-                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                        <?= $form->field($model, 'tgl_so')->widget(DatePicker::classname(), [
-                            'type' => DatePicker::TYPE_INPUT,
-                            'options' => [
-                                'placeholder' => 'dd-mm-yyyy',
-                                'value' => (!$model->isNewRecord) ? date('d-m-Y', strtotime($model->tgl_so)) : date('d-m-Y'),
-                            ],
-                            'pluginOptions' => [
-                                'autoclose' => true,
-                                'format' => 'dd-mm-yyyy',
-                            ]])->label(false) ?>
                     </div>
                 </div>
                 <!-- No. PO -->
@@ -109,22 +109,13 @@ use yii\widgets\MaskedInput;
                 </div>
             </div>
             <div class="col-lg-6 col-md-6 col-xs-12">
-                <!-- Ekspedisi -->
+                <!-- Minimal Order -->
                 <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
                     <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                        <label>Ekspedisi:</label>
+                        <label>Minimal Order:</label>
                     </div>
-                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                        <?= $form->field($model, 'ekspedisi_name')->textInput(['maxlength' => true])->label(false) ?>
-                    </div>
-                </div>
-                <!-- Biaya Pengiriman -->
-                <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
-                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                        <label>Biaya Pengiriman:</label>
-                    </div>
-                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                        <?= $form->field($model, 'biaya_pengiriman')->widget(MaskedInput::className(), [
+                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-right-0">
+                        <?= $form->field($tempItem, 'qty_order_1')->widget(MaskedInput::className(), [
                                 'clientOptions' => [
                                     'alias' => 'decimal',
                                     'groupSeparator' => ',',
@@ -132,8 +123,25 @@ use yii\widgets\MaskedInput;
                                 ],
                                 'options' => [
                                     'data-align' => 'text-right',
-                                    'data-name' => 'iconbox',
-                                    'data-icons' => 'rupiah',
+                                    'readonly' => ($model->isNewRecord) ? true : false,
+                                    'placeholder' => 'RIM',
+                                    'value' => (!$model->isNewRecord) ? $itemTemp->qty_order_1 : '',
+                                ]
+                            ])->label(false) ?>
+                    </div>
+                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-right-0">
+                        <?= $form->field($tempItem, 'qty_order_2')->widget(MaskedInput::className(), [
+                                'clientOptions' => [
+                                    'alias' => 'decimal',
+                                    'groupSeparator' => ',',
+                                    'autoGroup' => true
+                                ],
+                                'options' => [
+                                    'data-align' => 'text-right',
+                                    'readonly' => ($model->isNewRecord) ? true : false,
+                                    'maxlength' => 3,
+                                    'placeholder' => 'LB',
+                                    'value' => (!$model->isNewRecord) ? $itemTemp->qty_order_2 : '',
                                 ]
                             ])->label(false) ?>
                     </div>
@@ -183,127 +191,248 @@ use yii\widgets\MaskedInput;
                         <label>Material:</label>
                     </div>
                     <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                        <?= $form->field($tempItem, 'item_name')->textInput(['placeholder' => 'Pilih material tekan F4'])->label(false) ?>
+                        <?= $form->field($tempItem, 'item_name')->textInput(['placeholder' => 'Pilih material tekan F4', 'data-type'=>'item'])->label(false) ?>
                         <?= $form->field($tempItem, 'item_code')->hiddenInput()->label(false) ?>
                     </div>
                 </div>
-                <!-- Min Order -->
+                <!-- Total Potong -->
                 <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
                     <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                        <label>Min Order:</label>
+                        <label>Total Potong:</label>
                     </div>
-                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-right-0">
-                        <?= $form->field($tempItem, 'qty_order_1')->widget(MaskedInput::className(), [
+                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
+                        <?= $form->field($tempItem, 'total_potong')->widget(MaskedInput::className(), [
                                 'clientOptions' => [
-                                    'alias' => 'decimal',
+                                    'alias' =>  'decimal',
                                     'groupSeparator' => ',',
                                     'autoGroup' => true
                                 ],
                                 'options' => [
                                     'data-align' => 'text-right',
-                                    'readonly' => true,
-                                    'placeholder' => 'RIM',
-                                ]
-                            ])->label(false) ?>
-                    </div>
-                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-right-0">
-                        <?= $form->field($tempItem, 'qty_order_2')->widget(MaskedInput::className(), [
-                                'clientOptions' => [
-                                    'alias' => 'decimal',
-                                    'groupSeparator' => ',',
-                                    'autoGroup' => true
-                                ],
-                                'options' => [
-                                    'data-align' => 'text-right',
-                                    'readonly' => true,
-                                    'maxlength' => 3,
-                                    'placeholder' => 'LB',
+                                    'data-temp' => true,
                                 ]
                             ])->label(false) ?>
                     </div>
                 </div>
-            </div>
-            <!-- /ITEM -->
-            <!-- DETAIL -->
-            <div class="col-lg-12 col-md-12 col-xs-12">
-                <hr />
+                <!-- PxL / Objek -->
+                <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
+                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
+                        <label>Potong (PxL) / Objek:</label>
+                    </div>
+                    <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
+                        <?= $form->field($tempPotong, 'panjang[]')->widget(MaskedInput::className(), [
+                                'clientOptions' => [
+                                    'alias' => 'decimal',
+                                    'groupSeparator' => ',',
+                                    'autoGroup' => true
+                                ],
+                                'options' => [
+                                    'data-align' => 'text-right',
+                                    'data-temp' => true,
+                                    'data-urutan' => 1,
+                                    'placeholder' => 'P',
+                                    'disabled' => true,
+                                ]
+                            ])->label(false) ?>
+                    </div>
+                    <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
+                        <?= $form->field($tempPotong, 'lebar[]')->widget(MaskedInput::className(), [
+                                'clientOptions' => [
+                                    'alias' => 'decimal',
+                                    'groupSeparator' => ',',
+                                    'autoGroup' => true
+                                ],
+                                'options' => [
+                                    'data-align' => 'text-right',
+                                    'data-temp' => true,
+                                    'data-urutan' => 1,
+                                    'placeholder' => 'L',
+                                    'disabled' => true,
+                                ]
+                            ])->label(false) ?>
+                    </div>
+                    <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
+                        <?= $form->field($tempPotong, 'total_objek[]')->widget(MaskedInput::className(), [
+                                'clientOptions' => [
+                                    'alias' => 'decimal',
+                                    'groupSeparator' => ',',
+                                    'autoGroup' => true
+                                ],
+                                'options' => [
+                                    'data-align' => 'text-right',
+                                    'data-temp' => true,
+                                    'data-urutan' => 1,
+                                    'placeholder' => 'Objek',
+                                    'disabled' => true,
+                                ]
+                            ])->label(false) ?>
+                    </div>
+                </div>
+                <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
+                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
+                    </div>
+                    <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
+                        <?= $form->field($tempPotong, 'panjang[]')->widget(MaskedInput::className(), [
+                                'clientOptions' => [
+                                    'alias' => 'decimal',
+                                    'groupSeparator' => ',',
+                                    'autoGroup' => true
+                                ],
+                                'options' => [
+                                    'data-align' => 'text-right',
+                                    'data-temp' => true,
+                                    'data-urutan' => 2,
+                                    'placeholder' => 'P',
+                                    'disabled' => true,
+                                ]
+                            ])->label(false) ?>
+                    </div>
+                    <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
+                        <?= $form->field($tempPotong, 'lebar[]')->widget(MaskedInput::className(), [
+                                'clientOptions' => [
+                                    'alias' => 'decimal',
+                                    'groupSeparator' => ',',
+                                    'autoGroup' => true
+                                ],
+                                'options' => [
+                                    'data-align' => 'text-right',
+                                    'data-temp' => true,
+                                    'data-urutan' => 2,
+                                    'placeholder' => 'L',
+                                    'disabled' => true,
+                                ]
+                            ])->label(false) ?>
+                    </div>
+                    <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
+                        <?= $form->field($tempPotong, 'total_objek[]')->widget(MaskedInput::className(), [
+                                'clientOptions' => [
+                                    'alias' => 'decimal',
+                                    'groupSeparator' => ',',
+                                    'autoGroup' => true
+                                ],
+                                'options' => [
+                                    'data-align' => 'text-right',
+                                    'data-temp' => true,
+                                    'data-urutan' => 2,
+                                    'placeholder' => 'Objek',
+                                    'disabled' => true,
+                                ]
+                            ])->label(false) ?>
+                    </div>
+                </div>
+                <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
+                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
+                    </div>
+                    <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
+                        <?= $form->field($tempPotong, 'panjang[]')->widget(MaskedInput::className(), [
+                                'clientOptions' => [
+                                    'alias' => 'decimal',
+                                    'groupSeparator' => ',',
+                                    'autoGroup' => true
+                                ],
+                                'options' => [
+                                    'data-align' => 'text-right',
+                                    'data-temp' => true,
+                                    'data-urutan' => 3,
+                                    'placeholder' => 'P',
+                                    'disabled' => true,
+                                ]
+                            ])->label(false) ?>
+                    </div>
+                    <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
+                        <?= $form->field($tempPotong, 'lebar[]')->widget(MaskedInput::className(), [
+                                'clientOptions' => [
+                                    'alias' => 'decimal',
+                                    'groupSeparator' => ',',
+                                    'autoGroup' => true
+                                ],
+                                'options' => [
+                                    'data-align' => 'text-right',
+                                    'data-temp' => true,
+                                    'data-urutan' => 3,
+                                    'placeholder' => 'L',
+                                    'disabled' => true,
+                                ]
+                            ])->label(false) ?>
+                    </div>
+                    <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
+                        <?= $form->field($tempPotong, 'total_objek[]')->widget(MaskedInput::className(), [
+                                'clientOptions' => [
+                                    'alias' => 'decimal',
+                                    'groupSeparator' => ',',
+                                    'autoGroup' => true
+                                ],
+                                'options' => [
+                                    'data-align' => 'text-right',
+                                    'data-temp' => true,
+                                    'data-urutan' => 3,
+                                    'placeholder' => 'Objek',
+                                    'disabled' => true,
+                                ]
+                            ])->label(false) ?>
+                    </div>
+                </div>
+                <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
+                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
+                    </div>
+                    <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
+                        <?= $form->field($tempPotong, 'panjang[]')->widget(MaskedInput::className(), [
+                                'clientOptions' => [
+                                    'alias' => 'decimal',
+                                    'groupSeparator' => ',',
+                                    'autoGroup' => true
+                                ],
+                                'options' => [
+                                    'data-align' => 'text-right',
+                                    'data-temp' => true,
+                                    'data-urutan' => 4,
+                                    'placeholder' => 'P',
+                                    'disabled' => true,
+                                ]
+                            ])->label(false) ?>
+                    </div>
+                    <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
+                        <?= $form->field($tempPotong, 'lebar[]')->widget(MaskedInput::className(), [
+                                'clientOptions' => [
+                                    'alias' => 'decimal',
+                                    'groupSeparator' => ',',
+                                    'autoGroup' => true
+                                ],
+                                'options' => [
+                                    'data-align' => 'text-right',
+                                    'data-temp' => true,
+                                    'data-urutan' => 4,
+                                    'placeholder' => 'L',
+                                    'disabled' => true,
+                                ]
+                            ])->label(false) ?>
+                    </div>
+                    <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
+                        <?= $form->field($tempPotong, 'total_objek[]')->widget(MaskedInput::className(), [
+                                'clientOptions' => [
+                                    'alias' => 'decimal',
+                                    'groupSeparator' => ',',
+                                    'autoGroup' => true
+                                ],
+                                'options' => [
+                                    'data-align' => 'text-right',
+                                    'data-temp' => true,
+                                    'data-urutan' => 4,
+                                    'placeholder' => 'Objek',
+                                    'disabled' => true,
+                                ]
+                            ])->label(false) ?>
+                    </div>
+                </div>
             </div>
             <div class="col-lg-6 col-md-6 col-xs-12">
-                <!-- Panjang/Lebar -->
-                <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
-                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                        <label>Potong (PxL):</label>
-                    </div>
-                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-right-0">
-                        <?= $form->field($tempDetail, 'panjang')->widget(MaskedInput::className(), [
-                                'clientOptions' => [
-                                    'alias' =>  'decimal',
-                                    'groupSeparator' => ',',
-                                    'autoGroup' => true
-                                ],
-                                'options' => [
-                                    'data-align' => 'text-right',
-                                    'data-temp' => true,
-                                    'placeholder' => 'Panjang'
-                                ]
-                            ])->label(false) ?>
-                    </div>
-                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-right-0">
-                        <?= $form->field($tempDetail, 'lebar')->widget(MaskedInput::className(), [
-                                'clientOptions' => [
-                                    'alias' =>  'decimal',
-                                    'groupSeparator' => ',',
-                                    'autoGroup' => true
-                                ],
-                                'options' => [
-                                    'data-align' => 'text-right',
-                                    'data-temp' => true,
-                                    'placeholder' => 'Lebar'
-                                ]
-                            ])->label(false) ?>
-                    </div>
-                </div>
-                <!-- Potong/Objek -->
-                <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
-                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                        <label>Total Potong / Objek:</label>
-                    </div>
-                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-right-0">
-                        <?= $form->field($tempDetail, 'total_potong')->widget(MaskedInput::className(), [
-                                'clientOptions' => [
-                                    'alias' =>  'decimal',
-                                    'groupSeparator' => ',',
-                                    'autoGroup' => true
-                                ],
-                                'options' => [
-                                    'data-align' => 'text-right',
-                                    'data-temp' => true,
-                                    'placeholder' => 'Potong'
-                                ]
-                            ])->label(false) ?>
-                    </div>
-                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-right-0">
-                        <?= $form->field($tempDetail, 'total_objek')->widget(MaskedInput::className(), [
-                                'clientOptions' => [
-                                    'alias' =>  'decimal',
-                                    'groupSeparator' => ',',
-                                    'autoGroup' => true
-                                ],
-                                'options' => [
-                                    'data-align' => 'text-right',
-                                    'data-temp' => true, 
-                                    'placeholder' => 'Objek'
-                                ]
-                            ])->label(false) ?>
-                    </div>
-                </div>
                 <!-- Warna -->
                 <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0  padding-right-0">
                     <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
                         <label>Total Warna:</label>
                     </div>
                     <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                        <?= $form->field($tempDetail, 'total_warna')->widget(MaskedInput::className(), [
+                        <?= $form->field($tempItem, 'total_warna')->widget(MaskedInput::className(), [
                                 'clientOptions' => [
                                     'alias' =>  'decimal',
                                     'groupSeparator' => ',',
@@ -320,10 +449,10 @@ use yii\widgets\MaskedInput;
                 <!-- Lb. Ikat -->
                 <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0  padding-right-0">
                     <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                        <label>Lb.Ikat</label>
+                        <label>Lb.Ikat:</label>
                     </div>
                     <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                        <?= $form->field($tempDetail, 'satuan_ikat_code')->dropDownList($typeSatuan, [
+                        <?= $form->field($tempItem, 'satuan_ikat_code')->dropDownList($typeSatuan, [
                                 'prompt'=>'Satuan Lb.Ikat', 'data-temp'=>true])->label(false) ?>
                     </div>
                 </div>
@@ -332,10 +461,10 @@ use yii\widgets\MaskedInput;
                     <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
                         <label>Satuan Lb.Ikat:</label>
                     </div>
-                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-right-0">
-                        <?= $form->field($tempDetail, 'lembar_ikat_1')->widget(MaskedInput::className(), [
+                    <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
+                        <?= $form->field($tempItem, 'lembar_ikat_1')->widget(MaskedInput::className(), [
                                 'clientOptions' => [
-                                    'alias' =>  'decimal',
+                                    'alias' => 'decimal',
                                     'groupSeparator' => ',',
                                     'autoGroup' => true
                                 ],
@@ -347,12 +476,12 @@ use yii\widgets\MaskedInput;
                                     'readonly' => true,
                                 ]
                             ])->label(false) ?>
-                        <?= $form->field($tempDetail, 'lembar_ikat_um_1')->hiddenInput(['data-temp' => true, 'data-value' => 'DOS'])->label(false) ?>
+                        <?= $form->field($tempItem, 'lembar_ikat_um_1')->hiddenInput(['data-temp' => true, 'data-value' => 'DOS'])->label(false) ?>
                     </div>
-                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-right-0">
-                        <?= $form->field($tempDetail, 'lembar_ikat_2')->widget(MaskedInput::className(), [
+                    <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
+                        <?= $form->field($tempItem, 'lembar_ikat_2')->widget(MaskedInput::className(), [
                                 'clientOptions' => [
-                                    'alias' =>  'decimal',
+                                    'alias' => 'decimal',
                                     'groupSeparator' => ',',
                                     'autoGroup' => true
                                 ],
@@ -364,12 +493,12 @@ use yii\widgets\MaskedInput;
                                     'readonly' => true,
                                 ]
                             ])->label(false) ?>
-                        <?= $form->field($tempDetail, 'lembar_ikat_um_2')->hiddenInput(['data-temp' => true, 'data-value' => 'IKAT'])->label(false) ?>
+                        <?= $form->field($tempItem, 'lembar_ikat_um_2')->hiddenInput(['data-temp' => true, 'data-value' => 'IKAT'])->label(false) ?>
                     </div>
-                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-right-0">
-                        <?= $form->field($tempDetail, 'lembar_ikat_3')->widget(MaskedInput::className(), [
+                    <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
+                        <?= $form->field($tempItem, 'lembar_ikat_3')->widget(MaskedInput::className(), [
                                 'clientOptions' => [
-                                    'alias' =>  'decimal',
+                                    'alias' => 'decimal',
                                     'groupSeparator' => ',',
                                     'autoGroup' => true
                                 ],
@@ -381,36 +510,7 @@ use yii\widgets\MaskedInput;
                                     'readonly' => true,
                                 ]
                             ])->label(false) ?>
-                        <?= $form->field($tempDetail, 'lembar_ikat_um_3')->hiddenInput(['data-temp' => true, 'data-value' => 'PCS'])->label(false) ?>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-6 col-md-6 col-xs-12">
-                <!-- Keterangan Cetak -->
-                <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
-                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                        <label>Keterangan Cetak:</label>
-                    </div>
-                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                        <?= $form->field($tempDetail, 'keterangan_cetak')->textarea(['data-temp'=>true])->label(false) ?>
-                    </div>
-                </div>
-                <!-- Keterangan Potong -->
-                <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
-                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                        <label>Keterangan Potong:</label>
-                    </div>
-                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                        <?= $form->field($tempDetail, 'keterangan_potong')->textarea(['data-temp'=>true])->label(false) ?>
-                    </div>
-                </div>
-                <!-- Keterangan Pond -->
-                <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
-                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                        <label>Keterangan Pond:</label>
-                    </div>
-                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                        <?= $form->field($tempDetail, 'keterangan_pond')->textarea(['data-temp'=>true])->label(false) ?>
+                        <?= $form->field($tempItem, 'lembar_ikat_um_3')->hiddenInput(['data-temp' => true, 'data-value' => 'PCS'])->label(false) ?>
                     </div>
                 </div>
             </div>
@@ -420,10 +520,157 @@ use yii\widgets\MaskedInput;
                     <span>Tambah Data Detail</span>
                 </button>
             </div>
-            <!-- /DETAIL -->
+            <!-- /ITEM -->
             <!-- VIEW DETAIL TEMP -->
             <div class="col-lg-12 col-md-12 col-xs-12">
-                <div render="detail" data-render="detail" class="form-container padding-bottom-5 hidden"></div>
+                <div render="detail" class="form-container padding-bottom-5">
+                    <!-- detail item -->
+                    <div class="col-lg-12 col-md-12 col-xs-12">
+                        <h4>Detail Material</h4>
+                        <hr />
+                    </div>
+                    <div data-render="detail-item">
+                        <div class="col-lg-12 col-md-12 col-xs-12">
+                            <table class="table table-bordered table-custom margin-top-10">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center">No.</th>
+                                        <th class="text-center">PxL</th>
+                                        <th class="text-center">Objek</th>
+                                        <th class="text-center">Proses Produksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="text-danger" colspan="5">Data masih kosong.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- /detail item -->
+                    <div class="col-lg-12 col-md-12 col-xs-12 margin-bottom-20"></div>
+                    <!-- Ekspedisi -->
+                    <div class="col-lg-12 col-md-12 col-xs-12">
+                        <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
+                            <strong>Ekspedisi:</strong>
+                        </div>
+                        <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-right-0">
+                            <?= $form->field($model, 'ekspedisi_name')->textInput(['maxlength' => true])->label(false) ?>
+                        </div>
+                    </div>
+                    <!-- Biaya Pengiriman -->
+                    <div class="col-lg-12 col-md-12 col-xs-12">
+                        <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
+                            <strong>Biaya Pengiriman:</strong>
+                        </div>
+                        <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-right-0">
+                            <?= $form->field($model, 'biaya_pengiriman')->widget(MaskedInput::className(), [
+                                    'clientOptions' => [
+                                        'alias' => 'decimal',
+                                        'groupSeparator' => ',',
+                                        'autoGroup' => true
+                                    ],
+                                    'options' => [
+                                        'data-align' => 'text-right',
+                                        'data-icons' => 'rupiah',
+                                        'data-name' => 'iconbox',
+                                    ]
+                                ])->label(false) ?>
+                        </div>
+                    </div>
+                    <!-- form bahan pembantu -->
+                    <div class="col-lg-12 col-md-12 col-xs-12 margin-top-20">
+                        <h4>Detail Bahan Pembantu</h4>
+                        <hr />
+                    </div>
+                    <!-- Item Bahan -->
+                    <div class="col-lg-12 col-md-12 col-xs-12">
+                        <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
+                            <strong>Item Bahan:</strong>
+                        </div>
+                        <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-right-0">
+                            <?= $form->field($tempItem, 'bahan_item_name')->textInput(['placeholder' => 'Pilih material tekan F4', 'data-type'=>'bahan'])->label(false) ?>
+                            <?= $form->field($tempItem, 'bahan_item_code')->hiddenInput()->label(false) ?>
+                        </div>
+                    </div>
+                    <!-- QTY Bahan -->
+                    <div class="col-lg-12 col-md-12 col-xs-12">
+                        <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
+                            <strong>QTY:</strong>
+                        </div>
+                        <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
+                            <?= $form->field($tempItem, 'bahan_qty_order_1')->widget(MaskedInput::className(), [
+                                    'clientOptions' => [
+                                        'alias' => 'decimal',
+                                        'groupSeparator' => ',',
+                                        'autoGroup' => true
+                                    ],
+                                    'options' => [
+                                        'data-align' => 'text-right',
+                                        'readonly' => true,
+                                        'placeholder' => 'KG',
+                                    ]
+                                ])->label(false) ?>
+                        </div>
+                        <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
+                            <?= $form->field($tempItem, 'bahan_qty_order_2')->widget(MaskedInput::className(), [
+                                    'clientOptions' => [
+                                        'alias' => 'decimal',
+                                        'groupSeparator' => ',',
+                                        'autoGroup' => true
+                                    ],
+                                    'options' => [
+                                        'data-align' => 'text-right',
+                                        'readonly' => true,
+                                        'maxlength' => 3,
+                                        'placeholder' => 'G',
+                                    ]
+                                ])->label(false) ?>
+                        </div>
+                    </div>
+                    <div class="col-lg-12 col-md-12 col-xs-12 text-right">
+                        <button class="btn btn-success" data-button="create_temp">
+                            <i class="fontello icon-plus"></i>
+                            <span>Tambah Data Bahan</span>
+                        </button>
+                    </div>
+                    <!-- /form bahan pembantu -->
+                    <!-- detail bahan pembantu -->
+                    <div data-render="detail-bahan">
+                        <div class="col-lg-12 col-md-12 col-xs-12">
+                            <table class="table table-bordered table-custom margin-top-10">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center" rowspan="2">No.</th>
+                                        <th class="text-center" colspan="2">Item</th>
+                                        <th class="text-center" colspan="3">QTY</th>
+                                        <th class="text-center" rowspan="2">Jenis</th>
+                                        <th class="text-center" rowspan="2">Action</th>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-center">Code</th>
+                                        <th class="text-center">Name</th>
+                                        <th class="text-center">1</th>
+                                        <th class="text-center">2</th>
+                                        <th class="text-center">3</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="text-danger" colspan="10">Data masih kosong.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- /detail bahan pembantu -->
+                    <div class="col-lg-12 col-md-12 col-xs-12">
+                        <div class="form-group text-right">
+                            <?= Html::submitButton('<i class="fontello icon-floppy"></i><span>Save</span>', ['class' => 'btn btn-success']) ?>
+                        </div>
+                    </div>
+                </div>
             </div>
             <!-- /VIEW DETAIL TEMP -->
         </div>
@@ -431,11 +678,14 @@ use yii\widgets\MaskedInput;
 </div>
 <div data-popup="popup"></div>
 <script>
-function load_item()
+function load_item(type)
 {
     $.ajax({
         url: "<?=Url::to(['sales-order/list-item'])?>",
 		type: "GET",
+        data: {
+            type: type,
+        },
 		dataType: "text",
         error: function(xhr, status, error) {},
 		beforeSend: function (data){},
@@ -454,13 +704,14 @@ function load_item()
     });
 }
 
-function search_item(code)
+function search_item(code, type)
 {
     $.ajax({
-        url: "<?=Url::to(['sales-order/search'])?>",
+        url: "<?=Url::to(['sales-order/search-item'])?>",
 		type: "POST",
         data: {
             code: code,
+            type: type,
         },
 		dataType: "text",
         error: function(xhr, status, error) {},
@@ -481,10 +732,10 @@ function search_item(code)
     });
 }
 
-function select_item(code)
+function select_item(code, type)
 {
     $.ajax({
-        url: "<?=Url::to(['sales-order/item'])?>",
+        url: "<?=Url::to(['sales-order/select-item'])?>",
 		type: "POST",
         data: {
             code: code,
@@ -495,13 +746,23 @@ function select_item(code)
         success: function(data){
             var o = $.parseJSON(data);
             $.each(o, function(index, value){
-                $("#tempsalesorderitem-"+index).val(value);
+                if(type == 'item'){
+                    $("#tempsalesorderitem-"+index).val(value);
+                }else{
+                    $("#tempsalesorderitem-bahan_"+index).val(value);
+                }
             });
             for(var a=1;a<=o.composite;a++){
-                $("#tempsalesorderitem-qty_order_"+a).attr("readonly", false);
+                if(type == 'item'){
+                    $("#tempsalesorderitem-qty_order_"+a).attr("readonly", false);
+                }else{
+                    $("#tempsalesorderitem-bahan_qty_order_"+a).attr("readonly", false);
+                }
             }
-            $("#tempsalesorderitem-qty_order_1").val(20);
-            $("#tempsalesorderitem-qty_order_2").val(0);
+            if(type == 'item'){
+                $("#tempsalesorderitem-qty_order_1").val(20);
+                $("#tempsalesorderitem-qty_order_2").val(0);
+            }
         },
         complete: function(){
             popup.close();
@@ -523,7 +784,8 @@ function create_temp(el)
         success: function(data){
             var o = $.parseJSON(data);
             if(o.success == true){
-                init_temp();
+                init_temp_item();
+                init_temp_bahan();
                 notification.open("success", o.message, timeOut);
             }else{
                 notification.open("danger", o.message, timeOut);
@@ -535,10 +797,10 @@ function create_temp(el)
     });
 }
 
-function delete_temp_item(id)
+function delete_temp(id)
 {
     $.ajax({
-        url: "<?= Url::to(['sales-order/delete-temp-item']) ?>",
+        url: "<?= Url::to(['sales-order/delete-temp']) ?>",
         type: "GET",
         dataType: "text",
         error: function(xhr, status, error) {},
@@ -555,36 +817,8 @@ function delete_temp_item(id)
             }else{
                 notification.open("danger", o.message, timeOut);
             }
-            init_temp();
-            popup.close();
-        },
-        complete: function(){
-			loading.close();
-        }
-    });
-}
-
-function delete_temp_detail(id)
-{
-    $.ajax({
-        url: "<?= Url::to(['sales-order/delete-temp-detail']) ?>",
-        type: "GET",
-        dataType: "text",
-        error: function(xhr, status, error) {},
-        beforeSend: function(){
-            loading.open("loading bars");
-        },
-        data: {
-            id: id
-        },
-        success: function(data){
-            var o = $.parseJSON(data);
-            if(o.success == true){
-                notification.open("success", o.message, timeOut);
-            }else{
-                notification.open("danger", o.message, timeOut);
-            }
-            init_temp();
+            init_temp_item();
+            init_temp_bahan();
             popup.close();
         },
         complete: function(){
@@ -633,7 +867,7 @@ function create_proses()
             if(!o.success == true){
                 notification.open("danger", o.message, timeOut);
             }
-            init_temp();
+            init_temp_item();
         },
         complete: function(){
             popup.close();
@@ -641,10 +875,10 @@ function create_proses()
     });
 }
 
-function init_temp()
+function init_temp_item()
 {
     $.ajax({
-        url: "<?= Url::to(['sales-order/temp']) ?>",
+        url: "<?= Url::to(['sales-order/temp-item']) ?>",
         type: "POST",
         dataType: "text",
         error: function(xhr, status, error) {},
@@ -653,9 +887,29 @@ function init_temp()
         },
         success: function(data){
             var o = $.parseJSON(data);
-            $("[data-render=\"detail\"]").html(o.model);
-            $("[data-render=\"detail\"]").removeClass("hidden");
+            $("[data-render=\"detail-item\"]").html(o.model);
             $("[id^=\"tempsalesorderdetail-lembar_ikat_\"]").attr("readonly", 1);
+        },
+        complete: function(){
+            temp.destroy();
+        }
+    });
+}
+
+function init_temp_bahan()
+{
+    $.ajax({
+        url: "<?= Url::to(['sales-order/temp-bahan']) ?>",
+        type: "POST",
+        dataType: "text",
+        error: function(xhr, status, error) {},
+        beforeSend: function() {
+            temp.destroy();
+        },
+        success: function(data){
+            var o = $.parseJSON(data);
+            $("[data-render=\"detail-bahan\"] table > tbody").html(o.model);
+            $("[id^=\"tempsalesorderitem-bahan_\"]").val(null);
         },
         complete: function(){
             temp.destroy();
@@ -669,7 +923,7 @@ $(document).ready(function(){
     $("body").on("keydown","#tempsalesorderitem-item_name", function(e){
         var key = e.charCode ? e.charCode : e.keyCode ? e.keyCode : 0;
         if(key == KEY.F4){
-            load_item();
+            load_item($(this).data().type);
         }
     });
 
@@ -677,7 +931,7 @@ $(document).ready(function(){
     $("body").on("click","[data-id=\"popup\"] table > tbody tr[data-code]", function(e){
         e.preventDefault();
         var data = $(this).data();
-        select_item(data.code);
+        select_item(data.code, data.type);
     });
 
     $("body").off("input","#tempsalesorderitem-qty_order_2");
@@ -690,8 +944,46 @@ $(document).ready(function(){
         }
     });
 
-    $("body").off("change","#tempsalesorderdetail-satuan_ikat_code");
-    $("body").on("change","#tempsalesorderdetail-satuan_ikat_code", function(e){
+    $("body").off("keydown","#tempsalesorderitem-bahan_item_name")
+    $("body").on("keydown","#tempsalesorderitem-bahan_item_name", function(e){
+        var key = e.charCode ? e.charCode : e.keyCode ? e.keyCode : 0;
+        if(key == KEY.F4){
+            load_item($(this).data().type);
+        }
+    });
+
+    $("body").off("keydown","#tempsalesorderitem-item_name")
+    $("body").on("keydown","#tempsalesorderitem-item_name", function(e){
+        var key = e.charCode ? e.charCode : e.keyCode ? e.keyCode : 0;
+        if(key == KEY.F4){
+            load_item($(this).data().type);
+        }
+    });
+
+    $("body").off("input","#tempsalesorderitem-total_potong");
+    $("body").on("input","#tempsalesorderitem-total_potong", function(e){
+        e.preventDefault();
+        if($(this).val() > 4){
+            $(this).val(4);
+        }else{
+            $(this).val();
+        }
+
+        $("[id=\"tempsalesorderpotong-panjang\"]").prop("disabled", true);
+        $("[id=\"tempsalesorderpotong-panjang\"]").val(null);
+        $("[id=\"tempsalesorderpotong-lebar\"]").prop("disabled", true);
+        $("[id=\"tempsalesorderpotong-lebar\"]").val(null);
+        $("[id=\"tempsalesorderpotong-total_objek\"]").prop("disabled", true);
+        $("[id=\"tempsalesorderpotong-total_objek\"]").val(null);
+        for(var i=1;i<=$(this).val();i++){
+            $("#tempsalesorderpotong-panjang[data-urutan=\""+i+"\"]").prop("disabled", false);
+            $("#tempsalesorderpotong-lebar[data-urutan=\""+i+"\"]").prop("disabled", false);
+            $("#tempsalesorderpotong-total_objek[data-urutan=\""+i+"\"]").prop("disabled", false);
+        }
+    });
+
+    $("body").off("change","#tempsalesorderitem-satuan_ikat_code");
+    $("body").on("change","#tempsalesorderitem-satuan_ikat_code", function(e){
         e.preventDefault();
         var text = $(this).find("option:selected").text();
         $("[data-um]").attr("readonly", true);
@@ -725,34 +1017,19 @@ $(document).ready(function(){
         }
     });
 
-    $("body").off("click","[data-button=\"delete_item_temp\"]");
-    $("body").on("click","[data-button=\"delete_item_temp\"]", function(e){
+    $("body").off("click","[data-button=\"delete_temp\"]");
+    $("body").on("click","[data-button=\"delete_temp\"]", function(e){
         e.preventDefault();
         var data = $(this).data();
         popup.open("confirm", {
 			message: "Apakah anda yakin ingin menghapus data ini ?",
-			selector: "delete_item_temp",
+			selector: "delete_temp",
 			target: data.id,
 		});
     });
-    $("body").off("click","#delete_item_temp").on("click","#delete_item_temp", function(e){
+    $("body").off("click","#delete_temp").on("click","#delete_temp", function(e){
         e.preventDefault();
-        delete_temp_item($(this).attr("data-target"));
-    });
-
-    $("body").off("click","[data-button=\"delete_detail_temp\"]");
-    $("body").on("click","[data-button=\"delete_detail_temp\"]", function(e){
-        e.preventDefault();
-        var data = $(this).data();
-        popup.open("confirm", {
-			message: "Apakah anda yakin ingin menghapus data ini ?",
-			selector: "delete_detail_temp",
-			target: data.id,
-		});
-    });
-    $("body").off("click","#delete_detail_temp").on("click","#delete_detail_temp", function(e){
-        e.preventDefault();
-        delete_temp_detail($(this).attr("data-target"));
+        delete_temp($(this).attr("data-target"));
     });
 
     $("body").off("click","[data-button=\"create_proses_temp\"]");
@@ -770,7 +1047,8 @@ $(document).ready(function(){
 
 $(function(){
     <?php if(!$model->isNewRecord): ?>
-        init_temp();
+        init_temp_item();
+        init_temp_bahan();
     <?php endif; ?>
 });
 </script>
