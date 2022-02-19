@@ -6,6 +6,7 @@ use Yii;
 use app\modules\inventory\models\InventoryStockItem;
 use app\modules\master\models\MasterMaterialItem;
 use app\modules\sales\models\SalesOrderPotong;
+use app\modules\sales\models\SalesOrderProses;
 use yii\behaviors\TimestampBehavior;
 
 /**
@@ -79,6 +80,7 @@ class SalesOrderItem extends \yii\db\ActiveRecord
             [['um_1', 'um_2', 'um_3', 'lembar_ikat_um_1', 'lembar_ikat_um_2', 'lembar_ikat_um_3'], 'string', 'max' => 5],
             [['keterangan'], 'string', 'max' => 128],
             [['code', 'urutan', 'item_code'], 'unique', 'targetAttribute' => ['code', 'urutan', 'item_code']],
+            [['status'], 'default', 'value' => 1],
         ];
     }
 
@@ -139,5 +141,10 @@ class SalesOrderItem extends \yii\db\ActiveRecord
     public function getPotongs()
     {
         return $this->hasMany(SalesOrderPotong::className(), ['code' => 'code', 'item_code' => 'item_code']);
+    }
+
+    public function getProses()
+    {
+        return $this->hasMany(SalesOrderProses::className(), ['code' => 'code', 'item_code' => 'item_code']);
     }
 }

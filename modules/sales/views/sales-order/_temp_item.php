@@ -4,10 +4,14 @@
             <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
                 <label class="font-size-12">Material</label>
             </div>
-            <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
+            <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padding-right-0">
                 <span><?=(isset($item->item->name)) ? $item->item->code.' - '.$item->item->name : '' ?></span>
             </div>
-            <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 text-right padding-right-0">
+            <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 text-right padding-right-0">
+                <a class="custom-btn" href="javascript:void(0)" data-button="create_proses_temp" data-id="<?=$item->id ?>">
+                    <i class="fontello icon-plus"></i>
+                    <span>Add Proses Produksi</span>
+                </a>
                 <a class="custom-btn" href="javascript:void(0)" data-button="delete_temp" data-id="<?=$item->id ?>">
                     <i class="fontello icon-trash"></i>
                     <span>Hapus</span>
@@ -52,46 +56,6 @@
             <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-right-0">
                 <span><?=$item->total_warna ?></span>
             </div>
-        </div>
-        <div class="col-lg-12 col-md-12 col-xs-12">
-            <table class="table table-bordered table-custom margin-top-10">
-                <thead>
-                    <tr>
-                        <th class="text-center">No.</th>
-                        <th class="text-center">PxL</th>
-                        <th class="text-center">Objek</th>
-                        <th class="text-center">Proses Produksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php 
-                        foreach($item->potongs as $no=>$val): ?>
-                        <tr>
-                            <td class="text-center" rowspan="<?=count($val->prosesTemps)+1 ?>"><?=$no+1 ?></td>
-                            <td class="text-center" rowspan="<?=count($val->prosesTemps)+1 ?>"><?=$val->panjang.'x'.$val->lebar ?></td>
-                            <td class="text-right" rowspan="<?=count($val->prosesTemps)+1 ?>">
-                                <?=$val->total_objek .'
-                                    <span class="text-muted font-size-10">('.number_format($val->jumlah_objek).' objek)</span>' ?>
-                            </td>
-                            <td class="text-center">
-                                <a class="custom-btn" href="javascript:void(0)" data-button="create_proses_temp" data-id="<?=$val->id ?>">
-                                    <i class="fontello icon-plus"></i>
-                                    <span>Add Proses Produksi</span>
-                                </a>
-                            </td>
-                        </tr>
-                        <?php if(count($val->prosesTemps) > 0): ?>
-                            <?php foreach($val->prosesTemps as $dataProses): ?>
-                                <tr>
-                                    <td class="text-muted text-left">
-                                        <?='<i>'.$dataProses->biayaProduksi->name.'</i>' ?>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
         </div>
     <?php endforeach; ?>
 <?php endif; ?>

@@ -3,7 +3,6 @@
 namespace app\modules\sales\models;
 
 use Yii;
-use app\modules\sales\models\SalesOrderProses;
 use yii\behaviors\TimestampBehavior;
 
 /**
@@ -14,11 +13,8 @@ use yii\behaviors\TimestampBehavior;
  * @property int $urutan
  * @property float|null $panjang
  * @property float|null $lebar
- * @property int|null $total_objek
- * @property float|null $jumlah_objek
- * @property string|null $keterangan_cetak
- * @property string|null $keterangan_potong
- * @property string|null $keterangan_pond
+ * @property int|null $objek
+ * @property float|null $total_objek
  * @property int|null $status
  * @property int|null $created_at
  * @property int|null $updated_at
@@ -47,12 +43,12 @@ class SalesOrderPotong extends \yii\db\ActiveRecord
     {
         return [
             [['code', 'item_code', 'urutan'], 'required'],
-            [['urutan', 'total_objek', 'status', 'created_at', 'updated_at'], 'integer'],
-            [['panjang', 'lebar', 'jumlah_objek'], 'number'],
+            [['urutan', 'objek', 'status', 'created_at', 'updated_at'], 'integer'],
+            [['panjang', 'lebar', 'total_objek'], 'number'],
             [['code'], 'string', 'max' => 12],
             [['item_code'], 'string', 'max' => 7],
-            [['keterangan_cetak', 'keterangan_potong', 'keterangan_pond'], 'string', 'max' => 128],
             [['code', 'item_code', 'urutan'], 'unique', 'targetAttribute' => ['code', 'item_code', 'urutan']],
+            [['status'], 'default', 'value' => 1],
         ];
     }
 
@@ -67,19 +63,11 @@ class SalesOrderPotong extends \yii\db\ActiveRecord
             'urutan' => 'Urutan',
             'panjang' => 'Panjang',
             'lebar' => 'Lebar',
+            'objek' => 'Objek',
             'total_objek' => 'Total Objek',
-            'jumlah_objek' => 'Jumlah Objek',
-            'keterangan_cetak' => 'Keterangan Cetak',
-            'keterangan_potong' => 'Keterangan Potong',
-            'keterangan_pond' => 'Keterangan Pond',
             'status' => 'Status',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
         ];
-    }
-
-    public function getProses()
-    {
-        return $this->hasMany(SalesOrderProses::className(), ['code' => 'code', 'item_code' => 'item_code', 'potong_id' => 'urutan']);
     }
 }

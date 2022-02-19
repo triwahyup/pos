@@ -4,7 +4,7 @@
             <td class="text-center"><?=$no+1 ?></td>
             <td class="text-center"><?=$val->item_code ?></td>
             <td><?=(isset($val->item)) ? $val->item->name : '-' ?></td>
-            <?php for($a=1;$a<=3;$a++):?>
+            <?php for($a=1;$a<3;$a++):?>
                 <td class="text-center"><?=($val['qty_order_'.$a] !=0) ? $val['qty_order_'.$a] .' '.$val['um_'.$a] : '' ?></td>
             <?php endfor; ?>
             <td class="text-center"><?=$val->item->material->name ?></td>

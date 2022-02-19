@@ -27,7 +27,6 @@ use yii\behaviors\TimestampBehavior;
  * @property string|null $fax
  * @property string|null $keterangan
  * @property int|null $type_user
- * @property string|null $tgl_jatuh_tempo
  * @property string|null $group_supplier_code
  * @property int|null $status
  * @property int|null $created_at
@@ -58,8 +57,7 @@ class MasterPerson extends \yii\db\ActiveRecord
         return [
             [['code', 'name', 'contact_person', 'phone_1'], 'required'],
             [['keterangan'], 'string'],
-            [['type_user', 'status', 'created_at', 'updated_at'], 'integer'],
-            [['tgl_jatuh_tempo'], 'safe'],
+            [['type_user', 'term_in', 'status', 'created_at', 'updated_at'], 'integer'],
             [['code', 'group_supplier_code'], 'string', 'max' => 3],
             [['name', 'address', 'contact_person'], 'string', 'max' => 128],
             [['provinsi_id'], 'string', 'max' => 2],
@@ -94,18 +92,12 @@ class MasterPerson extends \yii\db\ActiveRecord
             'fax' => 'Fax',
             'keterangan' => 'Keterangan',
             'type_user' => 'Type User',
-            'tgl_jatuh_tempo' => 'Term In',
+            'term_in' => 'Term In',
             'group_supplier_code' => 'Group Supplier',
             'status' => 'Status',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
         ];
-    }
-
-    public function beforeSave($attribute)
-    {
-        $this->tgl_jatuh_tempo = date('Y-m-d', strtotime($this->tgl_jatuh_tempo));
-        return parent::beforeSave($attribute);
     }
 
     public function generateCode()

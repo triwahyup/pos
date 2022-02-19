@@ -89,7 +89,7 @@ class MasterMaterialItem extends \yii\db\ActiveRecord
         ];
     }
 
-    public function generateCode($type)
+    public static function generateCode($type)
     {
         $model = MasterMaterialItem::find()->where(['type_code'=>$type])->count();
         $total=0;

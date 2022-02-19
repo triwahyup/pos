@@ -6,22 +6,30 @@
                 <th class="text-center"></th>
                 <th class="text-center">No.</th>
                 <th class="text-center">Nama</th>
+                <th class="text-center">Keterangan</th>
             </tr>
         </thead>
         <tbody>
             <?php if(count($data) > 0):
                 $no=1; ?>
-                <?php foreach($data as $index=>$val) : ?>
+                <?php foreach($data as $val) : ?>
                     <tr>
                         <td>
                             <?php if(isset($val['id'])): ?>
                                 <input type="checkbox" name="TempSalesOrderProses[biaya_code][]" value="<?=$val['biaya_code'] ?>" checked>
-                                <?php else: ?>
-                                    <input type="checkbox" name="TempSalesOrderProses[biaya_code][]" value="<?=$val['biaya_code'] ?>">
-                                <?php endif; ?>
+                            <?php else: ?>
+                                <input type="checkbox" name="TempSalesOrderProses[biaya_code][]" value="<?=$val['biaya_code'] ?>">
+                            <?php endif; ?>
                         </td>
                         <td class="text-center"><?=$no++ ?></td>
                         <td><?=$val['name'] ?></td>
+                        <td>
+                            <?php if(isset($val['id'])): ?>
+                                <textarea class="form-control" name="TempSalesOrderProses[keterangan][<?=$val['biaya_code']?>]" rows="2"><?=$val['keterangan'] ?></textarea>
+                            <?php else: ?>
+                                <textarea class="form-control" name="TempSalesOrderProses[keterangan][<?=$val['biaya_code']?>]" rows="2"></textarea>
+                            <?php endif; ?>
+                        </td>
                     </tr>
                 <?php endforeach; ?>
             <?php else : ?>
@@ -31,10 +39,9 @@
             <?php endif; ?>
         </tbody>
     </table>
-    <div class="col-lg-12 col-md-12 col-xs-12 text-right padding-right-0">
-        <input type="hidden" name="TempSalesOrderProses[code]" value="<?=$tempPotong->code ?>">
-        <input type="hidden" name="TempSalesOrderProses[item_code]" value="<?=$tempPotong->item_code ?>">
-        <input type="hidden" name="TempSalesOrderProses[urutan]" value="<?=$tempPotong->urutan ?>">
+    <div class="col-lg-12 col-md-12 col-xs-12">
+        <input type="hidden" name="TempSalesOrderProses[code]" value="<?=$tempItem->code ?>">
+        <input type="hidden" name="TempSalesOrderProses[item_code]" value="<?=$tempItem->item_code ?>">
         <button class="btn btn-primary" data-button="create_proses">
             <i class="fontello icon-floppy"></i>
             <span>Simpan</span>

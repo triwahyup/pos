@@ -31,6 +31,12 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
             ],
             [
+                'attribute' => 'term_in',
+                'contentOptions' => [
+                    'class' => 'text-center',
+                ],
+            ],
+            [
                 'attribute' => 'created_at',
                 'contentOptions' => [
                     'class' => 'text-center',

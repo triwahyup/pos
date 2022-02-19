@@ -17,7 +17,7 @@ class MasterSupplierSearch extends MasterPerson
     public function rules()
     {
         return [
-            [[ 'name', 'address', 'phone_1', 'created_at', 'updated_at', 'tgl_jatuh_tempo', 'group_supplier_code', 'contact_person'], 'safe'],
+            [[ 'name', 'address', 'phone_1', 'created_at', 'updated_at', 'term_in', 'group_supplier_code', 'contact_person'], 'safe'],
         ];
     }
 
@@ -72,15 +72,11 @@ class MasterSupplierSearch extends MasterPerson
         if(!empty($this->group_supplier_code)){
             $query->andWhere('b.code LIKE "%'.$this->group_supplier_code.'%" OR b.name LIKE "%'.$this->group_supplier_code.'%"');
         }
-        if(!empty($this->tgl_jatuh_tempo)){
-            $query->andFilterWhere([
-                'tgl_jatuh_tempo' => date('Y-m-d', strtotime($this->tgl_jatuh_tempo))
-            ]);
-        }
 
         $query->andFilterWhere(['like', 'a.name', $this->name])
             ->andFilterWhere(['like', 'contact_person', $this->contact_person])
             ->andFilterWhere(['like', 'address', $this->address])
+            ->andFilterWhere(['like', 'term_in', $this->term_in])
             ->andFilterWhere(['like', 'phone_1', $this->phone_1]);
 
         return $dataProvider;

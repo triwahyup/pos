@@ -17,6 +17,5 @@ $this->params['breadcrumbs'][] = 'Update';
         'tempPotong' => $tempPotong,
         'tempItem' => $tempItem,
         'typeSatuan' => $typeSatuan,
-        'itemTemp' => $itemTemp,
     ]) ?>
 </div>

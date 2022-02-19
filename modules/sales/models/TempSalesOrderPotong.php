@@ -3,7 +3,6 @@
 namespace app\modules\sales\models;
 
 use Yii;
-use app\modules\sales\models\TempSalesOrderProses;
 
 /**
  * This is the model class for table "temp_sales_order_potong".
@@ -14,11 +13,8 @@ use app\modules\sales\models\TempSalesOrderProses;
  * @property string|null $item_code
  * @property float|null $panjang
  * @property float|null $lebar
- * @property int|null $total_objek
- * @property float|null $jumlah_objek
- * @property string|null $keterangan_cetak
- * @property string|null $keterangan_potong
- * @property string|null $keterangan_pond
+ * @property int|null $objek
+ * @property float|null $total_objek
  * @property int|null $user_id
  */
 class TempSalesOrderPotong extends \yii\db\ActiveRecord
@@ -38,11 +34,10 @@ class TempSalesOrderPotong extends \yii\db\ActiveRecord
     {
         return [
             [['code', 'urutan'], 'required'],
-            [['urutan', 'total_objek', 'user_id'], 'integer'],
-            [['panjang', 'lebar', 'jumlah_objek'], 'number'],
+            [['urutan', 'objek', 'user_id'], 'integer'],
+            [['panjang', 'lebar', 'total_objek'], 'number'],
             [['code'], 'string', 'max' => 12],
             [['item_code'], 'string', 'max' => 7],
-            [['keterangan_cetak', 'keterangan_potong', 'keterangan_pond'], 'string', 'max' => 128],
         ];
     }
 
@@ -58,11 +53,8 @@ class TempSalesOrderPotong extends \yii\db\ActiveRecord
             'item_code' => 'Item Code',
             'panjang' => 'Panjang',
             'lebar' => 'Lebar',
+            'objek' => 'Objek',
             'total_objek' => 'Total Objek',
-            'jumlah_objek' => 'Jumlah Objek',
-            'keterangan_cetak' => 'Keterangan Cetak',
-            'keterangan_potong' => 'Keterangan Potong',
-            'keterangan_pond' => 'Keterangan Pond',
             'user_id' => 'User ID',
         ];
     }
@@ -74,13 +66,6 @@ class TempSalesOrderPotong extends \yii\db\ActiveRecord
 
     public function getCountTemp()
     {
-        return TempSalesOrderPotong::find()->where(['item_code'=>$this->item_code, 'user_id'=> \Yii::$app->user->id])->count();
-    }
-
-    public function getProsesTemps()
-    {
-        return TempSalesOrderProses::find()
-            ->where(['code'=>$this->code, 'item_code'=>$this->item_code, 'potong_id'=>$this->urutan, 'user_id'=> \Yii::$app->user->id])
-            ->all();
+        return TempSalesOrderPotong::find()->where(['code'=>$this->code, 'item_code'=>$this->item_code, 'user_id'=> \Yii::$app->user->id])->count();
     }
 }

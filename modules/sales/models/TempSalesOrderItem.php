@@ -7,6 +7,7 @@ use app\modules\inventory\models\InventoryStockItem;
 use app\modules\master\models\MasterMaterialItem;
 use app\modules\master\models\MasterMaterialItemPricelist;
 use app\modules\sales\models\TempSalesOrderPotong;
+use app\modules\sales\models\TempSalesOrderProses;
 
 /**
  * This is the model class for table "temp_sales_order_item".
@@ -43,7 +44,6 @@ use app\modules\sales\models\TempSalesOrderPotong;
  * @property string|null $lembar_ikat_um_3
  * @property float|null $jumlah_cetak
  * @property float|null $total_order
- * @property string|null $keterangan
  * @property int|null $user_id
  */
 class TempSalesOrderItem extends \yii\db\ActiveRecord
@@ -74,7 +74,7 @@ class TempSalesOrderItem extends \yii\db\ActiveRecord
             [['item_code', 'bahan_item_code'], 'string', 'max' => 7],
             [['satuan_code', 'material_code', 'type_code', 'group_supplier_code', 'group_material_code', 'satuan_ikat_code'], 'string', 'max' => 3],
             [['um_1', 'um_2', 'um_3', 'lembar_ikat_um_1', 'lembar_ikat_um_2', 'lembar_ikat_um_3'], 'string', 'max' => 5],
-            [['keterangan'], 'string', 'max' => 128],
+            [['keterangan', 'item_name'], 'string', 'max' => 128],
         ];
     }
 
@@ -116,7 +116,6 @@ class TempSalesOrderItem extends \yii\db\ActiveRecord
             'lembar_ikat_um_3' => 'Lembar Ikat Um 3',
             'jumlah_cetak' => 'Jumlah Cetak',
             'total_order' => 'Total Order',
-            'keterangan' => 'Keterangan',
             'user_id' => 'User ID',
         ];
     }
@@ -172,6 +171,23 @@ class TempSalesOrderItem extends \yii\db\ActiveRecord
     public function getPotongs()
     {
         return $this->hasMany(TempSalesOrderPotong::className(), ['code' => 'code', 'item_code' => 'item_code']);
+    }
+
+    public function getProsesTemps()
+    {
+        return TempSalesOrderProses::find()
+            ->where(['code'=>$this->code, 'item_code'=>$this->item_code, 'user_id'=> \Yii::$app->user->id])
+            ->all();
+    }
+
+    public function getJumlahCetak()
+    {
+        $inventoryStock = $this->inventoryStock;
+        $konversi = $inventoryStock->satuanTerkecil($this->item_code, [
+            0 => $this->qty_order_1,
+            1 => $this->qty_order_2]);
+        $jumlahCetak = $konversi * $this->total_potong;
+        return $jumlahCetak;
     }
 
     public function getTotalOrder()

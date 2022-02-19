@@ -30,20 +30,12 @@ use yii\widgets\MaskedInput;
             <div class="col-lg-12 col-md-12 col-xs-12">
                 <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
                     <?= $form->field($model, 'group_supplier_code')->widget(Select2::classname(), [
-                            'data' => $groupSupplier,
-                            'options' => ['placeholder' => 'Group Supplier'],
+                        'data' => $groupSupplier,
+                        'options' => ['placeholder' => 'Group Supplier'],
                         ]) ?>
                 </div>
                 <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
-                    <?= $form->field($model, 'tgl_jatuh_tempo')->widget(DatePicker::classname(), [
-                        'type' => DatePicker::TYPE_INPUT,
-                        'options' => [
-                            'placeholder' => 'dd-mm-yyyy',
-                        ],
-                        'pluginOptions' => [
-                            'autoclose' => true,
-                            'format' => 'dd-mm-yyyy',
-                        ]]) ?>
+                    <?= $form->field($model, 'term_in')->textInput(['maxlength' => true]) ?>
                 </div>
             </div>
             <div class="col-lg-12 col-md-12 col-xs-12">

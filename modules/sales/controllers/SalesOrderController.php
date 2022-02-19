@@ -4,7 +4,6 @@ namespace app\modules\sales\controllers;
 
 use app\models\Logs;
 use app\models\User;
-use app\modules\inventory\models\InventoryStockItem;
 use app\modules\inventory\models\InventoryStockTransaction;
 use app\modules\master\models\MasterBiayaProduksi;
 use app\modules\master\models\MasterMaterialItem;
@@ -17,8 +16,8 @@ use app\modules\sales\models\SalesOrderItem;
 use app\modules\sales\models\SalesOrderProses;
 use app\modules\sales\models\SalesOrderSearch;
 use app\modules\produksi\models\SpkInternal;
-use app\modules\sales\models\TempSalesOrderPotong;
 use app\modules\sales\models\TempSalesOrderItem;
+use app\modules\sales\models\TempSalesOrderPotong;
 use app\modules\sales\models\TempSalesOrderProses;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -43,10 +42,10 @@ class SalesOrderController extends Controller
                     'rules' => [
                         [
                             'actions' => [
-                                'index', 'view', 'create', 'update', 'delete',
+                                'index', 'view', 'create', 'update', 'delete', 'change-customer',
                                 'list-item', 'autocomplete-item', 'search-item', 'select-item',
-                                'temp-item', 'temp-bahan', 'create-temp', 'delete-temp',
-                                'list-proses', 'create-proses', 'invoice', 'post'
+                                'temp-item', 'temp-bahan', 'temp-potong', 'create-temp', 'delete-temp',
+                                'list-proses', 'create-proses', 'create-potong', 'delete-potong', 'invoice', 'post'
                             ],
                             'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('sales-order')),
                             'roles' => ['@'],
@@ -109,7 +108,7 @@ class SalesOrderController extends Controller
             ->where(['master_kode.value'=>\Yii::$app->params['TYPE_SATUAN_PRODUKSI'], 'master_satuan.status'=>1])
             ->indexBy('master_satuan.code')
             ->column();
-
+        
         $success = true;
         $message = '';
         $model = new SalesOrder();
@@ -249,7 +248,6 @@ class SalesOrderController extends Controller
             ->where(['master_kode.value'=>\Yii::$app->params['TYPE_SATUAN_PRODUKSI'], 'master_satuan.status'=>1])
             ->indexBy('master_satuan.code')
             ->column();
-        $itemTemp = TempSalesOrderItem::find()->orderBy(['urutan'=>SORT_ASC])->one();
         
         $success = true;
         $message = '';
@@ -412,7 +410,6 @@ class SalesOrderController extends Controller
             'tempItem' => $tempItem,
             'tempPotong' => $tempPotong,
             'typeSatuan' => $typeSatuan,
-            'itemTemp' => $itemTemp,
         ]);
     }
 
@@ -504,6 +501,14 @@ class SalesOrderController extends Controller
         return $this->redirect(['index']);
     }
 
+    public function actionChangeCustomer($customer_code, $tgl_so)
+    {
+        $model = MasterPerson::find()->where(['code'=>$customer_code])->asArray()->one();
+        $top = date('d-m-Y', strtotime('+'.$model['term_in'].' days', strtotime($tgl_so)));
+        $tgl_tempo = '<i class="text-muted font-size-10">Tgl. Jatuh Tempo Pembayaran: '.$top.'</i>';
+        return json_encode(['term_in'=>$model['term_in'], 'tgl_tempo'=>$tgl_tempo]);
+    }
+    
     public function actionListItem($type)
     {
         $andWhere = '';
@@ -652,6 +657,116 @@ class SalesOrderController extends Controller
         return json_encode(['model'=>$model]);
     }
 
+    public function actionTempPotong()
+    {
+        $temps = TempSalesOrderPotong::findAll(['user_id' => \Yii::$app->user->id]);
+        $tempsProses = TempSalesOrderProses::findAll(['user_id' => \Yii::$app->user->id]);
+        $model = $this->renderAjax('_temp_potong', [
+            'temps' => $temps,
+            'tempsProses' => $tempsProses]);
+        return json_encode(['model'=>$model]);
+    }
+
+    public function actionCreatePotong()
+    {
+        $request = \Yii::$app->request;
+        $success = true;
+        $message = 'CREATE TEMP SUCCESSFULLY';
+        if($request->isPost){
+            $dataHeader = $request->post('SalesOrder');
+            $code = (!empty($dataHeader['code'])) ? $dataHeader['code'] : 'tmp';
+            $dataItem = $request->post('TempSalesOrderItem');
+            $tempItem = new TempSalesOrderItem();
+            $tempItem->attributes = (array)$dataItem;
+            if(!empty($tempItem->item_name) && !empty($tempItem->item_code)){
+                if(!empty($tempItem->total_potong)){
+                    $dataPotong = $request->post('TempSalesOrderPotong');
+                    if(empty($dataPotong['panjang'])){
+                        $success = false;
+                        $message = 'Panjang tidak boleh kosong.';
+                    }else if(empty($dataPotong['lebar'])){
+                        $success = false;
+                        $message = 'Lebar tidak boleh kosong.';
+                    }else if(empty($dataPotong['objek'])){
+                        $success = false;
+                        $message = 'Objek tidak boleh kosong.';
+                    }else{
+                        $tempPotong = new TempSalesOrderPotong();
+                        $tempPotong->attributes = (array)$dataPotong;
+                        $tempPotong->code = $code;
+                        $tempPotong->item_code = $tempItem->item_code;
+                        $tempPotong->urutan = $tempPotong->countTemp +1;
+                        $tempPotong->user_id = \Yii::$app->user->id;
+                        $tempPotong->total_objek = $tempItem->jumlahCetak * $tempPotong->objek;
+                        if($tempPotong->countTemp < $tempItem->total_potong){
+                            if(!$tempPotong->save()){
+                                $success = false;
+                                foreach($tempPotong->errors as $error => $value){
+                                    $message = $value[0].', ';
+                                }
+                                $message = substr($message, 0, -2);
+                            }
+                        }else{
+                            $success = false;
+                            $message = 'Maksimal Detail Potong '.$dataItem['total_potong'].'.';
+                        }
+                    }
+                }else{
+                    $success = false;
+                    $message = 'Total Potong tidak boleh kosong.';
+                }
+            }else{
+                $success = false;
+                $message = 'Material tidak boleh kosong.';
+            }
+        }else{
+            throw new NotFoundHttpException('The requested data does not exist.');
+        }
+        return json_encode(['success'=>$success, 'message'=>$message]);
+    }
+
+    public function actionDeletePotong($id)
+    {
+        $success = true;
+        $message = '';
+        $temp = TempSalesOrderPotong::findOne(['id'=>$id]);
+        if(isset($temp)){
+            $connection = \Yii::$app->db;
+            $transaction = $connection->beginTransaction();
+            try{
+                if($temp->delete()){
+                    foreach($temp->temps as $index=>$val){
+                        $val->urutan = $index +1;
+                        if(!$val->save()){
+                            $success = false;
+                            foreach($val->errors as $error => $value){
+                                $message .= strtoupper($value[0].', ');
+                            }
+                            $message = substr($message, 0, -2);
+                        }
+                    }
+                }else{
+                    $success = false;
+                    foreach($temp->errors as $error => $value){
+                        $message = $value[0].', ';
+                    }
+                    $message = substr($message, 0, -2);
+                }
+                if($success){
+                    $transaction->commit();
+                    $message = 'DELETE ITEM TEMP SUCCESSFULLY.';
+                }else{
+                    $transaction->rollBack();
+                }
+            }catch(\Exception $e){
+                $success = false;
+                $message = $e->getMessage();
+                $transaction->rollBack();
+            }
+        }
+        return json_encode(['success'=>$success, 'message'=>$message]);
+    }
+
     public function actionCreateTemp()
     {
         $request = \Yii::$app->request;
@@ -662,11 +777,7 @@ class SalesOrderController extends Controller
             $transaction = $connection->beginTransaction();
             try{
                 $dataHeader = $request->post('SalesOrder');
-                if(!empty($dataHeader['code'])){
-                    $code = $dataHeader['code'];
-                }else{
-                    $code = 'tmp';
-                }
+                $code = (!empty($dataHeader['code'])) ? $dataHeader['code'] : 'tmp';
                 // TEMP ITEM ATTRIBUTES
                 $dataItem = $request->post('TempSalesOrderItem');
                 $tempItem = new TempSalesOrderItem();
@@ -698,12 +809,7 @@ class SalesOrderController extends Controller
                             if(!$tempItem->lembar_ikat_2) $tempItem->lembar_ikat_2 = 0;
                             if(!$tempItem->lembar_ikat_3) $tempItem->lembar_ikat_3 = 0;
                         }
-    
-                        $inventoryStock = InventoryStockItem::findOne(['item_code'=>$tempItem->item_code]);
-                        $konversi = $inventoryStock->satuanTerkecil($tempItem->item_code, [
-                            0 => $tempItem->qty_order_1,
-                            1 => $tempItem->qty_order_2]);
-                        $tempItem->jumlah_cetak = $konversi * $tempItem->total_potong;
+                        $tempItem->jumlah_cetak = $tempItem->jumlahCetak;
                     }
                 }else{
                     $success = false;
@@ -717,41 +823,7 @@ class SalesOrderController extends Controller
                 
                 if($success){
                     if(empty($tempItem->itemTemp)){
-                        if($tempItem->save()){
-                            if($tempItem->item->typeCode->value == \Yii::$app->params['TYPE_MATERIAL_KERTAS']){
-                                // TEMP POTONG ATTRIBUTES
-                                $dataPotong = $request->post('TempSalesOrderPotong');
-                                foreach($dataPotong['panjang'] as $index=>$val){
-                                    if(empty($dataPotong['panjang'][$index])){
-                                        $success = false;
-                                        $message = 'Panjang tidak boleh kosong.';
-                                    }else if(empty($dataPotong['lebar'][$index])){
-                                        $success = false;
-                                        $message = 'Lebar tidak boleh kosong.';
-                                    }else if(empty($dataPotong['total_objek'][$index])){
-                                        $success = false;
-                                        $message = 'Objek tidak boleh kosong.';
-                                    }else{
-                                        $tempPotong = new TempSalesOrderPotong();
-                                        $tempPotong->code = $code;
-                                        $tempPotong->item_code = $tempItem->item_code;
-                                        $tempPotong->urutan = $tempPotong->countTemp +1;
-                                        $tempPotong->panjang = $dataPotong['panjang'][$index];
-                                        $tempPotong->lebar = $dataPotong['lebar'][$index];
-                                        $tempPotong->total_objek = $dataPotong['total_objek'][$index];
-                                        $tempPotong->user_id = \Yii::$app->user->id;
-                                        $tempPotong->jumlah_objek = $tempItem->jumlah_cetak * $tempPotong->total_objek;
-                                        if(!$tempPotong->save()){
-                                            $success = false;
-                                            foreach($tempPotong->errors as $error => $value){
-                                                $message = $value[0].', ';
-                                            }
-                                            $message = substr($message, 0, -2);
-                                        }
-                                    }
-                                }
-                            }
-                        }else{
+                        if(!$tempItem->save()){
                             $success = false;
                             foreach($tempItem->errors as $error => $value){
                                 $message = $value[0].', ';
@@ -829,31 +901,30 @@ class SalesOrderController extends Controller
     {
         $data = [];
         $model = MasterBiayaProduksi::findAll(['status'=>1]);
-        $tempPotong = TempSalesOrderPotong::findOne(['id'=>$id]);
+        $tempItem = TempSalesOrderItem::findOne(['id'=>$id]);
         foreach($model as $val){
             $data[$val->code] = [
                 'name' => $val->name,
                 'biaya_code' => $val->code,
-                'code' => $tempPotong->code,
-                'item_code' => $tempPotong->item_code,
-                'potong_id' => $tempPotong->urutan,
+                'code' => $tempItem->code,
+                'item_code' => $tempItem->item_code,
             ];
         }
-        if(count($tempPotong->prosesTemps) > 0){
-            foreach($tempPotong->prosesTemps as $val){
+        if(count($tempItem->prosesTemps) > 0){
+            foreach($tempItem->prosesTemps as $val){
                 $data[$val->biaya_code] = [
                     'id' => $val->id,
                     'name' => (isset($val->biayaProduksi)) ? $val->biayaProduksi->name : '-',
                     'biaya_code' => $val->biaya_code,
                     'code' => $val->code,
                     'item_code' => $val->item_code,
-                    'potong_id' => $val->potong_id,
+                    'keterangan' => $val->keterangan,
                 ];
             }
         }
         return json_encode(['data'=>$this->renderPartial('_list_proses', [
             'data'=>$data,
-            'tempPotong'=>$tempPotong])
+            'tempItem'=>$tempItem])
         ]);
     }
 
@@ -865,15 +936,15 @@ class SalesOrderController extends Controller
         if($request->isPost){
             $dataProses = $request->post('TempSalesOrderProses');
             if(!empty($dataProses['biaya_code'])){
-                TempSalesOrderProses::deleteAll('code=:code and item_code=:item_code and potong_id=:urutan and user_id=:user_id', [
-                    ':code'=>$dataProses['code'], ':item_code'=>$dataProses['item_code'], ':urutan'=>$dataProses['urutan'], ':user_id'=>\Yii::$app->user->id]);
+                TempSalesOrderProses::deleteAll('code=:code and item_code=:item_code and user_id=:user_id', [
+                    ':code'=>$dataProses['code'], ':item_code'=>$dataProses['item_code'], ':user_id'=>\Yii::$app->user->id]);
                 foreach($dataProses['biaya_code'] as $val){
                     $tempProses = new TempSalesOrderProses();
                     $biayaProduksi = $tempProses->biayaProduksi($val);
                     $tempProses->attributes = $biayaProduksi->attributes;
                     $tempProses->attributes = (array)$dataProses;
-                    $tempProses->potong_id = $dataProses['urutan'];
                     $tempProses->biaya_code = $val;
+                    $tempProses->keterangan = $tempProses['keterangan'][$val];
                     $tempProses->user_id = \Yii::$app->user->id;
                     $totalBiaya = $tempProses->totalBiaya($dataProses);
                     if(!$tempProses->save()){

@@ -87,18 +87,31 @@ $this->params['breadcrumbs'][] = $this->title;
             </div>
             <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
                 <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                    <label>Ekspedisi</label>
+                    <label>Dateline</label>
                 </div>
                 <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                    <span><?=$model->ekspedisi_name ?></span>
+                    <span><?=date('d-m-Y', strtotime($model->dateline)) ?></span>
                 </div>
             </div>
             <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
                 <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                    <label>Biaya Pengiriman</label>
+                    <label>Term In</label>
                 </div>
                 <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                    <span><?=(!empty($model->biaya_pengiriman)) ? number_format($model->biaya_pengiriman).'.-' : '-' ?></span>
+                    <span><?=$model->term_in.' Hari' ?></span>
+                    <div>
+                        <i class="text-muted font-size-10">
+                            <?='Tgl. Jatuh Tempo Pembayaran: '.date('d-m-Y', strtotime('+'.$model->term_in.' days', strtotime($model->tgl_so)))?>
+                        </i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
+                <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
+                    <label>Ekspedisi</label>
+                </div>
+                <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
+                    <span><?=$model->ekspedisi_name ?></span>
                 </div>
             </div>
             <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
@@ -180,37 +193,49 @@ $this->params['breadcrumbs'][] = $this->title;
                     </div>
                 </div>
                 <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
-                    <table class="table table-bordered table-custom margin-top-10">
-                        <thead>
-                            <tr>
-                                <th class="text-center">No.</th>
-                                <th class="text-center">PxL</th>
-                                <th class="text-center">Objek</th>
-                                <th class="text-center">Proses Produksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach($item->potongs as $no=>$val): ?>
+                    <div class="col-lg-6 col-md-6 col-xs-12 padding-left-0 padding-right-0">
+                        <table class="table table-bordered table-custom margin-top-10">
+                            <thead>
                                 <tr>
-                                    <td class="text-center" rowspan="<?=count($val->proses)+1 ?>"><?=$no+1 ?></td>
-                                    <td class="text-center" rowspan="<?=count($val->proses)+1 ?>"><?=$val->panjang.'x'.$val->lebar ?></td>
-                                    <td class="text-right" rowspan="<?=count($val->proses)+1 ?>">
-                                        <?=$val->total_objek .'
-                                        <span class="text-muted font-size-10">('.number_format($val->jumlah_objek).' objek)</span>' ?>
-                                    </td>
+                                    <th class="text-center">No.</th>
+                                    <th class="text-center">PxL</th>
+                                    <th class="text-center">Objek</th>
                                 </tr>
-                                <?php if(count($val->proses) > 0): ?>
-                                    <?php foreach($val->proses as $dataProses): ?>
-                                        <tr>
-                                            <td class="text-muted text-left" colspan="2">
-                                                <?='<i>'.$dataProses->biayaProduksi->name.'</i>' ?>
-                                            </td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                <?php endif; ?>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                <?php foreach($item->potongs as $no=>$val): ?>
+                                    <tr>
+                                        <td class="text-center"><?=$no+1 ?></td>
+                                        <td class="text-center"><?=$val->panjang.'x'.$val->lebar ?></td>
+                                        <td class="text-right">
+                                            <?=$val->objek .'
+                                            <span class="text-muted font-size-10">('.number_format($val->total_objek).' objek)</span>' ?>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-lg-6 col-md-6 col-xs-12 padding-right-0">
+                        <table class="table table-bordered table-custom margin-top-10">
+                            <thead>
+                                <tr>
+                                    <th class="text-center">No.</th>
+                                    <th class="text-center">Proses Produksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach($item->proses as $no=>$val): ?>
+                                    <tr>
+                                        <td class="text-center"><?=$no+1 ?></td>
+                                        <td class="text-left text-muted">
+                                            <?='<i>'.$val->biayaProduksi->name.'</i>' ?>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         <?php endforeach; ?>
@@ -224,15 +249,14 @@ $this->params['breadcrumbs'][] = $this->title;
                     <tr>
                         <th class="text-center" rowspan="2">No.</th>
                         <th class="text-center" colspan="2">Item</th>
-                        <th class="text-center" colspan="3">QTY</th>
+                        <th class="text-center" colspan="2">QTY</th>
                         <th class="text-center" rowspan="2">Jenis</th>
                     </tr>
                     <tr>
                         <th class="text-center">Code</th>
                         <th class="text-center">Name</th>
-                        <th class="text-center">1</th>
-                        <th class="text-center">2</th>
-                        <th class="text-center">3</th>
+                        <th class="text-center">Um 1</th>
+                        <th class="text-center">Um 2</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -242,7 +266,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                 <td class="text-center"><?=$no+1 ?></td>
                                 <td class="text-center"><?=$val->item_code ?></td>
                                 <td><?=(isset($val->item)) ? $val->item->name : '-' ?></td>
-                                <?php for($a=1;$a<=3;$a++):?>
+                                <?php for($a=1;$a<3;$a++):?>
                                     <td class="text-center"><?=($val['qty_order_'.$a] !=0) ? $val['qty_order_'.$a] .' '.$val['um_'.$a] : '' ?></td>
                                 <?php endfor; ?>
                                 <td class="text-center"><?=$val->item->material->name ?></td>

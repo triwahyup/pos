@@ -75,6 +75,7 @@ use yii\widgets\MaskedInput;
                     <?= $form->field($model, 'fax')->textInput(['maxlength' => true]) ?>
                 </div>
                 <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
+                    <?= $form->field($model, 'term_in')->textInput(['maxlength' => true]) ?>
                     <?= $form->field($model, 'keterangan')->textarea(['rows' => 4]) ?>
                 </div>
                 <div class="margin-bottom-20 full-width"></div>

@@ -31,25 +31,10 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
             ],
             [
-                'attribute' => 'tgl_jatuh_tempo',
+                'attribute' => 'term_in',
                 'contentOptions' => [
                     'class' => 'text-center',
                 ],
-                'filter' => DatePicker::widget([
-                    'model' => $searchModel, 
-                    'name' => 'tgl_jatuh_tempo', 
-                    'type' => DatePicker::TYPE_COMPONENT_APPEND,
-                    'pickerButton' => false,
-                    'attribute' => 'tgl_jatuh_tempo',
-                    'pluginOptions' => [
-                        'format' => 'dd-mm-yyyy',
-                        'autoclose' => true,
-                    ],
-                ]),
-                'value' => function($model, $index, $key)
-                {
-                    return !empty($model->tgl_jatuh_tempo) ? date('d-m-Y', strtotime($model->tgl_jatuh_tempo)) : null;
-                }
             ],
             [
                 'attribute' => 'group_supplier_code',

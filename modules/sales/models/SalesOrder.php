@@ -7,8 +7,9 @@ use yii\behaviors\TimestampBehavior;
 use app\modules\master\models\MasterPerson;
 use app\modules\sales\models\SalesOrderItem;
 use app\modules\sales\models\SalesOrderPotong;
-use app\modules\sales\models\TempSalesOrderPotong;
+use app\modules\sales\models\SalesOrderProses;
 use app\modules\sales\models\TempSalesOrderItem;
+use app\modules\sales\models\TempSalesOrderPotong;
 use app\modules\sales\models\TempSalesOrderProses;
 
 /**
@@ -23,7 +24,6 @@ use app\modules\sales\models\TempSalesOrderProses;
  * @property int|null $type_order
  * @property int|null $up_produksi
  * @property string|null $ekspedisi_name
- * @property float|null $biaya_pengiriman
  * @property float|null $ppn
  * @property float|null $total_order_material
  * @property float|null $total_biaya_produksi
@@ -57,9 +57,9 @@ class SalesOrder extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['name', 'type_order', 'customer_code', 'no_po', 'ekspedisi_name', 'biaya_pengiriman'], 'required'],
-            [['tgl_so', 'tgl_po', 'biaya_pengiriman'], 'safe'],
-            [['type_order', 'up_produksi', 'post', 'status', 'created_at', 'updated_at'], 'integer'],
+            [['name', 'type_order', 'customer_code', 'no_po', 'ekspedisi_flag', 'ekspedisi_name'], 'required'],
+            [['tgl_so', 'tgl_po', 'dateline'], 'safe'],
+            [['term_in', 'ekspedisi_flag', 'type_order', 'up_produksi', 'post', 'status', 'created_at', 'updated_at'], 'integer'],
             [['ppn', 'total_order_material', 'total_order_bahan', 'total_biaya_produksi', 'total_ppn', 'grand_total'], 'number'],
             [['code', 'no_po'], 'string', 'max' => 12],
             [['name', 'ekspedisi_name', 'keterangan'], 'string', 'max' => 128],
@@ -81,10 +81,11 @@ class SalesOrder extends \yii\db\ActiveRecord
             'no_po' => 'No Po',
             'tgl_po' => 'Tgl Po',
             'customer_code' => 'Customer',
+            'term_in' => 'Term In',
             'type_order' => 'Type Order',
             'up_produksi' => 'Up Produksi',
+            'ekspedisi_flag' => 'Pengambilan Barang',
             'ekspedisi_name' => 'Ekspedisi Name',
-            'biaya_pengiriman' => 'Biaya Pengiriman',
             'ppn' => 'Ppn',
             'total_order_material' => 'Total Order',
             'total_biaya_produksi' => 'Total Biaya Produksi',
@@ -112,7 +113,7 @@ class SalesOrder extends \yii\db\ActiveRecord
     {
         $this->tgl_so = date('Y-m-d', strtotime($this->tgl_so));
         $this->tgl_po = date('Y-m-d', strtotime($this->tgl_po));
-        $this->biaya_pengiriman = str_replace(',', '', $this->biaya_pengiriman);
+        $this->dateline = date('Y-m-d', strtotime($this->dateline));
         return parent::beforeSave($attribute);
     }
 
@@ -233,7 +234,7 @@ class SalesOrder extends \yii\db\ActiveRecord
             $total_ppn = ceil($total * ($this->ppn / 100));
         }
         $this->total_ppn = $total_ppn;
-        $this->grand_total = $total+$total_ppn+$this->biaya_pengiriman;
+        $this->grand_total = $total+$total_ppn;
         return true;
     }
 }
