@@ -43,6 +43,7 @@ class SalesOrderController extends Controller
                         [
                             'actions' => [
                                 'index', 'view', 'create', 'update', 'delete', 'on-change-term-in', 'on-input-term-in',
+                                'list-order', 'autocomplete-order', 'search-order', 'select-order',
                                 'list-item', 'autocomplete-item', 'search-item', 'select-item',
                                 'temp-item', 'temp-bahan', 'temp-potong', 'create-temp', 'delete-temp',
                                 'list-proses', 'create-proses', 'create-potong', 'delete-potong', 'invoice', 'post'
@@ -523,6 +524,116 @@ class SalesOrderController extends Controller
         $top = date('d-m-Y', strtotime('+'.$termIn.' days', strtotime($tgl_so)));
         $tgl_tempo = '<i class="text-muted font-size-10">Tgl. Jatuh Tempo Pembayaran: '.$top.'</i>';
         return json_encode(['tgl_tempo'=>$tgl_tempo]);
+    }
+
+    public function actionListOrder()
+    {
+        $model = SalesOrder::find()
+            ->alias('a')
+            ->leftJoin('master_person b', 'b.code = a.customer_code')
+            ->where(['a.status'=>1])
+            ->orderBy(['a.code'=>SORT_ASC])
+            ->limit(10)
+            ->all();
+        return json_encode(['data'=>$this->renderPartial('_list_order', [
+            'model'=>$model])
+        ]);
+    }
+
+    public function actionAutocompleteOrder()
+    {
+        $model = [];
+        if(isset($_POST['search'])){
+            $model = SalesOrder::find()
+                ->alias('a')
+                ->select(['a.code', 'a.name as label'])
+                ->leftJoin('master_person b', 'b.code = a.customer_code')
+                ->where(['a.status'=>1])
+                ->andWhere('a.name LIKE "%'.$_POST['search'].'%"')
+                ->orderBy(['a.code'=>SORT_ASC])
+                ->asArray()
+                ->limit(10)
+                ->all();
+        }
+        return  json_encode($model);
+    }
+
+    public function actionSearchOrder()
+    {
+        $model = [];
+        if(isset($_POST['code'])){
+            $model = SalesOrder::find()
+                ->alias('a')
+                ->leftJoin('master_person b', 'b.code = a.customer_code')
+                ->where(['a.code'=>$_POST['code'], 'a.status'=>1])
+                ->orderBy(['a.code'=>SORT_ASC])
+                ->all();
+        }
+        return json_encode(['data'=>$this->renderPartial('_list_order', [
+            'model'=>$model])
+        ]);
+    }
+
+    public function actionSelectOrder()
+    {
+        $model = SalesOrder::find()->where(['code'=>$_POST['code'], 'status'=>1])->asArray()->one();
+        $model['tgl_so'] = date('d-m-Y', strtotime($model['tgl_so']));
+        $model['tgl_po'] = date('d-m-Y', strtotime($model['tgl_po']));
+        $model['dateline'] = date('d-m-Y', strtotime($model['dateline']));
+
+        $this->emptyTemp();
+        $salesOrder = $this->findModel($model['code']);
+        $tempDetail = [];
+        foreach($salesOrder->items as $detail){
+            $tempItem = new TempSalesOrderItem();
+            $tempItem->attributes = $detail->attributes;
+            $tempItem->code = 'tmp';
+            $tempItem->user_id = \Yii::$app->user->id;
+            if(!$tempItem->save()){
+                $message = (count($tempItem->errors) > 0) ? 'ERROR LOAD SALES ORDER ITEM: ' : '';
+                foreach($tempItem->errors as $error => $value){
+                    $message .= strtoupper($value[0].', ');
+                }
+                $message = substr($message, 0, -2);
+                \Yii::$app->session->setFlash('error', $message);
+            }
+            $tempDetail = [
+                'qty_order_1' => $tempItem->itemMaterial->qty_order_1,
+                'qty_order_2' => $tempItem->itemMaterial->qty_order_2
+            ];
+        }
+        foreach($salesOrder->potongs as $detail){
+            $tempPotong = new TempSalesOrderPotong();
+            $tempPotong->attributes = $detail->attributes;
+            $tempPotong->code = 'tmp';
+            $tempPotong->user_id = \Yii::$app->user->id;
+            if(!$tempPotong->save()){
+                $message = (count($tempPotong->errors) > 0) ? 'ERROR LOAD SALES ORDER POTONG: ' : '';
+                foreach($tempPotong->errors as $error => $value){
+                    $message .= strtoupper($value[0].', ');
+                }
+                $message = substr($message, 0, -2);
+                \Yii::$app->session->setFlash('error', $message);
+            }
+        }
+        foreach($salesOrder->proses as $detail){
+            $tempProses = new TempSalesOrderProses();
+            $tempProses->attributes = $detail->attributes;
+            $tempProses->code = 'tmp';
+            $tempProses->user_id = \Yii::$app->user->id;
+            if(!$tempProses->save()){
+                $message = (count($tempProses->errors) > 0) ? 'ERROR LOAD SALES ORDER PROSES PRODUKSI: ' : '';
+                foreach($tempProses->errors as $error => $value){
+                    $message .= strtoupper($value[0].', ');
+                }
+                $message = substr($message, 0, -2);
+                \Yii::$app->session->setFlash('error', $message);
+            }
+        }
+
+        $model['qty_order_1'] = $tempDetail['qty_order_1'];
+        $model['qty_order_2'] = $tempDetail['qty_order_2'];
+        return json_encode($model);
     }
     
     public function actionListItem($type)

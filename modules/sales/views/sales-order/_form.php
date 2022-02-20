@@ -88,7 +88,7 @@ use yii\widgets\MaskedInput;
                         <label>Nama Job:</label>
                     </div>
                     <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                        <?= $form->field($model, 'name')->textInput(['maxlength' => true])->label(false) ?>
+                        <?= $form->field($model, 'name')->textInput(['maxlength' => true, 'placeholder' => 'Repeat Order tekan F4'])->label(false) ?>
                         <?php if(!$model->isNewRecord): ?>
                             <?= $form->field($model, 'code')->hiddenInput(['maxlength' => true])->label(false) ?>
                         <?php endif; ?>
@@ -598,6 +598,83 @@ function onInputTermIn(term_in, tgl_so)
     });
 }
 
+function load_order()
+{
+    $.ajax({
+        url: "<?=Url::to(['sales-order/list-order'])?>",
+		type: "GET",
+		dataType: "text",
+        error: function(xhr, status, error) {},
+		beforeSend: function (data){},
+        success: function(data){
+            var o = $.parseJSON(data);
+            $("[data-popup=\"popup\"]").html(o.data);
+            $("[data-popup=\"popup\"]").popup("open", {
+				container: "popup",
+				title: 'List Data Job Order',
+				styleOptions: {
+					width: 600
+				}
+			});
+        },
+        complete: function(){}
+    });
+}
+
+function search_order(code)
+{
+    $.ajax({
+        url: "<?=Url::to(['sales-order/search-order'])?>",
+		type: "POST",
+        data: {
+            code: code,
+        },
+		dataType: "text",
+        error: function(xhr, status, error) {},
+		beforeSend: function(){},
+        success: function(data){
+            popup.close();
+            var o = $.parseJSON(data);
+            $("[data-popup=\"popup\"]").html(o.data);
+            $("[data-popup=\"popup\"]").popup("open", {
+				container: "popup",
+				title: 'List Data Job Order',
+				styleOptions: {
+					width: 600
+				}
+			});
+        },
+        complete: function(){}
+    });
+}
+
+function select_order(code)
+{
+    $.ajax({
+        url: "<?=Url::to(['sales-order/select-order'])?>",
+		type: "POST",
+        data: {
+            code: code,
+        },
+		dataType: "text",
+        error: function(xhr, status, error) {},
+		beforeSend: function(){},
+        success: function(data){
+            var o = $.parseJSON(data);
+            $.each(o, function(index, value){
+                $("#salesorder-"+index).val(value);
+                $("#salesorder-"+index).val(value).trigger("change");
+            });
+            isNotNewRecord();
+            $("#tempsalesorderitem-qty_order_1").val(o.qty_order_1);
+            $("#tempsalesorderitem-qty_order_2").val(o.qty_order_2);
+        },
+        complete: function(){
+            popup.close();
+        }
+    });
+}
+
 function load_item(type)
 {
     $.ajax({
@@ -905,16 +982,6 @@ function init_temp_potong()
 
 var timeOut = 3000;
 $(document).ready(function(){
-    $("body").off("change","#salesorder-customer_code").on("change","#salesorder-customer_code", function(e){
-        e.preventDefault();
-        onChangeTermIn($(this).val(), $("#salesorder-tgl_so").val());
-    });
-
-    $("body").off("input","#salesorder-term_in").on("input","#salesorder-term_in", function(e){
-        e.preventDefault();
-        onInputTermIn($(this).val(), $("#salesorder-tgl_so").val());
-    });
-    
     $("body").off("change","#salesorder-ekspedisi_flag").on("change","#salesorder-ekspedisi_flag", function(e){
         e.preventDefault();
         if($(this).val() == 1){
@@ -925,28 +992,40 @@ $(document).ready(function(){
         $("#salesorder-ekspedisi_name").val(null);
     });
 
+    /**  TERM IN */
+    $("body").off("change","#salesorder-customer_code").on("change","#salesorder-customer_code", function(e){
+        e.preventDefault();
+        onChangeTermIn($(this).val(), $("#salesorder-tgl_so").val());
+    });
+
+    $("body").off("input","#salesorder-term_in").on("input","#salesorder-term_in", function(e){
+        e.preventDefault();
+        onInputTermIn($(this).val(), $("#salesorder-tgl_so").val());
+    });
+    /** END TERM IN */
+
+    /** JOB */
+    $("body").off("keydown","#salesorder-name").on("keydown","#salesorder-name", function(e){
+        var key = e.charCode ? e.charCode : e.keyCode ? e.keyCode : 0;
+        <?php if($model->isNewRecord): ?>
+            if(key == KEY.F4) load_order();
+        <?php endif; ?>
+    });
+
+    $("body").off("click","table[data-table=\"sales_order\"] > tbody tr[data-code]");
+    $("body").on("click","table[data-table=\"sales_order\"] > tbody tr[data-code]", function(e){
+        e.preventDefault();
+        var data = $(this).data();
+        select_order(data.code);
+    });
+    /** END JOB */
+
+    /** LOAD ITEM MATERIAL & BAHAN */
     $("body").off("keydown","#tempsalesorderitem-item_name")
     $("body").on("keydown","#tempsalesorderitem-item_name", function(e){
         var key = e.charCode ? e.charCode : e.keyCode ? e.keyCode : 0;
         if(key == KEY.F4){
             load_item($(this).data().type);
-        }
-    });
-
-    $("body").off("click","[data-id=\"popup\"] table > tbody tr[data-code]");
-    $("body").on("click","[data-id=\"popup\"] table > tbody tr[data-code]", function(e){
-        e.preventDefault();
-        var data = $(this).data();
-        select_item(data.code, data.type);
-    });
-
-    $("body").off("input","#tempsalesorderitem-qty_order_2");
-    $("body").on("input","#tempsalesorderitem-qty_order_2", function(e){
-        e.preventDefault();
-        if($(this).val() >= 500){
-            $(this).val(499);
-        }else{
-            $(this).val();
         }
     });
 
@@ -958,26 +1037,15 @@ $(document).ready(function(){
         }
     });
 
-    $("body").off("keydown","#tempsalesorderitem-item_name")
-    $("body").on("keydown","#tempsalesorderitem-item_name", function(e){
-        var key = e.charCode ? e.charCode : e.keyCode ? e.keyCode : 0;
-        if(key == KEY.F4){
-            load_item($(this).data().type);
-        }
-    });
-
-    $("body").off("change","#tempsalesorderitem-satuan_ikat_code");
-    $("body").on("change","#tempsalesorderitem-satuan_ikat_code", function(e){
+    $("body").off("click","table[data-table=\"master_item_material\"] > tbody tr[data-code]");
+    $("body").on("click","table[data-table=\"master_item_material\"] > tbody tr[data-code]", function(e){
         e.preventDefault();
-        var text = $(this).find("option:selected").text();
-        $("[data-um]").attr("readonly", true);
-        $("[data-value]").val(null);
-        $.each(text.split("-"), function(index, value){
-            $("[data-um=\""+value+"\"]").attr("readonly", false);
-            $("[data-value=\""+value+"\"]").val(value);
-        });
+        var data = $(this).data();
+        select_item(data.code, data.type);
     });
+    /** END LOAD ITEM MATERIAL & BAHAN */
 
+    /** POTONG TEMP */
     $("body").off("click","[data-button=\"create_potong\"]").on("click","[data-button=\"create_potong\"]", function(e){
         e.preventDefault();
         success = true;
@@ -1014,6 +1082,30 @@ $(document).ready(function(){
     $("body").off("click","#delete_potong").on("click","#delete_potong", function(e){
         e.preventDefault();
         delete_potong($(this).attr("data-target"));
+    });
+    /** END POTONG TEMP */
+
+    /** ITEM TEMP */
+    $("body").off("input","#tempsalesorderitem-qty_order_2");
+    $("body").on("input","#tempsalesorderitem-qty_order_2", function(e){
+        e.preventDefault();
+        if($(this).val() >= 500){
+            $(this).val(499);
+        }else{
+            $(this).val();
+        }
+    });
+
+    $("body").off("change","#tempsalesorderitem-satuan_ikat_code");
+    $("body").on("change","#tempsalesorderitem-satuan_ikat_code", function(e){
+        e.preventDefault();
+        var text = $(this).find("option:selected").text();
+        $("[data-um]").attr("readonly", true);
+        $("[data-value]").val(null);
+        $.each(text.split("-"), function(index, value){
+            $("[data-um=\""+value+"\"]").attr("readonly", false);
+            $("[data-value=\""+value+"\"]").val(value);
+        });
     });
 
     $("body").off("click","[data-button=\"create_temp\"]").on("click","[data-button=\"create_temp\"]", function(e){
@@ -1053,7 +1145,9 @@ $(document).ready(function(){
         e.preventDefault();
         delete_temp($(this).attr("data-target"));
     });
+    /** END ITEM TEMP */
 
+    /** PROSES TEMP */
     $("body").off("click","[data-button=\"create_proses_temp\"]");
     $("body").on("click","[data-button=\"create_proses_temp\"]", function(e){
         e.preventDefault();
@@ -1065,19 +1159,20 @@ $(document).ready(function(){
         e.preventDefault();
         create_proses();
     });
+    /** END PROSES TEMP */
 });
 
-var isNewRecord = function() {
-    <?php if(!$model->isNewRecord): ?>
-        init_temp_item();
-        init_temp_bahan();
-        init_temp_potong();
+var isNotNewRecord = function() {
+    init_temp_item();
+    init_temp_bahan();
+    init_temp_potong();
 
-        onInputTermIn($("#salesorder-term_in").val(), $("#salesorder-tgl_so").val());
-        $("[id^=\"tempsalesorderitem-\"]:not([id^=\"tempsalesorderitem-qty_order_\"])").val(null)
-    <?php endif; ?>
+    onInputTermIn($("#salesorder-term_in").val(), $("#salesorder-tgl_so").val());
+    $("[id^=\"tempsalesorderitem-\"]:not([id^=\"tempsalesorderitem-qty_order_\"])").val(null)
 }
 $(function(){
-    isNewRecord();
+    <?php if(!$model->isNewRecord): ?>
+        isNotNewRecord();
+    <?php endif; ?>
 });
 </script>
