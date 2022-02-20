@@ -57,7 +57,7 @@ class SalesOrder extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['name', 'type_order', 'customer_code', 'no_po', 'ekspedisi_flag', 'ekspedisi_name'], 'required'],
+            [['name', 'type_order', 'customer_code', 'no_po', 'ekspedisi_flag'], 'required'],
             [['tgl_so', 'tgl_po', 'dateline'], 'safe'],
             [['term_in', 'ekspedisi_flag', 'type_order', 'up_produksi', 'post', 'status', 'created_at', 'updated_at'], 'integer'],
             [['ppn', 'total_order_material', 'total_order_bahan', 'total_biaya_produksi', 'total_ppn', 'grand_total'], 'number'],
@@ -224,6 +224,34 @@ class SalesOrder extends \yii\db\ActiveRecord
         $this->total_order_bahan = $total_order_bahan;
         $total_biaya_produksi=0;
         foreach($this->prosesTemps() as $val){
+            $total_biaya_produksi += $val->total_biaya;
+        }
+        $this->total_biaya_produksi = $total_biaya_produksi;
+        
+        $total = $total_order_material + $total_order_bahan + $total_biaya_produksi;
+        $total_ppn=0;
+        if(!empty($this->ppn)){
+            $total_ppn = ceil($total * ($this->ppn / 100));
+        }
+        $this->total_ppn = $total_ppn;
+        $this->grand_total = $total+$total_ppn;
+        return true;
+    }
+
+    public function getUpdateTotalOrder()
+    {
+        $total_order_material=0;
+        foreach($this->itemsMaterial as $val){
+            $total_order_material += $val->total_order;
+        }
+        $this->total_order_material = $total_order_material;
+        $total_order_bahan=0;
+        foreach($this->itemsNonMaterial as $val){
+            $total_order_bahan += $val->total_order;
+        }
+        $this->total_order_bahan = $total_order_bahan;
+        $total_biaya_produksi=0;
+        foreach($this->proses as $val){
             $total_biaya_produksi += $val->total_biaya;
         }
         $this->total_biaya_produksi = $total_biaya_produksi;

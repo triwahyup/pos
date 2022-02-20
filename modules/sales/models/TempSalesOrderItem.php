@@ -143,6 +143,12 @@ class TempSalesOrderItem extends \yii\db\ActiveRecord
         return $this->hasOne(MasterMaterialItem::className(), ['code' => 'bahan_item_code']);
     }
 
+    public $type_material = '007';
+    public function getItemMaterial()
+    {
+        return $this->hasOne(TempSalesOrderItem::className(), ['code' => 'code', 'type_code' => 'type_material']);
+    }
+
     public function getItemPricelist()
     {
         return $this->hasOne(MasterMaterialItemPricelist::className(), ['item_code' => 'item_code']);

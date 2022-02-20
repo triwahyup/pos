@@ -42,7 +42,7 @@ class SalesOrderController extends Controller
                     'rules' => [
                         [
                             'actions' => [
-                                'index', 'view', 'create', 'update', 'delete', 'change-customer',
+                                'index', 'view', 'create', 'update', 'delete', 'on-change-term-in', 'on-input-term-in',
                                 'list-item', 'autocomplete-item', 'search-item', 'select-item',
                                 'temp-item', 'temp-bahan', 'temp-potong', 'create-temp', 'delete-temp',
                                 'list-proses', 'create-proses', 'create-potong', 'delete-potong', 'invoice', 'post'
@@ -255,73 +255,80 @@ class SalesOrderController extends Controller
         $tempItem = new TempSalesOrderItem();
         $tempPotong = new TempSalesOrderPotong();
         if($this->request->isPost){
-            if($model->load($this->request->post())){
+            if($model->load($this->request->post()) && $tempItem->load($this->request->post())){
                 $connection = \Yii::$app->db;
 			    $transaction = $connection->beginTransaction();
                 try{
                     $model->attributes = $model->attributes;
-                    $totalOrder = $model->totalOrder;
-                    if($model->save()){
-                        if(count($model->itemTemps) > 0){
-                            foreach($model->items as $empty)
-                                $empty->delete();
-                            foreach($model->itemTemps as $temp){
-                                $salesItem = new SalesOrderItem();
-                                $salesItem->attributes = $temp->attributes;
-                                if(!$salesItem->save()){
-                                    $success = false;
-                                    $message = (count($salesItem->errors) > 0) ? 'ERROR UPDATE SALES ORDER ITEM: ' : '';
-                                    foreach($salesItem->errors as $error => $value){
-                                        $message .= strtoupper($value[0].', ');
-                                    }
-                                    $message = substr($message, 0, -2);
-                                }
+                    if(count($model->itemTemps) > 0){
+                        foreach($model->items as $empty)
+                            $empty->delete();
+                        foreach($model->itemTemps as $temp){
+                            $salesItem = new SalesOrderItem();
+                            $salesItem->attributes = $temp->attributes;
+                            if($salesItem->item->typeCode->value == \Yii::$app->params['TYPE_MATERIAL_KERTAS']){
+                                $salesItem->qty_order_1 = $tempItem->qty_order_1;
+                                $salesItem->qty_order_2 = $tempItem->qty_order_2;
+                                $salesItem->total_order = $salesItem->totalOrder;
+                                $salesItem->jumlah_cetak = $salesItem->jumlahCetak;
                             }
-                        }else{
-                            $success = false;
-                            $message = 'ERROR UPDATE SALES ORDER: ITEM IS EMPTY.';
-                        }
-
-                        if(count($model->potongTemps) > 0){
-                            foreach($model->potongs as $empty)
-                                $empty->delete();
-                            foreach($model->potongTemps as $temp){
-                                $salesPotong = new SalesOrderPotong();
-                                $salesPotong->attributes = $temp->attributes;
-                                if(!$salesPotong->save()){
-                                    $success = false;
-                                    $message = (count($salesPotong->errors) > 0) ? 'ERROR UPDATE SALES ORDER POTONG: ' : '';
-                                    foreach($salesPotong->errors as $error => $value){
-                                        $message .= strtoupper($value[0].', ');
-                                    }
-                                    $message = substr($message, 0, -2);
+                            if(!$salesItem->save()){
+                                $success = false;
+                                $message = (count($salesItem->errors) > 0) ? 'ERROR UPDATE SALES ORDER ITEM: ' : '';
+                                foreach($salesItem->errors as $error => $value){
+                                    $message .= strtoupper($value[0].', ');
                                 }
+                                $message = substr($message, 0, -2);
                             }
-                        }else{
-                            $success = false;
-                            $message = 'ERROR UPDATE SALES ORDER: POTONG IS EMPTY.';
-                        }
-
-                        if(count($model->prosesTemps) >0){
-                            foreach($model->proses as $empty)
-                                $empty->delete();
-                            foreach($model->prosesTemps as $temp){
-                                $salesProses = new SalesOrderProses();
-                                $salesProses->attributes = $temp->attributes;
-                                if(!$salesProses->save()){
-                                    $success = false;
-                                    $message = (count($salesProses->errors) > 0) ? 'ERROR UPDATE SALES ORDER PROSES PRODUKSI: ' : '';
-                                    foreach($salesProses->errors as $error => $value){
-                                        $message .= strtoupper($value[0].', ');
-                                    }
-                                    $message = substr($message, 0, -2);
-                                }
-                            }
-                        }else{
-                            $success = false;
-                            $message = 'ERROR UPDATE SALES ORDER: PROSES PRODUKSI IS EMPTY.';
                         }
                     }else{
+                        $success = false;
+                        $message = 'ERROR UPDATE SALES ORDER: ITEM IS EMPTY.';
+                    }
+
+                    if(count($model->potongTemps) > 0){
+                        foreach($model->potongs as $empty)
+                            $empty->delete();
+                        foreach($model->potongTemps as $temp){
+                            $salesPotong = new SalesOrderPotong();
+                            $salesPotong->attributes = $temp->attributes;
+                            if(!$salesPotong->save()){
+                                $success = false;
+                                $message = (count($salesPotong->errors) > 0) ? 'ERROR UPDATE SALES ORDER POTONG: ' : '';
+                                foreach($salesPotong->errors as $error => $value){
+                                    $message .= strtoupper($value[0].', ');
+                                }
+                                $message = substr($message, 0, -2);
+                            }
+                        }
+                    }else{
+                        $success = false;
+                        $message = 'ERROR UPDATE SALES ORDER: POTONG IS EMPTY.';
+                    }
+
+                    if(count($model->prosesTemps) >0){
+                        foreach($model->proses as $empty)
+                            $empty->delete();
+                        foreach($model->prosesTemps as $temp){
+                            $salesProses = new SalesOrderProses();
+                            $salesProses->attributes = $temp->attributes;
+                            $totalBiaya = $salesProses->totalBiaya($salesProses);
+                            if(!$salesProses->save()){
+                                $success = false;
+                                $message = (count($salesProses->errors) > 0) ? 'ERROR UPDATE SALES ORDER PROSES PRODUKSI: ' : '';
+                                foreach($salesProses->errors as $error => $value){
+                                    $message .= strtoupper($value[0].', ');
+                                }
+                                $message = substr($message, 0, -2);
+                            }
+                        }
+                    }else{
+                        $success = false;
+                        $message = 'ERROR UPDATE SALES ORDER: PROSES PRODUKSI IS EMPTY.';
+                    }
+                    
+                    $updateTotalOrder = $model->updateTotalOrder;
+                    if(!$model->save()){
                         $success = false;
                         $message = (count($model->errors) > 0) ? 'ERROR UPDATE SALES ORDER: ' : '';
                         foreach($model->errors as $error => $value){
@@ -501,12 +508,21 @@ class SalesOrderController extends Controller
         return $this->redirect(['index']);
     }
 
-    public function actionChangeCustomer($customer_code, $tgl_so)
+    public function actionOnChangeTermIn($customer_code, $tgl_so)
     {
         $model = MasterPerson::find()->where(['code'=>$customer_code])->asArray()->one();
-        $top = date('d-m-Y', strtotime('+'.$model['term_in'].' days', strtotime($tgl_so)));
+        $termIn = (!empty($model['term_in'])) ? $model['term_in'] : 0;
+        $top = date('d-m-Y', strtotime('+'.$termIn.' days', strtotime($tgl_so)));
         $tgl_tempo = '<i class="text-muted font-size-10">Tgl. Jatuh Tempo Pembayaran: '.$top.'</i>';
-        return json_encode(['term_in'=>$model['term_in'], 'tgl_tempo'=>$tgl_tempo]);
+        return json_encode(['term_in'=>$termIn, 'tgl_tempo'=>$tgl_tempo]);
+    }
+
+    public function actionOnInputTermIn($tgl_so, $term_in)
+    {
+        $termIn = (!empty($term_in)) ? $term_in : 0;
+        $top = date('d-m-Y', strtotime('+'.$termIn.' days', strtotime($tgl_so)));
+        $tgl_tempo = '<i class="text-muted font-size-10">Tgl. Jatuh Tempo Pembayaran: '.$top.'</i>';
+        return json_encode(['tgl_tempo'=>$tgl_tempo]);
     }
     
     public function actionListItem($type)
@@ -786,6 +802,15 @@ class SalesOrderController extends Controller
                     $tempItem->item_code = $tempItem->bahan_item_code;
                     $tempItem->qty_order_1 = $tempItem->bahan_qty_order_1;
                     $tempItem->qty_order_2 = $tempItem->bahan_qty_order_2;
+                    $tempItem->total_potong = null;
+                    $tempItem->total_warna = null;
+                    $tempItem->satuan_ikat_code = null;
+                    $tempItem->lembar_ikat_1 = null;
+                    $tempItem->lembar_ikat_2 = null;
+                    $tempItem->lembar_ikat_3 = null;
+                    $tempItem->lembar_ikat_um_1 = null;
+                    $tempItem->lembar_ikat_um_2 = null;
+                    $tempItem->lembar_ikat_um_3 = null;
                 }
                 $tempItem->attributes = $tempItem->item->attributes;
                 if(isset($tempItem->itemPricelist)){

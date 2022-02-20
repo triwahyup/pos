@@ -111,7 +111,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     <label>Ekspedisi</label>
                 </div>
                 <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                    <span><?=$model->ekspedisi_name ?></span>
+                    <span><?=(!empty($model->ekspedisi_name)) ? $model->ekspedisi_name : '-' ?></span>
                 </div>
             </div>
             <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
@@ -222,6 +222,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                 <tr>
                                     <th class="text-center">No.</th>
                                     <th class="text-center">Proses Produksi</th>
+                                    <th class="text-center">Keterangan</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -230,6 +231,9 @@ $this->params['breadcrumbs'][] = $this->title;
                                         <td class="text-center"><?=$no+1 ?></td>
                                         <td class="text-left text-muted">
                                             <?='<i>'.$val->biayaProduksi->name.'</i>' ?>
+                                        </td>
+                                        <td class="text-muted text-left">
+                                            <?='<i>'.$val->keterangan.'</i>' ?>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
@@ -283,7 +287,7 @@ $this->params['breadcrumbs'][] = $this->title;
     </div>
     <div class="col-lg-12 col-md-12 col-xs-12 text-right padding-right-0">
         <?php if(\Yii::$app->user->identity->profile->typeUser->value == 'ADMINISTRATOR' || \Yii::$app->user->identity->profile->typeUser->value == 'OWNER'): ?>
-            <?= Html::a('<i class="fontello icon-list"></i><span>Invoice Sales Order</span>', ['invoice', 'code'=>$model->code], ['class' => 'btn btn-warning btn-flat btn-sm']) ?>
+            <?= Html::a('<i class="fontello icon-list"></i><span>Invoice Sales Order</span>', ['invoice', 'code'=>$model->code], ['class' => 'btn btn-warning btn-flat btn-sm', 'target'=>'_blank']) ?>
         <?php endif; ?>
         <?php if($model->post==0): ?>
             <?= Html::a('<i class="fontello icon-ok"></i><span>Post to SPK</span>', ['post', 'code'=>$model->code], ['class' => 'btn btn-primary btn-flat btn-sm']) ?>

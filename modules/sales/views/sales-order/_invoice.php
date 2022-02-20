@@ -148,7 +148,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     <label>Ekspedisi</label>
                 </div>
                 <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                    <span><?=$model->ekspedisi_name ?></span>
+                    <span><?=(!empty($model->ekspedisi_name)) ? $model->ekspedisi_name : '-' ?></span>
                 </div>
             </div>
             <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
@@ -280,8 +280,9 @@ $this->params['breadcrumbs'][] = $this->title;
                                 <tr>
                                     <th class="text-center">No.</th>
                                     <th class="text-center">Proses Produksi</th>
+                                    <th class="text-center">Keterangan</th>
                                     <th class="text-center">Index</th>
-                                    <th class="text-center">Biaya Produksi</th>
+                                    <th class="text-center">Biaya</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -294,6 +295,9 @@ $this->params['breadcrumbs'][] = $this->title;
                                         <td class="text-left text-muted">
                                             <?='<i>'.$val->biayaProduksi->name.'</i>' ?>
                                         </td>
+                                        <td class="text-muted text-left">
+                                            <?='<i>'.$val->keterangan.'</i>' ?>
+                                        </td>
                                         <td class="text-muted text-right">
                                             <?='<i>'.$val->index.'</i>' ?>
                                         </td>
@@ -303,7 +307,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                     </tr>
                                 <?php endforeach; ?>
                                 <tr>
-                                    <td class="summary" colspan="3"><strong>Total Biaya:</strong></td>
+                                    <td class="summary" colspan="4"><strong>Total Biaya:</strong></td>
                                     <td class="summary"><strong><?=number_format($totalBiaya).'.-' ?></strong></td>
                                 </tr>
                             </tbody>

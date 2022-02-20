@@ -147,4 +147,29 @@ class SalesOrderItem extends \yii\db\ActiveRecord
     {
         return $this->hasMany(SalesOrderProses::className(), ['code' => 'code', 'item_code' => 'item_code']);
     }
+
+    public function getJumlahCetak()
+    {
+        $inventoryStock = $this->inventoryStock;
+        $konversi = $inventoryStock->satuanTerkecil($this->item_code, [
+            0 => $this->qty_order_1,
+            1 => $this->qty_order_2]);
+        $jumlahCetak = $konversi * $this->total_potong;
+        return $jumlahCetak;
+    }
+
+    public function getTotalOrder()
+    {
+        $total_order=0;
+        if(!empty($this->qty_order_1)){
+            $total_order += $this->qty_order_1 * $this->harga_jual_1;
+        }
+        if(!empty($this->qty_order_2)){
+            $total_order += $this->qty_order_2 * $this->harga_jual_2;
+        }
+        if(!empty($this->qty_order_3)){
+            $total_order += $this->qty_order_3 * $this->harga_jual_3;
+        }
+        return $total_order;
+    }
 }

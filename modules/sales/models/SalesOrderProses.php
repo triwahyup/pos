@@ -4,6 +4,8 @@ namespace app\modules\sales\models;
 
 use Yii;
 use app\modules\master\models\MasterBiayaProduksi;
+use app\modules\sales\models\SalesOrderPotong;
+use app\modules\sales\models\SalesOrderItem;
 use yii\behaviors\TimestampBehavior;
 
 /**
@@ -79,5 +81,23 @@ class SalesOrderProses extends \yii\db\ActiveRecord
     public function getBiayaProduksi()
     {
         return $this->hasOne(MasterBiayaProduksi::className(), ['code' => 'biaya_code']);
+    }
+
+    public function totalBiaya($model)
+    {
+        $potongs = SalesOrderPotong::findAll(['code'=>$model['code'], 'item_code'=>$model['item_code']]);
+        $item = SalesOrderItem::findOne(['code'=>$model['code'], 'item_code'=>$model['item_code']]);
+        if($this->type == 1){
+            $konversi = $item->inventoryStock->satuanTerkecil($item->item_code, [
+                0 => $item->qty_order_1,
+                1 => $item->qty_order_2]);
+            $totalBiaya = 0;
+            foreach($potongs as $val){
+                $totalBiaya += $val->panjang * $val->lebar * $this->index * $konversi;
+            }
+            $this->total_biaya = $totalBiaya;
+        }else{
+            $this->total_biaya = $this->harga;
+        }
     }
 }

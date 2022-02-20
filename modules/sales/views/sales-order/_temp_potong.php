@@ -35,6 +35,7 @@
                 <tr>
                     <th class="text-center">No.</th>
                     <th class="text-center">Proses Produksi</th>
+                    <th class="text-center">Keterangan</th>
                 </tr>
             </thead>
             <tbody>
@@ -44,6 +45,9 @@
                             <td class="text-center"><?=$no+1 ?></td>
                             <td class="text-muted text-left">
                                 <?='<i>'.$tempProses->biayaProduksi->name.'</i>' ?>
+                            </td>
+                            <td class="text-muted text-left">
+                                <?='<i>'.$tempProses->keterangan.'</i>' ?>
                             </td>
                         </tr>
                     <?php endforeach; ?>

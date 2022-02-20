@@ -61,7 +61,7 @@ use yii\widgets\MaskedInput;
                     <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
                         <?= $form->field($model, 'term_in', [
                                 'template' => '{input}<span id="term_in" class="margin-bottom-10"></span>{error}{hint}'
-                            ])->textInput(['readonly' => true, 'data-align' => 'text-right'])->label(false) ?>
+                            ])->textInput(['data-align' => 'text-right'])->label(false) ?>
                     </div>
                 </div>
                 <!--  Dateline-->
@@ -156,7 +156,7 @@ use yii\widgets\MaskedInput;
                                 'options' => [
                                     'data-align' => 'text-right',
                                     'placeholder' => 'RIM',
-                                    'value' => 20,
+                                    'value' => (!$model->isNewRecord) ? $tempItem->itemMaterial->qty_order_1 : 20,
                                 ]
                             ])->label(false) ?>
                     </div>
@@ -171,6 +171,7 @@ use yii\widgets\MaskedInput;
                                     'data-align' => 'text-right',
                                     'maxlength' => 3,
                                     'placeholder' => 'LB',
+                                    'value' => (!$model->isNewRecord) ? $tempItem->itemMaterial->qty_order_2 : '',
                                 ]
                             ])->label(false) ?>
                     </div>
@@ -190,7 +191,7 @@ use yii\widgets\MaskedInput;
                         <label>Ekspedisi:</label>
                     </div>
                     <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                        <?= $form->field($model, 'ekspedisi_name')->textInput(['maxlength' => true, 'disabled' => true])->label(false) ?>
+                        <?= $form->field($model, 'ekspedisi_name')->textInput(['maxlength' => true, 'readonly' => true])->label(false) ?>
                     </div>
                 </div>
                 <!-- Up Produksi -->
@@ -442,6 +443,7 @@ use yii\widgets\MaskedInput;
                                         <tr>
                                             <th class="text-center">No.</th>
                                             <th class="text-center">Proses Produksi</th>
+                                            <th class="text-center">Keterangan</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -555,10 +557,10 @@ use yii\widgets\MaskedInput;
 </div>
 <div data-popup="popup"></div>
 <script>
-function change_customer(customer_code, tgl_so)
+function onChangeTermIn(customer_code, tgl_so)
 {
     $.ajax({
-        url: "<?=Url::to(['sales-order/change-customer'])?>",
+        url: "<?=Url::to(['sales-order/on-change-term-in'])?>",
 		type: "GET",
         data: {
             customer_code: customer_code,
@@ -570,6 +572,26 @@ function change_customer(customer_code, tgl_so)
         success: function(data){
             var o = $.parseJSON(data);
             $("#salesorder-term_in").val(o.term_in);
+            $("#term_in").html(o.tgl_tempo);
+        },
+        complete: function(){}
+    });
+}
+
+function onInputTermIn(term_in, tgl_so)
+{
+    $.ajax({
+        url: "<?=Url::to(['sales-order/on-input-term-in'])?>",
+		type: "GET",
+        data: {
+            term_in: term_in,
+            tgl_so: tgl_so,
+        },
+        dataType: "text",
+        error: function(xhr, status, error) {},
+		beforeSend: function (data){},
+        success: function(data){
+            var o = $.parseJSON(data);
             $("#term_in").html(o.tgl_tempo);
         },
         complete: function(){}
@@ -760,7 +782,7 @@ function create_proses()
             if(!o.success == true){
                 notification.open("danger", o.message, timeOut);
             }
-            init_temp_item();
+            init_temp_potong();
         },
         complete: function(){
             popup.close();
@@ -885,17 +907,22 @@ var timeOut = 3000;
 $(document).ready(function(){
     $("body").off("change","#salesorder-customer_code").on("change","#salesorder-customer_code", function(e){
         e.preventDefault();
-        var tgl_so = $("#salesorder-tgl_so").val();
-        change_customer($(this).val(), tgl_so);
+        onChangeTermIn($(this).val(), $("#salesorder-tgl_so").val());
+    });
+
+    $("body").off("input","#salesorder-term_in").on("input","#salesorder-term_in", function(e){
+        e.preventDefault();
+        onInputTermIn($(this).val(), $("#salesorder-tgl_so").val());
     });
     
     $("body").off("change","#salesorder-ekspedisi_flag").on("change","#salesorder-ekspedisi_flag", function(e){
         e.preventDefault();
         if($(this).val() == 1){
-            $("#salesorder-ekspedisi_name").prop("disabled", false);
+            $("#salesorder-ekspedisi_name").attr("readonly", false);
         }else{
-            $("#salesorder-ekspedisi_name").prop("disabled", true);
+            $("#salesorder-ekspedisi_name").attr("readonly", true);
         }
+        $("#salesorder-ekspedisi_name").val(null);
     });
 
     $("body").off("keydown","#tempsalesorderitem-item_name")
@@ -1040,12 +1067,17 @@ $(document).ready(function(){
     });
 });
 
-$(function(){
+var isNewRecord = function() {
     <?php if(!$model->isNewRecord): ?>
-        change_customer($("#salesorder-customer_code").val(), $("#salesorder-tgl_so").val());
         init_temp_item();
         init_temp_bahan();
         init_temp_potong();
+
+        onInputTermIn($("#salesorder-term_in").val(), $("#salesorder-tgl_so").val());
+        $("[id^=\"tempsalesorderitem-\"]:not([id^=\"tempsalesorderitem-qty_order_\"])").val(null)
     <?php endif; ?>
+}
+$(function(){
+    isNewRecord();
 });
 </script>
