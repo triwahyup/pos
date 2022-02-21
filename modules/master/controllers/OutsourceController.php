@@ -33,22 +33,22 @@ class OutsourceController extends Controller
 				    'rules' => [
                         [
                             'actions' => ['create'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-outsource')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-outsourcing')),
                             'roles' => ['@'],
                         ],
                         [
                             'actions' => ['index', 'view', 'list-kabupaten', 'list-kecamatan', 'list-kelurahan'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-outsource')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-outsourcing')),
                             'roles' => ['@'],
                         ], 
                         [
                             'actions' => ['update'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-outsource')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-outsourcing')),
                             'roles' => ['@'],
                         ], 
                         [
                             'actions' => ['delete'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-outsource')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-outsourcing')),
                             'roles' => ['@'],
                         ],
                     ],

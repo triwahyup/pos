@@ -53,6 +53,18 @@ use yii\widgets\MaskedInput;
                             ])->label(false) ?>
                     </div>
                 </div>
+                <!-- Nama Job -->
+                <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
+                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
+                        <label>Nama Job:</label>
+                    </div>
+                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
+                        <?= $form->field($model, 'name')->textInput(['maxlength' => true, 'placeholder' => 'Repeat Order tekan F4'])->label(false) ?>
+                        <?php if(!$model->isNewRecord): ?>
+                            <?= $form->field($model, 'code')->hiddenInput(['maxlength' => true])->label(false) ?>
+                        <?php endif; ?>
+                    </div>
+                </div>
                 <!-- Term In -->
                 <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
                     <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
@@ -64,34 +76,22 @@ use yii\widgets\MaskedInput;
                             ])->textInput(['data-align' => 'text-right'])->label(false) ?>
                     </div>
                 </div>
-                <!--  Dateline-->
+                <!--  Deadline-->
                 <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
                     <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                        <label>Dateline:</label>
+                        <label>Deadline:</label>
                     </div>
                     <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                        <?= $form->field($model, 'dateline')->widget(DatePicker::classname(), [
+                        <?= $form->field($model, 'deadline')->widget(DatePicker::classname(), [
                             'type' => DatePicker::TYPE_INPUT,
                             'options' => [
                                 'placeholder' => 'dd-mm-yyyy',
-                                'value' => (!$model->isNewRecord) ? date('d-m-Y', strtotime($model->dateline)) : date('d-m-Y'),
+                                'value' => (!$model->isNewRecord) ? date('d-m-Y', strtotime($model->deadline)) : date('d-m-Y'),
                             ],
                             'pluginOptions' => [
                                 'autoclose' => true,
                                 'format' => 'dd-mm-yyyy',
                             ]])->label(false) ?>
-                    </div>
-                </div>
-                <!-- Nama Job -->
-                <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
-                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                        <label>Nama Job:</label>
-                    </div>
-                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                        <?= $form->field($model, 'name')->textInput(['maxlength' => true, 'placeholder' => 'Repeat Order tekan F4'])->label(false) ?>
-                        <?php if(!$model->isNewRecord): ?>
-                            <?= $form->field($model, 'code')->hiddenInput(['maxlength' => true])->label(false) ?>
-                        <?php endif; ?>
                     </div>
                 </div>
                 <!-- Type Order -->
@@ -142,9 +142,9 @@ use yii\widgets\MaskedInput;
                 <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
                     <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
                         <label class="margin-bottom-0">QTY Order:</label>
-                        <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
+                        <!--<div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
                             <span class="text-danger font-size-10">Minimal order 20 RIM.</span>
-                        </div>
+                        </div>-->
                     </div>
                     <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-right-0">
                         <?= $form->field($tempItem, 'qty_order_1')->widget(MaskedInput::className(), [
@@ -182,7 +182,7 @@ use yii\widgets\MaskedInput;
                         <label>Pengambilan Barang:</label>
                     </div>
                     <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                        <?= $form->field($model, 'ekspedisi_flag')->dropDownList(['0' => 'Ambil Sendiri', '1' => 'Kirim Ekspedisi'], ['prompt'=>'Pengambilan Barang'])->label(false) ?>
+                        <?= $form->field($model, 'ekspedisi_flag')->dropDownList(['0' => 'Ambil Sendiri', '1' => 'Kirim Ekspedisi'])->label(false) ?>
                     </div>
                 </div>
                 <!-- Ekspedisi -->
@@ -401,9 +401,17 @@ use yii\widgets\MaskedInput;
                 </div>
             </div>
             <div class="col-lg-12 col-md-12 col-xs-12 text-right">
-                <button class="btn btn-success margin-top-20 margin-bottom-20" data-button="create_temp">
+                <button class="btn btn-success margin-top-20 margin-bottom-20" data-button="create_temp" data-type="item">
                     <i class="fontello icon-plus"></i>
                     <span>Tambah Data Detail</span>
+                </button>
+                <button class="btn btn-success margin-bottom-20 hidden" data-button="change">
+                    <i class="fontello icon-plus"></i>
+                    <span>Update Data Detail</span>
+                </button>
+                <button class="btn btn-danger margin-bottom-20 margin-left-5 hidden" data-button="batal">
+                    <i class="fontello icon-cancel"></i>
+                    <span>Cancel</span>
                 </button>
             </div>
             <!-- /ITEM -->
@@ -621,9 +629,13 @@ function type_order(type)
 
 function load_order()
 {
+    customer_code = $("#salesorder-customer_code").val();
     $.ajax({
         url: "<?=Url::to(['sales-order/list-order'])?>",
-		type: "GET",
+		type: "POST",
+        data: {
+            customer_code: customer_code
+        },
 		dataType: "text",
         error: function(xhr, status, error) {},
 		beforeSend: function (data){},
@@ -683,12 +695,13 @@ function select_order(code)
         success: function(data){
             var o = $.parseJSON(data);
             $.each(o, function(index, value){
-                $("#salesorder-"+index).val(value);
-                $("#salesorder-"+index).val(value).trigger("change");
+                $("#salesorder-"+index)
+                    .not("#salesorder-tgl_so").not("#salesorder-tgl_po").not("#salesorder-no_po")
+                    .not("#salesorder-deadline").val(value).trigger("change");
             });
-            isNotNewRecord();
             $("#tempsalesorderitem-qty_order_1").val(o.qty_order_1);
             $("#tempsalesorderitem-qty_order_2").val(o.qty_order_2);
+            isNotNewRecord();
         },
         complete: function(){
             popup.close();
@@ -802,6 +815,73 @@ function create_temp(el)
             }else{
                 notification.open("danger", o.message, timeOut);
             }
+        },
+        complete: function(){
+            el.loader("destroy");
+        }
+    });
+}
+
+function get_temp(id)
+{
+    $.ajax({
+        url: "<?= Url::to(['sales-order/get-temp']) ?>",
+        type: "GET",
+        dataType: "text",
+        data: {
+            id: id
+        },
+        error: function(xhr, status, error) {},
+        beforeSend: function(){},
+        success: function(data){
+            var o = $.parseJSON(data);
+            $.each(o, function(index, value){
+                $("#tempsalesorderitem-"+index).val(value);
+            });
+            if(o.lembar_ikat_1 != 0){
+                $("#tempsalesorderitem-lembar_ikat_1").attr("readonly", false);
+            }else{
+                $("#tempsalesorderitem-lembar_ikat_1").val(null);
+            }
+
+            if(o.lembar_ikat_2 != 0){
+                $("#tempsalesorderitem-lembar_ikat_2").attr("readonly", false);
+            }else{
+                $("#tempsalesorderitem-lembar_ikat_2").val(null);
+            }
+
+            if(o.lembar_ikat_3 != 0){
+                $("#tempsalesorderitem-lembar_ikat_3").attr("readonly", false);
+            }else{
+                $("#tempsalesorderitem-lembar_ikat_3").val(null);
+            }
+        },
+        complete: function(){
+            dataButtonHidden(1);
+        }
+    });
+}
+
+function update_temp(el)
+{
+    $.ajax({
+        url: "<?= Url::to(['sales-order/update-temp']) ?>",
+        type: "POST",
+        dataType: "text",
+        error: function(xhr, status, error) {},
+        beforeSend: function(){
+            el.loader("load");
+        },
+        data: $("#form").serialize(),
+        success: function(data){
+            var o = $.parseJSON(data);
+            if(o.success == true){
+                notification.open("success", o.message, timeOut);
+            }else{
+                notification.open("danger", o.message, timeOut);
+            }
+            $("[data-button=\"batal\"]").trigger("click");
+            init_temp_item();
         },
         complete: function(){
             el.loader("destroy");
@@ -1157,6 +1237,22 @@ $(document).ready(function(){
         }
     });
 
+    $("body").off("click","[data-button=\"update_temp\"]").on("click","[data-button=\"update_temp\"]", function(e){
+        e.preventDefault();
+        var data = $(this).data();
+        get_temp(data.id);
+    });
+    $("body").off("click","[data-button=\"change\"]").on("click","[data-button=\"change\"]", function(e){
+        e.preventDefault();
+        update_temp($(this));
+    });
+    $("body").off("click","[data-button=\"batal\"]").on("click","[data-button=\"batal\"]", function(e){
+        e.preventDefault();
+        $("[id^=\"tempsalesorderitem-\"]")
+            .not("#tempsalesorderitem-qty_order_1").not("#tempsalesorderitem-qty_order_2").val(null);
+        dataButtonHidden();
+    });
+
     $("body").off("click","[data-button=\"delete_temp\"]");
     $("body").on("click","[data-button=\"delete_temp\"]", function(e){
         e.preventDefault();
@@ -1195,6 +1291,17 @@ var isNotNewRecord = function() {
 
     onInputTermIn($("#salesorder-term_in").val(), $("#salesorder-tgl_so").val());
     $("[id^=\"tempsalesorderitem-\"]:not([id^=\"tempsalesorderitem-qty_order_\"])").val(null)
+}
+var dataButtonHidden = function(type) {
+    if(type == 1){
+        $("[data-button=\"create_temp\"]").removeClass("hidden").addClass("hidden");
+        $("[data-button=\"change\"]").removeClass("hidden");
+        $("[data-button=\"batal\"]").removeClass("hidden");
+    }else{
+        $("[data-button=\"create_temp\"]").removeClass("hidden");
+        $("[data-button=\"change\"]").removeClass("hidden").addClass("hidden");
+        $("[data-button=\"batal\"]").removeClass("hidden").addClass("hidden");
+    }
 }
 $(function(){
     <?php if(!$model->isNewRecord): ?>

@@ -58,7 +58,7 @@ class SalesOrder extends \yii\db\ActiveRecord
     {
         return [
             [['name', 'type_order', 'customer_code', 'no_po', 'ekspedisi_flag'], 'required'],
-            [['tgl_so', 'tgl_po', 'dateline'], 'safe'],
+            [['tgl_so', 'tgl_po', 'deadline'], 'safe'],
             [['term_in', 'ekspedisi_flag', 'type_order', 'up_produksi', 'post', 'status', 'created_at', 'updated_at'], 'integer'],
             [['ppn', 'total_order_material', 'total_order_bahan', 'total_biaya_produksi', 'total_ppn', 'grand_total'], 'number'],
             [['code', 'no_po'], 'string', 'max' => 12],
@@ -113,7 +113,7 @@ class SalesOrder extends \yii\db\ActiveRecord
     {
         $this->tgl_so = date('Y-m-d', strtotime($this->tgl_so));
         $this->tgl_po = date('Y-m-d', strtotime($this->tgl_po));
-        $this->dateline = date('Y-m-d', strtotime($this->dateline));
+        $this->deadline = date('Y-m-d', strtotime($this->deadline));
         return parent::beforeSave($attribute);
     }
 

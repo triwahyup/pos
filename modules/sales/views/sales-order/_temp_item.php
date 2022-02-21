@@ -12,6 +12,10 @@
                     <i class="fontello icon-plus"></i>
                     <span>Add Proses Produksi</span>
                 </a>
+                <a class="custom-btn" href="javascript:void(0)" data-button="update_temp" data-id="<?=$item->id ?>">
+                    <i class="fontello icon-pencil"></i>
+                    <span>Update</span>
+                </a>
                 <a class="custom-btn" href="javascript:void(0)" data-button="delete_temp" data-id="<?=$item->id ?>">
                     <i class="fontello icon-trash"></i>
                     <span>Hapus</span>

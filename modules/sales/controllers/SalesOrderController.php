@@ -42,12 +42,11 @@ class SalesOrderController extends Controller
                     'rules' => [
                         [
                             'actions' => [
-                                'index', 'view', 'create', 'update', 'delete', 
-                                'on-change-term-in', 'on-input-term-in', 'type-order',
-                                'list-order', 'autocomplete-order', 'search-order', 'select-order',
-                                'list-item', 'autocomplete-item', 'search-item', 'select-item',
-                                'temp-item', 'temp-bahan', 'temp-potong', 'create-temp', 'delete-temp',
-                                'list-proses', 'create-proses', 'create-potong', 'delete-potong', 'invoice', 'post'
+                                'index', 'view', 'create', 'update', 'delete', 'on-change-term-in', 'on-input-term-in', 'type-order',
+                                'list-order', 'autocomplete-order', 'search-order', 'select-order', 'list-item', 'autocomplete-item',
+                                'search-item', 'select-item', 'temp-item', 'temp-bahan', 'temp-potong', 'get-temp', 'create-temp',
+                                'update-temp', 'delete-temp', 'list-proses', 'create-proses', 'create-potong', 'delete-potong',
+                                'invoice', 'post'
                             ],
                             'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('sales-order')),
                             'roles' => ['@'],
@@ -542,7 +541,7 @@ class SalesOrderController extends Controller
         $model = SalesOrder::find()
             ->alias('a')
             ->leftJoin('master_person b', 'b.code = a.customer_code')
-            ->where(['a.status'=>1])
+            ->where(['customer_code'=>$_POST['customer_code'], 'a.status'=>1])
             ->orderBy(['a.code'=>SORT_ASC])
             ->limit(10)
             ->all();
@@ -590,7 +589,7 @@ class SalesOrderController extends Controller
         $model = SalesOrder::find()->where(['code'=>$_POST['code'], 'status'=>1])->asArray()->one();
         $model['tgl_so'] = date('d-m-Y', strtotime($model['tgl_so']));
         $model['tgl_po'] = date('d-m-Y', strtotime($model['tgl_po']));
-        $model['dateline'] = date('d-m-Y', strtotime($model['dateline']));
+        $model['deadline'] = date('d-m-Y', strtotime($model['deadline']));
 
         $this->emptyTemp();
         $salesOrder = $this->findModel($model['code']);
@@ -905,6 +904,18 @@ class SalesOrderController extends Controller
         return json_encode(['success'=>$success, 'message'=>$message]);
     }
 
+    public function actionGetTemp($id)
+    {
+        $temp = TempSalesOrderItem::find()
+            ->alias('a')
+            ->select(['a.*', 'b.name as item_name'])
+            ->leftJoin('master_material_item b', 'b.code = a.item_code')
+            ->where(['id'=>$id])
+            ->asArray()
+            ->one();
+        return json_encode($temp);
+    }
+
     public function actionCreateTemp()
     {
         $request = \Yii::$app->request;
@@ -986,6 +997,74 @@ class SalesOrderController extends Controller
                 if($success){
                     $transaction->commit();
                     $message = 'CREATE TEMP SUCCESSFULLY';
+                }else{
+                    $transaction->rollBack();
+                }
+            }catch(\Exception $e){
+                $success = false;
+                $message = $e->getMessage();
+                $transaction->rollBack();
+            }
+        }else{
+            throw new NotFoundHttpException('The requested data does not exist.');
+        }
+        return json_encode(['success'=>$success, 'message'=>$message]);
+    }
+
+    public function actionUpdateTemp()
+    {
+        $request = \Yii::$app->request;
+        $success = true;
+        $message = '';
+        if($request->isPost){
+            $connection = \Yii::$app->db;
+            $transaction = $connection->beginTransaction();
+            try{
+                $dataItem = $request->post('TempSalesOrderItem');
+                if(isset($dataItem['id'])){
+                    $tempItem = TempSalesOrderItem::findOne(['id'=>$dataItem['id']]);
+                    $tempCode = $dataItem['code'];
+                }else{
+                    $tempItem = TempSalesOrderItem::find()->where(['code'=>'tmp'])->orderBy(['id'=>SORT_ASC])->one();
+                    $tempCode = 'tmp';
+                }
+                
+                $itemCode = $tempItem->item_code;
+                $tempItem->item_code = $dataItem['item_code'];
+                if($tempItem->save()){
+                    $tempsPotong = TempSalesOrderPotong::findAll(['code'=>$tempCode, 'item_code'=>$itemCode]);
+                    foreach($tempsPotong as $temp){
+                        $temp->item_code = $tempItem->item_code;
+                        if(!$temp->save()){
+                            $success = false;
+                            foreach($tempItem->errors as $error => $value){
+                                $message = $value[0].', ';
+                            }
+                            $message = substr($message, 0, -2);
+                        }
+                    }
+                    $tempsProses = TempSalesOrderProses::findAll(['code'=>$tempCode, 'item_code'=>$itemCode]);
+                    foreach($tempsProses as $temp){
+                        $temp->item_code = $tempItem->item_code;
+                        if(!$temp->save()){
+                            $success = false;
+                            foreach($tempItem->errors as $error => $value){
+                                $message = $value[0].', ';
+                            }
+                            $message = substr($message, 0, -2);
+                        }
+                    }
+                }else{
+                    $success = false;
+                    foreach($tempItem->errors as $error => $value){
+                        $message = $value[0].', ';
+                    }
+                    $message = substr($message, 0, -2);
+                }
+
+                if($success){
+                    $transaction->commit();
+                    $message = 'UPDATE TEMP SUCCESSFULLY';
                 }else{
                     $transaction->rollBack();
                 }
