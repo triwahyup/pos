@@ -42,7 +42,8 @@ class SalesOrderController extends Controller
                     'rules' => [
                         [
                             'actions' => [
-                                'index', 'view', 'create', 'update', 'delete', 'on-change-term-in', 'on-input-term-in',
+                                'index', 'view', 'create', 'update', 'delete', 
+                                'on-change-term-in', 'on-input-term-in', 'type-order',
                                 'list-order', 'autocomplete-order', 'search-order', 'select-order',
                                 'list-item', 'autocomplete-item', 'search-item', 'select-item',
                                 'temp-item', 'temp-bahan', 'temp-potong', 'create-temp', 'delete-temp',
@@ -524,6 +525,16 @@ class SalesOrderController extends Controller
         $top = date('d-m-Y', strtotime('+'.$termIn.' days', strtotime($tgl_so)));
         $tgl_tempo = '<i class="text-muted font-size-10">Tgl. Jatuh Tempo Pembayaran: '.$top.'</i>';
         return json_encode(['tgl_tempo'=>$tgl_tempo]);
+    }
+
+    public function actionTypeOrder($type)
+    {
+        $item = MasterMaterialItem::findOne(['material_code'=>\Yii::$app->params['TYPE_PRODUK_JASA']]);
+        $data = ['item_name' => null, 'item_code' => null, 'qty_order_1' => 20, 'qty_order_2' => 0];
+        if($type == 2){
+            $data = ['item_name' => $item->name, 'item_code' => $item->code, 'qty_order_1' => 0, 'qty_order_2' => 0];
+        }
+        return json_encode($data);
     }
 
     public function actionListOrder()

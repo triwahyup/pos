@@ -19,6 +19,8 @@ $data = [
     'TYPE_CUSTOMER' => 1,
     'TYPE_OUTSOURCE' => 3,
     'TYPE_SUPPLIER' => 2,
+    // TYPE JASA
+    'TYPE_PRODUK_JASA' => '021',
 
     'URL' => ((getenv('APP_ENV') != 'production') ? (getenv('APP_ENV') != 'beta') ? 'http://localhost/pos/web/index.php?r=' : '' : ''),
 ];

@@ -1648,13 +1648,19 @@ textarea {
 /** BY PASS **/
 form {
     .form-group {
-        &.field-profile-password, &.field-profile-current_password, &.field-profile-new_password, &.field-profile-retype_new_password {
+        &.field-profile-password, &.field-profile-current_password, &.field-profile-new_password, 
+        &.field-profile-retype_new_password, &.field-loginform-password {
             position: relative;
         }
         .plain-text {
             position: absolute;
             right: 10px;
             top: 30px;
+            .fontello {
+                font-size: 16px;
+                right: -10px;
+                top: 21px;
+            }
         }
     }
 }

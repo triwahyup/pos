@@ -19,7 +19,12 @@ $this->params['breadcrumbs'][] = $this->title;
 				<?= $form->field($model, 'username')->textInput(['autofocus' => true]) ?>
 			</div>
 			<div class="form-group">
-				<?= $form->field($model, 'password')->passwordInput() ?>
+				<?= $form->field($model, 'password',[
+					'template' => '{label}{input}
+						<a class="plain-text" href="javascript:void(0)" data-button="plaintext" data-field="profile-password">
+							<span class="fontello icon-eye-1"></span>
+						</a>
+					{error}{hint}'])->passwordInput() ?>
 			</div>
 			<div class="form-group">
 				<div class="checkbox checkbox-primary pull-left offpadding">
@@ -36,3 +41,18 @@ $this->params['breadcrumbs'][] = $this->title;
 	</div>
 	<div class="form-layer"></div>
 </div>
+<script>
+$(document).ready(function(){
+	$("body").off("click","[data-button=\"plaintext\"]").on("click","[data-button=\"plaintext\"]", function(e){
+		e.preventDefault();
+		$("#loginform-password").toggleClass("open-text");
+		if($("#loginform-password").hasClass("open-text")){
+			$("#loginform-password").attr("type", "text");
+			$(this).find(".icon-eye-1").removeClass("icon-eye-1").addClass("icon-eye-off");
+		}else{
+			$("#loginform-password").attr("type", "password");
+			$(this).find(".icon-eye-off").removeClass("icon-eye-off").addClass("icon-eye-1");
+		}
+	});
+});
+</script>

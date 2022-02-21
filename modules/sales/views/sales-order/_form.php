@@ -598,6 +598,27 @@ function onInputTermIn(term_in, tgl_so)
     });
 }
 
+function type_order(type)
+{
+    $.ajax({
+        url: "<?=Url::to(['sales-order/type-order'])?>",
+		type: "GET",
+        data: {
+            type: type,
+        },
+        dataType: "text",
+        error: function(xhr, status, error) {},
+		beforeSend: function (data){},
+        success: function(data){
+            var o = $.parseJSON(data);
+            $.each(o, function(index, value){
+                $("#tempsalesorderitem-"+index).val(value);
+            });
+        },
+        complete: function(){}
+    });
+}
+
 function load_order()
 {
     $.ajax({
@@ -982,6 +1003,11 @@ function init_temp_potong()
 
 var timeOut = 3000;
 $(document).ready(function(){
+    $("body").off("change","#salesorder-type_order").on("change","#salesorder-type_order", function(e){
+        e.preventDefault();
+        type_order($(this).val());
+    });
+
     $("body").off("change","#salesorder-ekspedisi_flag").on("change","#salesorder-ekspedisi_flag", function(e){
         e.preventDefault();
         if($(this).val() == 1){

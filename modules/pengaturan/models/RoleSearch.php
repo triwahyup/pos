@@ -57,7 +57,7 @@ class RoleSearch extends MasterKode
             return $dataProvider;
         }
         
-        $query->where(['type'=>\Yii::$app->params['TYPE_USER']])
+        $query->where(['type'=>\Yii::$app->params['TYPE_USER'], 'status'=>1])
             ->andFilterWhere(['like', 'name', $this->name])
             ->andFilterWhere(['like', 'type', $this->type]);
 
