@@ -141,10 +141,7 @@ use yii\widgets\MaskedInput;
                 <!-- Minimal Order -->
                 <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
                     <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                        <label class="margin-bottom-0">QTY Order:</label>
-                        <!--<div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
-                            <span class="text-danger font-size-10">Minimal order 20 RIM.</span>
-                        </div>-->
+                        <label>QTY Order (Plano):</label>
                     </div>
                     <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-right-0">
                         <?= $form->field($tempItem, 'qty_order_1')->widget(MaskedInput::className(), [
@@ -155,25 +152,12 @@ use yii\widgets\MaskedInput;
                                 ],
                                 'options' => [
                                     'data-align' => 'text-right',
-                                    'placeholder' => 'RIM',
-                                    'value' => (!$model->isNewRecord) ? $tempItem->itemMaterial->qty_order_1 : 20,
+                                    'value' => (!$model->isNewRecord) ? $tempItem->itemMaterial->qty_order_1 : '',
                                 ]
                             ])->label(false) ?>
                     </div>
-                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-right-0">
-                        <?= $form->field($tempItem, 'qty_order_2')->widget(MaskedInput::className(), [
-                                'clientOptions' => [
-                                    'alias' => 'decimal',
-                                    'groupSeparator' => ',',
-                                    'autoGroup' => true
-                                ],
-                                'options' => [
-                                    'data-align' => 'text-right',
-                                    'maxlength' => 3,
-                                    'placeholder' => 'LB',
-                                    'value' => (!$model->isNewRecord) ? $tempItem->itemMaterial->qty_order_2 : '',
-                                ]
-                            ])->label(false) ?>
+                    <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-left-0">
+                        <span class=" font-size-10 text-muted margin-left-5 margin-top-5">RIM</span>
                     </div>
                 </div>
                 <!-- Ekspedisi Flag -->
@@ -182,7 +166,7 @@ use yii\widgets\MaskedInput;
                         <label>Pengambilan Barang:</label>
                     </div>
                     <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                        <?= $form->field($model, 'ekspedisi_flag')->dropDownList(['0' => 'Ambil Sendiri', '1' => 'Kirim Ekspedisi'])->label(false) ?>
+                        <?= $form->field($model, 'ekspedisi_flag')->dropDownList(['0' => 'Kirim', '1' => 'Ekspedisi'])->label(false) ?>
                     </div>
                 </div>
                 <!-- Ekspedisi -->
@@ -191,7 +175,14 @@ use yii\widgets\MaskedInput;
                         <label>Ekspedisi:</label>
                     </div>
                     <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                        <?= $form->field($model, 'ekspedisi_name')->textInput(['maxlength' => true, 'readonly' => true])->label(false) ?>
+                        <?= $form->field($model, 'ekspedisi_code')->widget(Select2::classname(), [
+                                'data' => $ekspedisi,
+                                'options' => [
+                                    'placeholder' => 'Pilih Ekspedisi',
+                                    'class' => 'select2',
+                                    'readonly' => true
+                                ],
+                            ])->label(false) ?>
                     </div>
                 </div>
                 <!-- Up Produksi -->
@@ -698,9 +689,8 @@ function select_order(code)
                 $("#salesorder-"+index)
                     .not("#salesorder-tgl_so").not("#salesorder-tgl_po").not("#salesorder-no_po")
                     .not("#salesorder-deadline").val(value).trigger("change");
+                $("#tempsalesorderitem-"+index).val(value);
             });
-            $("#tempsalesorderitem-qty_order_1").val(o.qty_order_1);
-            $("#tempsalesorderitem-qty_order_2").val(o.qty_order_2);
             isNotNewRecord();
         },
         complete: function(){
@@ -1091,11 +1081,11 @@ $(document).ready(function(){
     $("body").off("change","#salesorder-ekspedisi_flag").on("change","#salesorder-ekspedisi_flag", function(e){
         e.preventDefault();
         if($(this).val() == 1){
-            $("#salesorder-ekspedisi_name").attr("readonly", false);
+            $("#salesorder-ekspedisi_code").attr("readonly", false);
         }else{
-            $("#salesorder-ekspedisi_name").attr("readonly", true);
+            $("#salesorder-ekspedisi_code").attr("readonly", true);
         }
-        $("#salesorder-ekspedisi_name").val(null);
+        $("#salesorder-ekspedisi_code").val(null).trigger("change");
     });
 
     /**  TERM IN */

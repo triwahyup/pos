@@ -42,11 +42,15 @@ class SalesOrderController extends Controller
                     'rules' => [
                         [
                             'actions' => [
-                                'index', 'view', 'create', 'update', 'delete', 'on-change-term-in', 'on-input-term-in', 'type-order',
-                                'list-order', 'autocomplete-order', 'search-order', 'select-order', 'list-item', 'autocomplete-item',
-                                'search-item', 'select-item', 'temp-item', 'temp-bahan', 'temp-potong', 'get-temp', 'create-temp',
-                                'update-temp', 'delete-temp', 'list-proses', 'create-proses', 'create-potong', 'delete-potong',
-                                'invoice', 'post'
+                                'index', 'view', 'create', 'update', 'delete', 
+                                'on-change-term-in', 'on-input-term-in', 
+                                'list-proses', 'type-order',
+                                'list-order', 'autocomplete-order', 'search-order', 'select-order', 
+                                'list-item', 'autocomplete-item', 'search-item', 'select-item', 
+                                'temp-item', 'temp-bahan', 'temp-potong', 'get-temp', 
+                                'create-temp', 'update-temp', 'delete-temp', 
+                                'create-proses', 'create-potong', 'delete-potong',
+                                'invoice', 'post',
                             ],
                             'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('sales-order')),
                             'roles' => ['@'],
@@ -101,6 +105,11 @@ class SalesOrderController extends Controller
         $customer = MasterPerson::find()
             ->select(['name'])
             ->where(['type_user'=>\Yii::$app->params['TYPE_CUSTOMER'], 'status' => 1])
+            ->indexBy('code')
+            ->column();
+        $ekspedisi = MasterPerson::find()
+            ->select(['name'])
+            ->where(['type_user'=>\Yii::$app->params['TYPE_EKSPEDISI'], 'status' => 1])
             ->indexBy('code')
             ->column();
         $typeSatuan = MasterSatuan::find()
@@ -223,6 +232,7 @@ class SalesOrderController extends Controller
         return $this->render('create', [
             'model' => $model,
             'customer' => $customer,
+            'ekspedisi' => $ekspedisi,
             'tempItem' => $tempItem,
             'tempPotong' => $tempPotong,
             'typeSatuan' => $typeSatuan,
@@ -241,6 +251,11 @@ class SalesOrderController extends Controller
         $customer = MasterPerson::find()
             ->select(['name'])
             ->where(['type_user'=>\Yii::$app->params['TYPE_CUSTOMER'], 'status' => 1])
+            ->indexBy('code')
+            ->column();
+        $ekspedisi = MasterPerson::find()
+            ->select(['name'])
+            ->where(['type_user'=>\Yii::$app->params['TYPE_EKSPEDISI'], 'status' => 1])
             ->indexBy('code')
             ->column();
         $typeSatuan = MasterSatuan::find()
@@ -415,6 +430,7 @@ class SalesOrderController extends Controller
         return $this->render('update', [
             'model' => $model,
             'customer' => $customer,
+            'ekspedisi' => $ekspedisi,
             'tempItem' => $tempItem,
             'tempPotong' => $tempPotong,
             'typeSatuan' => $typeSatuan,
@@ -607,10 +623,7 @@ class SalesOrderController extends Controller
                 $message = substr($message, 0, -2);
                 \Yii::$app->session->setFlash('error', $message);
             }
-            $tempDetail = [
-                'qty_order_1' => $tempItem->itemMaterial->qty_order_1,
-                'qty_order_2' => $tempItem->itemMaterial->qty_order_2
-            ];
+            $tempDetail = ['qty_order_1' => $tempItem->itemMaterial->qty_order_1];
         }
         foreach($salesOrder->potongs as $detail){
             $tempPotong = new TempSalesOrderPotong();
@@ -642,7 +655,6 @@ class SalesOrderController extends Controller
         }
 
         $model['qty_order_1'] = $tempDetail['qty_order_1'];
-        $model['qty_order_2'] = $tempDetail['qty_order_2'];
         return json_encode($model);
     }
     

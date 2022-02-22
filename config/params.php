@@ -17,8 +17,9 @@ $data = [
     'TYPE_SATUAN_PRODUKSI' => 'PRODUKSI',
     // TYPE PERSON
     'TYPE_CUSTOMER' => 1,
-    'TYPE_OUTSOURCE' => 3,
     'TYPE_SUPPLIER' => 2,
+    'TYPE_OUTSOURCE' => 3,
+    'TYPE_EKSPEDISI' => 4,
     // TYPE JASA
     'TYPE_PRODUK_JASA' => '021',
 

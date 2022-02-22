@@ -23,7 +23,7 @@ use app\modules\sales\models\TempSalesOrderProses;
  * @property string|null $customer_code
  * @property int|null $type_order
  * @property int|null $up_produksi
- * @property string|null $ekspedisi_name
+ * @property string|null $ekspedisi_code
  * @property float|null $ppn
  * @property float|null $total_order_material
  * @property float|null $total_biaya_produksi
@@ -62,8 +62,8 @@ class SalesOrder extends \yii\db\ActiveRecord
             [['term_in', 'ekspedisi_flag', 'type_order', 'up_produksi', 'post', 'status', 'created_at', 'updated_at'], 'integer'],
             [['ppn', 'total_order_material', 'total_order_bahan', 'total_biaya_produksi', 'total_ppn', 'grand_total'], 'number'],
             [['code', 'no_po'], 'string', 'max' => 12],
-            [['name', 'ekspedisi_name', 'keterangan'], 'string', 'max' => 128],
-            [['customer_code'], 'string', 'max' => 3],
+            [['name', 'keterangan'], 'string', 'max' => 128],
+            [['customer_code', 'ekspedisi_code'], 'string', 'max' => 3],
             [['code'], 'unique'],
             [['status'], 'default', 'value' => 1],
         ];
@@ -85,7 +85,7 @@ class SalesOrder extends \yii\db\ActiveRecord
             'type_order' => 'Type Order',
             'up_produksi' => 'Up Produksi',
             'ekspedisi_flag' => 'Pengambilan Barang',
-            'ekspedisi_name' => 'Ekspedisi Name',
+            'ekspedisi_code' => 'Ekspedisi Code',
             'ppn' => 'Ppn',
             'total_order_material' => 'Total Order',
             'total_biaya_produksi' => 'Total Biaya Produksi',
