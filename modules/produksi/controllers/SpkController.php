@@ -2,16 +2,16 @@
 
 namespace app\modules\produksi\controllers;
 
-use app\modules\produksi\models\SpkInternal;
-use app\modules\produksi\models\SpkInternalSearch;
+use app\modules\produksi\models\Spk;
+use app\modules\produksi\models\SpkSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
 /**
- * SpkInternalController implements the CRUD actions for SpkInternal model.
+ * SpkController implements the CRUD actions for Spk model.
  */
-class SpkInternalController extends Controller
+class SpkController extends Controller
 {
     /**
      * @inheritDoc
@@ -32,12 +32,12 @@ class SpkInternalController extends Controller
     }
 
     /**
-     * Lists all SpkInternal models.
+     * Lists all Spk models.
      * @return mixed
      */
     public function actionIndex()
     {
-        $searchModel = new SpkInternalSearch();
+        $searchModel = new SpkSearch();
         $dataProvider = $searchModel->search($this->request->queryParams);
 
         return $this->render('index', [
@@ -47,7 +47,7 @@ class SpkInternalController extends Controller
     }
 
     /**
-     * Displays a single SpkInternal model.
+     * Displays a single Spk model.
      * @param string $no_spk No Spk
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
@@ -60,13 +60,13 @@ class SpkInternalController extends Controller
     }
 
     /**
-     * Creates a new SpkInternal model.
+     * Creates a new Spk model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
     public function actionCreate()
     {
-        $model = new SpkInternal();
+        $model = new Spk();
 
         if ($this->request->isPost) {
             if ($model->load($this->request->post()) && $model->save()) {
@@ -82,7 +82,7 @@ class SpkInternalController extends Controller
     }
 
     /**
-     * Updates an existing SpkInternal model.
+     * Updates an existing Spk model.
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param string $no_spk No Spk
      * @return mixed
@@ -102,7 +102,7 @@ class SpkInternalController extends Controller
     }
 
     /**
-     * Deletes an existing SpkInternal model.
+     * Deletes an existing Spk model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param string $no_spk No Spk
      * @return mixed
@@ -116,15 +116,15 @@ class SpkInternalController extends Controller
     }
 
     /**
-     * Finds the SpkInternal model based on its primary key value.
+     * Finds the Spk model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param string $no_spk No Spk
-     * @return SpkInternal the loaded model
+     * @return Spk the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($no_spk)
     {
-        if (($model = SpkInternal::findOne($no_spk)) !== null) {
+        if (($model = Spk::findOne($no_spk)) !== null) {
             return $model;
         }
 

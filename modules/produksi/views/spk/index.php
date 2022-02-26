@@ -5,16 +5,13 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 
 /* @var $this yii\web\View */
-/* @var $searchModel app\modules\produksi\models\SpkInternalSearch */
+/* @var $searchModel app\modules\produksi\models\SpkSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Spk Internal';
+$this->title = 'Surat Perintah Kerja';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="spk-internal-index">
-    <p class="text-right">
-        <?= Html::a('<i class="fontello icon-plus"></i><span>Create SPK</span>', ['create'], ['class' => 'btn btn-success btn-flat btn-sm']) ?>
-    </p>
+<div class="spk-index">
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,

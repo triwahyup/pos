@@ -4,12 +4,12 @@ namespace app\modules\produksi\models;
 
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use app\modules\produksi\models\SpkInternal;
+use app\modules\produksi\models\Spk;
 
 /**
- * SpkInternalSearch represents the model behind the search form of `app\modules\produksi\models\SpkInternal`.
+ * SpkSearch represents the model behind the search form of `app\modules\produksi\models\Spk`.
  */
-class SpkInternalSearch extends SpkInternal
+class SpkSearch extends Spk
 {
     /**
      * {@inheritdoc}
@@ -39,7 +39,7 @@ class SpkInternalSearch extends SpkInternal
      */
     public function search($params)
     {
-        $query = SpkInternal::find();
+        $query = Spk::find();
 
         // add conditions that should always apply here
 

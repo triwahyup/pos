@@ -15,7 +15,10 @@ use app\modules\sales\models\SalesOrderPotong;
 use app\modules\sales\models\SalesOrderItem;
 use app\modules\sales\models\SalesOrderProses;
 use app\modules\sales\models\SalesOrderSearch;
-use app\modules\produksi\models\SpkInternal;
+use app\modules\produksi\models\Spk;
+use app\modules\produksi\models\SpkItem;
+use app\modules\produksi\models\SpkPotong;
+use app\modules\produksi\models\SpkProses;
 use app\modules\sales\models\TempSalesOrderItem;
 use app\modules\sales\models\TempSalesOrderPotong;
 use app\modules\sales\models\TempSalesOrderProses;
@@ -1301,16 +1304,60 @@ class SalesOrderController extends Controller
                             $message = 'SISA STOCK ITEM '.$stockItem->item_code.' TIDAK MENCUKUPI. SISA '.$stockItem->onhand;
                         }
                     }
+
                     // PROSES SIMPAN SPK
-                    $spkInternal = new SpkInternal();
-                    $spkInternal->attributes = $model->attributes;
-                    $spkInternal->no_so = $model->code;
-                    $spkInternal->no_spk = $spkInternal->generateCode();
-                    $spkInternal->tgl_spk = date('Y-m-d');
-                    if(!$spkInternal->save()){
+                    $spk = new Spk();
+                    $spk->attributes = $model->attributes;
+                    $spk->no_so = $model->code;
+                    $spk->no_spk = $spk->generateCode();
+                    $spk->tgl_spk = date('Y-m-d');
+                    if($spk->save()){
+                        // PROSES SIMPAN SPK ITEM
+                        foreach($model->items as $detail){
+                            $spkItem = new SpkItem();
+                            $spkItem->no_spk = $spk->no_spk;
+                            $spkItem->attributes = $detail->attributes;
+                            if(!$spkItem->save()){
+                                $success = false;
+                                $message = (count($spkItem->errors) > 0) ? 'ERROR CREATE SPK ITEM: ' : '';
+                                foreach($spkItem->errors as $error => $value){
+                                    $message .= strtoupper($value[0].', ');
+                                }
+                                $message = substr($message, 0, -2);
+                            }
+                        }
+                        // PROSES SIMPAN SPK POTONG
+                        foreach($model->potongs as $detail){
+                            $spkPotong = new SpkPotong();
+                            $spkPotong->no_spk = $spk->no_spk;
+                            $spkPotong->attributes = $detail->attributes;
+                            if(!$spkPotong->save()){
+                                $success = false;
+                                $message = (count($spkPotong->errors) > 0) ? 'ERROR CREATE SPK POTONG: ' : '';
+                                foreach($spkPotong->errors as $error => $value){
+                                    $message .= strtoupper($value[0].', ');
+                                }
+                                $message = substr($message, 0, -2);
+                            }
+                        }
+                        // PROSES SIMPAN SPK PROSES
+                        foreach($model->proses as $detail){
+                            $spkProses = new SpkProses();
+                            $spkProses->no_spk = $spk->no_spk;
+                            $spkProses->attributes = $detail->attributes;
+                            if(!$spkProses->save()){
+                                $success = false;
+                                $message = (count($spkProses->errors) > 0) ? 'ERROR CREATE SPK PROSES: ' : '';
+                                foreach($spkProses->errors as $error => $value){
+                                    $message .= strtoupper($value[0].', ');
+                                }
+                                $message = substr($message, 0, -2);
+                            }
+                        }
+                    }else{
                         $success = false;
-                        $message = (count($spkInternal->errors) > 0) ? 'ERROR CREATE SPK: ' : '';
-                        foreach($spkInternal->errors as $error => $value){
+                        $message = (count($spk->errors) > 0) ? 'ERROR CREATE SPK: ' : '';
+                        foreach($spk->errors as $error => $value){
                             $message .= strtoupper($value[0].', ');
                         }
                         $message = substr($message, 0, -2);

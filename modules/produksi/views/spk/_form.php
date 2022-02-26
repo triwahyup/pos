@@ -4,11 +4,11 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model app\modules\produksi\models\SpkInternal */
+/* @var $model app\modules\produksi\models\Spk */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 
-<div class="spk-internal-form">
+<div class="spk-form">
     <?php $form = ActiveForm::begin(['id'=>'form']); ?>
         <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
             <div class="col-lg-3 col-md-3 col-xs-12 padding-left-0">

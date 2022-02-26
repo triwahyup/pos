@@ -6,7 +6,7 @@ use Yii;
 use yii\behaviors\TimestampBehavior;
 
 /**
- * This is the model class for table "spk_internal".
+ * This is the model class for table "spk".
  *
  * @property string $no_spk
  * @property string|null $tgl_spk
@@ -18,14 +18,14 @@ use yii\behaviors\TimestampBehavior;
  * @property int|null $created_at
  * @property int|null $updated_at
  */
-class SpkInternal extends \yii\db\ActiveRecord
+class Spk extends \yii\db\ActiveRecord
 {
     /**
      * {@inheritdoc}
      */
     public static function tableName()
     {
-        return 'spk_internal';
+        return 'spk';
     }
 
     public function behaviors()
@@ -42,8 +42,10 @@ class SpkInternal extends \yii\db\ActiveRecord
     {
         return [
             [['no_spk'], 'required'],
-            [['tgl_spk', 'tgl_so'], 'safe'],
-            [['status', 'status_produksi', 'created_at', 'updated_at'], 'integer'],
+            [['tgl_spk', 'tgl_so', 'deadline', 'type_order', 'up_produksi'], 'safe'],
+            [['ekspedisi_flag', 'term_in', 'status', 'status_produksi', 'created_at', 'updated_at'], 'integer'],
+            [['customer_code'], 'string', 'max' => 3],
+            [['ekspedisi_code'], 'string', 'max' => 7],
             [['no_spk', 'no_so'], 'string', 'max' => 12],
             [['keterangan'], 'string', 'max' => 128],
             [['no_spk'], 'unique'],
@@ -71,10 +73,10 @@ class SpkInternal extends \yii\db\ActiveRecord
 
     public function generateCode()
     {
-        $model = SpkInternal::find()->count();
+        $model = Spk::find()->count();
         $total=0;
         if($model > 0){
-            $model = SpkInternal::find()->orderBy(['no_spk'=>SORT_DESC])->one();
+            $model = Spk::find()->orderBy(['no_spk'=>SORT_DESC])->one();
             $total = (int)substr($model->no_spk, -4);
         }
         return (string)date('Ymd').sprintf('%04s', ($total+1));

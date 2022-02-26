@@ -157,7 +157,7 @@ use yii\widgets\MaskedInput;
                             ])->label(false) ?>
                     </div>
                     <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-left-0">
-                        <span class=" font-size-10 text-muted margin-left-5 margin-top-5">RIM</span>
+                        <label class="font-size-14 margin-left-5 margin-top-5">RIM</label>
                     </div>
                 </div>
                 <!-- Ekspedisi Flag -->
