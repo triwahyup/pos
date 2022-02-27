@@ -1147,6 +1147,7 @@ class SalesOrderController extends Controller
             $data[$val->code] = [
                 'name' => $val->name,
                 'biaya_code' => $val->code,
+                'type' => ($val->type == 1) ? 'Cetak' : 'Pond',
                 'code' => $tempItem->code,
                 'item_code' => $tempItem->item_code,
             ];
@@ -1157,6 +1158,7 @@ class SalesOrderController extends Controller
                     'id' => $val->id,
                     'name' => (isset($val->biayaProduksi)) ? $val->biayaProduksi->name : '-',
                     'biaya_code' => $val->biaya_code,
+                    'type' => ($val->type == 1) ? 'Cetak' : 'Pond',
                     'code' => $val->code,
                     'item_code' => $val->item_code,
                     'keterangan' => $val->keterangan,

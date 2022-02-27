@@ -3,6 +3,7 @@
 namespace app\modules\produksi\models;
 
 use Yii;
+use app\modules\master\models\MasterBiayaProduksi;
 use yii\behaviors\TimestampBehavior;
 
 /**
@@ -66,5 +67,10 @@ class SpkProses extends \yii\db\ActiveRecord
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
         ];
+    }
+
+    public function getBiayaProduksi()
+    {
+        return $this->hasOne(MasterBiayaProduksi::className(), ['code' => 'biaya_code']);
     }
 }

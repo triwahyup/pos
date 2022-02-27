@@ -6,6 +6,7 @@
                 <th class="text-center"></th>
                 <th class="text-center">No.</th>
                 <th class="text-center">Nama</th>
+                <th class="text-center">Type</th>
                 <th class="text-center">Keterangan</th>
             </tr>
         </thead>
@@ -16,13 +17,14 @@
                     <tr>
                         <td>
                             <?php if(isset($val['id'])): ?>
-                                <input type="checkbox" name="TempSalesOrderProses[biaya_code][]" value="<?=$val['biaya_code'] ?>" checked>
+                                <input type="checkbox" id="<?=$val['biaya_code'] ?>" name="TempSalesOrderProses[biaya_code][]" value="<?=$val['biaya_code'] ?>" checked>
                             <?php else: ?>
-                                <input type="checkbox" name="TempSalesOrderProses[biaya_code][]" value="<?=$val['biaya_code'] ?>">
+                                <input type="checkbox" id="<?=$val['biaya_code'] ?>" name="TempSalesOrderProses[biaya_code][]" value="<?=$val['biaya_code'] ?>">
                             <?php endif; ?>
                         </td>
                         <td class="text-center"><?=$no++ ?></td>
-                        <td><?=$val['name'] ?></td>
+                        <td><label class="font-thin margin-bottom-0" for="<?=$val['biaya_code'] ?>"><?=$val['name'] ?></label></td>
+                        <td class="text-center"><?=$val['type'] ?></td>
                         <td>
                             <?php if(isset($val['id'])): ?>
                                 <textarea class="form-control" name="TempSalesOrderProses[keterangan][<?=$val['biaya_code']?>]" rows="2"><?=$val['keterangan'] ?></textarea>
@@ -42,7 +44,7 @@
     <div class="col-lg-12 col-md-12 col-xs-12">
         <input type="hidden" name="TempSalesOrderProses[code]" value="<?=$tempItem->code ?>">
         <input type="hidden" name="TempSalesOrderProses[item_code]" value="<?=$tempItem->item_code ?>">
-        <button class="btn btn-primary" data-button="create_proses">
+        <button class="btn btn-primary margin-bottom-20" data-button="create_proses">
             <i class="fontello icon-floppy"></i>
             <span>Simpan</span>
         </button>

@@ -111,7 +111,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     <label>Ekspedisi</label>
                 </div>
                 <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                    <span><?=(!empty($model->ekspedisi_name)) ? $model->ekspedisi_name : '-' ?></span>
+                    <span><?=(!empty($model->ekspedisi)) ? $model->ekspedisi->name : '-' ?></span>
                 </div>
             </div>
             <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">

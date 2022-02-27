@@ -56,10 +56,13 @@ class SpkSearch extends Spk
         }
 
         // grid filtering conditions
-        $query->andFilterWhere([
-            'tgl_spk' => $this->tgl_spk,
-            'tgl_so' => $this->tgl_so,
-        ]);
+        $query->where(['status'=>1]);
+        if(!empty($this->tgl_spk)){
+            $query->andFilterWhere(['tgl_spk' => date('Y-m-d', strtotime($this->tgl_spk))]);
+        }
+        if(!empty($this->tgl_so)){
+            $query->andFilterWhere(['tgl_so' => date('Y-m-d', strtotime($this->tgl_so))]);
+        }
 
         $query->andFilterWhere(['like', 'no_spk', $this->no_spk])
             ->andFilterWhere(['like', 'no_so', $this->no_so]);

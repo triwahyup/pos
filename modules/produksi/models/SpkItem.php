@@ -3,6 +3,10 @@
 namespace app\modules\produksi\models;
 
 use Yii;
+use app\modules\inventory\models\InventoryStockItem;
+use app\modules\master\models\MasterMaterialItem;
+use app\modules\produksi\models\SpkPotong;
+use app\modules\produksi\models\SpkProses;
 use yii\behaviors\TimestampBehavior;
 
 /**
@@ -108,5 +112,25 @@ class SpkItem extends \yii\db\ActiveRecord
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
         ];
+    }
+
+    public function getItem()
+    {
+        return $this->hasOne(MasterMaterialItem::className(), ['code' => 'item_code']);
+    }
+
+    public function getInventoryStock()
+    {
+        return $this->hasOne(InventoryStockItem::className(), ['item_code' => 'item_code']);
+    }
+
+    public function getPotongs()
+    {
+        return $this->hasMany(SpkPotong::className(), ['no_spk' => 'no_spk', 'item_code' => 'item_code']);
+    }
+
+    public function getProses()
+    {
+        return $this->hasMany(SpkProses::className(), ['no_spk' => 'no_spk', 'item_code' => 'item_code']);
     }
 }

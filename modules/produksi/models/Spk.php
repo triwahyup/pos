@@ -3,6 +3,10 @@
 namespace app\modules\produksi\models;
 
 use Yii;
+use app\modules\master\models\MasterPerson;
+use app\modules\produksi\models\SpkItem;
+use app\modules\produksi\models\SpkPotong;
+use app\modules\produksi\models\SpkProses;
 use yii\behaviors\TimestampBehavior;
 
 /**
@@ -47,7 +51,7 @@ class Spk extends \yii\db\ActiveRecord
             [['customer_code'], 'string', 'max' => 3],
             [['ekspedisi_code'], 'string', 'max' => 7],
             [['no_spk', 'no_so'], 'string', 'max' => 12],
-            [['keterangan'], 'string', 'max' => 128],
+            [['name', 'keterangan'], 'string', 'max' => 128],
             [['no_spk'], 'unique'],
             [['status'], 'default', 'value' => 1],
         ];
@@ -80,5 +84,47 @@ class Spk extends \yii\db\ActiveRecord
             $total = (int)substr($model->no_spk, -4);
         }
         return (string)date('Ymd').sprintf('%04s', ($total+1));
+    }
+
+    public function getCustomer()
+    {
+        return $this->hasOne(MasterPerson::className(), ['code' => 'customer_code']);
+    }
+
+    public function getEkspedisi()
+    {
+        return $this->hasOne(MasterPerson::className(), ['code' => 'ekspedisi_code']);
+    }
+
+    public $type_material = '007';
+    public function getItemsMaterial()
+    {
+        return $this->hasMany(SpkItem::className(), ['no_spk' => 'no_spk', 'type_code' => 'type_material']);
+    }
+
+    public function getItemsNonMaterial()
+    {
+        return SpkItem::find()->where(['no_spk' => $this->no_spk])->andWhere('type_code <> "'.$this->type_material.'"')->all();
+    }
+
+    public function getPotongs()
+    {
+        return $this->hasMany(SpkPotong::className(), ['code' => 'code']);
+    }
+
+    public function getProses()
+    {
+        return $this->hasMany(SpkProses::className(), ['code' => 'code']);
+    }
+
+    public function getTypeOrder()
+    {
+        $message = '';
+        if($this->type_order == 1){
+            $message = 'Produksi';
+        }else{
+            $message = 'Jasa';
+        }
+        return $message;
     }
 }

@@ -928,7 +928,7 @@ function load_proses(id)
 				container: "popup",
 				title: 'List Proses Produksi',
 				styleOptions: {
-					width: 300
+					width: 800
 				}
 			});
         },
@@ -1281,6 +1281,11 @@ var isNotNewRecord = function() {
 
     onInputTermIn($("#salesorder-term_in").val(), $("#salesorder-tgl_so").val());
     $("[id^=\"tempsalesorderitem-\"]:not([id^=\"tempsalesorderitem-qty_order_\"])").val(null)
+    if($("#salesorder-ekspedisi_flag").val() == 1){
+        $("#salesorder-ekspedisi_code").attr("readonly", false);
+    }else{
+        $("#salesorder-ekspedisi_code").attr("readonly", true);
+    }
 }
 var dataButtonHidden = function(type) {
     if(type == 1){
