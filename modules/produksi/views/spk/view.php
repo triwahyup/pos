@@ -1,6 +1,6 @@
 <?php
-
 use yii\helpers\Html;
+use yii\helpers\Url;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
@@ -185,6 +185,12 @@ $this->params['breadcrumbs'][] = $this->title;
                             <?=(!empty($item->lembar_ikat_3) ? number_format($item->lembar_ikat_3) .' '.$item->lembar_ikat_um_3 : '') ?>
                         </span>
                     </div>
+                    <div class="col-lg-5 col-md-5 col-sm-12 col-xs-12 padding-right-0 text-right">
+                        <a class="custom-btn padding-right-0" href="javascript:void(0)" data-spk="<?=$model->no_spk ?>" data-button="print_spk">
+                            <i class="fontello icon-print"></i>
+                            <span class="font-size-14">Print SPK</span>
+                        </a>
+                    </div>
                 </div>
                 <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
                     <div class="col-lg-6 col-md-6 col-xs-12 padding-left-0 padding-right-0">
@@ -280,3 +286,87 @@ $this->params['breadcrumbs'][] = $this->title;
         </div>
     </div>
 </div>
+<div data-popup="popup"></div>
+<div data-layout="print_layout"></div>
+<script>
+function load_print(no_spk)
+{
+    $.ajax({
+        url: "<?=Url::to(['spk/list-print'])?>",
+		type: "GET",
+        data: {
+            no_spk: no_spk
+        },
+        dataType: "text",
+        error: function(xhr, status, error) {},
+		beforeSend: function (){},
+        success: function(data){
+            var o = $.parseJSON(data);
+            $("[data-popup=\"popup\"]").html(o.data);
+            $("[data-popup=\"popup\"]").popup("open", {
+				container: "popup",
+				title: 'List Print SPK',
+				styleOptions: {
+					width: 500
+				}
+			});
+        },
+        complete: function(){}
+    });
+}
+
+function print_preview()
+{
+    $.ajax({
+        url: "<?=Url::to(['spk/print-preview'])?>",
+		type: "POST",
+        data: $("#print").serialize(),
+        dataType: "text",
+        error: function(xhr, status, error) {},
+		beforeSend: function (){},
+        success: function(data){
+            var o = $.parseJSON(data);
+            if(o.success == true){
+                $("[data-layout=\"print_layout\"]").html(o.data)
+                var w = window.open(),
+                    newstr = $("[data-layout=\"print_layout\"]").html();
+                $.get("css/print.min.css", function(css){
+                    w.document.write("<html>");
+                        w.document.write("<head>");
+                            w.document.write("<style>");
+                                w.document.write(css);
+                            w.document.write("</style>");
+                        w.document.write("</head>");
+                        w.document.write("<body>");
+                            $(w.document.body).html(newstr);
+                        w.document.write("</body>");
+                    w.document.write("</html>");
+                });
+            }else{
+                notification.open("danger", o.message, timeOut);
+            }
+        },
+        complete: function(){
+            popup.close();
+        }
+    });
+}
+
+var timeOut = 3000;
+$(document).ready(function(){
+    $("body").off("click","[data-button=\"print_spk\"]").on("click","[data-button=\"print_spk\"]", function(e){
+        e.preventDefault();
+        var data = $(this).data();
+        load_print(data.spk);
+    });
+
+    $("body").off("click","[data-button=\"print\"]").on("click","[data-button=\"print\"]", function(e){
+        e.preventDefault();
+        if($("[id^=\"spk_\"]").prop("checked") == true){
+            print_preview();
+        }else{
+            notification.open("danger", "Pilih salah satu!", timeOut);
+        }
+    });
+});
+</script>

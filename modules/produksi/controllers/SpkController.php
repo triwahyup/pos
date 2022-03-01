@@ -28,7 +28,9 @@ class SpkController extends Controller
                     'class' => AccessControl::className(),
                     'rules' => [
                         [
-                            'actions' => ['index', 'view', 'update', 'delete'],
+                            'actions' => [
+                                'index', 'view', 'update', 'delete', 'list-print', 'print-preview'
+                            ],
                             'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('surat-perintah-kerja')),
                             'roles' => ['@'],
                         ],
@@ -69,28 +71,6 @@ class SpkController extends Controller
     {
         return $this->render('view', [
             'model' => $this->findModel($no_spk),
-        ]);
-    }
-
-    /**
-     * Creates a new Spk model.
-     * If creation is successful, the browser will be redirected to the 'view' page.
-     * @return mixed
-     */
-    public function actionCreate()
-    {
-        $model = new Spk();
-
-        if ($this->request->isPost) {
-            if ($model->load($this->request->post()) && $model->save()) {
-                return $this->redirect(['view', 'no_spk' => $model->no_spk]);
-            }
-        } else {
-            $model->loadDefaultValues();
-        }
-
-        return $this->render('create', [
-            'model' => $model,
         ]);
     }
 
@@ -142,5 +122,40 @@ class SpkController extends Controller
         }
 
         throw new NotFoundHttpException('The requested page does not exist.');
+    }
+
+    public function actionListPrint($no_spk)
+    {
+        $data = [
+            'spk_potong' => 'SPK Potong',
+            'spk_cetak' => 'SPK Cetak',
+            'spk_pond' => 'SPK Pond',
+            'spk_pretel' => 'SPK Pretel',
+            'spk_lem' => 'SPK Lem',
+            'spk_pengiriman' => 'SPK Pengiriman',
+        ];
+        $model = $this->findModel($no_spk);
+        return json_encode(['data'=>$this->renderPartial('_list_print', [
+            'data'=>$data, 'model'=>$model])
+        ]);
+    }
+
+    public function actionPrintPreview()
+    {
+        $request = \Yii::$app->request;
+        $success = true;
+        $message = '';
+        $data = [];
+        if($request->isPost){
+            $model = $this->findModel($request->post('no_spk'));
+            $data = $this->renderPartial('_preview', [
+                'model'=>$model,
+                'layouts'=>$request->post('spk_print'),
+            ]);
+        }else{
+            $success = false;
+            $message = 'The requested data does not exist.';
+        }
+        return json_encode(['success'=>$success, 'message'=>$message, 'data'=>$data]);
     }
 }

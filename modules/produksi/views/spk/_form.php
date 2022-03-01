@@ -12,10 +12,6 @@ use yii\widgets\ActiveForm;
     <?php $form = ActiveForm::begin(['id'=>'form']); ?>
         <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
             <div class="col-lg-3 col-md-3 col-xs-12 padding-left-0">
-                <?= $form->field($model, 'no_spk')->textInput(['maxlength' => true]) ?>
-                <?= $form->field($model, 'tgl_spk')->textInput() ?>
-                <?= $form->field($model, 'no_so')->textInput(['maxlength' => true]) ?>
-                <?= $form->field($model, 'tgl_so')->textInput() ?>
                 <?= $form->field($model, 'keterangan')->textInput(['maxlength' => true]) ?>
             </div>
         </div>

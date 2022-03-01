@@ -107,14 +107,19 @@ class Spk extends \yii\db\ActiveRecord
         return SpkItem::find()->where(['no_spk' => $this->no_spk])->andWhere('type_code <> "'.$this->type_material.'"')->all();
     }
 
+    public function getItemMaterial()
+    {
+        return $this->hasOne(SpkItem::className(), ['no_spk' => 'no_spk', 'type_code' => 'type_material']);
+    }
+
     public function getPotongs()
     {
-        return $this->hasMany(SpkPotong::className(), ['code' => 'code']);
+        return $this->hasMany(SpkPotong::className(), ['no_spk' => 'no_spk']);
     }
 
     public function getProses()
     {
-        return $this->hasMany(SpkProses::className(), ['code' => 'code']);
+        return $this->hasMany(SpkProses::className(), ['no_spk' => 'no_spk']);
     }
 
     public function getTypeOrder()
