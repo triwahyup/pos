@@ -5,11 +5,11 @@ use yii\widgets\ActiveForm;
 use yii\widgets\MaskedInput;
 
 /* @var $this yii\web\View */
-/* @var $model app\modules\master\models\MasterBiayaProduksi */
+/* @var $model app\modules\master\models\MasterProses */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 
-<div class="master-biaya-produksi-form">
+<div class="master-proses-form">
     <?php $form = ActiveForm::begin(); ?>
         <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
             <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0">

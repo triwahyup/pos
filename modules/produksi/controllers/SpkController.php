@@ -4,8 +4,12 @@ namespace app\modules\produksi\controllers;
 
 use app\models\Logs;
 use app\models\User;
+use app\modules\master\models\MasterMesin;
 use app\modules\produksi\models\Spk;
 use app\modules\produksi\models\SpkSearch;
+use app\modules\produksi\models\SpkProduksi;
+use app\modules\sales\models\SalesOrderPotong;
+use app\modules\sales\models\SalesOrderProses;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\AccessControl;
@@ -29,7 +33,7 @@ class SpkController extends Controller
                     'rules' => [
                         [
                             'actions' => [
-                                'index', 'view', 'update', 'delete', 'list-print', 'print-preview'
+                                'index', 'view', 'update', 'delete', 'list-mesin', 'print-preview',
                             ],
                             'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('surat-perintah-kerja')),
                             'roles' => ['@'],
@@ -83,14 +87,42 @@ class SpkController extends Controller
      */
     public function actionUpdate($no_spk)
     {
+        $success = true;
+        $message = '';
         $model = $this->findModel($no_spk);
-
-        if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'no_spk' => $model->no_spk]);
+        $column = $model->setListColumn();
+        $spk_produksi = new SpkProduksi();
+        if($this->request->isPost){
+            if($model->load($this->request->post()) && $spk_produksi->load($this->request->post())){
+                $connection = \Yii::$app->db;
+			    $transaction = $connection->beginTransaction();
+                try{
+                    // SO ITEM
+                    $soItem = $model->itemMaterial;
+                    print_r($soItem);die;
+                    // SO POTONG
+                    $soPotong = SalesOrderPotong::findOne(['code'=>$model->no_so, 'urutan'=>$spk_produksi->potong_id]);
+                }catch(\Exception $e){
+                    $success = false;
+                    $message = $e->getMessage();
+				    $transaction->rollBack();
+                }
+                $logs =	[
+                    'type' => Logs::TYPE_USER,
+                    'description' => $message,
+                ];
+                Logs::addLog($logs);
+                \Yii::$app->session->setFlash('error', $message);
+            }
         }
 
         return $this->render('update', [
             'model' => $model,
+            'spk_produksi' => $spk_produksi,
+            'operator' => $column['operator'],
+            'so_potong' => $column['so_potong'],
+            'so_proses' => $column['so_proses'],
+            'type_mesin' => $column['type_mesin'],
         ]);
     }
 
@@ -103,8 +135,47 @@ class SpkController extends Controller
      */
     public function actionDelete($no_spk)
     {
-        $this->findModel($no_spk)->delete();
-
+        $success = true;
+		$message = '';
+        $model = $this->findModel($no_spk);
+        if(isset($model)){
+            $connection = \Yii::$app->db;
+			$transaction = $connection->beginTransaction();
+            try{
+                if(count($model->temps) > 0){
+                    \Yii::$app->session->setFlash('error', 'Dokumen ini sudah di Proses Produksi.');
+                    return $this->redirect(['index']);
+                }else{
+                    $model->status = 0;
+                    if(!$model->save()){
+                        $success = false;
+                        $message = (count($model->errors) > 0) ? 'ERROR DELETE SPK: ' : '';
+                        foreach($model->errors as $error => $value){
+                            $message .= $value[0].', ';
+                        }
+                        $message = substr($message, 0, -2);
+                    }
+                }
+                if($success){
+                    $transaction->commit();
+                    $message = '['.$model->no_spk.'] SUCCESS DELETE SPK.';
+                    \Yii::$app->session->setFlash('success', $message);
+                }else{
+                    $transaction->rollBack();
+                    \Yii::$app->session->setFlash('error', $message);
+                }
+            }catch(\Exception $e){
+				$success = false;
+				$message = $e->getMessage();
+				$transaction->rollBack();
+                \Yii::$app->session->setFlash('error', $message);
+            }
+            $logs =	[
+                'type' => Logs::TYPE_USER,
+                'description' => $message,
+            ];
+            Logs::addLog($logs);
+        }
         return $this->redirect(['index']);
     }
 
@@ -124,20 +195,14 @@ class SpkController extends Controller
         throw new NotFoundHttpException('The requested page does not exist.');
     }
 
-    public function actionListPrint($no_spk)
+    public function actionListMesin($type)
     {
-        $data = [
-            'spk_potong' => 'SPK Potong',
-            'spk_cetak' => 'SPK Cetak',
-            'spk_pond' => 'SPK Pond',
-            'spk_pretel' => 'SPK Pretel',
-            'spk_lem' => 'SPK Lem',
-            'spk_pengiriman' => 'SPK Pengiriman',
-        ];
-        $model = $this->findModel($no_spk);
-        return json_encode(['data'=>$this->renderPartial('_list_print', [
-            'data'=>$data, 'model'=>$model])
-        ]);
+        $model = MasterMesin::find()
+            ->select(['code', 'name'])
+            ->where(['type_code'=>$type, 'status'=>1])
+            ->asArray()
+            ->all();
+        return json_encode($model);
     }
 
     public function actionPrintPreview()

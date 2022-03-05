@@ -4,17 +4,17 @@ namespace app\modules\master\controllers;
 
 use app\models\Logs;
 use app\models\User;
-use app\modules\master\models\MasterBiayaProduksi;
-use app\modules\master\models\MasterBiayaProduksiSearch;
+use app\modules\master\models\MasterProses;
+use app\modules\master\models\MasterProsesSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 
 /**
- * BiayaProduksiController implements the CRUD actions for MasterBiayaProduksi model.
+ * ProsesController implements the CRUD actions for MasterProses model.
  */
-class BiayaProduksiController extends Controller
+class ProsesController extends Controller
 {
     /**
      * @inheritDoc
@@ -29,22 +29,22 @@ class BiayaProduksiController extends Controller
 				    'rules' => [
                         [
                             'actions' => ['create'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('biaya-produksi')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-proses')),
                             'roles' => ['@'],
                         ],
                         [
                             'actions' => ['index', 'view'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('biaya-produksi')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-proses')),
                             'roles' => ['@'],
                         ], 
                         [
                             'actions' => ['update'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('biaya-produksi')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-proses')),
                             'roles' => ['@'],
                         ], 
                         [
                             'actions' => ['delete'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('biaya-produksi')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-proses')),
                             'roles' => ['@'],
                         ],
                     ],
@@ -60,12 +60,12 @@ class BiayaProduksiController extends Controller
     }
 
     /**
-     * Lists all MasterBiayaProduksi models.
+     * Lists all MasterProses models.
      * @return mixed
      */
     public function actionIndex()
     {
-        $searchModel = new MasterBiayaProduksiSearch();
+        $searchModel = new MasterProsesSearch();
         $dataProvider = $searchModel->search($this->request->queryParams);
 
         return $this->render('index', [
@@ -75,7 +75,7 @@ class BiayaProduksiController extends Controller
     }
 
     /**
-     * Displays a single MasterBiayaProduksi model.
+     * Displays a single MasterProses model.
      * @param string $code Code
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
@@ -88,7 +88,7 @@ class BiayaProduksiController extends Controller
     }
 
     /**
-     * Creates a new MasterBiayaProduksi model.
+     * Creates a new MasterProses model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
@@ -96,7 +96,7 @@ class BiayaProduksiController extends Controller
     {
         $success = true;
         $message = '';
-        $model = new MasterBiayaProduksi();
+        $model = new MasterProses();
         if ($this->request->isPost) {
             if ($model->load($this->request->post())) {
                 $connection = \Yii::$app->db;
@@ -105,7 +105,7 @@ class BiayaProduksiController extends Controller
                     $model->code = $model->generateCode();
                     if(!$model->save()){
                         $success = false;
-                        $message = (count($model->errors) > 0) ? 'ERROR CREATE BIAYA PRODUKSI: ' : '';
+                        $message = (count($model->errors) > 0) ? 'ERROR CREATE DATA PROSES: ' : '';
                         foreach($model->errors as $error => $value){
                             $message .= $value[0].', ';
                         }
@@ -114,7 +114,7 @@ class BiayaProduksiController extends Controller
 
                     if($success){
                         $transaction->commit();
-                        $message = '['.$model->code.'] SUCCESS CREATE BIAYA PRODUKSI.';
+                        $message = '['.$model->code.'] SUCCESS CREATE DATA PROSES.';
                         $logs =	[
                             'type' => Logs::TYPE_USER,
                             'description' => $message,
@@ -148,7 +148,7 @@ class BiayaProduksiController extends Controller
     }
 
     /**
-     * Updates an existing MasterBiayaProduksi model.
+     * Updates an existing MasterProses model.
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param string $code Code
      * @return mixed
@@ -165,7 +165,7 @@ class BiayaProduksiController extends Controller
             try{
                 if(!$model->save()){
                     $success = false;
-                    $message = (count($model->errors) > 0) ? 'ERROR UPDATE BIAYA PRODUKSI: ' : '';
+                    $message = (count($model->errors) > 0) ? 'ERROR UPDATE DATA PROSES: ' : '';
                     foreach($model->errors as $error => $value){
                         $message .= $value[0].', ';
                     }
@@ -174,7 +174,7 @@ class BiayaProduksiController extends Controller
 
                 if($success){
                     $transaction->commit();
-                    $message = '['.$model->code.'] SUCCESS UPDATE BIAYA PRODUKSI.';
+                    $message = '['.$model->code.'] SUCCESS UPDATE DATA PROSES.';
                     $logs =	[
                         'type' => Logs::TYPE_USER,
                         'description' => $message,
@@ -205,7 +205,7 @@ class BiayaProduksiController extends Controller
     }
 
     /**
-     * Deletes an existing MasterBiayaProduksi model.
+     * Deletes an existing MasterProses model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param string $code Code
      * @return mixed
@@ -223,7 +223,7 @@ class BiayaProduksiController extends Controller
                 $model->status = 0;
                 if(!$model->save()){
                     $success = false;
-                    $message = (count($model->errors) > 0) ? 'ERROR DELETE BIAYA PRODUKSI: ' : '';
+                    $message = (count($model->errors) > 0) ? 'ERROR DELETE DATA PROSES: ' : '';
                     foreach($model->errors as $error => $value){
                         $message .= $value[0].', ';
                     }
@@ -232,7 +232,7 @@ class BiayaProduksiController extends Controller
 
                 if($success){
                     $transaction->commit();
-                    $message = '['.$model->code.'] SUCCESS DELETE BIAYA PRODUKSI.';
+                    $message = '['.$model->code.'] SUCCESS DELETE DATA PROSES.';
                     \Yii::$app->session->setFlash('success', $message);
                 }else{
                     $transaction->rollBack();
@@ -254,15 +254,15 @@ class BiayaProduksiController extends Controller
     }
 
     /**
-     * Finds the MasterBiayaProduksi model based on its primary key value.
+     * Finds the MasterProses model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param string $code Code
-     * @return MasterBiayaProduksi the loaded model
+     * @return MasterProses the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($code)
     {
-        if (($model = MasterBiayaProduksi::findOne($code)) !== null) {
+        if (($model = MasterProses::findOne($code)) !== null) {
             return $model;
         }
 

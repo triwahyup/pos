@@ -22,6 +22,11 @@ $this->params['breadcrumbs'][] = $this->title;
                 'contentOptions' => [
                     'class' => 'text-center',
                 ],
+                'format' => 'raw',
+                'label' => 'No. SPK',
+                'value' => function($model, $index, $key) {
+                    return Html::a($model->no_spk, ['view', 'no_spk' => $model->no_spk]);
+                }
             ],
             [
                 'attribute' => 'tgl_spk',
@@ -39,6 +44,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         'autoclose' => true,
                     ],
                 ]),
+                'label' => 'Tgl. SPK',
                 'value' => function($model, $index, $key){
                     return date('d-m-Y', strtotime($model->tgl_spk));
                 }
@@ -48,6 +54,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'contentOptions' => [
                     'class' => 'text-center',
                 ],
+                'label' => 'No. SO',
             ],
             [
                 'attribute' => 'tgl_so',
@@ -65,41 +72,22 @@ $this->params['breadcrumbs'][] = $this->title;
                         'autoclose' => true,
                     ],
                 ]),
+                'label' => 'Tgl. SO',
                 'value' => function($model, $index, $key){
                     return date('d-m-Y', strtotime($model->tgl_so));
                 }
             ],
+            'name',
             [
-                'buttons' => [
-                    'view' => function ($url, $model) {
-                        return Html::a(Helper::buttonIcons()['eye-open'],
-                            ['view', 'no_spk'=>$model->no_spk],
-                            ['title'=>'View', 'aria-label'=>'View', 'data-pjax'=>true]);
-                    },
-                    'update' => function ($url, $model) {
-                        return Html::a(Helper::buttonIcons()['pencil'],
-                            ['update', 'no_spk'=>$model->no_spk],
-                            ['title'=>'Update', 'aria-label'=>'Update', 'data-pjax'=>true]);
-                    },
-                    'delete' => function ($url, $model) {
-                        return Html::a(Helper::buttonIcons()['trash'],
-                            ['delete', 'no_spk'=>$model->no_spk],
-                            [
-                                'title'=>'Delete',
-                                'aria-label'=>'Delete', 
-                                'data-pjax'=>true,
-                                'data' => [
-                                    'confirm' => 'Are you sure you want to delete this item?',
-                                    'method' => 'post',
-                                ],
-                            ]);
-                    },
-                ],
-                'class' => 'yii\grid\ActionColumn',
+                'attribute' => 'status_produksi',
+                'format' => 'raw',
                 'contentOptions' => [
-                    'class' => 'text-center column-action',
+                    'class' => 'text-center',
                 ],
-                'template' => '{view} {update} {delete}',
+                'value' => function($model, $index, $key)
+                {
+                    return $model->statusProduksi;
+                }
             ],
         ],
     ]); ?>

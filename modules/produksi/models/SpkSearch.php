@@ -17,7 +17,7 @@ class SpkSearch extends Spk
     public function rules()
     {
         return [
-            [['no_spk', 'tgl_spk', 'no_so', 'tgl_so'], 'safe'],
+            [['no_spk', 'tgl_spk', 'no_so', 'tgl_so', 'name', 'status_produksi'], 'safe'],
         ];
     }
 
@@ -65,7 +65,8 @@ class SpkSearch extends Spk
         }
 
         $query->andFilterWhere(['like', 'no_spk', $this->no_spk])
-            ->andFilterWhere(['like', 'no_so', $this->no_so]);
+            ->andFilterWhere(['like', 'no_so', $this->no_so])
+            ->andFilterWhere(['like', 'name', $this->name]);
 
         return $dataProvider;
     }

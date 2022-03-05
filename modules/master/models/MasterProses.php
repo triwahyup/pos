@@ -6,7 +6,7 @@ use Yii;
 use yii\behaviors\TimestampBehavior;
 
 /**
- * This is the model class for table "master_biaya_produksi".
+ * This is the model class for table "master_proses".
  *
  * @property string $code
  * @property string|null $name
@@ -15,14 +15,14 @@ use yii\behaviors\TimestampBehavior;
  * @property int|null $created_at
  * @property int|null $updated_at
  */
-class MasterBiayaProduksi extends \yii\db\ActiveRecord
+class MasterProses extends \yii\db\ActiveRecord
 {
     /**
      * {@inheritdoc}
      */
     public static function tableName()
     {
-        return 'master_biaya_produksi';
+        return 'master_proses';
     }
 
     public function behaviors()
@@ -65,10 +65,10 @@ class MasterBiayaProduksi extends \yii\db\ActiveRecord
 
     public function generateCode()
     {
-        $model = MasterBiayaProduksi::find()->count();
+        $model = MasterProses::find()->count();
         $total=0;
         if($model > 0){
-            $model = MasterBiayaProduksi::find()->orderBy(['code'=>SORT_DESC])->one();
+            $model = MasterProses::find()->orderBy(['code'=>SORT_DESC])->one();
             $total = (int)substr($model->code, 1);
         }
         return (string)sprintf('%03s', ($total+1));

@@ -20,6 +20,8 @@ $data = [
     'TYPE_SUPPLIER' => 2,
     'TYPE_OUTSOURCE' => 3,
     'TYPE_EKSPEDISI' => 4,
+    // TYPE KARYAWAN
+    'TYPE_OPERATOR_PRODUKSI' => 'OPERATOR PRODUKSI',
     // TYPE JASA
     'TYPE_PRODUK_JASA' => '021',
 

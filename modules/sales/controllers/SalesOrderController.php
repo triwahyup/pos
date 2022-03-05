@@ -16,9 +16,6 @@ use app\modules\sales\models\SalesOrderItem;
 use app\modules\sales\models\SalesOrderProses;
 use app\modules\sales\models\SalesOrderSearch;
 use app\modules\produksi\models\Spk;
-use app\modules\produksi\models\SpkItem;
-use app\modules\produksi\models\SpkPotong;
-use app\modules\produksi\models\SpkProses;
 use app\modules\sales\models\TempSalesOrderItem;
 use app\modules\sales\models\TempSalesOrderPotong;
 use app\modules\sales\models\TempSalesOrderProses;
@@ -346,7 +343,7 @@ class SalesOrderController extends Controller
                         $message = 'ERROR UPDATE SALES ORDER: PROSES PRODUKSI IS EMPTY.';
                     }
                     
-                    $updateTotalOrder = $model->updateTotalOrder;
+                    $totalOrder = $model->totalOrder;
                     if(!$model->save()){
                         $success = false;
                         $message = (count($model->errors) > 0) ? 'ERROR UPDATE SALES ORDER: ' : '';
@@ -1313,50 +1310,7 @@ class SalesOrderController extends Controller
                     $spk->no_so = $model->code;
                     $spk->no_spk = $spk->generateCode();
                     $spk->tgl_spk = date('Y-m-d');
-                    if($spk->save()){
-                        // PROSES SIMPAN SPK ITEM
-                        foreach($model->items as $detail){
-                            $spkItem = new SpkItem();
-                            $spkItem->no_spk = $spk->no_spk;
-                            $spkItem->attributes = $detail->attributes;
-                            if(!$spkItem->save()){
-                                $success = false;
-                                $message = (count($spkItem->errors) > 0) ? 'ERROR CREATE SPK ITEM: ' : '';
-                                foreach($spkItem->errors as $error => $value){
-                                    $message .= strtoupper($value[0].', ');
-                                }
-                                $message = substr($message, 0, -2);
-                            }
-                        }
-                        // PROSES SIMPAN SPK POTONG
-                        foreach($model->potongs as $detail){
-                            $spkPotong = new SpkPotong();
-                            $spkPotong->no_spk = $spk->no_spk;
-                            $spkPotong->attributes = $detail->attributes;
-                            if(!$spkPotong->save()){
-                                $success = false;
-                                $message = (count($spkPotong->errors) > 0) ? 'ERROR CREATE SPK POTONG: ' : '';
-                                foreach($spkPotong->errors as $error => $value){
-                                    $message .= strtoupper($value[0].', ');
-                                }
-                                $message = substr($message, 0, -2);
-                            }
-                        }
-                        // PROSES SIMPAN SPK PROSES
-                        foreach($model->proses as $detail){
-                            $spkProses = new SpkProses();
-                            $spkProses->no_spk = $spk->no_spk;
-                            $spkProses->attributes = $detail->attributes;
-                            if(!$spkProses->save()){
-                                $success = false;
-                                $message = (count($spkProses->errors) > 0) ? 'ERROR CREATE SPK PROSES: ' : '';
-                                foreach($spkProses->errors as $error => $value){
-                                    $message .= strtoupper($value[0].', ');
-                                }
-                                $message = substr($message, 0, -2);
-                            }
-                        }
-                    }else{
+                    if(!$spk->save()){
                         $success = false;
                         $message = (count($spk->errors) > 0) ? 'ERROR CREATE SPK: ' : '';
                         foreach($spk->errors as $error => $value){

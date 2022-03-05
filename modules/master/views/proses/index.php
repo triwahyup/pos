@@ -5,15 +5,15 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 
 /* @var $this yii\web\View */
-/* @var $searchModel app\modules\master\models\MasterBiayaProduksiSearch */
+/* @var $searchModel app\modules\master\models\MasterProsesSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Biaya Produksi';
+$this->title = 'Data Proses';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="master-biaya-produksi-index">
+<div class="master-proses-index">
     <p class="text-right">
-        <?= Html::a('<i class="fontello icon-plus"></i><span>Create Biaya Produksi</span>', ['create'], ['class' => 'btn btn-success btn-flat btn-sm']) ?>
+        <?= Html::a('<i class="fontello icon-plus"></i><span>Create Data Proses</span>', ['create'], ['class' => 'btn btn-success btn-flat btn-sm']) ?>
     </p>
     
     <?= GridView::widget([

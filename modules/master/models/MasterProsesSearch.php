@@ -4,12 +4,12 @@ namespace app\modules\master\models;
 
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use app\modules\master\models\MasterBiayaProduksi;
+use app\modules\master\models\MasterProses;
 
 /**
- * MasterBiayaProduksiSearch represents the model behind the search form of `app\modules\master\models\MasterBiayaProduksi`.
+ * MasterProsesSearch represents the model behind the search form of `app\modules\master\models\MasterProses`.
  */
-class MasterBiayaProduksiSearch extends MasterBiayaProduksi
+class MasterProsesSearch extends MasterProses
 {
     /**
      * {@inheritdoc}
@@ -39,7 +39,7 @@ class MasterBiayaProduksiSearch extends MasterBiayaProduksi
      */
     public function search($params)
     {
-        $query = MasterBiayaProduksi::find();
+        $query = MasterProses::find();
 
         // add conditions that should always apply here
 

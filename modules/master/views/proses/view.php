@@ -4,14 +4,14 @@ use yii\helpers\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model app\modules\master\models\MasterBiayaProduksi */
+/* @var $model app\modules\master\models\MasterProses */
 
 $this->title = $model->name;
-$this->params['breadcrumbs'][] = ['label' => 'Biaya Produksi', 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => 'Data Proses', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
 ?>
-<div class="master-biaya-produksi-view">
+<div class="master-proses-view">
     <p class="text-right">
         <?= Html::a('<i class="fontello icon-plus"></i><span>Create</span>', ['create'], ['class' => 'btn btn-success btn-flat btn-sm']) ?>
         <?= Html::a('<i class="fontello icon-pencil"></i><span>Update</span>', ['update', 'code' => $model->code], ['class' => 'btn btn-warning btn-flat btn-sm']) ?>

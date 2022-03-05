@@ -242,32 +242,4 @@ class SalesOrder extends \yii\db\ActiveRecord
         $this->grand_total = $total+$total_ppn;
         return true;
     }
-
-    public function getUpdateTotalOrder()
-    {
-        $total_order_material=0;
-        foreach($this->itemsMaterial as $val){
-            $total_order_material += $val->total_order;
-        }
-        $this->total_order_material = $total_order_material;
-        $total_order_bahan=0;
-        foreach($this->itemsNonMaterial as $val){
-            $total_order_bahan += $val->total_order;
-        }
-        $this->total_order_bahan = $total_order_bahan;
-        $total_biaya_produksi=0;
-        foreach($this->proses as $val){
-            $total_biaya_produksi += $val->total_biaya;
-        }
-        $this->total_biaya_produksi = $total_biaya_produksi;
-        
-        $total = $total_order_material + $total_order_bahan + $total_biaya_produksi;
-        $total_ppn=0;
-        if(!empty($this->ppn)){
-            $total_ppn = ceil($total * ($this->ppn / 100));
-        }
-        $this->total_ppn = $total_ppn;
-        $this->grand_total = $total+$total_ppn;
-        return true;
-    }
 }
