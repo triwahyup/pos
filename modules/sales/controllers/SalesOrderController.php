@@ -5,10 +5,10 @@ namespace app\modules\sales\controllers;
 use app\models\Logs;
 use app\models\User;
 use app\modules\inventory\models\InventoryStockTransaction;
-use app\modules\master\models\MasterBiayaProduksi;
 use app\modules\master\models\MasterMaterialItem;
 use app\modules\master\models\MasterMaterialItemPricelist;
 use app\modules\master\models\MasterPerson;
+use app\modules\master\models\MasterProses;
 use app\modules\master\models\MasterSatuan;
 use app\modules\sales\models\SalesOrder;
 use app\modules\sales\models\SalesOrderPotong;
@@ -1138,12 +1138,12 @@ class SalesOrderController extends Controller
     public function actionListProses($id)
     {
         $data = [];
-        $model = MasterBiayaProduksi::findAll(['status'=>1]);
+        $model = MasterProses::findAll(['status'=>1]);
         $tempItem = TempSalesOrderItem::findOne(['id'=>$id]);
         foreach($model as $val){
             $data[$val->code] = [
                 'name' => $val->name,
-                'biaya_code' => $val->code,
+                'proses_code' => $val->code,
                 'type' => ($val->type == 1) ? 'Cetak' : 'Pond',
                 'code' => $tempItem->code,
                 'item_code' => $tempItem->item_code,
@@ -1151,10 +1151,10 @@ class SalesOrderController extends Controller
         }
         if(count($tempItem->prosesTemps) > 0){
             foreach($tempItem->prosesTemps as $val){
-                $data[$val->biaya_code] = [
+                $data[$val->proses_code] = [
                     'id' => $val->id,
-                    'name' => (isset($val->biayaProduksi)) ? $val->biayaProduksi->name : '-',
-                    'biaya_code' => $val->biaya_code,
+                    'name' => (isset($val->prosesProduksi)) ? $val->prosesProduksi->name : '-',
+                    'proses_code' => $val->proses_code,
                     'type' => ($val->type == 1) ? 'Cetak' : 'Pond',
                     'code' => $val->code,
                     'item_code' => $val->item_code,
@@ -1175,15 +1175,15 @@ class SalesOrderController extends Controller
         $message = '';
         if($request->isPost){
             $dataProses = $request->post('TempSalesOrderProses');
-            if(!empty($dataProses['biaya_code'])){
+            if(!empty($dataProses['proses_code'])){
                 TempSalesOrderProses::deleteAll('code=:code and item_code=:item_code and user_id=:user_id', [
                     ':code'=>$dataProses['code'], ':item_code'=>$dataProses['item_code'], ':user_id'=>\Yii::$app->user->id]);
-                foreach($dataProses['biaya_code'] as $val){
+                foreach($dataProses['proses_code'] as $val){
                     $tempProses = new TempSalesOrderProses();
-                    $biayaProduksi = $tempProses->biayaProduksi($val);
-                    $tempProses->attributes = $biayaProduksi->attributes;
+                    $prosesProduksi = $tempProses->prosesProduksi($val);
+                    $tempProses->attributes = $prosesProduksi->attributes;
                     $tempProses->attributes = (array)$dataProses;
-                    $tempProses->biaya_code = $val;
+                    $tempProses->proses_code = $val;
                     $tempProses->keterangan = $tempProses['keterangan'][$val];
                     $tempProses->user_id = \Yii::$app->user->id;
                     $totalBiaya = $tempProses->totalBiaya($dataProses);

@@ -230,7 +230,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                     <tr>
                                         <td class="text-center"><?=$no+1 ?></td>
                                         <td class="text-left text-muted">
-                                            <?='<i>'.$val->biayaProduksi->name.'</i>' ?>
+                                            <?='<i>'.$val->prosesProduksi->name.'</i>' ?>
                                         </td>
                                         <td class="text-muted text-left">
                                             <?='<i>'.$val->keterangan.'</i>' ?>

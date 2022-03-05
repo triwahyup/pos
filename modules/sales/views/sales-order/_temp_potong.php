@@ -44,7 +44,7 @@
                         <tr>
                             <td class="text-center"><?=$no+1 ?></td>
                             <td class="text-muted text-left">
-                                <?='<i>'.$tempProses->biayaProduksi->name.'</i>' ?>
+                                <?='<i>'.$tempProses->prosesProduksi->name.'</i>' ?>
                             </td>
                             <td class="text-muted text-left">
                                 <?='<i>'.$tempProses->keterangan.'</i>' ?>

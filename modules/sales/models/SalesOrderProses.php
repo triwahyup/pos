@@ -3,7 +3,7 @@
 namespace app\modules\sales\models;
 
 use Yii;
-use app\modules\master\models\MasterBiayaProduksi;
+use app\modules\master\models\MasterProses;
 use app\modules\sales\models\SalesOrderPotong;
 use app\modules\sales\models\SalesOrderItem;
 use yii\behaviors\TimestampBehavior;
@@ -78,9 +78,9 @@ class SalesOrderProses extends \yii\db\ActiveRecord
         ];
     }
 
-    public function getBiayaProduksi()
+    public function getProsesProduksi()
     {
-        return $this->hasOne(MasterBiayaProduksi::className(), ['code' => 'proses_code']);
+        return $this->hasOne(MasterProses::className(), ['code' => 'proses_code']);
     }
 
     public function totalBiaya($model)

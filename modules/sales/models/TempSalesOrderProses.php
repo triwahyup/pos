@@ -3,7 +3,7 @@
 namespace app\modules\sales\models;
 
 use Yii;
-use app\modules\master\models\MasterBiayaProduksi;
+use app\modules\master\models\MasterProses;
 use app\modules\sales\models\TempSalesOrderPotong;
 use app\modules\sales\models\TempSalesOrderItem;
 
@@ -13,7 +13,7 @@ use app\modules\sales\models\TempSalesOrderItem;
  * @property int $id
  * @property string $code
  * @property string $item_code
- * @property string $biaya_code
+ * @property string $proses_code
  * @property int|null $type 1: Cetak; 2: Potong;
  * @property float|null $index
  * @property float|null $harga
@@ -37,12 +37,12 @@ class TempSalesOrderProses extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['code', 'item_code', 'biaya_code'], 'required'],
+            [['code', 'item_code', 'proses_code'], 'required'],
             [['type', 'user_id'], 'integer'],
             [['index', 'harga', 'total_biaya'], 'number'],
             [['code'], 'string', 'max' => 12],
             [['item_code'], 'string', 'max' => 7],
-            [['biaya_code'], 'string', 'max' => 3],
+            [['proses_code', 'mesin_type'], 'string', 'max' => 3],
             [['keterangan'], 'safe'],
         ];
     }
@@ -56,7 +56,7 @@ class TempSalesOrderProses extends \yii\db\ActiveRecord
             'id' => 'ID',
             'code' => 'Code',
             'item_code' => 'Item Code',
-            'biaya_code' => 'Biaya Code',
+            'proses_code' => 'Proses Code',
             'type' => 'Type',
             'index' => 'Index',
             'harga' => 'Harga',
@@ -71,14 +71,14 @@ class TempSalesOrderProses extends \yii\db\ActiveRecord
         return TempSalesOrderProses::find()->where(['code'=>$this->code, 'item_code'=>$this->item_code, 'user_id'=> \Yii::$app->user->id])->all();
     }
 
-    public function getBiayaProduksi()
+    public function getProsesProduksi()
     {
-        return $this->hasOne(MasterBiayaProduksi::className(), ['code' => 'biaya_code']);
+        return $this->hasOne(MasterProses::className(), ['code' => 'proses_code']);
     }
     
-    public function biayaProduksi($biaya_code)
+    public function prosesProduksi($proses_code)
     {
-        return MasterBiayaProduksi::findOne(['code'=>$biaya_code]);
+        return MasterProses::findOne(['code'=>$proses_code]);
     }
 
     public function totalBiaya($model)

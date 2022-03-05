@@ -944,7 +944,7 @@ function create_proses()
         dataType: "text",
         error: function(xhr, status, error) {},
         beforeSend: function(){},
-        data: $("#form_biaya").serialize(),
+        data: $("#form_proses").serialize(),
         success: function(data){
             var o = $.parseJSON(data);
             if(!o.success == true){
