@@ -42,6 +42,12 @@ $this->params['breadcrumbs'][] = $this->title;
                             return number_format($model->harga).'.-';
                         }
                     ],
+                    [
+                        'attribute' => 'mesin_type',
+                        'value'=> function ($model, $index) { 
+                            return (isset($model->typeCode)) ? $model->typeCode->value : null;
+                        }
+                    ],
                     'keterangan',
                     [
                         'attribute' => 'status',

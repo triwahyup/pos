@@ -13,7 +13,7 @@ use yii\behaviors\TimestampBehavior;
  *
  * @property string $code
  * @property string $item_code
- * @property string $biaya_code
+ * @property string $proses_code
  * @property int|null $type 1: Cetak; 2: Potong;
  * @property float|null $index
  * @property float|null $harga
@@ -46,14 +46,14 @@ class SalesOrderProses extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['code', 'item_code', 'biaya_code'], 'required'],
+            [['code', 'item_code', 'proses_code'], 'required'],
             [['type', 'status', 'created_at', 'updated_at'], 'integer'],
             [['index', 'harga', 'total_biaya'], 'number'],
             [['code'], 'string', 'max' => 12],
             [['item_code'], 'string', 'max' => 7],
-            [['biaya_code'], 'string', 'max' => 3],
+            [['proses_code', 'mesin_type'], 'string', 'max' => 3],
             [['keterangan'], 'string', 'max' => 128],
-            [['code', 'item_code', 'biaya_code'], 'unique', 'targetAttribute' => ['code', 'item_code', 'biaya_code']],
+            [['code', 'item_code', 'proses_code'], 'unique', 'targetAttribute' => ['code', 'item_code', 'proses_code']],
             [['status'], 'default', 'value' => 1],
         ];
     }
@@ -66,7 +66,7 @@ class SalesOrderProses extends \yii\db\ActiveRecord
         return [
             'code' => 'Code',
             'item_code' => 'Item Code',
-            'biaya_code' => 'Biaya Code',
+            'proses_code' => 'Biaya Code',
             'type' => 'Type',
             'index' => 'Index',
             'harga' => 'Harga',
@@ -80,7 +80,7 @@ class SalesOrderProses extends \yii\db\ActiveRecord
 
     public function getBiayaProduksi()
     {
-        return $this->hasOne(MasterBiayaProduksi::className(), ['code' => 'biaya_code']);
+        return $this->hasOne(MasterBiayaProduksi::className(), ['code' => 'proses_code']);
     }
 
     public function totalBiaya($model)

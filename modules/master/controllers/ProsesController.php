@@ -4,6 +4,7 @@ namespace app\modules\master\controllers;
 
 use app\models\Logs;
 use app\models\User;
+use app\modules\master\models\MasterKode;
 use app\modules\master\models\MasterProses;
 use app\modules\master\models\MasterProsesSearch;
 use yii\web\Controller;
@@ -94,6 +95,12 @@ class ProsesController extends Controller
      */
     public function actionCreate()
     {
+        $typeMesin = MasterKode::find()
+            ->select(['name'])
+            ->where(['type'=>\Yii::$app->params['TYPE_MESIN'], 'status'=>1])
+            ->indexBy('code')
+            ->column();
+
         $success = true;
         $message = '';
         $model = new MasterProses();
@@ -144,6 +151,7 @@ class ProsesController extends Controller
 
         return $this->render('create', [
             'model' => $model,
+            'typeMesin' => $typeMesin
         ]);
     }
 
@@ -156,6 +164,12 @@ class ProsesController extends Controller
      */
     public function actionUpdate($code)
     {
+        $typeMesin = MasterKode::find()
+            ->select(['name'])
+            ->where(['type'=>\Yii::$app->params['TYPE_MESIN'], 'status'=>1])
+            ->indexBy('code')
+            ->column();
+
         $success = true;
         $message = '';
         $model = $this->findModel($code);
@@ -201,6 +215,7 @@ class ProsesController extends Controller
 
         return $this->render('update', [
             'model' => $model,
+            'typeMesin' => $typeMesin
         ]);
     }
 

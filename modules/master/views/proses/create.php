@@ -12,5 +12,6 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="master-proses-create">
     <?= $this->render('_form', [
         'model' => $model,
+        'typeMesin' => $typeMesin,
     ]) ?>
 </div>

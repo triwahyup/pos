@@ -24,7 +24,6 @@ use yii\widgets\MaskedInput;
                             'class' => 'select2',
                         ],
                     ]) ?>
-                <?= $form->field($model, 'keterangan')->textarea(['rows' => 2]) ?>
                 <?= $form->field($model, 'index')->textInput() ?>
                 <?= $form->field($model, 'harga')->widget(MaskedInput::className(), [
                         'clientOptions' => [
@@ -38,6 +37,14 @@ use yii\widgets\MaskedInput;
                             'data-icons' => 'rupiah',
                         ]
                     ]) ?>
+                <?= $form->field($model, 'mesin_type')->widget(Select2::classname(), [
+                        'data' => $typeMesin,
+                        'options' => [
+                            'placeholder' => 'Pilih Type Mesin',
+                            'class' => 'select2',
+                        ],
+                    ]) ?>
+                <?= $form->field($model, 'keterangan')->textarea(['rows' => 2]) ?>
             </div>
         </div>
         <div class="form-group text-right">

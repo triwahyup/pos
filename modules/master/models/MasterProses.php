@@ -3,6 +3,7 @@
 namespace app\modules\master\models;
 
 use Yii;
+use app\modules\master\models\MasterKode;
 use yii\behaviors\TimestampBehavior;
 
 /**
@@ -41,7 +42,7 @@ class MasterProses extends \yii\db\ActiveRecord
             [['name', 'type', 'harga'], 'required'],
             [['harga', 'index'], 'safe'],
             [['status', 'created_at', 'updated_at', 'type'], 'integer'],
-            [['code'], 'string', 'max' => 3],
+            [['code', 'mesin_type'], 'string', 'max' => 3],
             [['name', 'keterangan'], 'string', 'max' => 128],
             [['code'], 'unique'],
             [['status'], 'default', 'value' => 1],
@@ -57,10 +58,17 @@ class MasterProses extends \yii\db\ActiveRecord
             'code' => 'Code',
             'name' => 'Name',
             'harga' => 'Harga',
+            'mesin_type' => 'Type Mesin',
             'status' => 'Status',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
         ];
+    }
+
+    public function beforeSave($attribute)
+    {
+        $this->harga = str_replace(',', '', $this->harga);
+        return parent::beforeSave($attribute);
     }
 
     public function generateCode()
@@ -79,9 +87,8 @@ class MasterProses extends \yii\db\ActiveRecord
         return ($this->type == 1) ? 'Cetak' : 'Pond';
     }
 
-    public function beforeSave($attribute)
+    public function getTypeCode()
     {
-        $this->harga = str_replace(',', '', $this->harga);
-        return parent::beforeSave($attribute);
+        return $this->hasOne(MasterKode::className(), ['code' => 'mesin_type']);
     }
 }

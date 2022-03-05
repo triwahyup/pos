@@ -17,7 +17,7 @@ class MasterProsesSearch extends MasterProses
     public function rules()
     {
         return [
-            [['name', 'type', 'harga', 'index', 'created_at', 'updated_at'], 'safe'],
+            [['name', 'type', 'harga', 'index', 'created_at', 'updated_at', 'mesin_type'], 'safe'],
         ];
     }
 
@@ -39,7 +39,9 @@ class MasterProsesSearch extends MasterProses
      */
     public function search($params)
     {
-        $query = MasterProses::find();
+        $query = MasterProses::find()
+            ->alias('a')
+            ->leftJoin('master_kode b', 'b.code = a.mesin_type');
 
         // add conditions that should always apply here
 
@@ -56,16 +58,19 @@ class MasterProsesSearch extends MasterProses
         }
 
         // grid filtering conditions
-        $query->where(['status'=>1]);
+        $query->where(['a.status'=>1]);
         if(!empty($this->created_at)){
             $t1 = strtotime($this->created_at);
 			$t2 = strtotime("+1 days", $t1);
-			$query->andWhere('created_at >='.$t1.' and created_at <'.$t2);
+			$query->andWhere('a.created_at >='.$t1.' and a.created_at <'.$t2);
         }
         if(!empty($this->updated_at)){
             $t1 = strtotime($this->updated_at);
 			$t2 = strtotime("+1 days", $t1);
-			$query->andWhere('updated_at >='.$t1.' and updated_at <'.$t2);
+			$query->andWhere('a.updated_at >='.$t1.' and a.updated_at <'.$t2);
+        }
+        if(!empty($this->mesin_type)){
+            $query->andWhere('b.code LIKE "%'.$this->mesin_type.'%" OR b.value LIKE "%'.$this->mesin_type.'%"');
         }
         $query->andFilterWhere([
             'harga' => $this->harga,
@@ -73,7 +78,7 @@ class MasterProsesSearch extends MasterProses
             'status' => $this->status
         ]);
 
-        $query->andFilterWhere(['like', 'name', $this->name]);
+        $query->andFilterWhere(['like', 'a.name', $this->name]);
         return $dataProvider;
     }
 }

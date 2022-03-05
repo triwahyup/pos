@@ -47,6 +47,12 @@ $this->params['breadcrumbs'][] = $this->title;
                 }
             ],
             [
+                'attribute' => 'mesin_type',
+                'value' => function ($model, $index) { 
+                    return (isset($model->typeCode)) ? $model->typeCode->value : null;
+                }
+            ],
+            [
                 'attribute' => 'created_at',
                 'contentOptions' => [
                     'class' => 'text-center',
