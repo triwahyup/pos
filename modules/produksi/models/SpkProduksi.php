@@ -3,6 +3,9 @@
 namespace app\modules\produksi\models;
 
 use Yii;
+use app\models\Profile;
+use app\modules\master\models\MasterMesin;
+use app\modules\master\models\MasterProses;
 use yii\behaviors\TimestampBehavior;
 
 /**
@@ -44,8 +47,8 @@ class SpkProduksi extends \yii\db\ActiveRecord
     {
         return [
             [['no_spk', 'item_code', 'proses_code', 'mesin_code', 'mesin_type', 'qty_proses', 'user_id', 'uk_potong'], 'required'],
-            [['potong_id', 'urutan', 'proses_type', 'user_id', 'status', 'created_at', 'updated_at'], 'integer'],
-            [['qty_hasil', 'qty_rusak', 'qty_proses'], 'safe'],
+            [['status_produksi', 'potong_id', 'urutan', 'proses_type', 'user_id', 'status', 'created_at', 'updated_at'], 'integer'],
+            [['qty_hasil', 'qty_rusak', 'qty_proses', 'tgl_spk', 'gram'], 'safe'],
             [['no_spk', 'uk_potong'], 'string', 'max' => 12],
             [['item_code'], 'string', 'max' => 7],
             [['proses_code', 'mesin_code', 'mesin_type'], 'string', 'max' => 3],
@@ -82,5 +85,55 @@ class SpkProduksi extends \yii\db\ActiveRecord
         $this->qty_hasil = str_replace(',', '', $this->qty_hasil);
         $this->qty_rusak = str_replace(',', '', $this->qty_rusak);
         return parent::beforeSave($attribute);
+    }
+
+    public function getQtyProses()
+    {
+        $models = SpkProduksi::find()
+            ->where(['no_spk'=>$this->no_spk, 'item_code'=>$this->item_code, 'potong_id'=>$this->potong_id, 'proses_code'=>$this->proses_code])
+            ->all();
+        $total = 0;
+        foreach($models as $val){
+            $total += $val->qty_proses;
+        }
+        return $total;
+    }
+
+    public function getCount()
+    {
+        return SpkProduksi::find()->where(['no_spk'=>$this->no_spk, 'item_code'=>$this->item_code, 'potong_id'=>$this->potong_id])->count();
+    }
+
+    public function getAlls()
+    {
+        return SpkProduksi::find()->where(['no_spk'=>$this->no_spk, 'item_code'=>$this->item_code, 'potong_id'=>$this->potong_id])->all();
+    }
+
+    public function getMesin()
+    {
+        return $this->hasOne(MasterMesin::className(), ['code' => 'mesin_code']);
+    }
+
+    public function getProses()
+    {
+        return $this->hasOne(MasterProses::className(), ['code' => 'proses_code']);
+    }
+
+    public function getOperator()
+    {
+        return $this->hasOne(Profile::className(), ['user_id' => 'user_id']);
+    }
+
+    public function getStatusProduksi()
+    {
+        $message = '';
+        if($this->status==1){
+            $message = '<span class="text-label text-default">Belum Proses</span>';
+        }else if($this->status==2){
+            $message = '<span class="text-label text-primary">In Progres</span>';
+        }else if($this->status==3){
+            $message = '<span class="text-label text-success">Done</span>';
+        }
+        return $message;
     }
 }

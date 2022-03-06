@@ -186,8 +186,14 @@ $this->params['breadcrumbs'][] = $this->title;
                     <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
                         <label class="font-size-12">Material</label>
                     </div>
-                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
+                    <div class="col-lg-5 col-md-5 col-sm-12 col-xs-12 padding-right-0">
                         <span><?=(isset($item->item->name)) ? $item->item->code.' - '.$item->item->name : '' ?></span>
+                    </div>
+                    <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
+                        <label class="font-size-12">Total Potong</label>
+                    </div>
+                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-right-0">
+                        <span><?=$item->total_potong.'<span class="text-muted font-size-10"> ('.number_format($item->jumlah_cetak).' cetak)</span>' ?></span>
                     </div>
                 </div>
                 <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
@@ -205,10 +211,10 @@ $this->params['breadcrumbs'][] = $this->title;
                         </span>
                     </div>
                     <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                        <label class="font-size-12">Total Potong</label>
+                        <label class="font-size-12">Total Warna</label>
                     </div>
                     <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-right-0">
-                        <span><?=$item->total_potong.'<span class="text-muted font-size-10"> ('.number_format($item->jumlah_cetak).' cetak)</span>' ?></span>
+                        <span><?=$item->total_warna ?></span>
                     </div>
                 </div>
                 <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
@@ -223,10 +229,10 @@ $this->params['breadcrumbs'][] = $this->title;
                         </span>
                     </div>
                     <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                        <label class="font-size-12">Total Warna</label>
+                        <label class="font-size-12">Total Order</label>
                     </div>
                     <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-right-0">
-                        <span><?=$item->total_warna ?></span>
+                        <strong class="font-size-12"><?='Rp.'.number_format($item->total_order).'.-' ?></strong>
                     </div>
                 </div>
                 <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
@@ -242,12 +248,6 @@ $this->params['breadcrumbs'][] = $this->title;
                                     : null ?>
                             <?php endfor; ?>
                         </strong>
-                    </div>
-                    <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                        <label class="font-size-12">Total Order</label>
-                    </div>
-                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-right-0">
-                        <strong class="font-size-12"><?='Rp.'.number_format($item->total_order).'.-' ?></strong>
                     </div>
                 </div>
                 <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">

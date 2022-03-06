@@ -10,21 +10,19 @@ $this->params['breadcrumbs'][] = ['label' => 'Surat Perintah Kerja', 'url' => ['
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
 ?>
+<style>
+    .in-block { display: inline-block; }
+</style>
 <div class="spk-view">
     <p class="text-right">
         <?= Html::a('<i class="fontello icon-pencil"></i><span>Proses Produksi</span>', ['update', 'no_spk' => $model->no_spk], ['class' => 'btn btn-warning btn-flat btn-sm']) ?>
-        <?= Html::a('<i class="fontello icon-trash"></i><span>Delete</span>', ['delete', 'no_spk' => $model->no_spk], [
-            'class' => 'btn btn-danger btn-flat btn-sm',
-            'data' => [
-                'confirm' => 'Are you sure you want to delete this item?',
-                'method' => 'post',
-            ],
-        ]) ?>
     </p>
 
     <div class="form-container no-background" render="detail">
+        <!-- Detail Job --->
         <div class="col-lg-12 col-md-12 col-xs-12">
-            <h6>Detail Job</h6>
+            <h6 class="in-block">Detail Job</h6>
+            <?=$model->statusProduksi ?>
             <hr />
         </div>
         <div class="col-lg-6 col-md-6 col-xs-12">
@@ -132,5 +130,49 @@ $this->params['breadcrumbs'][] = $this->title;
                 </div>
             </div>
         </div>
+        <!-- /Detail Job --->
+        <div class="col-lg-12 col-md-12 col-xs-12 margin-top-30"></div>
+        <!-- Detail list proses -->
+        <div class="col-lg-12 col-md-12 col-xs-12">
+            <h6>Detail Proses</h6>
+            <hr />
+        </div>
+        <div class="col-lg-12 col-md-12 col-xs-12">
+            <table class="table table-bordered table-custom margin-top-10">
+                <thead>
+                    <tr>
+                        <th class="text-center">No.</th>
+                        <th class="text-center">Tgl. SPK</th>
+                        <th class="text-center">Proses</th>
+                        <th class="text-center">Uk. Potong</th>
+                        <th class="text-center">Mesin</th>
+                        <th class="text-center">Operator</th>
+                        <th class="text-center">QTY (LB)</th>
+                        <th class="text-center">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if(count($model->produksi) > 0): ?>
+                        <?php foreach($model->produksi as $index=>$val): ?>
+                            <tr>
+                                <td class="text-center"><?=$index+1 ?></td>
+                                <td class="text-center"><?=date('d-m-Y', strtotime($val->tgl_spk)) ?></td>
+                                <td><?=(isset($val->proses)) ? $val->proses->name : '' ?></td>
+                                <td class="text-center"><?=$val->uk_potong ?></td>
+                                <td><?=(isset($val->mesin)) ? $val->mesin->name : '' ?></td>
+                                <td><?=(isset($val->operator)) ? $val->operator->name : '' ?></td>
+                                <td class="text-right"><?=number_format($val->qty_proses) ?></td>
+                                <td class="text-center"><?=$val->statusProduksi ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <tr>
+                            <td class="text-danger" colspan="10">Data masih kosong.</td>
+                        </tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+        <!-- Detail list proses -->
     </div>
 </div>

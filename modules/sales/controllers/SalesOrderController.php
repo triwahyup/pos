@@ -1269,6 +1269,16 @@ class SalesOrderController extends Controller
                         }
                     }
                     // PROSES KURANG STOK UP PRODUKSI (%)
+                    $stock = 0;
+                    foreach($model->itemsMaterial as $val){
+                        $stockItem = $val->inventoryStock;
+                        if(isset($stockItem)){
+                            $stock = $stockItem->satuanTerkecil($val->item_code, [
+                                0=>$val->qty_order_1,
+                                1=>$val->qty_order_2
+                            ]);
+                        }
+                    }
                     if(!empty($model->up_produksi) || $model->up_produksi != 0){
                         $upproduksi = $stock * ($model->up_produksi/100);
                         if($stockItem->onhand > $upproduksi){

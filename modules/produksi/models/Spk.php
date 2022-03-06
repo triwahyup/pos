@@ -5,7 +5,6 @@ namespace app\modules\produksi\models;
 use Yii;
 use app\models\Profile;
 use app\modules\master\models\MasterMesin;
-use app\modules\master\models\MasterKode;
 use app\modules\master\models\MasterPerson;
 use app\modules\sales\models\SalesOrderItem;
 use app\modules\sales\models\SalesOrderPotong;
@@ -127,9 +126,16 @@ class Spk extends \yii\db\ActiveRecord
         return $this->hasMany(SalesOrderProses::className(), ['code' => 'no_so']);
     }
 
-    public function getTemps()
+    public function getProduksi()
     {
-        return $this->hasMany(SpkProduksi::className(), ['no_spk' => 'no_spk']);
+        return $this->hasMany(SpkProduksi::className(), ['no_spk' => 'no_spk'])
+            ->orderBy(['no_spk'=>SORT_ASC, 'created_at' => SORT_ASC]);
+    }
+
+    public function itemPotong($no_so, $potong_id)
+    {
+        $model = SalesOrderPotong::findOne(['code'=>$no_so, 'urutan'=>$potong_id]);
+        return $model;
     }
 
     public function setListColumn()
@@ -141,21 +147,12 @@ class Spk extends \yii\db\ActiveRecord
             ->where(['value' => \Yii::$app->params['TYPE_OPERATOR_PRODUKSI'], 'a.status'=>1])
             ->indexBy('user_id')
             ->column();
-        $model['so_potong'] = SalesOrderPotong::find()
-            ->select(['concat(panjang, "x", lebar) as name'])
-            ->indexBy('urutan')
-            ->column();
         $model['so_proses'] = SalesOrderProses::find()
             ->alias('a')
             ->select(['b.name'])
-            ->leftJoin('master_biaya_produksi b', 'b.code = a.biaya_code')
+            ->leftJoin('master_proses b', 'b.code = a.proses_code')
             ->where(['b.status'=>1])
-            ->indexBy('biaya_code')
-            ->column();
-        $model['type_mesin'] = MasterKode::find()
-            ->select(['name'])
-            ->where(['type'=>\Yii::$app->params['TYPE_MESIN'], 'status'=>1])
-            ->indexBy('code')
+            ->indexBy('proses_code')
             ->column();
         return $model;
     }
@@ -182,5 +179,29 @@ class Spk extends \yii\db\ActiveRecord
             $message = '<span class="text-label text-success">Done</span>';
         }
         return $message;
+    }
+
+    public function getUpProduksi()
+    {
+        $str = '<strong class="font-size-12">';
+        $str .= (!empty($this->up_produksi || $this->up_produksi != 0)) ? $this->up_produksi.'%' : 0;
+        $str .= '</strong>';
+        $str .= '<span class="text-muted font-size-12">';
+        
+        if(!empty($this->up_produksi) || $this->up_produksi != 0){
+            $stock = 0;
+            $stockItem = $this->itemMaterial->inventoryStock;
+            if(isset($stockItem)){
+                $stock = $stockItem->satuanTerkecil($this->itemMaterial->item_code, [
+                    0=>$this->itemMaterial->qty_order_1,
+                    1=>$this->itemMaterial->qty_order_2
+                ]);
+            }
+            $upproduksi = $stock * ($this->up_produksi/100);
+    
+            $str .= ' ('.number_format($upproduksi).' Lembar)';
+            $str .= '</span>';
+        }
+        return $str;
     }
 }

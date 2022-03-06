@@ -18,140 +18,176 @@ use yii\widgets\MaskedInput;
                 <h4>Proses Produksi</h4>
                 <hr />
             </div>
-            <div class="col-lg-6 col-md-6 col-xs-12">
-                <!-- Item Code -->
-                <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
-                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                        <label>Material:</label>
+            <!-- Detail Item -->
+            <div class="col-lg-12 col-md-12 col-xs-12">
+                <div class="col-lg-6 col-md-6 col-xs-12">
+                    <!-- Item Code -->
+                    <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
+                        <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
+                            <label>Material</label>
+                        </div>
+                        <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1 padding-right-0">:</div>
+                        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
+                            <span class="font-size-12">
+                                <strong>
+                                    <?=$model->itemMaterial->item_code .' - '. $model->itemMaterial->item->name ?>
+                                </strong>
+                            </span>
+                        </div>
+                        <div class="hidden">
+                            <?= $form->field($spkProduksi, 'no_spk')->hiddenInput(['value'=>$model->no_spk])->label(false) ?>
+                            <?= $form->field($spkProduksi, 'item_code')->hiddenInput(['value'=>$model->itemMaterial->item_code])->label(false) ?>
+                        </div>
                     </div>
-                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                        <span class="font-size-12">
-                            <strong>
-                                <?=$model->itemMaterial->item_code .' - '. $model->itemMaterial->item->name ?>
+                    <!-- QTY Order -->
+                    <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
+                        <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
+                            <label>Qty Order</label>
+                        </div>
+                        <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1 padding-right-0">:</div>
+                        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
+                            <strong class="font-size-12">
+                                <?php for($a=1;$a<3;$a++): ?>
+                                    <?=(!empty($model->itemMaterial['qty_order_'.$a])) ? number_format($model->itemMaterial['qty_order_'.$a]).' '.$model->itemMaterial['um_'.$a] : null ?>
+                                <?php endfor; ?>
                             </strong>
-                        </span>
-                        <?= $form->field($model, 'no_spk')->hiddenInput(['value'=>$model->no_spk])->label(false) ?>
-                        <?= $form->field($model, 'item_code')->hiddenInput(['value'=>$model->itemMaterial->item_code])->label(false) ?>
+                            <span class="text-muted font-size-12">
+                                <?='('.number_format($model->itemMaterial->inventoryStock->satuanTerkecil($model->itemMaterial->item_code, [0=>$model->itemMaterial->qty_order_1, 1=>$model->itemMaterial->qty_order_2])).' LEMBAR)' ?>
+                            </span>
+                        </div>
                     </div>
-                </div>
-                <div class="col-lg-12 col-md-12 col-xs-12 margin-bottom-5"></div>
-                <!-- Uk. Kertas -->
-                <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
-                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                        <label>Uk. Potong:</label>
-                    </div>
-                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                        <?= $form->field($spk_produksi, 'potong_id')->widget(Select2::classname(), [
-                                'data' => $so_potong,
-                                'options' => [
-                                    'placeholder' => 'Pilih UK. Potong',
-                                    'class' => 'select2',
-                                ],
-                            ])->label(false) ?>
-                    </div>
-                </div>
-                <!-- Tgl. SPK -->
-                <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
-                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                        <label>Tgl SPK:</label>
-                    </div>
-                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                        <?= $form->field($spk_produksi, 'tgl_spk')->widget(DatePicker::classname(), [
-                            'type' => DatePicker::TYPE_INPUT,
-                            'options' => [
-                                'placeholder' => 'dd-mm-yyyy',
-                                'value' => (!$spk_produksi->isNewRecord) ? date('d-m-Y', strtotime($spk_produksi->tgl_spk)) : date('d-m-Y'),
-                            ],
-                            'pluginOptions' => [
-                                'autoclose' => true,
-                                'format' => 'dd-mm-yyyy',
-                            ]])->label(false) ?>
-                    </div>
-                </div>
-                <!-- Proses Produksi -->
-                <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
-                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                        <label>Produksi:</label>
-                    </div>
-                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                        <?= $form->field($spk_produksi, 'proses_code')->widget(Select2::classname(), [
-                                'data' => $so_proses,
-                                'options' => [
-                                    'placeholder' => 'Pilih Proses Produksi',
-                                    'class' => 'select2',
-                                ],
-                            ])->label(false) ?>
+                    <!-- Up Produksi -->
+                    <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
+                        <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
+                            <label>Up Produksi</label>
+                        </div>
+                        <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1 padding-right-0">:</div>
+                        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
+                            <?=$model->upProduksi ?>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="col-lg-6 col-md-6 col-xs-12">
-                <!-- Type Mesin -->
-                <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
-                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                        <label>Tipe Mesin:</label>
-                    </div>
-                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                        <?= $form->field($spk_produksi, 'mesin_type')->widget(Select2::classname(), [
-                                'data' => $type_mesin,
+            <!-- /Detail Item -->
+            <!-- FORM -->
+            <div class="col-lg-12 col-md-12 col-xs-12 margin-bottom-15">
+                <hr class="hr-dashed" />
+            </div>
+            <div class="col-lg-12 col-md-12 col-xs-12">
+                <div class="col-lg-6 col-md-6 col-xs-12">    
+                    <!-- Tgl. SPK -->
+                    <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
+                        <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
+                            <label>Tgl SPK:</label>
+                        </div>
+                        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
+                            <?= $form->field($spkProduksi, 'tgl_spk')->widget(DatePicker::classname(), [
+                                'type' => DatePicker::TYPE_INPUT,
                                 'options' => [
-                                    'placeholder' => 'Pilih Type Mesin',
-                                    'class' => 'select2',
+                                    'placeholder' => 'dd-mm-yyyy',
+                                    'value' => (!$spkProduksi->isNewRecord) ? date('d-m-Y', strtotime($spkProduksi->tgl_spk)) : date('d-m-Y'),
                                 ],
-                            ])->label(false) ?>
+                                'pluginOptions' => [
+                                    'autoclose' => true,
+                                    'format' => 'dd-mm-yyyy',
+                                ]])->label(false) ?>
+                        </div>
+                    </div>
+                    <!-- Proses Produksi -->
+                    <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
+                        <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
+                            <label>Produksi:</label>
+                        </div>
+                        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
+                            <?= $form->field($spkProduksi, 'proses_code')->widget(Select2::classname(), [
+                                    'data' => $so_proses,
+                                    'options' => [
+                                        'placeholder' => 'Pilih Proses Produksi',
+                                        'class' => 'select2',
+                                    ],
+                                ])->label(false) ?>
+                        </div>
+                    </div>
+                    <!-- Mesin Name -->
+                    <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
+                        <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
+                            <label>Nama Mesin:</label>
+                        </div>
+                        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
+                            <?= $form->field($spkProduksi, 'mesin_code')->widget(Select2::classname(), [
+                                    'data' => [],
+                                    'options' => [
+                                        'placeholder' => 'Pilih Nama Mesin',
+                                        'class' => 'select2',
+                                    ],
+                                ])->label(false) ?>
+                        </div>
                     </div>
                 </div>
-                <!-- Mesin Name -->
-                <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
-                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                        <label>Nama Mesin:</label>
+                <div class="col-lg-6 col-md-6 col-xs-12">
+                    <!-- Operator Mesin -->
+                    <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
+                        <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
+                            <label>Operator Mesin:</label>
+                        </div>
+                        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
+                            <?= $form->field($spkProduksi, 'user_id')->widget(Select2::classname(), [
+                                    'data' => $operator,
+                                    'options' => [
+                                        'placeholder' => 'Pilih Operator Mesin',
+                                        'class' => 'select2',
+                                    ],
+                                ])->label(false) ?>
+                        </div>
                     </div>
-                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                        <?= $form->field($spk_produksi, 'mesin_code')->widget(Select2::classname(), [
-                                'data' => [],
-                                'options' => [
-                                    'placeholder' => 'Pilih Nama Mesin',
-                                    'class' => 'select2',
-                                ],
-                            ])->label(false) ?>
+                    <!-- Uk. Kertas -->
+                    <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
+                        <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
+                            <label>Uk. Potong:</label>
+                        </div>
+                        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
+                            <?= $form->field($spkProduksi, 'potong_id')->widget(Select2::classname(), [
+                                    'data' => [],
+                                    'options' => [
+                                        'placeholder' => 'Pilih UK. Potong',
+                                        'class' => 'select2',
+                                    ],
+                                ])->label(false) ?>
+                        </div>
                     </div>
-                </div>
-                <!-- Operator Mesin -->
-                <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
-                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                        <label>Operator Mesin:</label>
+                    <!-- QTY Proses -->
+                    <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
+                        <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
+                            <label>QTY Proses:</label>
+                        </div>
+                        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
+                            <?= $form->field($spkProduksi, 'qty_proses')->widget(MaskedInput::className(), [
+                                    'clientOptions' => [
+                                        'alias' => 'decimal',
+                                        'groupSeparator' => ',',
+                                        'autoGroup' => true
+                                    ],
+                                    'options' => [
+                                        'data-align' => 'text-right',
+                                    ]
+                                ])->label(false) ?>
+                        </div>
                     </div>
-                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                        <?= $form->field($spk_produksi, 'user_id')->widget(Select2::classname(), [
-                                'data' => $operator,
-                                'options' => [
-                                    'placeholder' => 'Pilih Operator Mesin',
-                                    'class' => 'select2',
-                                ],
-                            ])->label(false) ?>
-                    </div>
-                </div>
-                <!-- QTY Proses -->
-                <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
-                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                        <label>QTY Proses:</label>
-                    </div>
-                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                        <?= $form->field($spk_produksi, 'qty_proses')->widget(MaskedInput::className(), [
-                                'clientOptions' => [
-                                    'alias' => 'decimal',
-                                    'groupSeparator' => ',',
-                                    'autoGroup' => true
-                                ],
-                                'options' => [
-                                    'data-align' => 'text-right',
-                                ]
-                            ])->label(false) ?>
+                    <!-- Keterangan -->
+                    <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
+                        <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
+                            <label>Keterangan:</label>
+                        </div>
+                        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
+                            <?= $form->field($spkProduksi, 'keterangan')->textarea(['rows'=>3])->label(false) ?>
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="col-lg-12 col-md-12 col-xs-12 text-right">
                 <?= Html::submitButton('<i class="fontello icon-floppy"></i><span>Save</span>', ['class' => 'btn btn-success']) ?>
             </div>
+            <!-- /FORM -->
             <!-- Detail list proses -->
             <div class="col-lg-12 col-md-12 col-xs-12">
                 <h4>Detail Proses</h4>
@@ -167,14 +203,48 @@ use yii\widgets\MaskedInput;
                             <th class="text-center">Uk. Potong</th>
                             <th class="text-center">Mesin</th>
                             <th class="text-center">Operator</th>
-                            <th class="text-center">QTY</th>
+                            <th class="text-center">QTY (LB)</th>
+                            <th class="text-center">Status</th>
                             <th class="text-center">Action</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td class="text-danger" colspan="10">Data masih kosong.</td>
-                        </tr>
+                        <?php if(count($model->produksi) > 0): ?>
+                            <?php foreach($model->produksi as $index=>$val): ?>
+                                <tr>
+                                    <td class="text-center"><?=$index+1 ?></td>
+                                    <td class="text-center"><?=date('d-m-Y', strtotime($val->tgl_spk)) ?></td>
+                                    <td><?=(isset($val->proses)) ? $val->proses->name : '' ?></td>
+                                    <td class="text-center"><?=$val->uk_potong ?></td>
+                                    <td><?=(isset($val->mesin)) ? $val->mesin->name : '' ?></td>
+                                    <td><?=(isset($val->operator)) ? $val->operator->name : '' ?></td>
+                                    <td class="text-right"><?=number_format($val->qty_proses) ?></td>
+                                    <td class="text-center"><?=$val->statusProduksi ?></td>
+                                    <td class="text-center">
+                                        <button class="btn btn-primary btn-xs btn-sm" 
+                                            data-spk="<?=$val->no_spk ?>" 
+                                            data-item="<?=$val->item_code ?>" 
+                                            data-urutan="<?=$val->urutan ?>" 
+                                            data-potong="<?=$val->potong_id ?>" 
+                                            data-button="print">
+                                            <i class="fontello icon-print"></i>
+                                        </button>
+                                        <button class="btn btn-danger btn-xs btn-sm" 
+                                            data-spk="<?=$val->no_spk ?>" 
+                                            data-item="<?=$val->item_code ?>" 
+                                            data-urutan="<?=$val->urutan ?>" 
+                                            data-potong="<?=$val->potong_id ?>" 
+                                            data-button="delete">
+                                            <i class="fontello icon-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <tr>
+                                <td class="text-danger" colspan="10">Data masih kosong.</td>
+                            </tr>
+                        <?php endif; ?>
                     </tbody>
                 </table>
             </div>
@@ -182,15 +252,15 @@ use yii\widgets\MaskedInput;
         </div>
     <?php ActiveForm::end(); ?>
 </div>
-<div data-layout="print_layout"></div>
+<div class="hidden" data-layout="print_layout"></div>
 <script>
-function load_mesin(type)
+function load_mesin(code)
 {
     $.ajax({
         url: "<?=Url::to(['spk/list-mesin'])?>",
 		type: "GET",
         data: {
-            type: type
+            code: code
         },
         dataType: "text",
         error: function(xhr, status, error) {},
@@ -208,53 +278,118 @@ function load_mesin(type)
     });
 }
 
-function print_preview()
+function load_ukKertas(code, no_spk)
+{
+    $.ajax({
+        url: "<?=Url::to(['spk/list-uk_kertas'])?>",
+		type: "GET",
+        data: {
+            code: code,
+            no_spk: no_spk
+        },
+        dataType: "text",
+        error: function(xhr, status, error) {},
+		beforeSend: function (data){},
+        success: function(data){
+            var o = $.parseJSON(data);
+            $("#spkproduksi-potong_id").empty();
+            $.each(o, function(index, value){
+                var opt = new Option(value.name, value.potong_id, false, false);
+                $("#spkproduksi-potong_id").append(opt);
+            });
+            $("#spkproduksi-potong_id").val(null);
+        },
+        complete: function(){}
+    });
+}
+
+function print_preview(data)
 {
     $.ajax({
         url: "<?=Url::to(['spk/print-preview'])?>",
-		type: "POST",
-        data: $("#print").serialize(),
+		type: "GET",
+        data: {
+            no_spk: data.spk,
+            item_code: data.item,
+            urutan: data.urutan,
+            potong_id: data.potong
+        },
         dataType: "text",
         error: function(xhr, status, error) {},
 		beforeSend: function (){},
         success: function(data){
             var o = $.parseJSON(data);
-            if(o.success == true){
-                $("[data-layout=\"print_layout\"]").html(o.data)
-                var w = window.open(),
-                    newstr = $("[data-layout=\"print_layout\"]").html();
-                $.get("css/print.min.css", function(css){
-                    w.document.write("<html>");
-                        w.document.write("<head>");
-                            w.document.write("<style>");
-                                w.document.write(css);
-                            w.document.write("</style>");
-                        w.document.write("</head>");
-                        w.document.write("<body>");
-                            $(w.document.body).html(newstr);
-                        w.document.write("</body>");
-                    w.document.write("</html>");
-                });
-            }else{
-                notification.open("danger", o.message, timeOut);
-            }
+            $("[data-layout=\"print_layout\"]").html(o.data)
+            var w = window.open(),
+                newstr = $("[data-layout=\"print_layout\"]").html();
+            $.get("css/print.min.css", function(css){
+                w.document.write("<html>");
+                    w.document.write("<head>");
+                        w.document.write("<style>");
+                            w.document.write(css);
+                        w.document.write("</style>");
+                    w.document.write("</head>");
+                    w.document.write("<body>");
+                        $(w.document.body).html(newstr);
+                    w.document.write("</body>");
+                w.document.write("</html>");
+            });
         },
-        complete: function(){
+        complete: function(){}
+    });
+}
+
+function delete_data(data)
+{
+    data = data.split("#");
+    $.ajax({
+        url: "<?= Url::to(['spk/delete-proses']) ?>",
+        type: "GET",
+        data: {
+            no_spk: data[0],
+            item_code: data[1],
+            urutan: data[2],
+            potong_id: data[3]
+        },
+        dataType: "text",
+        error: function(xhr, status, error) {},
+        beforeSend: function(){
             popup.close();
-        }
+        },
+        success: function(data){
+            location.reload();
+        },
+        complete: function(){}
     });
 }
 
 var timeOut = 3000;
 $(document).ready(function(){
-    $("body").off("change","#spkproduksi-mesin_type").on("change","#spkproduksi-mesin_type", function(e){
+    $("body").off("change","#spkproduksi-proses_code").on("change","#spkproduksi-proses_code", function(e){
         e.preventDefault();
         load_mesin($(this).val());
+        var noSPK = $("#spkproduksi-no_spk").val();
+        load_ukKertas($(this).val(), noSPK);
     });
 
     $("body").off("click","[data-button=\"print\"]").on("click","[data-button=\"print\"]", function(e){
         e.preventDefault();
-        print_preview();
+        var data = $(this).data();
+        print_preview(data);
+    });
+
+    $("body").off("click","[data-button=\"delete\"]").on("click","[data-button=\"delete\"]", function(e){
+        e.preventDefault();
+        var data = $(this).data();
+        popup.open("confirm", {
+			message: "Apakah anda yakin ingin menghapus data ini ?",
+			selector: "delete",
+			target: data.spk+"#"+data.item+"#"+data.urutan+"#"+data.potong
+		});
+    });
+    $("body").off("click","#delete").on("click","#delete", function(e){
+        e.preventDefault();
+        delete_data($(this).attr("data-target"));
     });
 });
 </script>

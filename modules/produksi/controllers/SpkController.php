@@ -5,6 +5,7 @@ namespace app\modules\produksi\controllers;
 use app\models\Logs;
 use app\models\User;
 use app\modules\master\models\MasterMesin;
+use app\modules\master\models\MasterProses;
 use app\modules\produksi\models\Spk;
 use app\modules\produksi\models\SpkSearch;
 use app\modules\produksi\models\SpkProduksi;
@@ -33,7 +34,7 @@ class SpkController extends Controller
                     'rules' => [
                         [
                             'actions' => [
-                                'index', 'view', 'update', 'delete', 'list-mesin', 'print-preview',
+                                'index', 'view', 'update', 'delete-proses', 'list-mesin', 'list-uk_kertas', 'print-preview',
                             ],
                             'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('surat-perintah-kerja')),
                             'roles' => ['@'],
@@ -91,17 +92,76 @@ class SpkController extends Controller
         $message = '';
         $model = $this->findModel($no_spk);
         $column = $model->setListColumn();
-        $spk_produksi = new SpkProduksi();
+        $spkProduksi = new SpkProduksi();
         if($this->request->isPost){
-            if($model->load($this->request->post()) && $spk_produksi->load($this->request->post())){
+            if($spkProduksi->load($this->request->post())){
                 $connection = \Yii::$app->db;
 			    $transaction = $connection->beginTransaction();
                 try{
-                    // SO ITEM
+                    $spkProduksi->attributes = $spkProduksi->attributes;
+                    // KONVERSI STOCK ORDER
+                    $stock = 0;
                     $soItem = $model->itemMaterial;
-                    print_r($soItem);die;
-                    // SO POTONG
-                    $soPotong = SalesOrderPotong::findOne(['code'=>$model->no_so, 'urutan'=>$spk_produksi->potong_id]);
+                    $stockItem = $soItem->inventoryStock;
+                    if(isset($stockItem)){
+                        $stock = $stockItem->satuanTerkecil($soItem->item_code, [
+                            0=>$soItem->qty_order_1,
+                            1=>$soItem->qty_order_2
+                        ]);
+                    }
+                    if(!empty($model->up_produksi) || $model->up_produksi != 0){
+                        $stock += $stock * ($model->up_produksi/100);
+                    }
+                    // END KONVERSI STOCK ORDER
+                    
+                    $m_proses = $spkProduksi->proses;
+                    if(strpos($m_proses->name, 'Potong') !== false){
+                        $spkProduksi->uk_potong = $soItem->item->panjang.'x'.$soItem->item->lebar;
+                    }else{
+                        $soPotong = $model->itemPotong($model->no_so, $spkProduksi->potong_id);
+                        $spkProduksi->uk_potong = $soPotong->panjang.'x'.$soPotong->lebar;
+                    }
+
+                    $qty_proses = $spkProduksi->qty_proses = str_replace(',', '', $spkProduksi->qty_proses);
+                    if($stock >= $qty_proses){
+                        $totalQTY = $spkProduksi->qtyProses + $qty_proses;
+                        $sisaProses = $stock - $spkProduksi->qtyProses;
+                        if($stock >= $totalQTY){
+                            $spkProduksi->gram = $soItem->item->gram;
+                            $spkProduksi->proses_type = $m_proses->type;
+                            $spkProduksi->mesin_type = $m_proses->mesin_type;
+                            $spkProduksi->urutan = $spkProduksi->count +1;
+                            $spkProduksi->status_produksi =1;
+                            if(!$spkProduksi->save()){
+                                $success = false;
+                                $message = (count($spkProduksi->errors) > 0) ? 'ERROR CREATE SPK PRODUKSI: ' : '';
+                                foreach($spkProduksi->errors as $error => $value){
+                                    $message .= strtoupper($value[0].', ');
+                                }
+                                $message = substr($message, 0, -2);
+                            }
+                        }else{
+                            $success = false;
+                            $message = 'Sisa Qty yang belum di proses '.$sisaProses;
+                        }
+                    }else{
+                        $success = false;
+                        $message = 'Qty tidak boleh lebih besar dari Order.';
+                    }
+
+                    if($success){
+                        $message = '['.$model->no_spk.'] SUCCESS CREATE SPK.';
+                        $transaction->commit();
+                        $logs =	[
+                            'type' => Logs::TYPE_USER,
+                            'description' => $message,
+                        ];
+                        Logs::addLog($logs);
+                        \Yii::$app->session->setFlash('success', $message);
+                        return $this->redirect(['update', 'no_spk' => $model->no_spk]);
+                    }else{
+                        $transaction->rollBack();
+                    }
                 }catch(\Exception $e){
                     $success = false;
                     $message = $e->getMessage();
@@ -118,65 +178,43 @@ class SpkController extends Controller
 
         return $this->render('update', [
             'model' => $model,
-            'spk_produksi' => $spk_produksi,
+            'spkProduksi' => $spkProduksi,
             'operator' => $column['operator'],
-            'so_potong' => $column['so_potong'],
             'so_proses' => $column['so_proses'],
-            'type_mesin' => $column['type_mesin'],
         ]);
     }
 
-    /**
-     * Deletes an existing Spk model.
-     * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param string $no_spk No Spk
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    public function actionDelete($no_spk)
+    public function actionDeleteProses($no_spk, $item_code, $urutan, $potong_id)
     {
         $success = true;
-		$message = '';
-        $model = $this->findModel($no_spk);
-        if(isset($model)){
-            $connection = \Yii::$app->db;
-			$transaction = $connection->beginTransaction();
-            try{
-                if(count($model->temps) > 0){
-                    \Yii::$app->session->setFlash('error', 'Dokumen ini sudah di Proses Produksi.');
-                    return $this->redirect(['index']);
-                }else{
-                    $model->status = 0;
-                    if(!$model->save()){
+        $message = '';
+        $model = SpkProduksi::findOne(['no_spk'=>$no_spk, 'item_code'=>$item_code, 'urutan'=>$urutan, 'potong_id'=>$potong_id]);
+        if($model->status_produksi == 1){
+            if($model->delete()){
+                foreach($model->alls as $index=>$val){
+                    $val->urutan = $index +1;
+                    if(!$val->save()){
                         $success = false;
-                        $message = (count($model->errors) > 0) ? 'ERROR DELETE SPK: ' : '';
-                        foreach($model->errors as $error => $value){
-                            $message .= $value[0].', ';
+                        foreach($val->errors as $error => $value){
+                            $message .= strtoupper($value[0].', ');
                         }
                         $message = substr($message, 0, -2);
                     }
                 }
-                if($success){
-                    $transaction->commit();
-                    $message = '['.$model->no_spk.'] SUCCESS DELETE SPK.';
-                    \Yii::$app->session->setFlash('success', $message);
-                }else{
-                    $transaction->rollBack();
-                    \Yii::$app->session->setFlash('error', $message);
+                $message = 'DELETE DETAIL PROSES PRODUKSI SUCCESSFULLY';
+            }else{
+                $success = false;
+                foreach($model->errors as $error => $value){
+                    $message = $value[0].', ';
                 }
-            }catch(\Exception $e){
-				$success = false;
-				$message = $e->getMessage();
-				$transaction->rollBack();
-                \Yii::$app->session->setFlash('error', $message);
+                $message = substr($message, 0, -2);
             }
-            $logs =	[
-                'type' => Logs::TYPE_USER,
-                'description' => $message,
-            ];
-            Logs::addLog($logs);
+        }else{
+            $success = false;
+            $message = 'Data ini tidak bisa dihapus. Proses sedang / sudah berjalan.';
         }
-        return $this->redirect(['index']);
+        \Yii::$app->session->setFlash(($success) ? 'success' : 'danger', $message);
+        return $this->redirect(['update', 'no_spk' => $model->no_spk]);
     }
 
     /**
@@ -195,32 +233,64 @@ class SpkController extends Controller
         throw new NotFoundHttpException('The requested page does not exist.');
     }
 
-    public function actionListMesin($type)
+    public function actionListMesin($code)
     {
-        $model = MasterMesin::find()
-            ->select(['code', 'name'])
-            ->where(['type_code'=>$type, 'status'=>1])
-            ->asArray()
-            ->all();
+        $m_proses = MasterProses::findOne(['code'=>$code]);
+        if(isset($m_proses)){
+            $model = MasterMesin::find()
+                ->select(['code', 'name'])
+                ->where(['type_code'=>$m_proses->mesin_type, 'status'=>1])
+                ->asArray()
+                ->all();
+        }
         return json_encode($model);
     }
 
-    public function actionPrintPreview()
+    public function actionListUk_kertas($code, $no_spk)
     {
-        $request = \Yii::$app->request;
-        $success = true;
-        $message = '';
-        $data = [];
-        if($request->isPost){
-            $model = $this->findModel($request->post('no_spk'));
-            $data = $this->renderPartial('_preview', [
-                'model'=>$model,
-                'layouts'=>$request->post('spk_print'),
-            ]);
-        }else{
-            $success = false;
-            $message = 'The requested data does not exist.';
+        $model = $this->findModel($no_spk);
+        if(isset($model)){
+            $m_proses = MasterProses::findOne(['code'=>$code]);
+            $data = [];
+            if(strpos($m_proses->name, 'Potong') !== false){
+                $soItem = $model->itemMaterial;
+                $data[0]['name'] = $soItem->item->panjang.'x'.$soItem->item->lebar;
+                $data[0]['potong_id'] = 9;
+            }else{
+                $data = SalesOrderPotong::find()
+                    ->select(['concat(panjang, "x", lebar) as name', 'urutan as potong_id'])
+                    ->asArray()
+                    ->all();
+            }
         }
-        return json_encode(['success'=>$success, 'message'=>$message, 'data'=>$data]);
+        return json_encode($data);
+    }
+
+    public function actionPrintPreview($no_spk, $item_code, $urutan, $potong_id)
+    {
+        $model = $this->findModel($no_spk);
+        $spkProduksi = SpkProduksi::findOne(['no_spk'=>$no_spk, 'item_code'=>$item_code, 'urutan'=>$urutan, 'potong_id'=>$potong_id]);
+        $m_proses = MasterProses::findOne(['code'=>$spkProduksi->proses_code]);
+        $header = '';
+        $type = '';
+        if(strpos($m_proses->name, 'Cetak') !== false){
+            $header = 'SPK. CETAK';
+            $type = 'cetak';
+        }
+        if(strpos($m_proses->name, 'Potong') !== false){
+            $header = 'SPK. POTONG';
+            $type = 'potong';
+        }
+        if(strpos($m_proses->name, 'Pond') !== false){
+            $header = 'SPK. POND';
+            $type = 'pond';
+        }
+        $data = $this->renderPartial('_preview', [
+            'model'=>$model,
+            'header'=>$header,
+            'spkProduksi'=>$spkProduksi,
+            'type'=>$type
+        ]);
+        return json_encode(['data'=>$data]);
     }
 }
