@@ -123,7 +123,7 @@ class SpkController extends Controller
                         $spkProduksi->uk_potong = $soPotong->panjang.'x'.$soPotong->lebar;
                     }
 
-                    $qty_proses = $spkProduksi->qty_proses = str_replace(',', '', $spkProduksi->qty_proses);
+                    $qty_proses = str_replace(',', '', $spkProduksi->qty_proses);
                     if($stock >= $qty_proses){
                         $totalQTY = $spkProduksi->qtyProses + $qty_proses;
                         $sisaProses = $stock - $spkProduksi->qtyProses;
@@ -187,11 +187,17 @@ class SpkController extends Controller
 
     public function actionGetProses($no_spk, $item_code, $urutan, $potong_id)
     {
+        $success = true;
+        $message = '';
         $model = SpkProduksi::find()
             ->where(['no_spk'=>$no_spk, 'item_code'=>$item_code, 'urutan'=>$urutan, 'potong_id'=>$potong_id])
             ->asArray()
             ->one();
-        return json_encode($model);
+        if($model['status_produksi'] == 3 || $model['status_produksi'] == 4){
+            $success = false;
+            $message = 'Tidak dapat melakukan perubahan pada data ini karena data ini sudah selesai di proses.';
+        }
+        return json_encode(['success'=>$success, 'message'=>$message, 'model'=>$model]);
     }
 
     public function actionChangeProses()
@@ -203,6 +209,17 @@ class SpkController extends Controller
             $data = $request->post('SpkProduksi');
             $model = $this->findProduksi($data['no_spk'], $data['item_code'], $data['urutan'], $data['potong_id']);
             $model->attributes = (array)$data;
+            $qty_hasil = str_replace(',', '', $model->qty_hasil);
+            if(!empty($qty_hasil)){
+                if($qty_hasil <= $model->qty_proses){
+                    $model->qty_rusak = $model->qty_proses - $qty_hasil;
+                    // 3=>DONE; 4=>RUSAK SEBAGIAN;
+                    $model->status_produksi = ($model->qty_rusak !=0 || $model->qty_rusak != null) ? 4 : 3;
+                }else{
+                    $success = false;
+                    $message = 'Qty hasil tidak boleh lebih dari qty proses.';
+                }
+            }
             if($model->save()){
                 $message = '['.$model->no_spk.'] SUCCESS UPDATE SPK.';
             }else{
@@ -250,7 +267,11 @@ class SpkController extends Controller
             }
         }else{
             $success = false;
-            $message = 'Data ini tidak bisa dihapus. Proses sedang / sudah berjalan.';
+            if($model->status_produksi == 2){
+                $message = 'Data ini tidak bisa dihapus, proses produksi sedang berjalan.';
+            }else if($model->status_produksi == 3 || $model->status_produksi == 4){
+                $message = 'Data ini tidak bisa dihapus, data sudah selesai di proses.';
+            }
         }
         \Yii::$app->session->setFlash(($success) ? 'success' : 'danger', $message);
         return $this->redirect(['update', 'no_spk' => $model->no_spk]);
@@ -275,6 +296,10 @@ class SpkController extends Controller
                     }
                 }else if($type == \Yii::$app->params['IN_PROGRESS']){
                     $model->status_produksi=2;
+                    if(!count($model->produksiOnStarts) > 0){
+                        $success = false;
+                        $message = 'Data yang akan di proses produksi masih kosong.';
+                    }
                 }
 
                 if($model->save()){
@@ -330,7 +355,7 @@ class SpkController extends Controller
         if(!$success){
             \Yii::$app->session->setFlash('error', $message);
         }
-        return $this->redirect(['view', 'no_spk' => $model->no_spk]);
+        return $this->redirect(['update', 'no_spk' => $model->no_spk]);
     }
 
     /**

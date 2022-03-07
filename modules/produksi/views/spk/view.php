@@ -147,9 +147,9 @@ $this->params['breadcrumbs'][] = $this->title;
                         <th class="text-center">Uk. Potong</th>
                         <th class="text-center">Mesin</th>
                         <th class="text-center">Operator</th>
-                        <th class="text-center">Qty Proses (LB)</th>
-                        <th class="text-center">Qty Hasil (LB)</th>
-                        <th class="text-center">Qty Rusak (LB)</th>
+                        <th class="text-center">Qty Proses</th>
+                        <th class="text-center">Qty Hasil</th>
+                        <th class="text-center">Qty Rusak</th>
                         <th class="text-center">Status</th>
                     </tr>
                 </thead>
@@ -163,9 +163,9 @@ $this->params['breadcrumbs'][] = $this->title;
                                 <td class="text-center"><?=$val->uk_potong ?></td>
                                 <td><?=(isset($val->mesin)) ? $val->mesin->name : '' ?></td>
                                 <td><?=(isset($val->operator)) ? $val->operator->name : '' ?></td>
-                                <td class="text-right"><?=number_format($val->qty_proses) ?></td>
-                                <td class="text-right"><?=number_format($val->qty_hasil) ?></td>
-                                <td class="text-right"><?=number_format($val->qty_rusak) ?></td>
+                                <td class="text-right"><?=number_format($val->qty_proses).' LB' ?></td>
+                                <td class="text-right"><?=number_format($val->qty_hasil).' LB' ?></td>
+                                <td class="text-right"><?=number_format($val->qty_rusak).' LB' ?></td>
                                 <td class="text-center"><?=$val->statusProduksi ?></td>
                             </tr>
                         <?php endforeach; ?>

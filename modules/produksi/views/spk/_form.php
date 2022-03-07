@@ -234,9 +234,9 @@ use yii\widgets\MaskedInput;
                             <th class="text-center">Uk. Potong</th>
                             <th class="text-center">Mesin</th>
                             <th class="text-center">Operator</th>
-                            <th class="text-center">Qty Proses (LB)</th>
-                            <th class="text-center">Qty Hasil (LB)</th>
-                            <th class="text-center">Qty Rusak (LB)</th>
+                            <th class="text-center">Qty Proses</th>
+                            <th class="text-center">Qty Hasil</th>
+                            <th class="text-center">Qty Rusak</th>
                             <th class="text-center">Status</th>
                             <th class="text-center">Action</th>
                         </tr>
@@ -251,9 +251,9 @@ use yii\widgets\MaskedInput;
                                     <td class="text-center"><?=$val->uk_potong ?></td>
                                     <td><?=(isset($val->mesin)) ? $val->mesin->name : '' ?></td>
                                     <td><?=(isset($val->operator)) ? $val->operator->name : '' ?></td>
-                                    <td class="text-right"><?=number_format($val->qty_proses) ?></td>
-                                    <td class="text-right"><?=number_format($val->qty_hasil) ?></td>
-                                    <td class="text-right"><?=number_format($val->qty_rusak) ?></td>
+                                    <td class="text-right"><?=number_format($val->qty_proses).' LB' ?></td>
+                                    <td class="text-right"><?=number_format($val->qty_hasil).' LB' ?></td>
+                                    <td class="text-right"><?=number_format($val->qty_rusak).' LB' ?></td>
                                     <td class="text-center"><?=$val->statusProduksi ?></td>
                                     <td class="text-center">
                                         <button class="btn btn-primary btn-xs btn-sm" 
@@ -406,31 +406,38 @@ function get_proses(data)
         },
         dataType: "text",
         error: function(xhr, status, error) {},
-		beforeSend: function (){
-            $("[data-button=\"change\"]").removeClass("hidden");
-            $("[data-button=\"cancel\"]").removeClass("hidden");
-            $("button[type=\"submit\"]").removeClass("hidden").addClass("hidden");
-        },
+		beforeSend: function (){},
         success: function(data){
-            var o = $.parseJSON(data),
-                mesin_code = '',
-                potong_id = '';
-            $.each(o, function(index, value){
-                $("#spkproduksi-"+index).val(value).trigger("change");
-                if(index == 'mesin_code')
-                    mesin_code = value;
-                if(index == 'potong_id')
-                    potong_id = value;
-            });
-            setTimeout(function(){
-                $("#spkproduksi-mesin_code").val(mesin_code).trigger("change");
-                $("#spkproduksi-potong_id").val(potong_id).trigger("change");
-            }, 600);
+            var o = $.parseJSON(data);
+            if(o.success == true){
+                $("[data-button=\"change\"]").removeClass("hidden");
+                $("[data-button=\"cancel\"]").removeClass("hidden");
+                $("button[type=\"submit\"]").removeClass("hidden").addClass("hidden");
+                $("button:not([data-button=\"change\"]):not([data-button=\"cancel\"])").prop("disabled", true);
+                $("#spkproduksi-qty_proses").attr("readonly", true);
+                
+                var mesin_code = '',
+                    potong_id = '',
+                    qty_proses = 0;
+                $.each(o.model, function(index, value){
+                    $("#spkproduksi-"+index).val(value).trigger("change");
+                    if(index == 'mesin_code')
+                        mesin_code = value;
+                    if(index == 'potong_id')
+                        potong_id = value;
+                    if(index == 'qty_proses')
+                        qty_proses = value;
+                });
+                setTimeout(function(){
+                    $("#spkproduksi-mesin_code").val(mesin_code).trigger("change");
+                    $("#spkproduksi-potong_id").val(potong_id).trigger("change");
+                }, 600);
+                $("#spkproduksi-qty_hasil").val(qty_proses);
+            }else{
+                notification.open("danger", o.message, timeOut);
+            }
         },
-        complete: function(){
-            $("button:not([data-button=\"change\"]):not([data-button=\"cancel\"])").prop("disabled", true);
-            $("#spkproduksi-qty_proses").attr("readonly", true);
-        }
+        complete: function(){}
     });
 }
 

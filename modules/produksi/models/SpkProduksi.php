@@ -94,7 +94,11 @@ class SpkProduksi extends \yii\db\ActiveRecord
             ->all();
         $total = 0;
         foreach($models as $val){
-            $total += $val->qty_proses;
+            if($val->qty_hasil != 0 || $val->qty_hasil != null){
+                $total += $val->qty_hasil;
+            }else{
+                $total += $val->qty_proses;
+            }
         }
         return $total;
     }
@@ -133,6 +137,8 @@ class SpkProduksi extends \yii\db\ActiveRecord
             $message = '<span class="text-label text-primary">In Progres</span>';
         }else if($this->status_produksi==3){
             $message = '<span class="text-label text-success">Done</span>';
+        }else if($this->status_produksi==4){
+            $message = '<span class="text-label text-danger">Rusak Sebagian</span>';
         }
         return $message;
     }
