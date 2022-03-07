@@ -126,9 +126,23 @@ class Spk extends \yii\db\ActiveRecord
         return $this->hasMany(SalesOrderProses::className(), ['code' => 'no_so']);
     }
 
-    public function getProduksi()
+    public function getProduksiInAlls()
     {
         return $this->hasMany(SpkProduksi::className(), ['no_spk' => 'no_spk'])
+            ->orderBy(['no_spk'=>SORT_ASC, 'created_at' => SORT_ASC]);
+    }
+
+    public $onStart = 1;
+    public function getProduksiOnStarts()
+    {
+        return $this->hasMany(SpkProduksi::className(), ['no_spk' => 'no_spk', 'status_produksi' => 'onStart'])
+            ->orderBy(['no_spk'=>SORT_ASC, 'created_at' => SORT_ASC]);
+    }
+
+    public $inProgress = 2;
+    public function getProduksiInProgress()
+    {
+        return $this->hasMany(SpkProduksi::className(), ['no_spk' => 'no_spk', 'status_produksi' => 'inProgress'])
             ->orderBy(['no_spk'=>SORT_ASC, 'created_at' => SORT_ASC]);
     }
 
@@ -171,11 +185,11 @@ class Spk extends \yii\db\ActiveRecord
     public function getStatusProduksi()
     {
         $message = '';
-        if($this->status==1){
+        if($this->status_produksi==1){
             $message = '<span class="text-label text-default">Belum Proses</span>';
-        }else if($this->status==2){
+        }else if($this->status_produksi==2){
             $message = '<span class="text-label text-primary">In Progres</span>';
-        }else if($this->status==3){
+        }else if($this->status_produksi==3){
             $message = '<span class="text-label text-success">Done</span>';
         }
         return $message;

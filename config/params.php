@@ -24,6 +24,11 @@ $data = [
     'TYPE_OPERATOR_PRODUKSI' => 'OPERATOR PRODUKSI',
     // TYPE JASA
     'TYPE_PRODUK_JASA' => '021',
+    // TYPE STATUS
+    'IN_PROGRESS' => 'IN_PROGRESS',
+    'IN_REVIEW' => 'IN_REVIEW',
+    'DONE' => 'DONE',
+    'ON_START' => 'ON_START',
 
     'URL' => ((getenv('APP_ENV') != 'production') ? (getenv('APP_ENV') != 'beta') ? 'http://localhost/pos/web/index.php?r=' : '' : ''),
 ];

@@ -34,7 +34,8 @@ class SpkController extends Controller
                     'rules' => [
                         [
                             'actions' => [
-                                'index', 'view', 'update', 'delete-proses', 'list-mesin', 'list-uk_kertas', 'print-preview',
+                                'index', 'view', 'update', 'list-mesin', 'list-uk_kertas', 'print-preview',
+                                'get-proses', 'change-proses', 'delete-proses', 'cancel-proses', 'post-proses',
                             ],
                             'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('surat-perintah-kerja')),
                             'roles' => ['@'],
@@ -184,11 +185,49 @@ class SpkController extends Controller
         ]);
     }
 
+    public function actionGetProses($no_spk, $item_code, $urutan, $potong_id)
+    {
+        $model = SpkProduksi::find()
+            ->where(['no_spk'=>$no_spk, 'item_code'=>$item_code, 'urutan'=>$urutan, 'potong_id'=>$potong_id])
+            ->asArray()
+            ->one();
+        return json_encode($model);
+    }
+
+    public function actionChangeProses()
+    {
+        $success = true;
+        $message = '';
+        $request = \Yii::$app->request;
+        if($request->isPost){
+            $data = $request->post('SpkProduksi');
+            $model = $this->findProduksi($data['no_spk'], $data['item_code'], $data['urutan'], $data['potong_id']);
+            $model->attributes = (array)$data;
+            if($model->save()){
+                $message = '['.$model->no_spk.'] SUCCESS UPDATE SPK.';
+            }else{
+                $success = false;
+                $message = (count($model->errors) > 0) ? 'ERROR UPDATE SPK PRODUKSI: ' : '';
+                foreach($model->errors as $error => $value){
+                    $message .= strtoupper($value[0].', ');
+                }
+                $message = substr($message, 0, -2);
+            }
+        }
+        \Yii::$app->session->setFlash(($success) ? 'success' : 'danger', $message);
+        return $this->redirect(['update', 'no_spk' => $model->no_spk]);
+    }
+
+    public function actionCancelProses($no_spk)
+    {
+        return $this->redirect(['update', 'no_spk' => $no_spk]);
+    }
+
     public function actionDeleteProses($no_spk, $item_code, $urutan, $potong_id)
     {
         $success = true;
         $message = '';
-        $model = SpkProduksi::findOne(['no_spk'=>$no_spk, 'item_code'=>$item_code, 'urutan'=>$urutan, 'potong_id'=>$potong_id]);
+        $model = $this->findProduksi($no_spk, $item_code, $urutan, $potong_id);
         if($model->status_produksi == 1){
             if($model->delete()){
                 foreach($model->alls as $index=>$val){
@@ -217,6 +256,83 @@ class SpkController extends Controller
         return $this->redirect(['update', 'no_spk' => $model->no_spk]);
     }
 
+    public function actionPostProses($no_spk, $type)
+    {
+        $success = true;
+		$message = '';
+        $model = $this->findModel($no_spk);
+        if(isset($model)){
+            $connection = \Yii::$app->db;
+            $transaction = $connection->beginTransaction();
+            try{
+                if($type == \Yii::$app->params['ON_START']){
+                    $model->status_produksi=1;
+                    foreach($model->produksiInProgress as $val){
+                        if(empty($val->qty_hasil) || $val->qty_hasil == null){
+                            $success = false;
+                            $message = 'Qty hasil masih ada yang belum di input.';
+                        }
+                    }
+                }else if($type == \Yii::$app->params['IN_PROGRESS']){
+                    $model->status_produksi=2;
+                }
+
+                if($model->save()){
+                    if($type == \Yii::$app->params['IN_PROGRESS']){
+                        foreach($model->produksiOnStarts as $val){
+                            $val->status_produksi = 2;
+                            if(!$val->save()){
+                                $success = false;
+                                $message = (count($model->errors) > 0) ? 'ERROR UPDATE STATUS PRODUKSI SPK_PRODUKSI: ' : '';
+                                foreach($model->errors as $error => $value){
+                                    $message .= strtoupper($value[0].', ');
+                                }
+                                $message = substr($message, 0, -2);
+                            }
+                        }
+                    }
+                }else{
+                    $success = false;
+                    $message = (count($model->errors) > 0) ? 'ERROR UPDATE STATUS PRODUKSI SPK: ' : '';
+                    foreach($model->errors as $error => $value){
+                        $message .= strtoupper($value[0].', ');
+                    }
+                    $message = substr($message, 0, -2);
+                }
+
+                if($success){
+                    $message = '['.$model->no_spk.'] SUCCESS UPDATE STATUS PRODUKSI SPK.';
+                    $transaction->commit();
+                    $logs =	[
+                        'type' => Logs::TYPE_USER,
+                        'description' => $message,
+                    ];
+                    Logs::addLog($logs);
+                    \Yii::$app->session->setFlash('success', $message);
+                    return $this->redirect(['view', 'no_spk' => $model->no_spk]);
+                }else{
+                    $transaction->rollBack();
+                }
+            }catch(Exception $e){
+                $success = false;
+                $message = $e->getMessage();
+                $transaction->rollBack();
+            }
+            $logs =	[
+                'type' => Logs::TYPE_USER,
+                'description' => $message,
+            ];
+            Logs::addLog($logs);
+        }else{
+            $success = false;
+            $message = 'Data SPK not valid.';
+        }
+        if(!$success){
+            \Yii::$app->session->setFlash('error', $message);
+        }
+        return $this->redirect(['view', 'no_spk' => $model->no_spk]);
+    }
+
     /**
      * Finds the Spk model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
@@ -230,6 +346,15 @@ class SpkController extends Controller
             return $model;
         }
 
+        throw new NotFoundHttpException('The requested page does not exist.');
+    }
+
+    protected function findProduksi($no_spk, $item_code, $urutan, $potong_id)
+    {
+        $model = SpkProduksi::findOne(['no_spk'=>$no_spk, 'item_code'=>$item_code, 'urutan'=>$urutan, 'potong_id'=>$potong_id]);
+        if($model !=null){
+            return $model;
+        }
         throw new NotFoundHttpException('The requested page does not exist.');
     }
 
@@ -269,21 +394,25 @@ class SpkController extends Controller
     public function actionPrintPreview($no_spk, $item_code, $urutan, $potong_id)
     {
         $model = $this->findModel($no_spk);
-        $spkProduksi = SpkProduksi::findOne(['no_spk'=>$no_spk, 'item_code'=>$item_code, 'urutan'=>$urutan, 'potong_id'=>$potong_id]);
+        $spkProduksi = $this->findProduksi($no_spk, $item_code, $urutan, $potong_id);
         $m_proses = MasterProses::findOne(['code'=>$spkProduksi->proses_code]);
         $header = '';
         $type = '';
         if(strpos($m_proses->name, 'Cetak') !== false){
             $header = 'SPK. CETAK';
             $type = 'cetak';
-        }
-        if(strpos($m_proses->name, 'Potong') !== false){
+        }else if(strpos($m_proses->name, 'Potong') !== false){
             $header = 'SPK. POTONG';
             $type = 'potong';
-        }
-        if(strpos($m_proses->name, 'Pond') !== false){
+        }else if(strpos($m_proses->name, 'Pond') !== false){
             $header = 'SPK. POND';
             $type = 'pond';
+        }else if(strpos($m_proses->name, 'Pretel') !== false){
+            $header = 'SPK. Pretel';
+            $type = 'pretel';
+        }else if(strpos($m_proses->name, 'Lem') !== false){
+            $header = 'SPK. LEM';
+            $type = 'lem';
         }
         $data = $this->renderPartial('_preview', [
             'model'=>$model,

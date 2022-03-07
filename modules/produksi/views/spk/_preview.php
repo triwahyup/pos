@@ -43,6 +43,18 @@
                         <th class="text-center" width="20">:</th>
                         <td class="text-left"><?=$model->name ?></td>
                     </tr>
+                    <?php if($type == 'pond'): ?>
+                        <tr>
+                            <th class="text-left" width="80">Lbr /Pond</th>
+                            <th class="text-center" width="20">:</th>
+                            <td class="text-left">1 Lbr per Pond</td>
+                        </tr>
+                        <tr>
+                            <th class="text-left" width="80">Gandeng</th>
+                            <th class="text-center" width="20">:</th>
+                            <td class="text-left"><?=$model->itemMaterial->total_potong ?></td>
+                        </tr>
+                    <?php endif; ?>
                     <?php if($type == 'potong'): ?>
                         <tr>
                             <th class="text-left" width="80">Uk. Potong</th>

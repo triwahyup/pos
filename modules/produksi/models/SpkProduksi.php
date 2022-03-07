@@ -127,11 +127,11 @@ class SpkProduksi extends \yii\db\ActiveRecord
     public function getStatusProduksi()
     {
         $message = '';
-        if($this->status==1){
-            $message = '<span class="text-label text-default">Belum Proses</span>';
-        }else if($this->status==2){
+        if($this->status_produksi==1){
+            $message = '<span class="text-label text-default">On Start</span>';
+        }else if($this->status_produksi==2){
             $message = '<span class="text-label text-primary">In Progres</span>';
-        }else if($this->status==3){
+        }else if($this->status_produksi==3){
             $message = '<span class="text-label text-success">Done</span>';
         }
         return $message;
