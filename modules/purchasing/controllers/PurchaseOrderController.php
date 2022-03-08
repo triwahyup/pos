@@ -3,7 +3,7 @@
 namespace app\modules\purchasing\controllers;
 
 use app\models\Logs;
-use app\models\LogsMailSend;
+use app\models\LogsMail;
 use app\models\User;
 use app\modules\master\models\MasterMaterialItem;
 use app\modules\master\models\MasterPerson;
@@ -910,7 +910,7 @@ class PurchaseOrderController extends Controller
                             'url' => \Yii::$app->params['URL'].'/purchasing/purchase-order/view&no_po='.$approval->no_po,
                         ]);
                         
-                        $logs_mail = new LogsMailSend();
+                        $logs_mail = new LogsMail();
                         $logs_mail->type = 'APPROVAL PURCHASE ORDER';
                         $logs_mail->email = substr($str_mail, 0, -2);
                         $logs_mail->bcc = '';
@@ -979,7 +979,7 @@ class PurchaseOrderController extends Controller
                 'url' => \Yii::$app->params['URL'].'/purchasing/purchase-order/view&no_po='.$approval->no_po,
             ]);
 
-            $logs_mail = new LogsMailSend();
+            $logs_mail = new LogsMail();
             $logs_mail->type = 'APPROVAL PURCHASE ORDER';
             $logs_mail->email = (isset($approval->po->profile)) ? $approval->po->profile->email : '';
             $logs_mail->bcc = '';

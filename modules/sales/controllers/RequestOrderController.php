@@ -1,29 +1,25 @@
 <?php
 
-namespace app\modules\inventory\controllers;
+namespace app\modules\sales\controllers;
 
 use app\models\Logs;
 use app\models\LogsMail;
 use app\models\User;
-use app\modules\master\models\Profile;
 use app\modules\master\models\MasterMaterialItem;
-use app\modules\inventory\models\InventoryOpname;
-use app\modules\inventory\models\InventoryOpnameApproval;
-use app\modules\inventory\models\InventoryOpnameDetail;
-use app\modules\inventory\models\InventoryOpnameSearch;
-use app\modules\inventory\models\InventoryStockItem;
-use app\modules\inventory\models\InventoryStockTransaction;
-use app\modules\inventory\models\TempInventoryOpnameDetail;
 use app\modules\pengaturan\models\PengaturanApproval;
+use app\modules\sales\models\RequestOrder;
+use app\modules\sales\models\RequestOrderItem;
+use app\modules\sales\models\RequestOrderSearch;
+use app\modules\sales\models\TempRequestOrderItem;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 
 /**
- * OpnameController implements the CRUD actions for InventoryOpname model.
+ * RequestOrderController implements the CRUD actions for RequestOrder model.
  */
-class OpnameController extends Controller
+class RequestOrderController extends Controller
 {
     /**
      * @inheritDoc
@@ -38,12 +34,11 @@ class OpnameController extends Controller
                     'rules' => [
                         [
                             'actions' => [
-                                'index', 'view', 'create', 'update', 'delete',
-                                'list-item', 'search', 'autocomplete', 'item', 'popup',
-                                'create-temp', 'update-temp', 'delete-temp', 'temp', 'get-temp',
-                                'send-approval', 'approval', 'post'
+                                'index', 'view', 'create', 'update', 'delete', 'search', 'item', 'autocomplete',
+                                'temp', 'get-temp', 'create-temp', 'update-temp', 'delete-temp',
+                                'popup', 'approval', 'send-approval', 'post',
                             ],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('stock-opname')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('request-order')),
                             'roles' => ['@'],
                         ],
                     ],
@@ -59,12 +54,12 @@ class OpnameController extends Controller
     }
 
     /**
-     * Lists all InventoryOpname models.
+     * Lists all RequestOrder models.
      * @return mixed
      */
     public function actionIndex()
     {
-        $searchModel = new InventoryOpnameSearch();
+        $searchModel = new RequestOrderSearch();
         $dataProvider = $searchModel->search($this->request->queryParams);
 
         return $this->render('index', [
@@ -74,44 +69,20 @@ class OpnameController extends Controller
     }
 
     /**
-     * Displays a single InventoryOpname model.
-     * @param string $code Code
+     * Displays a single RequestOrder model.
+     * @param string $no_request No Request
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionView($code)
+    public function actionView($no_request)
     {
-        $model = $this->findModel($code);
-        $typeuser = \Yii::$app->user->identity->profile->typeUser->value;
-        $sendApproval = false;
-        $post = false;
-        if($typeuser == 'ADMINISTRATOR' || $typeuser == 'ADMIN'){
-            if($model->status_approval == 0 || $model->status_approval == 3){
-                $sendApproval = true;
-            }
-            if($model->status_approval == 2 && ($model->post == 0 || empty($model->post))){
-                $post = true;
-            }
-            
-        }
-        $typeApproval = false;
-        $approval = InventoryOpnameApproval::findOne(['code'=>$code, 'status'=>2]);
-        if(isset($approval)){
-            if(($model->status_approval==1) && ($approval->user_id == \Yii::$app->user->id) || ($approval->typeuser_code == \Yii::$app->user->identity->profile->typeuser_code)){
-                $typeApproval = true;
-            }
-        }
         return $this->render('view', [
-            'model' => $model,
-            'sendApproval' => $sendApproval,
-            'post' => $post,
-            'typeApproval' => $typeApproval,
-            'typeuser' => $typeuser,
+            'model' => $this->findModel($no_request),
         ]);
     }
 
     /**
-     * Creates a new InventoryOpname model.
+     * Creates a new RequestOrder model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
@@ -119,26 +90,24 @@ class OpnameController extends Controller
     {
         $success = true;
         $message = '';
-        $model = new InventoryOpname();
-        $temp = new TempInventoryOpnameDetail();
+        $model = new RequestOrder();
+        $temp = new TempRequestOrderItem();
         if ($this->request->isPost) {
             if ($model->load($this->request->post())) {
                 $connection = \Yii::$app->db;
 			    $transaction = $connection->beginTransaction();
                 try{
-                    $model->code = $model->generateCode();
-                    $model->date = date('Y-m-d');
+                    $model->no_request = $model->generateCode();
                     $model->user_id = \Yii::$app->user->id;
                     if($model->save()){
-                        if(count($model->temps()) > 0){
-                            foreach($model->temps() as $temp){
-                                $detail = new InventoryOpnameDetail();
-                                $detail->attributes = $temp->attributes;
-                                $detail->code = $model->code;
-                                if(!$detail->save()){
+                        if(count($model->temps) > 0){
+                            foreach($model->temps as $temp){
+                                $item = new RequestOrderItem();
+                                $item->attributes = $temp->attributes;
+                                if(!$item->save()){
                                     $success = false;
-                                    $message = (count($detail->errors) > 0) ? 'ERROR CREATE OPNAME DETAIL: ' : '';
-                                    foreach($detail->errors as $error => $value){
+                                    $message = (count($item->errors) > 0) ? 'ERROR CREATE REQUEST ORDER ITEM: ' : '';
+                                    foreach($item->errors as $error => $value){
                                         $message .= strtoupper($value[0].', ');
                                     }
                                     $message = substr($message, 0, -2);
@@ -146,21 +115,21 @@ class OpnameController extends Controller
                             }
                         }else{
                             $success = false;
-                            $message = 'ERROR CREATE OPNAME: DETAIL IS EMPTY.';
+                            $message = 'ERROR CREATE REQUEST ORDER: DETAIL IS EMPTY.';
                         }
                     }else{
                         $success = false;
-                        $message = (count($model->errors) > 0) ? 'ERROR CREATE OPNAME: ' : '';
+                        $message = (count($model->errors) > 0) ? 'ERROR CREATE REQUEST ORDER: ' : '';
                         foreach($model->errors as $error => $value){
                             $message .= $value[0].', ';
                         }
                         $message = substr($message, 0, -2);
                     }
-                    
+
                     if($success){
                         $this->emptyTemp();
                         $transaction->commit();
-                        $message = '['.$model->code.'] SUCCESS CREATE OPNAME.';
+                        $message = '['.$model->no_po.'] SUCCESS CREATE REQUEST ORDER.';
                         $logs =	[
                             'type' => Logs::TYPE_USER,
                             'description' => $message,
@@ -168,7 +137,7 @@ class OpnameController extends Controller
                         Logs::addLog($logs);
 
                         \Yii::$app->session->setFlash('success', $message);
-                        return $this->redirect(['view', 'code' => $model->code]);
+                        return $this->redirect(['view', 'no_request' => $model->no_request]);
                     }else{
                         $transaction->rollBack();
                     }
@@ -196,18 +165,18 @@ class OpnameController extends Controller
     }
 
     /**
-     * Updates an existing InventoryOpname model.
+     * Updates an existing RequestOrder model.
      * If update is successful, the browser will be redirected to the 'view' page.
-     * @param string $code Code
+     * @param string $no_request No Request
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionUpdate($code)
+    public function actionUpdate($no_request)
     {
         $success = true;
         $message = '';
-        $model = $this->findModel($code);
-        $temp = new TempInventoryOpnameDetail();
+        $model = $this->findModel($no_request);
+        $temp = new TempRequestOrderItem();
         if ($this->request->isPost) {
             if ($model->load($this->request->post())){
                 $connection = \Yii::$app->db;
@@ -216,15 +185,15 @@ class OpnameController extends Controller
                     $model->status_approval = null;
                     if($model->save()){
                         if(count($model->temps) > 0){
-                            foreach($model->details as $empty)
+                            foreach($model->items as $empty)
                                 $empty->delete();
                             foreach($model->temps as $temp){
-                                $detail = new InventoryOpnameDetail();
-                                $detail->attributes = $temp->attributes;
-                                if(!$detail->save()){
+                                $item = new RequestOrderItem();
+                                $item->attributes = $temp->attributes;
+                                if(!$item->save()){
                                     $success = false;
-                                    $message = (count($detail->errors) > 0) ? 'ERROR UPDATE OPNAME DETAIL: ' : '';
-                                    foreach($detail->errors as $error => $value){
+                                    $message = (count($item->errors) > 0) ? 'ERROR UPDATE REQUEST ORDER ITEM: ' : '';
+                                    foreach($item->errors as $error => $value){
                                         $message .= strtoupper($value[0].', ');
                                     }
                                     $message = substr($message, 0, -2);
@@ -232,11 +201,11 @@ class OpnameController extends Controller
                             }
                         }else{
                             $success = false;
-                            $message = 'ERROR UPDATE OPNAME: DETAIL IS EMPTY.';
+                            $message = 'ERROR UPDATE PO: DETAIL IS EMPTY.';
                         }
                     }else{
                         $success = false;
-                        $message = (count($model->errors) > 0) ? 'ERROR UPDATE OPNAME: ' : '';
+                        $message = (count($model->errors) > 0) ? 'ERROR UPDATE REQUEST ORDER: ' : '';
                         foreach($model->errors as $error => $value){
                             $message .= $value[0].', ';
                         }
@@ -246,7 +215,7 @@ class OpnameController extends Controller
                     if($success){
                         $this->emptyTemp();
                         $transaction->commit();
-                        $message = '['.$model->code.'] SUCCESS UPDATE OPNAME.';
+                        $message = '['.$model->no_po.'] SUCCESS UPDATE REQUEST ORDER.';
                         $logs =	[
                             'type' => Logs::TYPE_USER,
                             'description' => $message,
@@ -254,7 +223,7 @@ class OpnameController extends Controller
                         Logs::addLog($logs);
 
                         \Yii::$app->session->setFlash('success', $message);
-                        return $this->redirect(['view', 'code' => $model->code]);
+                        return $this->redirect(['view', 'no_request' => $model->no_request]);
                     }else{
                         $transaction->rollBack();
                     }
@@ -276,16 +245,16 @@ class OpnameController extends Controller
                 return $this->redirect(['index']);
             }else{
                 if($model->post == 1){
-                    \Yii::$app->session->setFlash('error', 'Dokumen ini sudah di Post ke Stock Gudang.');
+                    \Yii::$app->session->setFlash('error', 'Dokumen ini sudah di post SPK.');
                     return $this->redirect(['index']);
                 }else{
                     $this->emptyTemp();
-                    foreach($model->details as $detail){
-                        $temp = new TempInventoryOpnameDetail();
-                        $temp->attributes = $detail->attributes;
+                    foreach($model->items as $item){
+                        $temp = new TempRequestOrderItem();
+                        $temp->attributes = $item->attributes;
                         $temp->user_id = \Yii::$app->user->id;
                         if(!$temp->save()){
-                            $message = (count($temp->errors) > 0) ? 'ERROR LOAD OPNAME DETAIL: ' : '';
+                            $message = (count($temp->errors) > 0) ? 'ERROR LOAD REQUEST ORDER ITEM: ' : '';
                             foreach($temp->errors as $error => $value){
                                 $message .= strtoupper($value[0].', ');
                             }
@@ -304,35 +273,35 @@ class OpnameController extends Controller
     }
 
     /**
-     * Deletes an existing InventoryOpname model.
+     * Deletes an existing RequestOrder model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param string $code Code
+     * @param string $no_request No Request
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionDelete($code)
+    public function actionDelete($no_request)
     {
         $success = true;
 		$message = '';
-        $model = $this->findModel($code);
+        $model = $this->findModel($no_request);
         if(isset($model)){
             if($model->status_approval == 1){
                 \Yii::$app->session->setFlash('error', 'Dokumen ini masih dalam proses Approval.');
             }else{
                 if($model->post == 1){
-                    \Yii::$app->session->setFlash('error', 'Dokumen ini sudah di Post ke Stock Gudang.');
+                    \Yii::$app->session->setFlash('error', 'Dokumen ini sudah di post SPK.');
                 }else{
                     $connection = \Yii::$app->db;
                     $transaction = $connection->beginTransaction();
                     try{
                         $model->status = 0;
                         if($model->save()){
-                            foreach($model->details as $detail){
-                                $detail->status = 0;
-                                if(!$detail->save()){
+                            foreach($model->items as $item){
+                                $item->status = 0;
+                                if(!$item->save()){
                                     $success = false;
-                                    $message = (count($detail->errors) > 0) ? 'ERROR DELETE DETAIL OPNAME: ' : '';
-                                    foreach($detail->errors as $error => $value){
+                                    $message = (count($item->errors) > 0) ? 'ERROR DELETE DETAIL REQUEST ORDER: ' : '';
+                                    foreach($item->errors as $error => $value){
                                         $message .= $value[0].', ';
                                     }
                                     $message = substr($message, 0, -2);
@@ -340,16 +309,16 @@ class OpnameController extends Controller
                             }
                         }else{
                             $success = false;
-                            $message = (count($model->errors) > 0) ? 'ERROR DELETE OPNAME: ' : '';
+                            $message = (count($model->errors) > 0) ? 'ERROR DELETE REQUEST ORDER: ' : '';
                             foreach($model->errors as $error => $value){
                                 $message .= $value[0].', ';
                             }
                             $message = substr($message, 0, -2);
                         }
-        
+
                         if($success){
                             $transaction->commit();
-                            $message = '['.$model->code.'] SUCCESS DELETE OPNAME.';
+                            $message = '['.$model->no_po.'] SUCCESS DELETE REQUEST ORDER.';
                             \Yii::$app->session->setFlash('success', $message);
                         }else{
                             $transaction->rollBack();
@@ -373,15 +342,15 @@ class OpnameController extends Controller
     }
 
     /**
-     * Finds the InventoryOpname model based on its primary key value.
+     * Finds the RequestOrder model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param string $code Code
-     * @return InventoryOpname the loaded model
+     * @param string $no_request No Request
+     * @return RequestOrder the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findModel($code)
+    protected function findModel($no_request)
     {
-        if (($model = InventoryOpname::findOne($code)) !== null) {
+        if (($model = RequestOrder::findOne($id)) !== null) {
             return $model;
         }
 
@@ -430,41 +399,33 @@ class OpnameController extends Controller
         }
         return json_encode(['data'=>$this->renderPartial('_list_item', ['model'=>$model])]);
     }
-    
+
     public function actionItem()
     {
-        $model['item'] = MasterMaterialItem::find()
+        $model = MasterMaterialItem::find()
             ->alias('a')
-            ->select(['a.code as item_code', 'a.name as item_name', 'b.composite', 'b.um_1', 'b.um_2'])
-            ->leftJoin('master_satuan b', 'b.code = a.satuan_code')
-            ->where(['a.code'=>$_POST['code'], 'a.status'=>1])
+            ->select(['a.*', 'b.*', 'a.name as item_name', 'c.composite'])
+            ->leftJoin('master_material_item_pricelist b', 'b.item_code = a.code')
+            ->leftJoin('master_satuan c', 'c.code = a.satuan_code')
+            ->where(['a.code'=>$_POST['code'], 'a.status'=>1, 'b.status_active' => 1])
             ->asArray()
             ->one();
-        if(empty($model['item'])){
+        if(empty($model)){
             $model = [];
-        }else{
-            $stockItem = InventoryStockItem::findOne(['item_code'=>$model['item']['item_code']]);
-            $konversi = $stockItem->nKonversi($model['item']['item_code'], $stockItem['onhand']);
-            $model['stock'] = $konversi;
         }
         return json_encode($model);
     }
 
     public function actionTemp()
     {
-        $temps = TempInventoryOpnameDetail::findAll(['user_id'=> \Yii::$app->user->id]);
-        return json_encode(['model' => $this->renderAjax('_temp', ['temps'=>$temps])]);
+        $temps = TempRequestOrderItem::findAll(['user_id'=> \Yii::$app->user->id]);
+        $model =  $this->renderAjax('_temp', ['temps'=>$temps]);
+        return json_encode(['model'=>$model]);
     }
 
     public function actionGetTemp($id)
     {
-        $temp = TempInventoryOpnameDetail::find()
-            ->alias('a')
-            ->select(['a.*', 'b.name as item_name'])
-            ->leftJoin('master_material_item b', 'b.code = a.item_code')
-            ->where(['id'=>$id])
-            ->asArray()
-            ->one();
+        $temp = TempRequestOrderItem::find()->where(['id'=>$id])->asArray()->one();
         return json_encode($temp);
     }
 
@@ -474,52 +435,7 @@ class OpnameController extends Controller
         $success = true;
         $message = '';
         if($request->isPost){
-            $data = $request->post('TempInventoryOpnameDetail');
-            $citem = TempInventoryOpnameDetail::findOne(['item_code'=>$data['item_code'], 'user_id'=>\Yii::$app->user->id]);
-            if(empty($citem)){
-                if($data['qty_1'] > 0 || $data['qty_2'] > 0){
-                    $temp = new TempInventoryOpnameDetail();
-                    $temp->attributes = (array)$data;
-                    $temp->attributes = ($temp->item) ? $temp->item->attributes : '';
-                    if(!empty($_POST['InventoryOpname']['code'])){
-                        $temp->code = $_POST['InventoryOpname']['code'];
-                    }
-                    $temp->urutan = $temp->count +1;
-                    $temp->user_id = \Yii::$app->user->id;
-    
-                    $stock = $temp->stock;
-                    $opname = $stock->satuanTerkecil($data['item_code'], [
-                        0=>$data['qty_1'],
-                        1=>$data['qty_2'],
-                    ]);
-                    $temp->selisih = $stock->onhand - $opname;
-                    $temp->keterangan = $data['keterangan'];
-                    if($stock->onhand != $opname){
-                        if($stock->onhand > $opname){
-                            $temp->balance = 0; // MINUS
-                        }else{
-                            $temp->balance = 2; // LEBIH
-                        }
-                    }else{
-                        $temp->balance = 1; // BALANCE
-                    }
-                    if($temp->save()){
-                        $message = 'CREATE TEMP SUCCESSFULLY';
-                    }else{
-                        $success = false;
-                        foreach($temp->errors as $error => $value){
-                            $message = $value[0].', ';
-                        }
-                        $message = substr($message, 0, -2);
-                    }
-                }else{
-                    $success = false;
-                    $message = 'QTY Opname wajib diisi.';
-                }
-            }else{
-                $success = false;
-                $message = 'Item sudah di inputkan.';
-            }
+            $data = $request->post('TempRequestOrderItem');
         }else{
             throw new NotFoundHttpException('The requested data does not exist.');
         }
@@ -532,45 +448,7 @@ class OpnameController extends Controller
         $success = true;
         $message = '';
         if($request->isPost){
-            $data = $request->post('TempInventoryOpnameDetail');
-            if($data['qty_1'] > 0 || $data['qty_2'] > 0){
-                $temp = $this->findTemp($data['id']);
-                $temp->attributes = (array)$data;
-                $temp->attributes = ($temp->item) ? $temp->item->attributes : '';
-                if(!empty($_POST['InventoryOpname']['code'])){
-                    $temp->code = $_POST['InventoryOpname']['code'];
-                }
-                $temp->user_id = \Yii::$app->user->id;
-
-                $stock = $temp->stock;
-                $opname = $stock->satuanTerkecil($data['item_code'], [
-                    0=>$data['qty_1'],
-                    1=>$data['qty_2'],
-                ]);
-                $temp->selisih = $stock->onhand - $opname;
-                $temp->keterangan = $data['keterangan'];
-                if($stock->onhand != $opname){
-                    if($stock->onhand > $opname){
-                        $temp->balance = 0; // MINUS
-                    }else{
-                        $temp->balance = 2; // LEBIH
-                    }
-                }else{
-                    $temp->balance = 1; // BALANCE
-                }
-                if($temp->save()){
-                    $message = 'UPDATE TEMP SUCCESSFULLY';
-                }else{
-                    $success = false;
-                    foreach($temp->errors as $error => $value){
-                        $message = $value[0].', ';
-                    }
-                    $message = substr($message, 0, -2);
-                }
-            }else{
-                $success = false;
-                $message = 'QTY Opname wajib diisi.';
-            }
+            $data = $request->post('TempRequestOrderItem');
         }else{
             throw new NotFoundHttpException('The requested data does not exist.');
         }
@@ -608,7 +486,7 @@ class OpnameController extends Controller
 
     protected function findTemp($id)
     {
-        $temp = TempInventoryOpnameDetail::findOne(['id'=>$id, 'user_id'=>\Yii::$app->user->id]);
+        $temp = TempRequestOrderItem::findOne(['id'=>$id, 'user_id'=>\Yii::$app->user->id]);
         if(isset($temp)){
             return $temp;
         }
@@ -617,34 +495,55 @@ class OpnameController extends Controller
 
     protected function emptyTemp()
     {
-        TempInventoryOpnameDetail::deleteAll('user_id=:user_id', [':user_id'=>\Yii::$app->user->id]);
-        $temp = TempInventoryOpnameDetail::find()->all();
+        TempRequestOrderItem::deleteAll('user_id=:user_id', [':user_id'=>\Yii::$app->user->id]);
+        $temp = TempRequestOrderItem::find()->all();
         if(empty($temp)){
             $connection = \Yii::$app->db;
-			$connection->createCommand('ALTER TABLE temp_inventory_opname_detail AUTO_INCREMENT=1')->query();
+			$connection->createCommand('ALTER TABLE temp_request_order_item AUTO_INCREMENT=1')->query();
         }
     }
 
-    public function actionSendApproval($code)
+    public function actionPopup()
+    {
+        $request = \Yii::$app->request;
+        $approval = RequestOrderApproval::findOne(['no_request'=>$request->post('no_request'), 'status'=>2]);
+        $model = $this->findModel($request->post('no_request'));
+        if($request->post('type') == 'APPROVE'){
+            return $this->renderPartial('_popup_approve', [
+                'model' => $model,
+                'approval' => $approval,
+                'title' => 'Form Approve',
+            ]);
+        }
+        if($request->post('type') == 'REJECT'){
+            return $this->renderPartial('_popup_reject', [
+                'model' => $model,
+                'approval' => $approval,
+                'title' => 'Form Reject',
+            ]);
+        }
+    }
+
+    public function actionSendApproval($no_request)
     {
         $success = true;
 		$message = '';
-        $model = $this->findModel($code);
+        $model = $this->findModel($no_request);
         if(isset($model)){
             $connection = \Yii::$app->db;
             $transaction = $connection->beginTransaction();
             try{
                 $model->status_approval = 1;
                 if($model->save()){
-                    $approvals = (new PengaturanApproval)->approval('stock-opname');
+                    $approvals = (new PengaturanApproval)->approval('request-order');
                     if(isset($approvals)){
-                        $approvaln = InventoryOpnameApproval::findAll(['code'=>$code]);
+                        $approvaln = RequestOrderApproval::findAll(['no_request'=>$no_request]);
                         if(count($approvaln) > 0)
-                        InventoryOpnameApproval::deleteAll('code=:code', [':code'=>$code]);
+                            RequestOrderApproval::deleteAll('no_request=:no_request', [':no_request'=>$no_request]);
                         foreach($approvals as $approval){
-                            $app = new InventoryOpnameApproval();
+                            $app = new RequestOrderApproval();
                             $app->attributes = $approval->attributes;
-                            $app->code = $code;
+                            $app->no_request = $no_request;
                             $app->status = 1;
                             if(!$app->save()){
                                 $success = false;
@@ -656,11 +555,11 @@ class OpnameController extends Controller
                         }
                     }else{
                         $success = false;
-                        $message = 'Setting approval Opname belum ada. Silakan hubungi administrator utk melakukan setting approval.';
+                        $message = 'Setting approval Request Order belum ada. Silakan hubungi administrator utk melakukan setting approval.';
                     }
                 }else{
                     $success = false;
-                    $message = (count($model->errors) > 0) ? 'ERROR UPDATE STATUS OPNAME: ' : '';
+                    $message = (count($model->errors) > 0) ? 'ERROR UPDATE STATUS REQUEST ORDER: ' : '';
                     foreach($model->errors as $error => $value){
                         $message .= strtoupper($value[0].', ');
                     }
@@ -668,9 +567,9 @@ class OpnameController extends Controller
                 }
 
                 if($success){
-                    $mailapproval = json_decode($this->mailapproval($model->code));
+                    $mailapproval = json_decode($this->mailapproval($model->no_request));
                     if($mailapproval->success){
-                        $message = '['.$model->code.'] SUCCESS SEND APPROVAL OPNAME.';
+                        $message = '['.$model->no_request.'] SUCCESS SEND APPROVAL REQUEST ORDER.';
                         $transaction->commit();
                         \Yii::$app->session->setFlash('success', $message);
                     }else{
@@ -687,26 +586,26 @@ class OpnameController extends Controller
             }
         }else{
             $success = false;
-            $message = 'Data Opname not valid.';
+            $message = 'Data Request Order not valid.';
         }
         if(!$success){
             \Yii::$app->session->setFlash('error', $message);
         }
-        return $this->redirect(['view', 'code' => $model->code]);
+        return $this->redirect(['view', 'no_request' => $model->no_request]);
     }
 
     public function actionApproval()
     {
         $request = \Yii::$app->request;
-        $data = $request->post('InventoryOpnameApproval');
+        $data = $request->post('RequestOrderApproval');
         $success = true;
 		$message = '';
-        $model = $this->findModel($data['code']);
+        $model = $this->findModel($data['no_request']);
         if(isset($model)){
             $connection = \Yii::$app->db;
             $transaction = $connection->beginTransaction();
             try{
-                $approval = InventoryOpnameApproval::findOne(['code'=>$model->code, 'status'=>2]);
+                $approval = RequestOrderApproval::findOne(['no_request'=>$model->no_request, 'status'=>2]);
                 if(isset($approval)){
                     if(($approval->user_id == \Yii::$app->user->id) || ($approval->typeuser_code == \Yii::$app->user->identity->profile->typeuser_code)){
                         // APPROVE
@@ -717,11 +616,11 @@ class OpnameController extends Controller
 								$approval->user_id = \Yii::$app->user->id;
 							}
                             if($approval->save()){
-                                $mailapproval = json_decode($this->mailapproval($model->code));
+                                $mailapproval = json_decode($this->mailapproval($model->no_request));
                                 if($mailapproval->success){
                                     $is_akhir = true;
                                     if($mailapproval->akhir){
-                                        $mailakhir = json_decode($this->mailapproval_akhir($model->code, $approval->comment));
+                                        $mailakhir = json_decode($this->mailapproval_akhir($model->no_request, $approval->comment));
                                         if($mailakhir->success){
                                             $model->status_approval=2;
                                             if(!$model->save()){
@@ -737,9 +636,9 @@ class OpnameController extends Controller
                                     }
                                     if($is_akhir){
                                         $transaction->commit();
-                                        $message = '['.$model->code.'] SUCCESS APPROVE OPNAME.';
+                                        $message = '['.$model->no_request.'] SUCCESS APPROVE REQUEST ORDER.';
                                         \Yii::$app->session->setFlash('success', $message);
-                                        return $this->redirect(['view', 'code' => $model->code]);
+                                        return $this->redirect(['view', 'no_request' => $model->no_request]);
                                     }else{
                                         $transaction->rollBack();
 										$message = $mailapproval->message;
@@ -777,12 +676,12 @@ class OpnameController extends Controller
 								}
 
                                 if($success){
-                                    $mailakhir = json_decode($this->mailapproval_akhir($model->code, $approval->comment));
+                                    $mailakhir = json_decode($this->mailapproval_akhir($model->no_request, $approval->comment));
                                     if($mailakhir->success){
                                         $transaction->commit();
-                                        $message = '['.$model->code.'] SUCCESS REJECT OPNAME.';
+                                        $message = '['.$model->no_request.'] SUCCESS REJECT REQUEST ORDER.';
                                         \Yii::$app->session->setFlash('success', $message);
-                                        return $this->redirect(['view', 'code' => $model->code]);
+                                        return $this->redirect(['view', 'no_request' => $model->no_request]);
                                     }else{
                                         $success = false;
 										$message .= $mailakhir->message;
@@ -810,43 +709,22 @@ class OpnameController extends Controller
             }
         }else{
             $success = false;
-            $message = 'Data Opname not valid.';
+            $message = 'Data Purchase Order not valid.';
         }
         if(!$success){
             \Yii::$app->session->setFlash('error', $message);
         }
-        return $this->redirect(['view', 'code' => $model->code]);
+        return $this->redirect(['view', 'no_request' => $model->no_request]);
     }
 
-    public function actionPopup()
-    {
-        $request = \Yii::$app->request;
-        $approval = InventoryOpnameApproval::findOne(['code'=>$request->post('code'), 'status'=>2]);
-        $model = $this->findModel($request->post('code'));
-        if($request->post('type') == 'APPROVE'){
-            return $this->renderPartial('_popup_approve', [
-                'model' => $model,
-                'approval' => $approval,
-                'title' => 'Form Approve',
-            ]);
-        }
-        if($request->post('type') == 'REJECT'){
-            return $this->renderPartial('_popup_reject', [
-                'model' => $model,
-                'approval' => $approval,
-                'title' => 'Form Reject',
-            ]);
-        }
-    }
-
-    function mailapproval($code)
+    function mailapproval($no_request)
     {
         $success = true;
 		$message = '';
         $akhir = false;
 		$urutan = 0;
 		$profile = [];
-        $approvals = InventoryOpnameApproval::find()->where(['code'=>$code])->orderBy(['urutan'=>SORT_ASC])->all();
+        $approvals = RequestOrderApproval::find()->where(['no_request'=>$no_request])->orderBy(['urutan'=>SORT_ASC])->all();
         if(count($approvals) > 0){
             foreach($approvals as $approval){
                 if(!$urutan){
@@ -871,7 +749,7 @@ class OpnameController extends Controller
                 }
             }
             if($urutan){
-                $app = InventoryOpnameApproval::findOne(['code'=>$code, 'urutan'=>$urutan]);
+                $app = RequestOrderApproval::findOne(['no_request'=>$no_request, 'urutan'=>$urutan]);
                 if(isset($app)){
                     $name = '';
                     if(!empty($app->user_id)){
@@ -892,14 +770,14 @@ class OpnameController extends Controller
                         $body = $this->renderPartial('_mailapproval', [
                             'approval' => $app,
 							'name' => $name,
-                            'url' => \Yii::$app->params['URL'].'/inventory/opname/view&code='.$approval->code,
+                            'url' => \Yii::$app->params['URL'].'/sales/request-order/view&no_request='.$approval->no_request,
                         ]);
                         
                         $logs_mail = new LogsMail();
-                        $logs_mail->type = 'APPROVAL OPNAME';
+                        $logs_mail->type = 'APPROVAL REQUEST ORDER';
                         $logs_mail->email = substr($str_mail, 0, -2);
                         $logs_mail->bcc = '';
-                        $logs_mail->subject = 'Approval Opname '. $app->code;
+                        $logs_mail->subject = 'Approval Request Order '. $app->no_request;
 						$logs_mail->body = $body;
 						$logs_mail->keterangan = '';
                         
@@ -948,12 +826,12 @@ class OpnameController extends Controller
         return json_encode(['success'=>$success, 'message'=>$message, 'akhir'=>$akhir]);
     }
 
-    function mailapproval_akhir($code, $comment=NULL)
+    function mailapproval_akhir($no_request, $comment=NULL)
     {
         $success = true;
 		$message = '';
-        $approval = InventoryOpnameApproval::find()
-            ->where(['code'=>$code])
+        $approval = RequestOrderApproval::find()
+            ->where(['no_request'=>$no_request])
             ->orderBy(['urutan'=>SORT_DESC])
             ->one();
         $str_mail = '';
@@ -961,14 +839,14 @@ class OpnameController extends Controller
             $body = $this->renderPartial('_mailapproval_akhir', [
                 'approval' => $approval,
 				'description' => $comment,
-                'url' => \Yii::$app->params['URL'].'/inventory/opname/view&code='.$approval->code,
+                'url' => \Yii::$app->params['URL'].'/sales/request-order/view&no_request='.$approval->no_request,
             ]);
 
             $logs_mail = new LogsMail();
-            $logs_mail->type = 'APPROVAL OPNAME';
-            $logs_mail->email = (isset($approval->opname->profile)) ? $approval->opname->profile->email : '';
+            $logs_mail->type = 'APPROVAL REQUEST ORDER';
+            $logs_mail->email = (isset($approval->request->profile)) ? $approval->request->profile->email : '';
             $logs_mail->bcc = '';
-            $logs_mail->subject = 'Approval Opname '. $approval->code;
+            $logs_mail->subject = 'Approval Request Order '. $approval->no_request;
             $logs_mail->body = $body;
             $logs_mail->keterangan = '';
             
@@ -995,107 +873,5 @@ class OpnameController extends Controller
 			$message = 'Pengaturan Approval belum di setting.';
         }
         return json_encode(['success'=>$success, 'message'=>$message]);
-    }
-
-    public function actionPost($code)
-    {
-        $success = true;
-        $message = '';
-        $model = $this->findModel($code);
-        if(isset($model)){
-            $connection = \Yii::$app->db;
-            $transaction = $connection->beginTransaction();
-            try{
-                $model->post=1;
-                if($model->save()){
-                    foreach($model->details as $val){
-                        if($val->balance != 1){
-                            $stockItem = InventoryStockItem::findOne(['item_code'=>$val->item_code, 'status'=>1]);
-                            if(isset($stockItem)){
-                                $konversi = $stockItem->satuanTerkecil($val->item_code, [
-                                    0 => $val->qty_1,
-                                    1 => $val->qty_2
-                                ]);
-                                $stockItem->onhand = $konversi;
-                                if(!$stockItem->save()){
-                                    $success = false;
-                                    $message = (count($stockItem->errors) > 0) ? 'ERROR UPDATE STOCK ITEM: ' : '';
-                                    foreach($stockItem->errors as $error => $value){
-                                        $message .= strtoupper($value[0].', ');
-                                    }
-                                    $message = substr($message, 0, -2);
-                                }
-                                
-                                $stockTransaction = new InventoryStockTransaction();
-                                $stockTransaction->item_code = $val->item_code;
-                                $stockTransaction->no_document = $model->code;
-                                $stockTransaction->tgl_document = $model->date;
-                                $stockTransaction->type_document = "STOCK OPNAME";
-                                // MINUS -> OUT
-                                if($val->balance == 0){
-                                    $stockTransaction->status_document = "OUT";
-                                    $stockTransaction->qty_out = $val->selisih;
-                                    $stockTransaction->onsales = $stockItem->onsales + $val->selisih;
-                                }
-                                // LEBIH -> IN
-                                else{
-                                    $stockTransaction->status_document = "IN";
-                                    $stockTransaction->qty_in = $konversi;
-                                }
-                                $stockTransaction->onhand = $konversi;
-                                if(!$stockTransaction->save()){
-                                    $success = false;
-                                    $message = (count($stockTransaction->errors) > 0) ? 'ERROR UPDATE STOCK TRANSACTION: ' : '';
-                                    foreach($stockTransaction->errors as $error => $value){
-                                        $message .= strtoupper($value[0].', ');
-                                    }
-                                    $message = substr($message, 0, -2);
-                                }
-                            }else{
-                                $success = false;
-                                $message = 'Item {'.$val->item_code.'-'.$val->name.'} tidak ditemukan di Inventory Stock Item';
-                            }
-                        }
-                    }
-                }else{
-                    $success = false;
-                    $message = (count($model->errors) > 0) ? 'ERROR POST OPNAME: ' : '';
-                    foreach($model->errors as $error => $value){
-                        $message .= strtoupper($value[0].', ');
-                    }
-                    $message = substr($message, 0, -2);
-                }
-
-                if($success){
-                    $message = '['.$model->code.'] SUCCESS POST OPNAME.';
-                    $transaction->commit();
-                    $logs =	[
-                        'type' => Logs::TYPE_USER,
-                        'description' => $message,
-                    ];
-                    Logs::addLog($logs);
-                    \Yii::$app->session->setFlash('success', $message);
-                    return $this->redirect(['view', 'code' => $model->code]);
-                }else{
-                    $transaction->rollback();
-                }
-            }catch(Exception $e){
-                $success = false;
-                $message = $e->getMessage();
-                $transaction->rollBack();
-            }
-            $logs =	[
-                'type' => Logs::TYPE_USER,
-                'description' => $message,
-            ];
-            Logs::addLog($logs);
-        }else{
-            $success = false;
-            $message = 'Data Opname not valid.';
-        }
-        if(!$success){
-            \Yii::$app->session->setFlash('error', $message);
-        }
-        return $this->redirect(['view', 'code' => $model->code]);
     }
 }
