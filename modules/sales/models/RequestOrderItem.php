@@ -3,6 +3,8 @@
 namespace app\modules\sales\models;
 
 use Yii;
+use app\modules\master\models\MasterMaterialItem;
+use yii\behaviors\TimestampBehavior;
 
 /**
  * This is the model class for table "request_order_item".
@@ -44,6 +46,13 @@ class RequestOrderItem extends \yii\db\ActiveRecord
         return 'request_order_item';
     }
 
+    public function behaviors()
+    {
+        return [
+            TimestampBehavior::className(),
+        ];
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -58,6 +67,7 @@ class RequestOrderItem extends \yii\db\ActiveRecord
             [['satuan_code', 'material_code', 'type_code', 'group_supplier_code', 'group_material_code'], 'string', 'max' => 3],
             [['um_1', 'um_2', 'um_3'], 'string', 'max' => 5],
             [['no_request', 'urutan'], 'unique', 'targetAttribute' => ['no_request', 'urutan']],
+            [['status'], 'default', 'value' => 1],
         ];
     }
 
@@ -94,5 +104,10 @@ class RequestOrderItem extends \yii\db\ActiveRecord
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
         ];
+    }
+
+    public function getItem()
+    {
+        return $this->hasOne(MasterMaterialItem::className(), ['code' => 'item_code']);
     }
 }

@@ -24,7 +24,7 @@ use yii\widgets\MaskedInput;
                     <!-- Item Code -->
                     <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
                         <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                            <label>Material</label>
+                            <label class="margin-bottom-15">Material</label>
                         </div>
                         <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1 padding-right-0">:</div>
                         <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
@@ -42,7 +42,7 @@ use yii\widgets\MaskedInput;
                     <!-- QTY Order -->
                     <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
                         <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                            <label>Qty Order</label>
+                            <label class="margin-bottom-15">Qty Order</label>
                         </div>
                         <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1 padding-right-0">:</div>
                         <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
@@ -59,7 +59,7 @@ use yii\widgets\MaskedInput;
                     <!-- Up Produksi -->
                     <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
                         <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                            <label>Up Produksi</label>
+                            <label class="margin-bottom-15">Up Produksi</label>
                         </div>
                         <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1 padding-right-0">:</div>
                         <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-left-0 padding-right-0">

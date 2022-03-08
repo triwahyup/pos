@@ -52,7 +52,6 @@ use yii\widgets\ActiveForm;
             </table>
         </div>
         <div class="col-lg-12 col-md-12 col-xs-12 text-right">
-            <div class="margin-top-20"></div>
             <?= Html::submitButton('<i class="fontello icon-floppy"></i><span>Save</span>', ['class' => 'btn btn-success']) ?>
         </div>
     <?php ActiveForm::end(); ?>
@@ -186,5 +185,11 @@ $(document).ready(function(){
         e.preventDefault();
         delete_temp($(this).attr("data-target"));
     });
+});
+
+$(function(){
+    <?php if(!$model->isNewRecord): ?>
+        init_temp();
+    <?php endif; ?>
 });
 </script>

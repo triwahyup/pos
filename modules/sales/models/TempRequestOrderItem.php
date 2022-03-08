@@ -3,6 +3,7 @@
 namespace app\modules\sales\models;
 
 use Yii;
+use app\modules\master\models\MasterMaterialItem;
 
 /**
  * This is the model class for table "temp_request_order_item".
@@ -97,5 +98,57 @@ class TempRequestOrderItem extends \yii\db\ActiveRecord
             'updated_at' => 'Updated At',
             'user_id' => 'User ID',
         ];
+    }
+
+    public function getCount()
+    {
+        return TempRequestOrderItem::find()->where(['user_id'=> \Yii::$app->user->id])->count();
+    }
+
+    public function getTmps()
+    {
+        return TempRequestOrderItem::find()->where(['user_id'=> \Yii::$app->user->id])->all();
+    }
+
+    public function getItem()
+    {
+        return $this->hasOne(MasterMaterialItem::className(), ['code' => 'item_code']);
+    }
+
+    public function beforeSave($attribute)
+    {
+        $this->harga_beli_1 = str_replace(',', '', $this->harga_beli_1);
+        $this->harga_beli_2 = str_replace(',', '', $this->harga_beli_2);
+        $this->harga_beli_3 = str_replace(',', '', $this->harga_beli_3);
+        $this->harga_jual_1 = str_replace(',', '', $this->harga_jual_1);
+        $this->harga_jual_2 = str_replace(',', '', $this->harga_jual_2);
+        $this->harga_jual_3 = str_replace(',', '', $this->harga_jual_3);
+        $this->qty_order_1 = str_replace(',', '', $this->qty_order_1);
+        $this->qty_order_2 = str_replace(',', '', $this->qty_order_2);
+        $this->qty_order_3 = str_replace(',', '', $this->qty_order_3);
+        return parent::beforeSave($attribute);
+    }
+
+    public function getTotalBeli()
+    {
+        $total_order=0;
+        if(!empty($this->qty_order_1)){
+            $harga_beli_1 = str_replace(',', '', $this->harga_beli_1);
+            $total_order += $this->qty_order_1 * $harga_beli_1;
+        }
+        if(!empty($this->qty_order_2)){
+            $harga_beli_2 = str_replace(',', '', $this->harga_beli_2);
+            $total_order += $this->qty_order_2 * $harga_beli_2;
+        }
+        if(!empty($this->qty_order_3)){
+            $harga_beli_3 = str_replace(',', '', $this->harga_beli_3);
+            $total_order += $this->qty_order_3 * $harga_beli_3;
+        }
+
+        if(!empty($this->ppn)){
+            $ppn = $total_order / ($this->ppn*100);
+            $total_order += $ppn;
+        }
+        return $total_order;
     }
 }

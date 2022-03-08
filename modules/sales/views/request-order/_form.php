@@ -39,13 +39,37 @@ use yii\widgets\ActiveForm;
                 </div>
             </div>
         </div>
+        <!-- Form Input Detail -->
         <div class="col-lg-12 col-md-12 col-xs-12 margin-top-30">
             <h4>Form Add Item Material / Bahan</h4>
             <hr>
         </div>
+        <!-- /Form Input Detail -->
+        <!-- Detail List Item -->
         <div class="col-lg-12 col-md-12 col-xs-12 margin-top-30">
             <h4>Detail Item Material / Bahan</h4>
             <hr>
         </div>
+        <div class="col-lg-12 col-md-12 col-xs-12">
+            <table class="table table-bordered table-custom margin-top-10">
+                <thead>
+                    <tr>
+                        <th class="text-center" rowspan="2">No.</th>
+                        <th class="text-center" colspan="2">Item</th>
+                        <th class="text-center" colspan="2">QTY</th>
+                        <th class="text-center" rowspan="2">Jenis</th>
+                    </tr>
+                    <tr>
+                        <th class="text-center">Code</th>
+                        <th class="text-center">Name</th>
+                        <th class="text-center">Um 1</th>
+                        <th class="text-center">Um 2</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+        <!-- /Detail List Item -->
     <?php ActiveForm::end(); ?>
 </div>

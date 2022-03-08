@@ -3,6 +3,10 @@
 namespace app\modules\sales\models;
 
 use Yii;
+use app\models\User;
+use app\modules\master\models\MasterKode;
+use app\modules\sales\models\RequestOrder;
+use yii\behaviors\TimestampBehavior;
 
 /**
  * This is the model class for table "request_order_approval".
@@ -24,6 +28,13 @@ class RequestOrderApproval extends \yii\db\ActiveRecord
     public static function tableName()
     {
         return 'request_order_approval';
+    }
+
+    public function behaviors()
+    {
+        return [
+            TimestampBehavior::className(),
+        ];
     }
 
     /**
@@ -56,5 +67,60 @@ class RequestOrderApproval extends \yii\db\ActiveRecord
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
         ];
+    }
+
+    public function getRequest()
+    {
+        return $this->hasOne(RequestOrder::className(), ['no_request' => 'no_request']);
+    }
+
+    public function getTypeUser()
+    {
+        return $this->hasOne(MasterKode::className(), ['code' => 'typeuser_code']);
+    }
+
+    public function getName()
+    {
+        return $this->hasOne(Profile::className(), ['user_id' => 'user_id']);
+    }
+
+    public function getUser()
+    {
+        return $this->hasOne(User::className(), ['id' => 'user_id']);
+    }
+
+    public function getProfile()
+    {
+        $profile = [];
+        if(empty($this->user_id)){
+            if(!empty($this->typeuser_code)){
+                $profile = Profile::findAll(['typeuser_code'=>$this->typeuser_code, 'status'=>1]);
+            }
+        }else{
+            $profile = Profile::findAll(['user_id'=>$this->user_id, 'status'=>1]);
+        }
+        if($this->status == 1 && count($profile) == 0){
+			$this->status = 5;
+			$this->comment = 'USER NOT FOUND.';
+            $this->save();
+		}
+        return $profile;
+    }
+
+    public function getStatusApproval()
+    {
+        $message = '';
+        if($this->status == 1){
+            $message = '<span class="text-label text-primary">Send Approval</span>';
+        }else if($this->status == 2){
+            $message = '<span class="text-label text-warning">Waiting Approval</span>';
+        }else if($this->status == 3){
+            $message = '<span class="text-label text-success">Success Approval</span>';
+        }else if($this->status == 4){
+            $message = '<span class="text-label text-danger">Rejected Approval</span>';
+        }else if($this->status == 5){
+            $message = '<span class="text-label text-danger">User not found.</span>';
+        }
+        return $message;
     }
 }
