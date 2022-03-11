@@ -4,11 +4,11 @@ namespace app\modules\sales\models;
 
 use Yii;
 use app\modules\master\models\MasterMaterialItem;
+use app\modules\master\models\MasterMaterialItemPricelist;
 
 /**
  * This is the model class for table "temp_request_order_item".
  *
- * @property int|null $id
  * @property string $no_request
  * @property int $urutan
  * @property string $no_spk
@@ -32,9 +32,6 @@ use app\modules\master\models\MasterMaterialItem;
  * @property float|null $qty_order_2
  * @property float|null $qty_order_3
  * @property float|null $total_order
- * @property int|null $status
- * @property int|null $created_at
- * @property int|null $updated_at
  * @property int|null $user_id
  */
 class TempRequestOrderItem extends \yii\db\ActiveRecord
@@ -53,9 +50,10 @@ class TempRequestOrderItem extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id', 'urutan', 'status', 'created_at', 'updated_at', 'user_id'], 'integer'],
-            [['no_request', 'urutan', 'no_spk', 'no_so'], 'required'],
+            [['no_spk'], 'required'],
+            [['urutan', 'user_id'], 'integer'],
             [['harga_beli_1', 'harga_beli_2', 'harga_beli_3', 'harga_jual_1', 'harga_jual_2', 'harga_jual_3', 'qty_order_1', 'qty_order_2', 'qty_order_3', 'total_order'], 'number'],
+            [['item_name'], 'string', 'max' => 128],
             [['no_request', 'no_spk', 'no_so'], 'string', 'max' => 12],
             [['item_code'], 'string', 'max' => 7],
             [['satuan_code', 'material_code', 'type_code', 'group_supplier_code', 'group_material_code'], 'string', 'max' => 3],
@@ -69,7 +67,6 @@ class TempRequestOrderItem extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
             'no_request' => 'No Request',
             'urutan' => 'Urutan',
             'no_spk' => 'No Spk',
@@ -93,9 +90,6 @@ class TempRequestOrderItem extends \yii\db\ActiveRecord
             'qty_order_2' => 'Qty Order 2',
             'qty_order_3' => 'Qty Order 3',
             'total_order' => 'Total Order',
-            'status' => 'Status',
-            'created_at' => 'Created At',
-            'updated_at' => 'Updated At',
             'user_id' => 'User ID',
         ];
     }
@@ -115,39 +109,27 @@ class TempRequestOrderItem extends \yii\db\ActiveRecord
         return $this->hasOne(MasterMaterialItem::className(), ['code' => 'item_code']);
     }
 
+    public function getItemPricelist()
+    {
+        return $this->hasOne(MasterMaterialItemPricelist::className(), ['item_code' => 'item_code']);
+    }
+
     public function beforeSave($attribute)
     {
-        $this->harga_beli_1 = str_replace(',', '', $this->harga_beli_1);
-        $this->harga_beli_2 = str_replace(',', '', $this->harga_beli_2);
-        $this->harga_beli_3 = str_replace(',', '', $this->harga_beli_3);
-        $this->harga_jual_1 = str_replace(',', '', $this->harga_jual_1);
-        $this->harga_jual_2 = str_replace(',', '', $this->harga_jual_2);
-        $this->harga_jual_3 = str_replace(',', '', $this->harga_jual_3);
         $this->qty_order_1 = str_replace(',', '', $this->qty_order_1);
         $this->qty_order_2 = str_replace(',', '', $this->qty_order_2);
         $this->qty_order_3 = str_replace(',', '', $this->qty_order_3);
         return parent::beforeSave($attribute);
     }
 
-    public function getTotalBeli()
+    public function getTotalOrder()
     {
         $total_order=0;
         if(!empty($this->qty_order_1)){
-            $harga_beli_1 = str_replace(',', '', $this->harga_beli_1);
-            $total_order += $this->qty_order_1 * $harga_beli_1;
+            $total_order += $this->qty_order_1 * $this->harga_jual_1;
         }
         if(!empty($this->qty_order_2)){
-            $harga_beli_2 = str_replace(',', '', $this->harga_beli_2);
-            $total_order += $this->qty_order_2 * $harga_beli_2;
-        }
-        if(!empty($this->qty_order_3)){
-            $harga_beli_3 = str_replace(',', '', $this->harga_beli_3);
-            $total_order += $this->qty_order_3 * $harga_beli_3;
-        }
-
-        if(!empty($this->ppn)){
-            $ppn = $total_order / ($this->ppn*100);
-            $total_order += $ppn;
+            $total_order += ($this->qty_order_2 / 1000) * $this->harga_jual_2;
         }
         return $total_order;
     }

@@ -62,6 +62,7 @@ class RequestOrderItem extends \yii\db\ActiveRecord
             [['no_request', 'urutan', 'no_spk', 'no_so'], 'required'],
             [['urutan', 'status', 'created_at', 'updated_at'], 'integer'],
             [['harga_beli_1', 'harga_beli_2', 'harga_beli_3', 'harga_jual_1', 'harga_jual_2', 'harga_jual_3', 'qty_order_1', 'qty_order_2', 'qty_order_3', 'total_order'], 'number'],
+            [['item_name'], 'string', 'max' => 128],
             [['no_request', 'no_spk', 'no_so'], 'string', 'max' => 12],
             [['item_code'], 'string', 'max' => 7],
             [['satuan_code', 'material_code', 'type_code', 'group_supplier_code', 'group_material_code'], 'string', 'max' => 3],

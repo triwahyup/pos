@@ -7,7 +7,9 @@ use app\models\LogsMail;
 use app\models\User;
 use app\modules\master\models\MasterMaterialItem;
 use app\modules\pengaturan\models\PengaturanApproval;
+use app\modules\produksi\models\Spk;
 use app\modules\sales\models\RequestOrder;
+use app\modules\sales\models\RequestOrderApproval;
 use app\modules\sales\models\RequestOrderItem;
 use app\modules\sales\models\RequestOrderSearch;
 use app\modules\sales\models\TempRequestOrderItem;
@@ -34,9 +36,10 @@ class RequestOrderController extends Controller
                     'rules' => [
                         [
                             'actions' => [
-                                'index', 'view', 'create', 'update', 'delete', 'search', 'item', 'autocomplete',
-                                'temp', 'get-temp', 'create-temp', 'update-temp', 'delete-temp',
-                                'popup', 'approval', 'send-approval', 'post',
+                                'index', 'view', 'create', 'update', 'delete',
+                                'list-item', 'search', 'item', 'autocomplete',
+                                'create-temp', 'update-temp', 'delete-temp',
+                                'temp', 'get-temp', 'popup', 'approval', 'send-approval', 'post',
                             ],
                             'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('request-order')),
                             'roles' => ['@'],
@@ -76,8 +79,33 @@ class RequestOrderController extends Controller
      */
     public function actionView($no_request)
     {
+        $model = $this->findModel($no_request);
+        $typeuser = \Yii::$app->user->identity->profile->typeUser->value;
+        $sendApproval = false;
+        $postSpk = false;
+        if($typeuser == 'ADMINISTRATOR' || $typeuser == 'ADMIN'){
+            if($model->status_approval == 0 || $model->status_approval == 3){
+                $sendApproval = true;
+            }
+            if($model->status_approval == 2 && ($model->post == 0 || empty($model->post))){
+                $postSpk = true;
+            }
+        }
+
+        $typeApproval = false;
+        $approval = RequestOrderApproval::findOne(['no_request'=>$no_request, 'status'=>2]);
+        if(isset($approval)){
+            if(($model->status_approval==1) && ($approval->user_id == \Yii::$app->user->id) || ($approval->typeuser_code == \Yii::$app->user->identity->profile->typeuser_code)){
+                $typeApproval = true;
+            }
+        }
+
         return $this->render('view', [
-            'model' => $this->findModel($no_request),
+            'model' => $model,
+            'sendApproval' => $sendApproval,
+            'postSpk' => $postSpk,
+            'typeApproval' => $typeApproval,
+            'typeuser' => $typeuser,
         ]);
     }
 
@@ -100,10 +128,11 @@ class RequestOrderController extends Controller
                     $model->no_request = $model->generateCode();
                     $model->user_id = \Yii::$app->user->id;
                     if($model->save()){
-                        if(count($model->temps) > 0){
-                            foreach($model->temps as $temp){
+                        if(count($model->temps()) > 0){
+                            foreach($model->temps() as $temp){
                                 $item = new RequestOrderItem();
                                 $item->attributes = $temp->attributes;
+                                $item->no_request = $model->no_request;
                                 if(!$item->save()){
                                     $success = false;
                                     $message = (count($item->errors) > 0) ? 'ERROR CREATE REQUEST ORDER ITEM: ' : '';
@@ -129,7 +158,7 @@ class RequestOrderController extends Controller
                     if($success){
                         $this->emptyTemp();
                         $transaction->commit();
-                        $message = '['.$model->no_po.'] SUCCESS CREATE REQUEST ORDER.';
+                        $message = '['.$model->no_request.'] SUCCESS CREATE REQUEST ORDER.';
                         $logs =	[
                             'type' => Logs::TYPE_USER,
                             'description' => $message,
@@ -161,6 +190,11 @@ class RequestOrderController extends Controller
         return $this->render('create', [
             'model' => $model,
             'temp' => $temp,
+            'spk' => Spk::find()
+                ->select(['no_spk'])
+                ->where(['status_produksi'=>[2,3]])
+                ->indexBy('no_spk')
+                ->column(),
         ]);
     }
 
@@ -173,6 +207,7 @@ class RequestOrderController extends Controller
      */
     public function actionUpdate($no_request)
     {
+        $spk = Spk::find()->select(['no_spk'])->where(['status_produksi'=>[2,3]])->indexBy('no_spk')->column();
         $success = true;
         $message = '';
         $model = $this->findModel($no_request);
@@ -215,7 +250,7 @@ class RequestOrderController extends Controller
                     if($success){
                         $this->emptyTemp();
                         $transaction->commit();
-                        $message = '['.$model->no_po.'] SUCCESS UPDATE REQUEST ORDER.';
+                        $message = '['.$model->no_request.'] SUCCESS UPDATE REQUEST ORDER.';
                         $logs =	[
                             'type' => Logs::TYPE_USER,
                             'description' => $message,
@@ -269,6 +304,11 @@ class RequestOrderController extends Controller
         return $this->render('update', [
             'model' => $model,
             'temp' => $temp,
+            'spk' => Spk::find()
+                ->select(['no_spk'])
+                ->where(['status_produksi'=>[2,3]])
+                ->indexBy('no_spk')
+                ->column()
         ]);
     }
 
@@ -318,7 +358,7 @@ class RequestOrderController extends Controller
 
                         if($success){
                             $transaction->commit();
-                            $message = '['.$model->no_po.'] SUCCESS DELETE REQUEST ORDER.';
+                            $message = '['.$model->no_request.'] SUCCESS DELETE REQUEST ORDER.';
                             \Yii::$app->session->setFlash('success', $message);
                         }else{
                             $transaction->rollBack();
@@ -350,7 +390,7 @@ class RequestOrderController extends Controller
      */
     protected function findModel($no_request)
     {
-        if (($model = RequestOrder::findOne($id)) !== null) {
+        if (($model = RequestOrder::findOne($no_request)) !== null) {
             return $model;
         }
 
@@ -433,9 +473,41 @@ class RequestOrderController extends Controller
     {
         $request = \Yii::$app->request;
         $success = true;
-        $message = '';
+        $message = 'CREATE TEMP SUCCESSFULLY';
         if($request->isPost){
-            $data = $request->post('TempRequestOrderItem');
+            $dataTemp = $request->post('TempRequestOrderItem');
+            $model = Spk::findOne(['no_spk'=>$dataTemp['no_spk']]);
+            if(isset($model)){
+                $temp = new TempRequestOrderItem();
+                $temp->attributes = (array)$dataTemp;
+                $temp->attributes = $model->attributes;
+                $temp->attributes = $temp->item->attributes;
+                if(!empty($temp->qty_order_1) || !empty($temp->qty_order_2)){
+                    if(isset($temp->itemPricelist)){
+                        $temp->attributes = $temp->itemPricelist->attributes;
+                        $temp->no_request = 'tmp';
+                        $temp->urutan = $temp->count +1;
+                        $temp->total_order = $temp->totalOrder;
+                        $temp->user_id = \Yii::$app->user->id;
+                        if(!$temp->save()){
+                            $success = false;
+                            foreach($temp->errors as $error => $value){
+                                $message = $value[0].', ';
+                            }
+                            $message = substr($message, 0, -2);
+                        }
+                    }else{
+                        $success = false;
+                        $message = 'Pricelist untuk item '.$dataTemp['item_name'].' belum di setting.';
+                    }
+                }else{
+                    $success = false;
+                    $message = 'Qty belum diisi. Silakan isi Qty terlebih dahulu.';
+                }
+            }else{
+                $success = false;
+                $message = 'No. SPK tidak ditemukan di Surat Perintah Kerja.';
+            }
         }else{
             throw new NotFoundHttpException('The requested data does not exist.');
         }
@@ -446,9 +518,42 @@ class RequestOrderController extends Controller
     {
         $request = \Yii::$app->request;
         $success = true;
-        $message = '';
+        $message = 'UPDATE TEMP SUCCESSFULLY';
         if($request->isPost){
-            $data = $request->post('TempRequestOrderItem');
+            $dataTemp = $request->post('TempRequestOrderItem');
+            $model = Spk::findOne(['no_spk'=>$dataTemp['no_spk']]);
+            if(isset($model)){
+                $temp = $this->findTemp($dataTemp['id']);
+                $temp->attributes = (array)$dataTemp;
+                $temp->attributes = $model->attributes;
+                $temp->attributes = $temp->item->attributes;
+                if(!empty($temp->qty_order_1) || !empty($temp->qty_order_2)){
+                    if(isset($temp->itemPricelist)){
+                        $temp->attributes = $temp->itemPricelist->attributes;
+                        $dataHeader = $request->post('RequestOrder');
+                        $temp->no_request = (!empty($dataHeader['no_request'])) ? $dataHeader['no_request'] : 'tmp';
+                        $temp->urutan = $dataTemp['urutan'];
+                        $temp->total_order = $temp->totalOrder;
+                        $temp->user_id = \Yii::$app->user->id;
+                        if(!$temp->save()){
+                            $success = false;
+                            foreach($temp->errors as $error => $value){
+                                $message = $value[0].', ';
+                            }
+                            $message = substr($message, 0, -2);
+                        }
+                    }else{
+                        $success = false;
+                        $message = 'Pricelist untuk item '.$dataTemp['item_name'].' belum di setting.';
+                    }
+                }else{
+                    $success = false;
+                    $message = 'Qty belum diisi. Silakan isi Qty terlebih dahulu.';
+                }
+            }else{
+                $success = false;
+                $message = 'No. SPK tidak ditemukan di Surat Perintah Kerja.';
+            }
         }else{
             throw new NotFoundHttpException('The requested data does not exist.');
         }
@@ -458,7 +563,7 @@ class RequestOrderController extends Controller
     public function actionDeleteTemp($id)
     {
         $success = true;
-        $message = '';
+        $message = 'DELETE TEMP SUCCESSFULLY';
         $temp = $this->findTemp($id);
         if(isset($temp)){
             if($temp->delete()){
@@ -472,7 +577,6 @@ class RequestOrderController extends Controller
                         $message = substr($message, 0, -2);
                     }
                 }
-                $message = 'DELETE TEMP SUCCESSFULLY';
             }else{
                 $success = false;
                 foreach($temp->errors as $error => $value){

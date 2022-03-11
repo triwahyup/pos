@@ -3,6 +3,7 @@
 namespace app\modules\sales\models;
 
 use Yii;
+use app\models\Profile;
 use app\models\User;
 use app\modules\master\models\MasterKode;
 use app\modules\sales\models\RequestOrder;

@@ -4,9 +4,9 @@ namespace app\modules\sales\models;
 
 use Yii;
 use app\modules\master\models\Profile;
-use app\modules\purchasing\models\RequestOrderApproval;
-use app\modules\purchasing\models\RequestOrderItem;
-use app\modules\purchasing\models\TempRequestOrderItem;
+use app\modules\sales\models\RequestOrderApproval;
+use app\modules\sales\models\RequestOrderItem;
+use app\modules\sales\models\TempRequestOrderItem;
 use yii\behaviors\TimestampBehavior;
 
 /**
@@ -14,7 +14,6 @@ use yii\behaviors\TimestampBehavior;
  *
  * @property string $no_request
  * @property string|null $tgl_request
- * @property string|null $no_spk
  * @property string|null $keterangan
  * @property int|null $user_id
  * @property int|null $post
@@ -46,10 +45,10 @@ class RequestOrder extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['no_request'], 'required'],
+            [['tgl_request'], 'required'],
             [['tgl_request'], 'safe'],
             [['user_id', 'post', 'status_approval', 'status', 'created_at', 'updated_at'], 'integer'],
-            [['no_request', 'no_spk'], 'string', 'max' => 12],
+            [['no_request'], 'string', 'max' => 12],
             [['keterangan'], 'string', 'max' => 128],
             [['no_request'], 'unique'],
             [['status'], 'default', 'value' => 1],
@@ -64,9 +63,8 @@ class RequestOrder extends \yii\db\ActiveRecord
         return [
             'no_request' => 'No Request',
             'tgl_request' => 'Tgl Request',
-            'no_spk' => 'No Spk',
             'keterangan' => 'Keterangan',
-            'user_id' => 'User ID',
+            'user_id' => 'User Request',
             'post' => 'Post',
             'status_approval' => 'Status Approval',
             'status' => 'Status',
@@ -105,6 +103,11 @@ class RequestOrder extends \yii\db\ActiveRecord
     public function getTemps()
     {
         return $this->hasMany(TempRequestOrderItem::className(), ['no_request' => 'no_request']);
+    }
+
+    public function temps()
+    {
+        return TempRequestOrderItem::findAll(['user_id' => \Yii::$app->user->id]);
     }
 
     public function getApprovals()

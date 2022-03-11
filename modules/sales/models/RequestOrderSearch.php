@@ -17,7 +17,7 @@ class RequestOrderSearch extends RequestOrder
     public function rules()
     {
         return [
-            [['no_request', 'tgl_request', 'no_spk', 'keterangan'], 'safe'],
+            [['no_request', 'tgl_request', 'keterangan'], 'safe'],
             [['user_id', 'post', 'status_approval', 'status', 'created_at', 'updated_at'], 'integer'],
         ];
     }
@@ -62,13 +62,12 @@ class RequestOrderSearch extends RequestOrder
             'user_id' => $this->user_id,
             'post' => $this->post,
             'status_approval' => $this->status_approval,
-            'status' => $this->status,
+            'status' => 1,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ]);
 
         $query->andFilterWhere(['like', 'no_request', $this->no_request])
-            ->andFilterWhere(['like', 'no_spk', $this->no_spk])
             ->andFilterWhere(['like', 'keterangan', $this->keterangan]);
 
         return $dataProvider;

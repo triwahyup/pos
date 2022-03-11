@@ -190,6 +190,8 @@ class Spk extends \yii\db\ActiveRecord
         }else if($this->status_produksi==2){
             $message = '<span class="text-label text-primary">In Progres</span>';
         }else if($this->status_produksi==3){
+            $message = '<span class="text-label text-success">Done</span>';
+        }else if($this->status_produksi==4){
             $message = '<span class="text-label text-success">Finish</span>';
         }
         return $message;

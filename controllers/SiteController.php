@@ -13,7 +13,7 @@ use app\models\User;
 use app\modules\inventory\models\InventoryOpnameApproval;
 use app\modules\purchasing\models\PurchaseInternalApproval;
 use app\modules\purchasing\models\PurchaseOrderApproval;
-use app\modules\produksi\models\SpkRequestItemApproval;
+use app\modules\sales\models\RequestOrderApproval;
 
 class SiteController extends Controller
 {
@@ -144,31 +144,31 @@ class SiteController extends Controller
         }
         // END PO INTERNAL
 
-        // REQUEST ITEM
-        // $requestItemApp = SpkRequestItemApproval::findAll(['status'=>2]);
-        // $countRequestItemApp=0;
-        // $listRequestItemApp = '';
-        // foreach($requestItemApp as $val){
-        //     $user = '';
-        //     if(!empty($val->user_id)){
-        //         if(!empty($val->user->profile)){
-        //             $user = $val->user->profile->name;
-        //         }
-        //     }
-        //     if(!empty($val->typeuser_code)){
-        //         $user = $val->typeUser->name;
-        //     }
+        // REQUEST ORDER
+        $requestOrderApp = RequestOrderApproval::findAll(['status'=>2]);
+        $countRequestOrderApp=0;
+        $listRequestOrderApp = '';
+        foreach($requestOrderApp as $val){
+            $user = '';
+            if(!empty($val->user_id)){
+                if(!empty($val->user->profile)){
+                    $user = $val->user->profile->name;
+                }
+            }
+            if(!empty($val->typeuser_code)){
+                $user = $val->typeUser->name;
+            }
             
-        //     if($val->user_id == \Yii::$app->user->id OR $val->typeuser_code == \Yii::$app->user->identity->profile->typeuser_code){
-        //         $userApproval = true;
-        //         $countRequestItemApp += 1;
-        //         $listRequestItemApp .= '<li><a href="'.\Yii::$app->params['URL'].'/produksi/request-item/view&no_request='.$val->no_request.'">'.$countRequestItemApp.'). Approval Request Item: '.$val->no_request.'<i>'.$user.'</i></a></li>';
-        //     }else{
-        //         $countRequestItemApp += 1;
-        //         $listRequestItemApp .= '<li><span>'.$countRequestItemApp.'). Approval Request Item: '.$val->no_request.'<i>'.$user.'</i></span></li>';
-        //     }
-        // }
-        // END REQUEST ITEM
+            if($val->user_id == \Yii::$app->user->id OR $val->typeuser_code == \Yii::$app->user->identity->profile->typeuser_code){
+                $userApproval = true;
+                $countRequestOrderApp += 1;
+                $listRequestOrderApp .= '<li><a href="'.\Yii::$app->params['URL'].'/sales/request-order/view&no_request='.$val->no_request.'">'.$countRequestOrderApp.'). Approval Request Order: '.$val->no_request.'<i>'.$user.'</i></a></li>';
+            }else{
+                $countRequestOrderApp += 1;
+                $listRequestOrderApp .= '<li><span>'.$countRequestOrderApp.'). Approval Request Order: '.$val->no_request.'<i>'.$user.'</i></span></li>';
+            }
+        }
+        // END REQUEST ORDER
         
         // STOCK OPNAME
         $stockOpnameApp = InventoryOpnameApproval::findAll(['status'=>2]);
@@ -204,9 +204,9 @@ class SiteController extends Controller
             'poInternalApp' => $poInternalApp,
             'countPoInternalApp' => $countPoInternalApp,
             'listPoInternalApp' => $listPoInternalApp,
-            'requestItemApp' => [],
-            'listRequestItemApp' => [],
-            'countRequestItemApp' => 0,
+            'requestOrderApp' => $requestOrderApp,
+            'listRequestOrderApp' => $listRequestOrderApp,
+            'countRequestOrderApp' => $countRequestOrderApp,
             'stockOpnameApp' => $stockOpnameApp,
             'countStockOpnameApp' => $countStockOpnameApp,
             'listStockOpnameApp' => $listStockOpnameApp,

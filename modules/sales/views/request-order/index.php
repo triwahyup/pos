@@ -48,12 +48,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 }
             ],
             [
-                'attribute' => 'no_spk',
-                'contentOptions' => [
-                    'class' => 'text-center',
-                ],
-            ],
-            [
                 'attribute' => 'post',
                 'format' => 'raw',
                 'contentOptions' => [
@@ -121,17 +115,17 @@ $this->params['breadcrumbs'][] = $this->title;
                 'buttons' => [
                     'view' => function ($url, $model) {
                         return Html::a(Helper::buttonIcons()['eye-open'],
-                            ['view', 'code'=>$model->code],
+                            ['view', 'no_request'=>$model->no_request],
                             ['title'=>'View', 'aria-label'=>'View', 'data-pjax'=>true]);
                     },
                     'update' => function ($url, $model) {
                         return Html::a(Helper::buttonIcons()['pencil'],
-                            ['update', 'code'=>$model->code],
+                            ['update', 'no_request'=>$model->no_request],
                             ['title'=>'Update', 'aria-label'=>'Update', 'data-pjax'=>true]);
                     },
                     'delete' => function ($url, $model) {
                         return Html::a(Helper::buttonIcons()['trash'],
-                            ['delete', 'code'=>$model->code],
+                            ['delete', 'no_request'=>$model->no_request],
                             [
                                 'title'=>'Delete',
                                 'aria-label'=>'Delete', 

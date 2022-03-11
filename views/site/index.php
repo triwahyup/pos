@@ -64,13 +64,13 @@ $this->params['breadcrumbs'][] = "Dashboard";
                 </div>
                 <div class="cube-right">
                     <?php if($userApproval): ?>
-                        <?='<p>(Request Item) Anda memiliki request '.$countRequestItemApp.' approval</p>'?>
+                        <?='<p>(Request Order) Anda memiliki request '.$countRequestOrderApp.' approval</p>'?>
                     <?php else: ?>
-                        <p>Request Item List Approval:</p>
+                        <p>Request Order List Approval:</p>
                     <?php endif; ?>
                     <ul>
-                        <?php if($countRequestItemApp > 0): ?>
-                            <?=$listRequestItemApp?>
+                        <?php if($countRequestOrderApp > 0): ?>
+                            <?=$listRequestOrderApp?>
                         <?php else: ?>
                             <li>
                                 <span>Request Approval is Empty.</span>
