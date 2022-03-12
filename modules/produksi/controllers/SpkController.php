@@ -425,6 +425,7 @@ class SpkController extends Controller
             }else{
                 $data = SalesOrderPotong::find()
                     ->select(['concat(panjang, "x", lebar) as name', 'urutan as potong_id'])
+                    ->where(['code'=>$model->no_so])
                     ->asArray()
                     ->all();
             }
