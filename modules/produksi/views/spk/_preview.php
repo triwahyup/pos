@@ -73,16 +73,18 @@
                             </td>
                         </tr>
                     <?php endif; ?>
-                    <tr>
-                        <th class="text-left" width="80">Mesin</th>
-                        <th class="text-center" width="20">:</th>
-                        <td class="text-left"><?=(!empty($spkDetail->mesin)) ? $spkDetail->mesin->name : '-' ?></td>
-                    </tr>
-                    <tr>
-                        <th class="text-left" width="80">Operator</th>
-                        <th class="text-center" width="20">:</th>
-                        <td class="text-left"><?=(!empty($spkDetail->operator)) ? $spkDetail->operator->name : '-' ?></td>
-                    </tr>
+                    <?php if(empty($spkDetail->outsource_code)): ?>
+                        <tr>
+                            <th class="text-left" width="80">Mesin</th>
+                            <th class="text-center" width="20">:</th>
+                            <td class="text-left"><?=(!empty($spkDetail->mesin)) ? $spkDetail->mesin->name : '-' ?></td>
+                        </tr>
+                        <tr>
+                            <th class="text-left" width="80">Operator</th>
+                            <th class="text-center" width="20">:</th>
+                            <td class="text-left"><?=(!empty($spkDetail->operator)) ? $spkDetail->operator->name : '-' ?></td>
+                        </tr>
+                    <?php endif; ?>
                     <tr>
                         <th class="text-left" width="80">Keterangan</th>
                         <th class="text-center" width="20">:</th>
@@ -111,3 +113,81 @@
         </div>
     </div>
 </div>
+<!-- SJ Outsource -->
+<?php if(!empty($spkDetail->outsource_code)): ?>
+    <div class="page-wrapper">
+        <div class="page-layout">
+            <div class="page-header">
+                <h3>SURAT JALAN OUTSOURCE</h3>
+                <table class="table-inline">
+                    <tr>
+                        <th class="text-left">No. SJ</th>
+                        <td class="text-center" width="10">:</td>
+                        <td><?='OS/'.$spkDetail->no_sj ?></td>
+                    </tr>
+                    <tr>
+                        <th class="text-left">Tanggal</th>
+                        <td class="text-center" width="10">:</td>
+                        <td><?=$spkDetail->tgl_spk ?></td>
+                    </tr>
+                    <tr>
+                        <th class="text-left">No. Pol</th>
+                        <td class="text-center" width="10">:</td>
+                        <td><?=$spkDetail->nopol ?></td>
+                    </tr>
+                </table>
+                <table class="table-inline">
+                    <tr>
+                        <th>Outsource Partner</th>
+                        <td class="text-center" width="10">:</td>
+                        <td>
+                            <?=$spkDetail->outsource->name ?>
+                            <br />
+                            <?=(!empty($spkDetail->outsource->address)) ? $spkDetail->outsource->address : '-' ?>
+                            <br />
+                            <?=(!empty($spkDetail->outsource->kabupaten)) ? str_replace('KABUPATEN', '', $spkDetail->outsource->kabupaten->name) : '-' ?>
+                            <br />
+                            <?=(!empty($spkDetail->outsource->phone_1)) ? 'HP: '.$spkDetail->outsource->phone_1 : '-' ?>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div class="page-body margin-top-0">
+                <table class="table-border">
+                    <thead>
+                        <tr>
+                            <th class="text-center" width="250">Job</th>
+                            <th class="text-center" width="100">Proses</th>
+                            <th class="text-center">Jumlah</th>
+                            <th class="text-center" width="180">Keterangan</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="padding-bottom-220"><?=$model->name ?></td>
+                            <td class="padding-bottom-220 text-center"><?=$spkDetail->proses->name ?></td>
+                            <td class="padding-bottom-220 text-center"><?=number_format($spkDetail->qty_proses, 0, ',', '.').' Lembar' ?></td>
+                            <td class="padding-bottom-220"><?=(!empty($spkDetail->keterangan)) ? $spkDetail->keterangan : '-' ?></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="page-footer">
+                <table>
+                    <tr>
+                        <th class="padding-bottom-60 text-center" width="200">Penerima</th>
+                        <th class="padding-bottom-60 text-center" width="200">Yang Membuat</th>
+                        <th class="padding-bottom-60 text-center" width="200">Gudang</th>
+                        <th class="padding-bottom-60 text-center" width="200">Hormat Kami</th>
+                    </tr>
+                    <tr>
+                        <th class="text-center" width="200"><?='('.str_repeat('.', 30).')'?></th>
+                        <th class="text-center" width="200"><?='('.str_repeat('.', 30).')'?></th>
+                        <th class="text-center" width="200"><?='('.str_repeat('.', 30).')'?></th>
+                        <th class="text-center" width="200"><?='('.str_repeat('.', 30).')'?></th>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+<?php endif; ?>

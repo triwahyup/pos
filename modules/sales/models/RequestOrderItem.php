@@ -3,6 +3,7 @@
 namespace app\modules\sales\models;
 
 use Yii;
+use app\modules\inventory\models\InventoryStockItem;
 use app\modules\master\models\MasterMaterialItem;
 use yii\behaviors\TimestampBehavior;
 
@@ -110,5 +111,10 @@ class RequestOrderItem extends \yii\db\ActiveRecord
     public function getItem()
     {
         return $this->hasOne(MasterMaterialItem::className(), ['code' => 'item_code']);
+    }
+
+    public function getInventoryStock()
+    {
+        return $this->hasOne(InventoryStockItem::className(), ['item_code' => 'item_code']);
     }
 }

@@ -48,28 +48,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 }
             ],
             [
-                'attribute' => 'post',
-                'format' => 'raw',
-                'contentOptions' => [
-                    'class' => 'text-center',
-                ],
-                'value' => function($model, $index, $key)
-                {
-                    return $model->statusPost;
-                }
-            ],
-            [
-                'attribute' => 'status_approval',
-                'label' => 'Approval',
-                'contentOptions' => [
-                    'class' => 'text-center',
-                ],
-                'format' => 'raw',
-                'value' => function ($model, $index, $key) { 
-                    return $model->statusApproval;
-                }
-            ],
-            [
                 'attribute' => 'created_at',
                 'contentOptions' => [
                     'class' => 'text-center',
@@ -109,6 +87,28 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => function($model, $index, $key)
                 {
                     return date('d-m-Y', $model->updated_at);
+                }
+            ],
+            [
+                'attribute' => 'post',
+                'format' => 'raw',
+                'contentOptions' => [
+                    'class' => 'text-center',
+                ],
+                'value' => function($model, $index, $key)
+                {
+                    return $model->statusPost;
+                }
+            ],
+            [
+                'attribute' => 'status_approval',
+                'label' => 'Approval',
+                'contentOptions' => [
+                    'class' => 'text-center',
+                ],
+                'format' => 'raw',
+                'value' => function ($model, $index, $key) { 
+                    return $model->statusApproval;
                 }
             ],
             [

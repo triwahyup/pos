@@ -5,6 +5,7 @@ namespace app\modules\sales\controllers;
 use app\models\Logs;
 use app\models\LogsMail;
 use app\models\User;
+use app\modules\inventory\models\InventoryStockTransaction;
 use app\modules\master\models\MasterMaterialItem;
 use app\modules\pengaturan\models\PengaturanApproval;
 use app\modules\produksi\models\Spk;
@@ -977,5 +978,103 @@ class RequestOrderController extends Controller
 			$message = 'Pengaturan Approval belum di setting.';
         }
         return json_encode(['success'=>$success, 'message'=>$message]);
+    }
+
+    public function actionPost($no_request)
+    {
+        $success = true;
+		$message = '';
+        $model = $this->findModel($no_request);
+        if(isset($model)){
+            $connection = \Yii::$app->db;
+            $transaction = $connection->beginTransaction();
+            try{
+                $model->post=1;
+                if($model->save()){
+                    // PROSES KURANG STOK
+                    $stock = 0;
+                    foreach($model->items as $val){
+                        $stockItem = $val->inventoryStock;
+                        if(isset($stockItem)){
+                            $stock = $stockItem->satuanTerkecil($val->item_code, [
+                                0=>$val->qty_order_1,
+                                1=>$val->qty_order_2
+                            ]);
+                            if($stockItem->onhand > $stock){
+                                $stockItem->onhand = $stockItem->onhand - $stock;
+                                $stockItem->onsales = $stockItem->onsales + $stock;
+                                if(!$stockItem->save()){
+                                    $success = false;
+                                    $message = (count($stockItem->errors) > 0) ? 'ERROR UPDATE STOCK ITEM: ' : '';
+                                    foreach($stockItem->errors as $error => $value){
+                                        $message .= strtoupper($value[0].', ');
+                                    }
+                                    $message = substr($message, 0, -2);
+                                }
+
+                                $stockTransaction = new InventoryStockTransaction();
+                                $stockTransaction->attributes = $stockItem->attributes;
+                                $stockTransaction->no_document = $model->no_request;
+                                $stockTransaction->tgl_document = $model->tgl_request;
+                                $stockTransaction->type_document = "REQUEST ORDER";
+                                $stockTransaction->status_document = "OUT";
+                                $stockTransaction->qty_out = $stock;
+                                if(!$stockTransaction->save()){
+                                    $success = false;
+                                    $message = (count($stockTransaction->errors) > 0) ? 'ERROR UPDATE STOCK TRANSACTION: ' : '';
+                                    foreach($stockTransaction->errors as $error => $value){
+                                        $message .= strtoupper($value[0].', ');
+                                    }
+                                    $message = substr($message, 0, -2);
+                                }
+                            }else{
+                                $success = false;
+                                $message = 'SISA STOCK ITEM '.$val->item_code.' TIDAK MENCUKUPI. SISA '.$stockItem->onhand;
+                            }
+                        }else{
+                            $success = false;
+                            $message = 'STOCK ITEM '.$val->item_code.' TIDAK DITEMUKAN.';
+                        }
+                    }
+                }else{
+                    $success = false;
+                    $message = (count($model->errors) > 0) ? 'ERROR POST REQUEST ORDER TO SPK: ' : '';
+                    foreach($model->errors as $error => $value){
+                        $message .= strtoupper($value[0].', ');
+                    }
+                    $message = substr($message, 0, -2);
+                }
+
+                if($success){
+                    $message = '['.$model->no_request.'] SUCCESS POST REQUEST ORDER TO SPK.';
+                    $transaction->commit();
+                    $logs =	[
+                        'type' => Logs::TYPE_USER,
+                        'description' => $message,
+                    ];
+                    Logs::addLog($logs);
+                    \Yii::$app->session->setFlash('success', $message);
+                    return $this->redirect(['view', 'no_request' => $model->no_request]);
+                }else{
+                    $transaction->rollBack();
+                }
+            }catch(Exception $e){
+                $success = false;
+                $message = $e->getMessage();
+                $transaction->rollBack();
+            }
+            $logs =	[
+                'type' => Logs::TYPE_USER,
+                'description' => $message,
+            ];
+            Logs::addLog($logs);
+        }else{
+            $success = false;
+            $message = 'Data Request Order not valid.';
+        }
+        if(!$success){
+            \Yii::$app->session->setFlash('error', $message);
+        }
+        return $this->redirect(['view', 'no_request' => $model->no_request]);
     }
 }

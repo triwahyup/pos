@@ -50,7 +50,7 @@ class SpkDetail extends \yii\db\ActiveRecord
             [['no_spk', 'item_code', 'proses_code', 'mesin_code', 'qty_proses', 'user_id', 'uk_potong'], 'required'],
             [['status_produksi', 'potong_id', 'urutan', 'proses_type', 'user_id', 'status', 'created_at', 'updated_at'], 'integer'],
             [['qty_hasil', 'qty_rusak', 'qty_proses', 'tgl_spk', 'gram'], 'safe'],
-            [['no_spk', 'uk_potong'], 'string', 'max' => 12],
+            [['no_spk', 'uk_potong', 'no_sj', 'nopol'], 'string', 'max' => 12],
             [['item_code'], 'string', 'max' => 7],
             [['proses_code', 'mesin_code', 'mesin_type', 'outsource_code'], 'string', 'max' => 3],
             [['keterangan'], 'string', 'max' => 128],
