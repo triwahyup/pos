@@ -147,6 +147,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         <th class="text-center">Uk. Potong</th>
                         <th class="text-center">Mesin</th>
                         <th class="text-center">Operator</th>
+                        <th class="text-center">Outsource</th>
                         <th class="text-center">Qty Proses</th>
                         <th class="text-center">Qty Hasil</th>
                         <th class="text-center">Qty Rusak</th>
@@ -161,8 +162,9 @@ $this->params['breadcrumbs'][] = $this->title;
                                 <td class="text-center"><?=date('d-m-Y', strtotime($val->tgl_spk)) ?></td>
                                 <td><?=(isset($val->proses)) ? $val->proses->name : '' ?></td>
                                 <td class="text-center"><?=$val->uk_potong ?></td>
-                                <td><?=(isset($val->mesin)) ? $val->mesin->name : '' ?></td>
-                                <td><?=(isset($val->operator)) ? $val->operator->name : '' ?></td>
+                                <td><?=(isset($val->mesin)) ? $val->mesin->name : '-' ?></td>
+                                <td><?=(isset($val->operator)) ? $val->operator->name : '-' ?></td>
+                                <td><?=(isset($val->outsource)) ? $val->outsource->name : '-' ?></td>
                                 <td class="text-right"><?=number_format($val->qty_proses).' LB' ?></td>
                                 <td class="text-right"><?=number_format($val->qty_hasil).' LB' ?></td>
                                 <td class="text-right"><?=number_format($val->qty_rusak).' LB' ?></td>

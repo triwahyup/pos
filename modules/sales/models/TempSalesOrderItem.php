@@ -203,10 +203,7 @@ class TempSalesOrderItem extends \yii\db\ActiveRecord
             $total_order += $this->qty_order_1 * $this->harga_jual_1;
         }
         if(!empty($this->qty_order_2)){
-            $total_order += $this->qty_order_2 * $this->harga_jual_2;
-        }
-        if(!empty($this->qty_order_3)){
-            $total_order += $this->qty_order_3 * $this->harga_jual_3;
+            $total_order += ($this->qty_order_2 / 1000) * $this->harga_jual_2;
         }
         return $total_order;
     }

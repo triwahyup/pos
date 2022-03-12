@@ -103,25 +103,12 @@ $this->params['breadcrumbs'][] = $this->title;
                             ['update', 'code'=>$model->code],
                             ['title'=>'Update', 'aria-label'=>'Update', 'data-pjax'=>true]);
                     },
-                    'delete' => function ($url, $model) {
-                        return Html::a(Helper::buttonIcons()['trash'],
-                            ['delete', 'code'=>$model->code],
-                            [
-                                'title'=>'Delete',
-                                'aria-label'=>'Delete', 
-                                'data-pjax'=>true,
-                                'data' => [
-                                    'confirm' => 'Are you sure you want to delete this item?',
-                                    'method' => 'post',
-                                ],
-                            ]);
-                    },
                 ],
                 'class' => 'yii\grid\ActionColumn',
                 'contentOptions' => [
                     'class' => 'text-center column-action',
                 ],
-                'template' => '{view} {update} {delete}',
+                'template' => '{view} {update}',
             ],
         ],
     ]); ?>

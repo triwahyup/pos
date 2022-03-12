@@ -5,11 +5,12 @@ namespace app\modules\produksi\models;
 use Yii;
 use app\models\Profile;
 use app\modules\master\models\MasterMesin;
+use app\modules\master\models\MasterPerson;
 use app\modules\master\models\MasterProses;
 use yii\behaviors\TimestampBehavior;
 
 /**
- * This is the model class for table "spk_produksi".
+ * This is the model class for table "spk_detail".
  *
  * @property string $no_spk
  * @property string $item_code
@@ -23,14 +24,14 @@ use yii\behaviors\TimestampBehavior;
  * @property int|null $created_at
  * @property int|null $updated_at
  */
-class SpkProduksi extends \yii\db\ActiveRecord
+class SpkDetail extends \yii\db\ActiveRecord
 {
     /**
      * {@inheritdoc}
      */
     public static function tableName()
     {
-        return 'spk_produksi';
+        return 'spk_detail';
     }
 
     public function behaviors()
@@ -46,12 +47,12 @@ class SpkProduksi extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['no_spk', 'item_code', 'proses_code', 'mesin_code', 'mesin_type', 'qty_proses', 'user_id', 'uk_potong'], 'required'],
+            [['no_spk', 'item_code', 'proses_code', 'mesin_code', 'qty_proses', 'user_id', 'uk_potong'], 'required'],
             [['status_produksi', 'potong_id', 'urutan', 'proses_type', 'user_id', 'status', 'created_at', 'updated_at'], 'integer'],
             [['qty_hasil', 'qty_rusak', 'qty_proses', 'tgl_spk', 'gram'], 'safe'],
             [['no_spk', 'uk_potong'], 'string', 'max' => 12],
             [['item_code'], 'string', 'max' => 7],
-            [['proses_code', 'mesin_code', 'mesin_type'], 'string', 'max' => 3],
+            [['proses_code', 'mesin_code', 'mesin_type', 'outsource_code'], 'string', 'max' => 3],
             [['keterangan'], 'string', 'max' => 128],
             [['no_spk', 'item_code', 'potong_id', 'urutan'], 'unique', 'targetAttribute' => ['no_spk', 'item_code', 'potong_id', 'urutan']],
             [['status'], 'default', 'value' => 1],
@@ -66,15 +67,17 @@ class SpkProduksi extends \yii\db\ActiveRecord
         return [
             'no_spk' => 'No Spk',
             'item_code' => 'Item Code',
-            'proses_code' => 'Proses Code',
+            'proses_code' => 'Produksi',
             'proses_type' => 'Proses Type',
-            'mesin_code' => 'Mesin Code',
+            'mesin_code' => 'Mesin',
             'mesin_type' => 'Mesin Type',
             'qty_hasil' => 'Qty Hasil',
             'keterangan' => 'Keterangan',
             'status' => 'Status',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
+            'outsource_code' => 'Outsource',
+            'user_id' => 'Operator Mesin',
         ];
     }
 
@@ -89,7 +92,7 @@ class SpkProduksi extends \yii\db\ActiveRecord
 
     public function getQtyProses()
     {
-        $models = SpkProduksi::find()
+        $models = SpkDetail::find()
             ->where(['no_spk'=>$this->no_spk, 'item_code'=>$this->item_code, 'potong_id'=>$this->potong_id, 'proses_code'=>$this->proses_code])
             ->all();
         $total = 0;
@@ -105,12 +108,12 @@ class SpkProduksi extends \yii\db\ActiveRecord
 
     public function getCount()
     {
-        return SpkProduksi::find()->where(['no_spk'=>$this->no_spk, 'item_code'=>$this->item_code, 'potong_id'=>$this->potong_id])->count();
+        return SpkDetail::find()->where(['no_spk'=>$this->no_spk, 'item_code'=>$this->item_code, 'potong_id'=>$this->potong_id])->count();
     }
 
     public function getAlls()
     {
-        return SpkProduksi::find()->where(['no_spk'=>$this->no_spk, 'item_code'=>$this->item_code, 'potong_id'=>$this->potong_id])->all();
+        return SpkDetail::find()->where(['no_spk'=>$this->no_spk, 'item_code'=>$this->item_code, 'potong_id'=>$this->potong_id])->all();
     }
 
     public function getMesin()
@@ -128,6 +131,11 @@ class SpkProduksi extends \yii\db\ActiveRecord
         return $this->hasOne(Profile::className(), ['user_id' => 'user_id']);
     }
 
+    public function getOutsource()
+    {
+        return $this->hasOne(MasterPerson::className(), ['code' => 'outsource_code']);
+    }
+
     public function getStatusProduksi()
     {
         $message = '';
@@ -138,6 +146,8 @@ class SpkProduksi extends \yii\db\ActiveRecord
         }else if($this->status_produksi==3){
             $message = '<span class="text-label text-success">Done</span>';
         }else if($this->status_produksi==4){
+            $message = '<span class="text-label text-warning">Done Sebagian</span>';
+        }else if($this->status_produksi==5){
             $message = '<span class="text-label text-danger">Rusak Sebagian</span>';
         }
         return $message;

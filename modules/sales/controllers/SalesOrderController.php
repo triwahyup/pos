@@ -90,8 +90,15 @@ class SalesOrderController extends Controller
      */
     public function actionView($code)
     {
+        $model = $this->findModel($code);
+        $cancelOrder = false;
+        $spk = Spk::findOne(['no_so'=>$code, 'status_produksi'=>1]);
+        if(!empty($spk)){
+            $cancelOrder = true;
+        }
         return $this->render('view', [
-            'model' => $this->findModel($code),
+            'model' => $model,
+            'cancelOrder' => $cancelOrder,
         ]);
     }
 
@@ -384,44 +391,49 @@ class SalesOrderController extends Controller
                 \Yii::$app->session->setFlash('error', 'Dokumen ini sudah di Proses SPK.');
                 return $this->redirect(['index']);
             }else{
-                $this->emptyTemp();
-                foreach($model->items as $detail){
-                    $tempItem = new TempSalesOrderItem();
-                    $tempItem->attributes = $detail->attributes;
-                    $tempItem->user_id = \Yii::$app->user->id;
-                    if(!$tempItem->save()){
-                        $message = (count($tempItem->errors) > 0) ? 'ERROR LOAD SALES ORDER ITEM: ' : '';
-                        foreach($tempItem->errors as $error => $value){
-                            $message .= strtoupper($value[0].', ');
+                if($model->status == 0){
+                    \Yii::$app->session->setFlash('error', 'Dokumen ini telah di Cancel Order.');
+                    return $this->redirect(['index']);
+                }else{
+                    $this->emptyTemp();
+                    foreach($model->items as $detail){
+                        $tempItem = new TempSalesOrderItem();
+                        $tempItem->attributes = $detail->attributes;
+                        $tempItem->user_id = \Yii::$app->user->id;
+                        if(!$tempItem->save()){
+                            $message = (count($tempItem->errors) > 0) ? 'ERROR LOAD SALES ORDER ITEM: ' : '';
+                            foreach($tempItem->errors as $error => $value){
+                                $message .= strtoupper($value[0].', ');
+                            }
+                            $message = substr($message, 0, -2);
+                            \Yii::$app->session->setFlash('error', $message);
                         }
-                        $message = substr($message, 0, -2);
-                        \Yii::$app->session->setFlash('error', $message);
                     }
-                }
-                foreach($model->potongs as $detail){
-                    $tempPotong = new TempSalesOrderPotong();
-                    $tempPotong->attributes = $detail->attributes;
-                    $tempPotong->user_id = \Yii::$app->user->id;
-                    if(!$tempPotong->save()){
-                        $message = (count($tempPotong->errors) > 0) ? 'ERROR LOAD SALES ORDER POTONG: ' : '';
-                        foreach($tempPotong->errors as $error => $value){
-                            $message .= strtoupper($value[0].', ');
+                    foreach($model->potongs as $detail){
+                        $tempPotong = new TempSalesOrderPotong();
+                        $tempPotong->attributes = $detail->attributes;
+                        $tempPotong->user_id = \Yii::$app->user->id;
+                        if(!$tempPotong->save()){
+                            $message = (count($tempPotong->errors) > 0) ? 'ERROR LOAD SALES ORDER POTONG: ' : '';
+                            foreach($tempPotong->errors as $error => $value){
+                                $message .= strtoupper($value[0].', ');
+                            }
+                            $message = substr($message, 0, -2);
+                            \Yii::$app->session->setFlash('error', $message);
                         }
-                        $message = substr($message, 0, -2);
-                        \Yii::$app->session->setFlash('error', $message);
                     }
-                }
-                foreach($model->proses as $detail){
-                    $tempProses = new TempSalesOrderProses();
-                    $tempProses->attributes = $detail->attributes;
-                    $tempProses->user_id = \Yii::$app->user->id;
-                    if(!$tempProses->save()){
-                        $message = (count($tempProses->errors) > 0) ? 'ERROR LOAD SALES ORDER PROSES PRODUKSI: ' : '';
-                        foreach($tempProses->errors as $error => $value){
-                            $message .= strtoupper($value[0].', ');
+                    foreach($model->proses as $detail){
+                        $tempProses = new TempSalesOrderProses();
+                        $tempProses->attributes = $detail->attributes;
+                        $tempProses->user_id = \Yii::$app->user->id;
+                        if(!$tempProses->save()){
+                            $message = (count($tempProses->errors) > 0) ? 'ERROR LOAD SALES ORDER PROSES PRODUKSI: ' : '';
+                            foreach($tempProses->errors as $error => $value){
+                                $message .= strtoupper($value[0].', ');
+                            }
+                            $message = substr($message, 0, -2);
+                            \Yii::$app->session->setFlash('error', $message);
                         }
-                        $message = substr($message, 0, -2);
-                        \Yii::$app->session->setFlash('error', $message);
                     }
                 }
             }
@@ -454,16 +466,114 @@ class SalesOrderController extends Controller
 			$transaction = $connection->beginTransaction();
             try{
                 if($model->post == 1){
-                    \Yii::$app->session->setFlash('error', 'Dokumen ini sudah di Proses SPK.');
-                    return $this->redirect(['index']);
-                }else{
+                    $spk = Spk::findOne(['no_so'=>$model->code, 'status_produksi'=>1]);
+                    if(!empty($spk)){
+                        $spk->status = 0;
+                        if($spk->save()){
+                            // PROSES KEMBALIKAN STOK
+                            $stock = 0;
+                            foreach($model->items as $val){
+                                $stockItem = $val->inventoryStock;
+                                if(isset($stockItem)){
+                                    $stock = $stockItem->satuanTerkecil($val->item_code, [
+                                        0=>$val->qty_order_1,
+                                        1=>$val->qty_order_2
+                                    ]);
+                                    
+                                    $stockItem->onhand = $stockItem->onhand + $stock;
+                                    $stockItem->onsales = $stockItem->onsales - $stock;
+                                    if(!$stockItem->save()){
+                                        $success = false;
+                                        $message = (count($stockItem->errors) > 0) ? 'ERROR UPDATE STOCK ITEM: ' : '';
+                                        foreach($stockItem->errors as $error => $value){
+                                            $message .= strtoupper($value[0].', ');
+                                        }
+                                        $message = substr($message, 0, -2);
+                                    }
+    
+                                    $stockTransaction = new InventoryStockTransaction();
+                                    $stockTransaction->attributes = $stockItem->attributes;
+                                    $stockTransaction->no_document = $model->code;
+                                    $stockTransaction->tgl_document = $model->tgl_so;
+                                    $stockTransaction->type_document = "CANCEL ORDER";
+                                    $stockTransaction->status_document = "IN";
+                                    $stockTransaction->qty_in = $stock;
+                                    if(!$stockTransaction->save()){
+                                        $success = false;
+                                        $message = (count($stockTransaction->errors) > 0) ? 'ERROR UPDATE STOCK TRANSACTION: ' : '';
+                                        foreach($stockTransaction->errors as $error => $value){
+                                            $message .= strtoupper($value[0].', ');
+                                        }
+                                        $message = substr($message, 0, -2);
+                                    }
+                                }else{
+                                    $success = false;
+                                    $message = 'STOCK ITEM '.$val->item_code.' TIDAK DITEMUKAN.';
+                                }
+                            }
+                            // PROSES KEMBALIKAN STOK UP PRODUKSI (%)
+                            $stock = 0;
+                            foreach($model->itemsMaterial as $val){
+                                $stockItem = $val->inventoryStock;
+                                if(isset($stockItem)){
+                                    $stock = $stockItem->satuanTerkecil($val->item_code, [
+                                        0=>$val->qty_order_1,
+                                        1=>$val->qty_order_2
+                                    ]);
+                                }
+                            }
+                            if(!empty($model->up_produksi) || $model->up_produksi != 0){
+                                $upproduksi = $stock * ($model->up_produksi/100);
+                                $stockItem->onhand = $stockItem->onhand + $upproduksi;
+                                $stockItem->onsales = $stockItem->onsales - $upproduksi;
+                                if(!$stockItem->save()){
+                                    $success = false;
+                                    $message = (count($stockItem->errors) > 0) ? 'ERROR UPDATE STOCK ITEM (UP PRODUKSI): ' : '';
+                                    foreach($stockItem->errors as $error => $value){
+                                        $message .= strtoupper($value[0].', ');
+                                    }
+                                    $message = substr($message, 0, -2);
+                                }
+    
+                                $stockTransaction = new InventoryStockTransaction();
+                                $stockTransaction->attributes = $stockItem->attributes;
+                                $stockTransaction->no_document = $model->code;
+                                $stockTransaction->tgl_document = $model->tgl_so;
+                                $stockTransaction->type_document = "CANCEL ORDER";
+                                $stockTransaction->status_document = "IN (UP PRODUKSI ".$model->up_produksi." %)";
+                                $stockTransaction->qty_in = $upproduksi;
+                                if(!$stockTransaction->save()){
+                                    $success = false;
+                                    $message = (count($stockTransaction->errors) > 0) ? 'ERROR UPDATE STOCK TRANSACTION (UP PRODUKSI): ' : '';
+                                    foreach($stockTransaction->errors as $error => $value){
+                                        $message .= strtoupper($value[0].', ');
+                                    }
+                                    $message = substr($message, 0, -2);
+                                }
+                            }
+                        }else{
+                            $success = false;
+                            $message = (count($spk->errors) > 0) ? 'ERROR UPDATE SPK: ' : '';
+                            foreach($spk->errors as $error => $value){
+                                $message .= $value[0].', ';
+                            }
+                            $message = substr($message, 0, -2);
+                        }
+                    }else{
+                        $success = false;
+                        $message = 'Dokumen ini sudah tidak bisa di cancel order. Proses produksi sudah berjalan.';
+                    }
+                }
+
+                if($success){
                     $model->status = 0;
+                    $model->post = 2;
                     if($model->save()){
                         foreach($model->items as $item){
                             $item->status = 0;
                             if(!$item->save()){
                                 $success = false;
-                                $message = (count($item->errors) > 0) ? 'ERROR DELETE ITEM SALES ORDER: ' : '';
+                                $message = (count($item->errors) > 0) ? 'ERROR CANCEL ITEM SALES ORDER: ' : '';
                                 foreach($item->errors as $error => $value){
                                     $message .= $value[0].', ';
                                 }
@@ -474,7 +584,7 @@ class SalesOrderController extends Controller
                             $potong->status = 0;
                             if(!$potong->save()){
                                 $success = false;
-                                $message = (count($potong->errors) > 0) ? 'ERROR DELETE POTONG SALES ORDER: ' : '';
+                                $message = (count($potong->errors) > 0) ? 'ERROR CANCEL POTONG SALES ORDER: ' : '';
                                 foreach($potong->errors as $error => $value){
                                     $message .= $value[0].', ';
                                 }
@@ -485,7 +595,7 @@ class SalesOrderController extends Controller
                             $proses->status = 0;
                             if(!$proses->save()){
                                 $success = false;
-                                $message = (count($proses->errors) > 0) ? 'ERROR DELETE PROSES PRODUKSI SALES ORDER: ' : '';
+                                $message = (count($proses->errors) > 0) ? 'ERROR CANCEL PROSES PRODUKSI SALES ORDER: ' : '';
                                 foreach($proses->errors as $error => $value){
                                     $message .= $value[0].', ';
                                 }
@@ -494,21 +604,21 @@ class SalesOrderController extends Controller
                         }
                     }else{
                         $success = false;
-                        $message = (count($model->errors) > 0) ? 'ERROR DELETE SALES ORDER: ' : '';
+                        $message = (count($model->errors) > 0) ? 'ERROR CANCEL SALES ORDER: ' : '';
                         foreach($model->errors as $error => $value){
                             $message .= $value[0].', ';
                         }
                         $message = substr($message, 0, -2);
                     }
+                }
 
-                    if($success){
-                        $transaction->commit();
-                        $message = '['.$model->code.'] SUCCESS DELETE SALES ORDER.';
-                        \Yii::$app->session->setFlash('success', $message);
-                    }else{
-                        $transaction->rollBack();
-                        \Yii::$app->session->setFlash('error', $message);
-                    }
+                if($success){
+                    $transaction->commit();
+                    $message = '['.$model->code.'] SUCCESS CANCEL SALES ORDER.';
+                    \Yii::$app->session->setFlash('success', $message);
+                }else{
+                    $transaction->rollBack();
+                    \Yii::$app->session->setFlash('error', $message);
                 }
             }catch(\Exception $e){
 				$success = false;
@@ -848,12 +958,24 @@ class SalesOrderController extends Controller
                         $tempPotong->user_id = \Yii::$app->user->id;
                         $tempPotong->total_objek = $tempItem->jumlahCetak * $tempPotong->objek;
                         if($tempPotong->countTemp < $tempItem->total_potong){
-                            if(!$tempPotong->save()){
-                                $success = false;
-                                foreach($tempPotong->errors as $error => $value){
-                                    $message = $value[0].', ';
+                            if($tempItem->item->panjang == $dataPotong['panjang']){
+                                $checkUkPotong = $tempPotong->checkUkPotong($code, $tempItem->item_code);
+                                if($tempItem->item->lebar >= $checkUkPotong['total_lebar']){
+                                    $tempPotong->waste = $checkUkPotong['waste'];
+                                    if(!$tempPotong->save()){
+                                        $success = false;
+                                        foreach($tempPotong->errors as $error => $value){
+                                            $message = $value[0].', ';
+                                        }
+                                        $message = substr($message, 0, -2);
+                                    }
+                                }else{
+                                    $success = false;
+                                    $message = 'Lebar tidak boleh lebih dari sisa potong. Sisa potong '.$checkUkPotong['sisa_potong'];
                                 }
-                                $message = substr($message, 0, -2);
+                            }else{
+                                $success = false;
+                                $message = 'Panjang tidak boleh lebih / kurang dari '.$tempItem->item->panjang;
                             }
                         }else{
                             $success = false;

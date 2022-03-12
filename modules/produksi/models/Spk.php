@@ -9,7 +9,7 @@ use app\modules\master\models\MasterPerson;
 use app\modules\sales\models\SalesOrderItem;
 use app\modules\sales\models\SalesOrderPotong;
 use app\modules\sales\models\SalesOrderProses;
-use app\modules\produksi\models\SpkProduksi;
+use app\modules\produksi\models\SpkDetail;
 use yii\behaviors\TimestampBehavior;
 
 /**
@@ -128,21 +128,21 @@ class Spk extends \yii\db\ActiveRecord
 
     public function getProduksiInAlls()
     {
-        return $this->hasMany(SpkProduksi::className(), ['no_spk' => 'no_spk'])
+        return $this->hasMany(SpkDetail::className(), ['no_spk' => 'no_spk'])
             ->orderBy(['no_spk'=>SORT_ASC, 'created_at' => SORT_ASC]);
     }
 
     public $onStart = 1;
     public function getProduksiOnStarts()
     {
-        return $this->hasMany(SpkProduksi::className(), ['no_spk' => 'no_spk', 'status_produksi' => 'onStart'])
+        return $this->hasMany(SpkDetail::className(), ['no_spk' => 'no_spk', 'status_produksi' => 'onStart'])
             ->orderBy(['no_spk'=>SORT_ASC, 'created_at' => SORT_ASC]);
     }
 
     public $inProgress = 2;
     public function getProduksiInProgress()
     {
-        return $this->hasMany(SpkProduksi::className(), ['no_spk' => 'no_spk', 'status_produksi' => 'inProgress'])
+        return $this->hasMany(SpkDetail::className(), ['no_spk' => 'no_spk', 'status_produksi' => 'inProgress'])
             ->orderBy(['no_spk'=>SORT_ASC, 'created_at' => SORT_ASC]);
     }
 
@@ -154,6 +154,11 @@ class Spk extends \yii\db\ActiveRecord
 
     public function setListColumn()
     {
+        $model['outsource'] = MasterPerson::find()
+            ->select(['name'])
+            ->where(['type_user' => \Yii::$app->params['TYPE_OUTSOURCE'], 'status'=>1])
+            ->indexBy('code')
+            ->column();
         $model['operator'] = Profile::find()
             ->alias('a')
             ->select(['a.name'])
@@ -190,7 +195,7 @@ class Spk extends \yii\db\ActiveRecord
         }else if($this->status_produksi==2){
             $message = '<span class="text-label text-primary">In Progres</span>';
         }else if($this->status_produksi==3){
-            $message = '<span class="text-label text-success">Done</span>';
+            $message = '<span class="text-label text-info">Sudah Proses</span>';
         }else if($this->status_produksi==4){
             $message = '<span class="text-label text-success">Finish</span>';
         }

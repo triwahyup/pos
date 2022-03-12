@@ -10,22 +10,28 @@
                 </tr>
             </thead>
             <tbody>
-                <?php foreach($temps as $no=>$val): ?>
+                <?php if(count($temps) > 0): ?>
+                    <?php foreach($temps as $no=>$val): ?>
+                        <tr>
+                            <td class="text-center"><?=$no+1 ?></td>
+                            <td class="text-center"><?=$val->panjang.'x'.$val->lebar ?></td>
+                            <td class="text-right">
+                                <?=$val->objek .'
+                                    <span class="text-muted font-size-10">('.number_format($val->total_objek).' objek)</span>' ?>
+                            </td>
+                            <td class="text-center">
+                                <a class="custom-btn" href="javascript:void(0)" data-button="delete_potong" data-id="<?=$val->id ?>">
+                                    <i class="fontello icon-trash"></i>
+                                    <span>Hapus</span>
+                                </a>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php else: ?>
                     <tr>
-                        <td class="text-center"><?=$no+1 ?></td>
-                        <td class="text-center"><?=$val->panjang.'x'.$val->lebar ?></td>
-                        <td class="text-right">
-                            <?=$val->objek .'
-                                <span class="text-muted font-size-10">('.number_format($val->total_objek).' objek)</span>' ?>
-                        </td>
-                        <td class="text-center">
-                            <a class="custom-btn" href="javascript:void(0)" data-button="delete_potong" data-id="<?=$val->id ?>">
-                                <i class="fontello icon-trash"></i>
-                                <span>Hapus</span>
-                            </a>
-                        </td>
+                        <td class="text-danger" colspan="5">Data masih kosong.</td>
                     </tr>
-                <?php endforeach; ?>
+                <?php endif; ?>
             </tbody>
         </table>
     </div>

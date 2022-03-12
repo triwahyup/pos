@@ -6,11 +6,11 @@
                 <tr>
                     <th>No. SPK</th>
                     <td class="text-center" width="10">:</td>
-                    <td><?='SPK/'.$spkProduksi->no_spk ?></td>
+                    <td><?='SPK/'.$spkDetail->no_spk ?></td>
                     <td width="350"></td>
                     <th>Tanggal</th>
                     <td class="text-center" width="10">:</td>
-                    <td><?=date('d/m/Y', strtotime($spkProduksi->tgl_spk)) ?></td>
+                    <td><?=date('d/m/Y', strtotime($spkDetail->tgl_spk)) ?></td>
                 </tr>
             </table>
         </div>
@@ -25,17 +25,17 @@
                     <tr>
                         <th class="text-left" width="80">Uk. Kertas</th>
                         <th class="text-center" width="20">:</th>
-                        <td class="text-left"><?=$spkProduksi->uk_potong ?></td>
+                        <td class="text-left"><?=$spkDetail->uk_potong ?></td>
                         <th width="120"></th>
                         <th class="text-left" width="80">Gram/C-NC</th>
                         <th class="text-center" width="20">:</th>
-                        <td class="text-left"><?=$spkProduksi->gram.'/C' ?></td>
+                        <td class="text-left"><?=$spkDetail->gram.'/C' ?></td>
                     </tr>
                     <tr>
                         <th class="text-left" width="80">Jumlah</th>
                         <th class="text-center" width="20">:</th>
                         <td class="text-left">
-                            <?=number_format($spkProduksi->qty_proses, 0, ',', '.').' Lembar' ?>
+                            <?=number_format($spkDetail->qty_proses, 0, ',', '.').' Lembar' ?>
                         </td>
                     </tr>
                     <tr>
@@ -76,17 +76,17 @@
                     <tr>
                         <th class="text-left" width="80">Mesin</th>
                         <th class="text-center" width="20">:</th>
-                        <td class="text-left"><?=(!empty($spkProduksi->mesin)) ? $spkProduksi->mesin->name : '-' ?></td>
+                        <td class="text-left"><?=(!empty($spkDetail->mesin)) ? $spkDetail->mesin->name : '-' ?></td>
                     </tr>
                     <tr>
                         <th class="text-left" width="80">Operator</th>
                         <th class="text-center" width="20">:</th>
-                        <td class="text-left"><?=(!empty($spkProduksi->operator)) ? $spkProduksi->operator->name : '-' ?></td>
+                        <td class="text-left"><?=(!empty($spkDetail->operator)) ? $spkDetail->operator->name : '-' ?></td>
                     </tr>
                     <tr>
                         <th class="text-left" width="80">Keterangan</th>
                         <th class="text-center" width="20">:</th>
-                        <td class="text-left"><?=(!empty($spkProduksi->keterangan)) ? $spkProduksi->keterangan : '-' ?></td>
+                        <td class="text-left"><?=(!empty($spkDetail->keterangan)) ? $spkDetail->keterangan : '-' ?></td>
                     </tr>
                 </thead>
             </table>

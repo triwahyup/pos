@@ -3,6 +3,7 @@
 namespace app\modules\sales\models;
 
 use Yii;
+use app\modules\master\models\MasterMaterialItem;
 
 /**
  * This is the model class for table "temp_sales_order_potong".
@@ -35,7 +36,7 @@ class TempSalesOrderPotong extends \yii\db\ActiveRecord
         return [
             [['code', 'urutan'], 'required'],
             [['urutan', 'objek', 'user_id'], 'integer'],
-            [['panjang', 'lebar', 'total_objek'], 'number'],
+            [['panjang', 'lebar', 'waste', 'total_objek'], 'number'],
             [['code'], 'string', 'max' => 12],
             [['item_code'], 'string', 'max' => 7],
         ];
@@ -66,6 +67,25 @@ class TempSalesOrderPotong extends \yii\db\ActiveRecord
 
     public function getCountTemp()
     {
-        return TempSalesOrderPotong::find()->where(['code'=>$this->code, 'item_code'=>$this->item_code, 'user_id'=> \Yii::$app->user->id])->count();
+        return TempSalesOrderPotong::find()
+            ->where(['code'=>$this->code, 'item_code'=>$this->item_code, 'user_id'=> \Yii::$app->user->id])
+            ->count();
+    }
+
+    public function checkUkPotong($code, $item_code)
+    {
+        $temps = TempSalesOrderPotong::find()
+            ->where(['code'=>$code, 'item_code'=>$item_code, 'user_id'=> \Yii::$app->user->id])
+            ->all();
+        $item = MasterMaterialItem::findOne(['code'=>$item_code]);
+        $item_lebar = $item->lebar;
+        $total_lebar = 0;
+        foreach($temps as $val){
+            $total_lebar += $val->lebar;
+        }
+        $sisa_potong = $item_lebar - $total_lebar;
+        $total_lebar = $total_lebar + $this->lebar;
+        $waste = $item_lebar - $total_lebar;
+        return ['total_lebar' => $total_lebar, 'sisa_potong' => $sisa_potong, 'waste' => $waste];
     }
 }

@@ -209,6 +209,8 @@ class SalesOrder extends \yii\db\ActiveRecord
         $message = '';
         if($this->post == 1){
             $message = '<span class="text-label text-success">Sudah Post</span>';
+        }else if($this->post == 2){
+            $message = '<span class="text-label text-danger">Cancel Order</span>';
         }else{
             $message = '<span class="text-label text-default">Belum Post</span>';
         }

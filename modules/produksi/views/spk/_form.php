@@ -35,8 +35,8 @@ use yii\widgets\MaskedInput;
                             </span>
                         </div>
                         <div class="hidden">
-                            <?= $form->field($spkProduksi, 'no_spk')->hiddenInput(['value'=>$model->no_spk])->label(false) ?>
-                            <?= $form->field($spkProduksi, 'item_code')->hiddenInput(['value'=>$model->itemMaterial->item_code])->label(false) ?>
+                            <?= $form->field($spkDetail, 'no_spk')->hiddenInput(['value'=>$model->no_spk])->label(false) ?>
+                            <?= $form->field($spkDetail, 'item_code')->hiddenInput(['value'=>$model->itemMaterial->item_code])->label(false) ?>
                         </div>
                     </div>
                     <!-- QTY Order -->
@@ -81,16 +81,34 @@ use yii\widgets\MaskedInput;
                             <label>Tgl SPK:</label>
                         </div>
                         <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                            <?= $form->field($spkProduksi, 'tgl_spk')->widget(DatePicker::classname(), [
+                            <?= $form->field($spkDetail, 'tgl_spk')->widget(DatePicker::classname(), [
                                 'type' => DatePicker::TYPE_INPUT,
                                 'options' => [
                                     'placeholder' => 'dd-mm-yyyy',
-                                    'value' => (!$spkProduksi->isNewRecord) ? date('d-m-Y', strtotime($spkProduksi->tgl_spk)) : date('d-m-Y'),
+                                    'value' => (!$spkDetail->isNewRecord) ? date('d-m-Y', strtotime($spkDetail->tgl_spk)) : date('d-m-Y'),
                                 ],
                                 'pluginOptions' => [
                                     'autoclose' => true,
                                     'format' => 'dd-mm-yyyy',
                                 ]])->label(false) ?>
+                        </div>
+                    </div>
+                    <!-- Outsource -->
+                    <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
+                        <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
+                            <label>Outsource:</label>
+                        </div>
+                        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
+                            <?= $form->field($spkDetail, 'outsource_code')->widget(Select2::classname(), [
+                                    'data' => $outsource,
+                                    'options' => [
+                                        'placeholder' => 'Pilih Data Outsource',
+                                        'class' => 'select2',
+                                    ],
+                                    'pluginOptions' => [
+                                        'allowClear' => true,
+                                    ],
+                                ])->label(false) ?>
                         </div>
                     </div>
                     <!-- Proses Produksi -->
@@ -99,7 +117,7 @@ use yii\widgets\MaskedInput;
                             <label>Produksi:</label>
                         </div>
                         <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                            <?= $form->field($spkProduksi, 'proses_code')->widget(Select2::classname(), [
+                            <?= $form->field($spkDetail, 'proses_code')->widget(Select2::classname(), [
                                     'data' => $so_proses,
                                     'options' => [
                                         'placeholder' => 'Pilih Proses Produksi',
@@ -114,7 +132,7 @@ use yii\widgets\MaskedInput;
                             <label>Nama Mesin:</label>
                         </div>
                         <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                            <?= $form->field($spkProduksi, 'mesin_code')->widget(Select2::classname(), [
+                            <?= $form->field($spkDetail, 'mesin_code')->widget(Select2::classname(), [
                                     'data' => [],
                                     'options' => [
                                         'placeholder' => 'Pilih Nama Mesin',
@@ -124,7 +142,7 @@ use yii\widgets\MaskedInput;
                         </div>
                     </div>
                     <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
-                        <?= $form->field($spkProduksi, 'urutan')->hiddenInput()->label(false) ?>
+                        <?= $form->field($spkDetail, 'urutan')->hiddenInput()->label(false) ?>
                     </div>
                 </div>
                 <div class="col-lg-6 col-md-6 col-xs-12">
@@ -134,7 +152,7 @@ use yii\widgets\MaskedInput;
                             <label>Operator Mesin:</label>
                         </div>
                         <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                            <?= $form->field($spkProduksi, 'user_id')->widget(Select2::classname(), [
+                            <?= $form->field($spkDetail, 'user_id')->widget(Select2::classname(), [
                                     'data' => $operator,
                                     'options' => [
                                         'placeholder' => 'Pilih Operator Mesin',
@@ -149,7 +167,7 @@ use yii\widgets\MaskedInput;
                             <label>Uk. Potong:</label>
                         </div>
                         <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                            <?= $form->field($spkProduksi, 'potong_id')->widget(Select2::classname(), [
+                            <?= $form->field($spkDetail, 'potong_id')->widget(Select2::classname(), [
                                     'data' => [],
                                     'options' => [
                                         'placeholder' => 'Pilih UK. Potong',
@@ -165,7 +183,7 @@ use yii\widgets\MaskedInput;
                                 <label>QTY Proses:</label>
                             </div>
                             <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                                <?= $form->field($spkProduksi, 'qty_proses')->widget(MaskedInput::className(), [
+                                <?= $form->field($spkDetail, 'qty_proses')->widget(MaskedInput::className(), [
                                         'clientOptions' => [
                                             'alias' => 'decimal',
                                             'groupSeparator' => ',',
@@ -183,7 +201,7 @@ use yii\widgets\MaskedInput;
                                 <label>Keterangan:</label>
                             </div>
                             <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                                <?= $form->field($spkProduksi, 'keterangan')->textarea(['rows'=>3])->label(false) ?>
+                                <?= $form->field($spkDetail, 'keterangan')->textarea(['rows'=>3])->label(false) ?>
                             </div>
                         </div>
                     <?php elseif($model->status_produksi == 2): ?>
@@ -193,7 +211,25 @@ use yii\widgets\MaskedInput;
                                 <label>QTY Hasil:</label>
                             </div>
                             <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                                <?= $form->field($spkProduksi, 'qty_hasil')->widget(MaskedInput::className(), [
+                                <?= $form->field($spkDetail, 'qty_hasil')->widget(MaskedInput::className(), [
+                                        'clientOptions' => [
+                                            'alias' => 'decimal',
+                                            'groupSeparator' => ',',
+                                            'autoGroup' => true
+                                        ],
+                                        'options' => [
+                                            'data-align' => 'text-right',
+                                        ]
+                                    ])->label(false) ?>
+                            </div>
+                        </div>
+                        <!-- QTY Rusak -->
+                        <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
+                            <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
+                                <label>QTY Rusak:</label>
+                            </div>
+                            <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
+                                <?= $form->field($spkDetail, 'qty_rusak')->widget(MaskedInput::className(), [
                                         'clientOptions' => [
                                             'alias' => 'decimal',
                                             'groupSeparator' => ',',
@@ -234,6 +270,7 @@ use yii\widgets\MaskedInput;
                             <th class="text-center">Uk. Potong</th>
                             <th class="text-center">Mesin</th>
                             <th class="text-center">Operator</th>
+                            <th class="text-center">Outsource</th>
                             <th class="text-center">Qty Proses</th>
                             <th class="text-center">Qty Hasil</th>
                             <th class="text-center">Qty Rusak</th>
@@ -249,8 +286,9 @@ use yii\widgets\MaskedInput;
                                     <td class="text-center"><?=date('d-m-Y', strtotime($val->tgl_spk)) ?></td>
                                     <td><?=(isset($val->proses)) ? $val->proses->name : '' ?></td>
                                     <td class="text-center"><?=$val->uk_potong ?></td>
-                                    <td><?=(isset($val->mesin)) ? $val->mesin->name : '' ?></td>
-                                    <td><?=(isset($val->operator)) ? $val->operator->name : '' ?></td>
+                                    <td><?=(isset($val->mesin)) ? $val->mesin->name : '-' ?></td>
+                                    <td><?=(isset($val->operator)) ? $val->operator->name : '-' ?></td>
+                                    <td><?=(isset($val->outsource)) ? $val->outsource->name : '-' ?></td>
                                     <td class="text-right"><?=number_format($val->qty_proses).' LB' ?></td>
                                     <td class="text-right"><?=number_format($val->qty_hasil).' LB' ?></td>
                                     <td class="text-right"><?=number_format($val->qty_rusak).' LB' ?></td>
@@ -319,12 +357,12 @@ function load_mesin(code)
 		beforeSend: function (data){},
         success: function(data){
             var o = $.parseJSON(data);
-            $("#spkproduksi-mesin_code").empty();
+            $("#spkdetail-mesin_code").empty();
             $.each(o, function(index, value){
                 var opt = new Option(value.name, value.code, false, false);
-                $("#spkproduksi-mesin_code").append(opt);
+                $("#spkdetail-mesin_code").append(opt);
             });
-            $("#spkproduksi-mesin_code").val(null);
+            $("#spkdetail-mesin_code").val(null);
         },
         complete: function(){}
     });
@@ -344,12 +382,12 @@ function load_ukKertas(code, no_spk)
 		beforeSend: function (data){},
         success: function(data){
             var o = $.parseJSON(data);
-            $("#spkproduksi-potong_id").empty();
+            $("#spkdetail-potong_id").empty();
             $.each(o, function(index, value){
                 var opt = new Option(value.name, value.potong_id, false, false);
-                $("#spkproduksi-potong_id").append(opt);
+                $("#spkdetail-potong_id").append(opt);
             });
-            $("#spkproduksi-potong_id").val(null);
+            $("#spkdetail-potong_id").val(null);
         },
         complete: function(){}
     });
@@ -414,13 +452,13 @@ function get_proses(data)
                 $("[data-button=\"cancel\"]").removeClass("hidden");
                 $("button[type=\"submit\"]").removeClass("hidden").addClass("hidden");
                 $("button:not([data-button=\"change\"]):not([data-button=\"cancel\"])").prop("disabled", true);
-                $("#spkproduksi-qty_proses").attr("readonly", true);
+                $("#spkdetail-qty_proses").attr("readonly", true);
                 
                 var mesin_code = '',
                     potong_id = '',
                     qty_proses = 0;
                 $.each(o.model, function(index, value){
-                    $("#spkproduksi-"+index).val(value).trigger("change");
+                    $("#spkdetail-"+index).val(value).trigger("change");
                     if(index == 'mesin_code')
                         mesin_code = value;
                     if(index == 'potong_id')
@@ -429,10 +467,10 @@ function get_proses(data)
                         qty_proses = value;
                 });
                 setTimeout(function(){
-                    $("#spkproduksi-mesin_code").val(mesin_code).trigger("change");
-                    $("#spkproduksi-potong_id").val(potong_id).trigger("change");
+                    $("#spkdetail-mesin_code").val(mesin_code).trigger("change");
+                    $("#spkdetail-potong_id").val(potong_id).trigger("change");
                 }, 600);
-                $("#spkproduksi-qty_hasil").val(qty_proses);
+                $("#spkdetail-qty_hasil").val(qty_proses);
             }else{
                 notification.open("danger", o.message, timeOut);
             }
@@ -477,10 +515,21 @@ function delete_proses(data)
 
 var timeOut = 3000;
 $(document).ready(function(){
-    $("body").off("change","#spkproduksi-proses_code").on("change","#spkproduksi-proses_code", function(e){
+    $("body").off("change","#spkdetail-outsource_code").on("change","#spkdetail-outsource_code", function(e){
+        e.preventDefault();
+        $("#spkdetail-mesin_code").prop("disabled", true);
+        $("#spkdetail-user_id").prop("disabled", true);
+    }).bind("select2:clear", function(e){
+        setTimeout(function(){
+            $("#spkdetail-mesin_code").prop("disabled", false);
+            $("#spkdetail-user_id").prop("disabled", false);
+        }, 70);
+    });
+
+    $("body").off("change","#spkdetail-proses_code").on("change","#spkdetail-proses_code", function(e){
         e.preventDefault();
         load_mesin($(this).val());
-        var noSPK = $("#spkproduksi-no_spk").val();
+        var noSPK = $("#spkdetail-no_spk").val();
         load_ukKertas($(this).val(), noSPK);
     });
 

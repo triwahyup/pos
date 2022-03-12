@@ -58,7 +58,6 @@ class SalesOrderSearch extends SalesOrder
         }
 
         // grid filtering conditions
-        $query->where(['a.status'=>1]);
         if(!empty($this->tgl_so)){
             $query->andFilterWhere(['tgl_so' => date('Y-m-d', strtotime($this->tgl_so))]);
         }
