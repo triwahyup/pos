@@ -168,6 +168,7 @@ var temp = {
 		$("button[type=\"submit\"]").prop("disabled", false);
 		// clear data temp
 		$("[data-temp]").val(null);
+		$("[data-temp]").val(null).trigger("change");
 	},
 	event: function() {
 		$("body").off("click", "[data-button=\"cancel\"]").on("click", "[data-button=\"cancel\"]", function(e){

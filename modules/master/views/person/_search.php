@@ -4,7 +4,7 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model app\modules\master\models\MasterEkspedisiSearch */
+/* @var $model app\modules\master\models\MasterPersonSearch */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 
@@ -15,8 +15,6 @@ use yii\widgets\ActiveForm;
         'method' => 'get',
     ]); ?>
 
-    <?= $form->field($model, 'keterangan') ?>
-
     <?= $form->field($model, 'code') ?>
 
     <?= $form->field($model, 'name') ?>
@@ -25,7 +23,7 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'provinsi_id') ?>
 
-    <?php // echo $form->field($model, 'kabupaten_id') ?>
+    <?= $form->field($model, 'kabupaten_id') ?>
 
     <?php // echo $form->field($model, 'kecamatan_id') ?>
 
@@ -49,7 +47,7 @@ use yii\widgets\ActiveForm;
 
     <?php // echo $form->field($model, 'term_in') ?>
 
-    <?php // echo $form->field($model, 'group_supplier_code') ?>
+    <?php // echo $form->field($model, 'keterangan') ?>
 
     <?php // echo $form->field($model, 'status') ?>
 

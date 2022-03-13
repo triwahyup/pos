@@ -7,7 +7,7 @@ use yii\widgets\DetailView;
 /* @var $model app\modules\master\models\MasterMaterial */
 
 $this->title = $model->name;
-$this->params['breadcrumbs'][] = ['label' => 'Data Material', 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => 'Material', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
 ?>
@@ -28,6 +28,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= DetailView::widget([
             'model' => $model,
             'attributes' => [
+                'code',
                 'name',
                 [
                     'attribute' => 'type_code',
@@ -35,6 +36,22 @@ $this->params['breadcrumbs'][] = $this->title;
                         return (isset($model->typeCode)) ? $model->typeCode->name : '';
                     }
                 ],
+                [
+                    'attribute' => 'material_code',
+                    'value' => function ($model, $index) { 
+                        return (isset($model->material)) ? $model->material->name : '';
+                    }
+                ],
+                [
+                    'attribute' => 'satuan_code',
+                    'value' => function ($model, $index) { 
+                        return (isset($model->satuan)) ? $model->satuan->name : '';
+                    }
+                ],
+                'panjang',
+                'lebar',
+                'gram',
+                'keterangan:ntext',
                 [
                     'attribute' => 'status',
                     'value' => function ($model, $index) { 
@@ -61,5 +78,44 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
             ],
         ]) ?>
+    </div>
+    <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
+        <div class="margin-top-40"></div>
+        <h6>Pricelist</h6>
+        <hr />
+        <table class="table table-bordered table-custom">
+            <thead>
+                <tr>
+                    <th class="text-center">No.</th>
+                    <th class="text-center">Nama</th>
+                    <th class="text-center">Supplier</th>
+                    <th class="text-center" colspan="3">Harga Beli (Rp)</th>
+                    <th class="text-center" colspan="3">Harga Jual (Rp)</th>
+                    <th class="text-center">Status Pricelist</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php if(count($model->pricelists) > 0): ?>
+                    <?php foreach($model->pricelists as $index=>$val): ?>
+                        <tr>
+                            <td class="text-center"><?=($index +1)?></td>
+                            <td><?=$val->name ?></td>
+                            <td><?=(isset($val->supplier)) ? $val->supplier->name : '-' ?></td>
+                            <?php for($a=1;$a<=3;$a++): ?>
+                                <td class="text-right"><?=(!empty($val['harga_beli_'.$a])) ? number_format($val['harga_beli_'.$a]).'.- <br /><span class="text-muted font-size-10">Per '.$val['um_'.$a].'</span>' : null ?></td>
+                            <?php endfor; ?>
+                            <?php for($a=1;$a<=3;$a++): ?>
+                                <td class="text-right"><?=(!empty($val['harga_jual_'.$a])) ? number_format($val['harga_jual_'.$a]).'.- <br /><span class="text-muted font-size-10">Per '.$val['um_'.$a].'</span>' : null ?></td>
+                            <?php endfor; ?>
+                            <td class="text-center"><?=$val->statusActive ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php else : ?>
+                    <tr>
+                        <td class="text-center text-danger" colspan="15">Data is empty</td>
+                    </tr>
+                <?php endif; ?>
+            </tbody>
+        </table>
     </div>
 </div>

@@ -21,6 +21,7 @@ use yii\widgets\MaskedInput;
                     <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
                     <?= $form->field($model, 'nik')->textInput(['maxlength' => true]) ?>
                     <?= $form->field($model, 'nip')->textInput(['maxlength' => true]) ?>
+                    <?= $form->field($model, 'kode_pos')->textInput(['maxlength' => true]) ?>
                 </div>
                 <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
                     <?= $form->field($model, 'tgl_lahir')->widget(DatePicker::classname(), [
@@ -34,6 +35,7 @@ use yii\widgets\MaskedInput;
                             'format' => 'dd-mm-yyyy',
                         ]]) ?>
                     <?= $form->field($model, 'tempat_lahir')->textInput(['maxlength' => true]) ?>
+                    <?= $form->field($model, 'npwp')->textInput(['maxlength' => true]) ?>
                 </div>
                 <div class="col-lg-1 col-md-1 col-sm-12 col-xs-12">
                 </div>
@@ -60,7 +62,6 @@ use yii\widgets\MaskedInput;
                 <div class="margin-top-20"></div>
                 <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
                     <?= $form->field($model, 'alamat')->textarea(['rows' => 4]) ?>
-                    <?= $form->field($model, 'kode_pos')->textInput(['maxlength' => true]) ?>
                 </div>
                 <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
                     <?= $form->field($model, 'provinsi_id')->widget(Select2::classname(), [

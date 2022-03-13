@@ -21,9 +21,21 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'type_code') ?>
 
-    <?= $form->field($model, 'status') ?>
+    <?= $form->field($model, 'material_code') ?>
 
-    <?= $form->field($model, 'created_at') ?>
+    <?= $form->field($model, 'satuan_code') ?>
+
+    <?php // echo $form->field($model, 'panjang') ?>
+
+    <?php // echo $form->field($model, 'lebar') ?>
+
+    <?php // echo $form->field($model, 'gram') ?>
+
+    <?php // echo $form->field($model, 'keterangan') ?>
+
+    <?php // echo $form->field($model, 'status') ?>
+
+    <?php // echo $form->field($model, 'created_at') ?>
 
     <?php // echo $form->field($model, 'updated_at') ?>
 

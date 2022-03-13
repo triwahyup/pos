@@ -3,17 +3,19 @@
 namespace app\modules\master\models;
 
 use Yii;
+use app\modules\master\models\MasterMaterial;
+use app\modules\master\models\MasterPerson;
 
 /**
- * This is the model class for table "temp_master_material_item_pricelist".
+ * This is the model class for table "temp_master_material_pricelist".
  *
  * @property int $id
  * @property string $item_code
  * @property int $urutan
  * @property string|null $name
  * @property string|null $um_1
- * @property string|null $um_3
  * @property string|null $um_2
+ * @property string|null $um_3
  * @property float|null $harga_beli_1
  * @property float|null $harga_beli_2
  * @property float|null $harga_beli_3
@@ -23,14 +25,14 @@ use Yii;
  * @property int|null $status_active
  * @property int|null $user_id
  */
-class TempMasterMaterialItemPricelist extends \yii\db\ActiveRecord
+class TempMasterMaterialPricelist extends \yii\db\ActiveRecord
 {
     /**
      * {@inheritdoc}
      */
     public static function tableName()
     {
-        return 'temp_master_material_item_pricelist';
+        return 'temp_master_material_pricelist';
     }
 
     /**
@@ -41,9 +43,10 @@ class TempMasterMaterialItemPricelist extends \yii\db\ActiveRecord
         return [
             [['urutan', 'status_active', 'user_id'], 'integer'],
             [['harga_beli_1', 'harga_beli_2', 'harga_beli_3', 'harga_jual_1', 'harga_jual_2', 'harga_jual_3'], 'safe'],
+            [['supplier_code'], 'string', 'max' => 3],
             [['item_code'], 'string', 'max' => 7],
             [['name'], 'string', 'max' => 64],
-            [['um_1', 'um_3', 'um_2'], 'string', 'max' => 5],
+            [['um_1', 'um_2', 'um_3'], 'string', 'max' => 5],
         ];
     }
 
@@ -57,9 +60,10 @@ class TempMasterMaterialItemPricelist extends \yii\db\ActiveRecord
             'item_code' => 'Item Code',
             'urutan' => 'Urutan',
             'name' => 'Name',
+            'supplier_code' => 'Supplier',
             'um_1' => 'Um 1',
-            'um_3' => 'Um 3',
             'um_2' => 'Um 2',
+            'um_3' => 'Um 3',
             'harga_beli_1' => 'Harga Beli 1',
             'harga_beli_2' => 'Harga Beli 2',
             'harga_beli_3' => 'Harga Beli 3',
@@ -69,21 +73,6 @@ class TempMasterMaterialItemPricelist extends \yii\db\ActiveRecord
             'status_active' => 'Status Active',
             'user_id' => 'User ID',
         ];
-    }
-
-    public function getCount()
-    {
-        return TempMasterMaterialItemPricelist::find()->where(['user_id'=> \Yii::$app->user->id])->count();
-    }
-
-    public function getTmps()
-    {
-        return TempMasterMaterialItemPricelist::find()->where(['user_id'=> \Yii::$app->user->id])->all();
-    }
-
-    public function getItem()
-    {
-        return $this->hasOne(MasterMaterialItem::className(), ['code' => 'item_code']);
     }
 
     public function beforeSave($attribute)
@@ -106,5 +95,25 @@ class TempMasterMaterialItemPricelist extends \yii\db\ActiveRecord
             $message = '<span class="text-label text-default">Not Active</span>';
         }
         return $message;
+    }
+
+    public function getCount()
+    {
+        return TempMasterMaterialPricelist::find()->where(['supplier_code'=>$this->supplier_code, 'user_id'=> \Yii::$app->user->id])->count();
+    }
+
+    public function getTmps()
+    {
+        return TempMasterMaterialPricelist::find()->where(['supplier_code'=>$this->supplier_code, 'user_id'=> \Yii::$app->user->id])->all();
+    }
+
+    public function getItem()
+    {
+        return $this->hasOne(MasterMaterial::className(), ['code' => 'item_code']);
+    }
+
+    public function getSupplier()
+    {
+        return $this->hasOne(MasterPerson::className(), ['code' => 'supplier_code']);
     }
 }

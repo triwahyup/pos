@@ -5,15 +5,15 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 
 /* @var $this yii\web\View */
-/* @var $searchModel app\modules\master\models\MasterEkspedisiSearch */
+/* @var $searchModel app\modules\master\models\MasterPersonSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Data Ekspedisi';
+$this->title = 'Data Person';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="master-person-index">
     <p class="text-right">
-        <?= Html::a('<i class="fontello icon-plus"></i><span>Create Data Ekspedisi</span>', ['create'], ['class' => 'btn btn-success btn-flat btn-sm']) ?>
+        <?= Html::a('<i class="fontello icon-plus"></i><span>Create Data Person</span>', ['create'], ['class' => 'btn btn-success btn-flat btn-sm']) ?>
     </p>
 
     <?= GridView::widget([
@@ -22,6 +22,12 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
             'name',
+            [
+                'attribute' => 'type_user',
+                'value' => function($model, $index, $key){
+                    return (isset($model->typePerson)) ? $model->typePerson->name : '';
+                }
+            ],
             'contact_person',
             [
                 'attribute' => 'phone_1',
@@ -31,46 +37,10 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
             ],
             [
-                'attribute' => 'created_at',
+                'attribute' => 'term_in',
                 'contentOptions' => [
                     'class' => 'text-center',
                 ],
-                'filter' => DatePicker::widget([
-                    'model' => $searchModel, 
-                    'name' => 'created_at', 
-                    'type' => DatePicker::TYPE_COMPONENT_APPEND,
-                    'pickerButton' => false,
-                    'attribute' => 'created_at',
-                    'pluginOptions' => [
-                        'format' => 'dd-mm-yyyy',
-                        'autoclose' => true,
-                    ],
-                ]),
-                'value' => function($model, $index, $key)
-                {
-                    return date('d-m-Y', $model->created_at);
-                }
-            ],
-            [
-                'attribute' => 'updated_at',
-                'contentOptions' => [
-                    'class' => 'text-center',
-                ],
-                'filter' => DatePicker::widget([
-                    'model' => $searchModel, 
-                    'name' => 'updated_at', 
-                    'type' => DatePicker::TYPE_COMPONENT_APPEND,
-                    'pickerButton' => false,
-                    'attribute' => 'updated_at',
-                    'pluginOptions' => [
-                        'format' => 'dd-mm-yyyy',
-                        'autoclose' => true,
-                    ],
-                ]),
-                'value' => function($model, $index, $key)
-                {
-                    return date('d-m-Y', $model->updated_at);
-                }
             ],
             [
                 'buttons' => [

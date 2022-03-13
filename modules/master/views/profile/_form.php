@@ -21,6 +21,7 @@ use yii\widgets\MaskedInput;
                     <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
                     <?= $form->field($model, 'nik')->textInput(['maxlength' => true]) ?>
                     <?= $form->field($model, 'nip')->textInput(['maxlength' => true]) ?>
+                    <?= $form->field($model, 'kode_pos')->textInput(['maxlength' => true]) ?>
                 </div>
                 <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
                     <?= $form->field($model, 'tgl_lahir')->widget(DatePicker::classname(), [
@@ -35,8 +36,7 @@ use yii\widgets\MaskedInput;
                     <?= $form->field($model, 'tempat_lahir')->textInput(['maxlength' => true]) ?>
                     <?= $form->field($model, 'npwp')->textInput(['maxlength' => true]) ?>
                 </div>
-                <div class="col-lg-1 col-md-1 col-sm-12 col-xs-12">
-                </div>
+                <div class="col-lg-1 col-md-1 col-sm-12 col-xs-12"></div>
                 <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
                     <div class="form-group-layer margin-bottom-20">
                         <?= $form->field($model, 'username')->textInput(['maxlength' => true]) ?>
@@ -72,6 +72,7 @@ use yii\widgets\MaskedInput;
                         <?php endif; ?>
                     </div>
                 </div>
+                <div class="margin-bottom-20 full-width"></div>
             </div>
         </fieldset>
         <div class="margin-bottom-20 full-width"></div>

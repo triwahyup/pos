@@ -18,31 +18,33 @@ use yii\widgets\MaskedInput;
             <div class="margin-bottom-20 full-width"></div>
             <div class="col-lg-12 col-md-12 col-xs-12">
                 <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
+                    <?= $form->field($model, 'type_user')->widget(Select2::classname(), [
+                            'data' => $typePerson,
+                            'options' => ['placeholder' => 'Type Person'],
+                        ]) ?>
+                </div>
+                <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
                     <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
                 </div>
                 <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
                     <?= $form->field($model, 'contact_person')->textInput(['maxlength' => true]) ?>
                 </div>
-                <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
-                    <?= $form->field($model, 'npwp')->textInput(['maxlength' => true]) ?>
-                </div>
             </div>
             <div class="col-lg-12 col-md-12 col-xs-12">
                 <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
-                    <?= $form->field($model, 'group_supplier_code')->widget(Select2::classname(), [
-                        'data' => $groupSupplier,
-                        'options' => ['placeholder' => 'Group Supplier'],
-                        ]) ?>
+                    <?= $form->field($model, 'npwp')->textInput(['maxlength' => true]) ?>
                 </div>
                 <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
                     <?= $form->field($model, 'term_in')->textInput(['maxlength' => true]) ?>
+                </div>
+                <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
+                    <?= $form->field($model, 'kode_pos')->textInput(['maxlength' => true]) ?>
                 </div>
             </div>
             <div class="col-lg-12 col-md-12 col-xs-12">
                 <div class="margin-top-20"></div>
                 <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
                     <?= $form->field($model, 'address')->textarea(['rows' => 4]) ?>
-                    <?= $form->field($model, 'kode_pos')->textInput(['maxlength' => true]) ?>
                 </div>
                 <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
                     <?= $form->field($model, 'provinsi_id')->widget(Select2::classname(), [
@@ -104,7 +106,7 @@ use yii\widgets\MaskedInput;
 function listKabupaten(provinsiId)
 {
     $.ajax({
-        url: "<?=Url::to(['supplier/list-kabupaten']) ?>",
+        url: "<?=Url::to(['person/list-kabupaten']) ?>",
         type: "GET",
         data: {
             provinsiId: provinsiId
@@ -129,7 +131,7 @@ function listKabupaten(provinsiId)
 function listKecamatan(kecamatanId)
 {
     $.ajax({
-        url: "<?=Url::to(['supplier/list-kecamatan']) ?>",
+        url: "<?=Url::to(['person/list-kecamatan']) ?>",
         type: "GET",
         data: {
             kecamatanId: kecamatanId
@@ -154,7 +156,7 @@ function listKecamatan(kecamatanId)
 function listKelurahan(kelurahanId)
 {
     $.ajax({
-        url: "<?=Url::to(['supplier/list-kelurahan']) ?>",
+        url: "<?=Url::to(['person/list-kelurahan']) ?>",
         type: "GET",
         data: {
             kelurahanId: kelurahanId

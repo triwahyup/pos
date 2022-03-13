@@ -1,6 +1,5 @@
 <?php
 use app\commands\Helper;
-use kartik\date\DatePicker;
 use yii\helpers\Html;
 use yii\grid\GridView;
 
@@ -8,12 +7,12 @@ use yii\grid\GridView;
 /* @var $searchModel app\modules\master\models\MasterMaterialSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Data Material';
+$this->title = 'Material';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="master-material-index">
     <p class="text-right">
-        <?= Html::a('<i class="fontello icon-plus"></i><span>Create Data Material</span>', ['create'], ['class' => 'btn btn-success btn-flat btn-sm']) ?>
+        <?= Html::a('<i class="fontello icon-plus"></i><span>Create Material</span>', ['create'], ['class' => 'btn btn-success btn-flat btn-sm']) ?>
     </p>
 
     <?= GridView::widget([
@@ -21,6 +20,12 @@ $this->params['breadcrumbs'][] = $this->title;
         'filterModel' => $searchModel,
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
+            [
+                'attribute' => 'code',
+                'contentOptions' => [
+                    'class' => 'text-center',
+                ],
+            ],
             'name',
             [
                 'attribute' => 'type_code',
@@ -29,45 +34,18 @@ $this->params['breadcrumbs'][] = $this->title;
                 }
             ],
             [
-                'attribute' => 'created_at',
-                'contentOptions' => [
-                    'class' => 'text-center',
-                ],
-                'filter' => DatePicker::widget([
-                    'model' => $searchModel, 
-                    'name' => 'created_at', 
-                    'type' => DatePicker::TYPE_COMPONENT_APPEND,
-                    'pickerButton' => false,
-                    'attribute' => 'created_at',
-                    'pluginOptions' => [
-                        'format' => 'dd-mm-yyyy',
-                        'autoclose' => true,
-                    ],
-                ]),
-                'value' => function($model, $index, $key)
-                {
-                    return date('d-m-Y', $model->created_at);
+                'attribute' => 'material_code',
+                'value' => function($model, $index, $key){
+                    return (isset($model->material)) ? $model->material->name : '';
                 }
             ],
             [
-                'attribute' => 'updated_at',
+                'attribute' => 'satuan_code',
                 'contentOptions' => [
                     'class' => 'text-center',
                 ],
-                'filter' => DatePicker::widget([
-                    'model' => $searchModel, 
-                    'name' => 'updated_at', 
-                    'type' => DatePicker::TYPE_COMPONENT_APPEND,
-                    'pickerButton' => false,
-                    'attribute' => 'updated_at',
-                    'pluginOptions' => [
-                        'format' => 'dd-mm-yyyy',
-                        'autoclose' => true,
-                    ],
-                ]),
-                'value' => function($model, $index, $key)
-                {
-                    return date('d-m-Y', $model->updated_at);
+                'value' => function($model, $index, $key){
+                    return (isset($model->satuan)) ? $model->satuan->name : '';
                 }
             ],
             [
@@ -104,6 +82,4 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
         ],
     ]); ?>
-
-
 </div>

@@ -3,11 +3,11 @@
 namespace app\modules\master\models;
 
 use Yii;
-use app\modules\master\models\MasterGroupSupplier;
 use app\modules\master\models\MasterProvinsi;
 use app\modules\master\models\MasterKabupaten;
 use app\modules\master\models\MasterKecamatan;
 use app\modules\master\models\MasterKelurahan;
+use app\modules\master\models\MasterKode;
 use yii\behaviors\TimestampBehavior;
 
 /**
@@ -20,14 +20,16 @@ use yii\behaviors\TimestampBehavior;
  * @property string|null $kabupaten_id
  * @property string|null $kecamatan_id
  * @property string|null $kelurahan_id
+ * @property string|null $contact_person
  * @property string|null $kode_pos
  * @property string|null $phone_1
  * @property string|null $phone_2
  * @property string|null $email
  * @property string|null $fax
- * @property string|null $keterangan
+ * @property string|null $npwp
  * @property int|null $type_user
- * @property string|null $group_supplier_code
+ * @property int|null $term_in
+ * @property string|null $keterangan
  * @property int|null $status
  * @property int|null $created_at
  * @property int|null $updated_at
@@ -55,10 +57,10 @@ class MasterPerson extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['code', 'name', 'contact_person', 'phone_1'], 'required'],
-            [['keterangan'], 'string'],
+            [['code', 'name'], 'required'],
             [['type_user', 'term_in', 'status', 'created_at', 'updated_at'], 'integer'],
-            [['code', 'group_supplier_code'], 'string', 'max' => 3],
+            [['keterangan'], 'string'],
+            [['code'], 'string', 'max' => 3],
             [['name', 'address', 'contact_person'], 'string', 'max' => 128],
             [['provinsi_id'], 'string', 'max' => 2],
             [['kabupaten_id'], 'string', 'max' => 4],
@@ -85,15 +87,16 @@ class MasterPerson extends \yii\db\ActiveRecord
             'kabupaten_id' => 'Kabupaten',
             'kecamatan_id' => 'Kecamatan',
             'kelurahan_id' => 'Kelurahan',
+            'contact_person' => 'Contact Person',
             'kode_pos' => 'Kode Pos',
             'phone_1' => 'Phone 1',
             'phone_2' => 'Phone 2',
             'email' => 'Email',
             'fax' => 'Fax',
-            'keterangan' => 'Keterangan',
-            'type_user' => 'Type User',
+            'npwp' => 'Npwp',
+            'type_user' => 'Type Person',
             'term_in' => 'Term In',
-            'group_supplier_code' => 'Group Supplier',
+            'keterangan' => 'Keterangan',
             'status' => 'Status',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
@@ -131,8 +134,8 @@ class MasterPerson extends \yii\db\ActiveRecord
         return $this->hasOne(MasterKelurahan::className(), ['id' => 'kelurahan_id']);
     }
 
-    public function getGroupSupplier()
+    public function getTypePerson()
     {
-        return $this->hasOne(MasterGroupSupplier::className(), ['code' => 'group_supplier_code']);
+        return $this->hasOne(MasterKode::className(), ['value' => 'type_user']);
     }
 }

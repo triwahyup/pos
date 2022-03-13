@@ -6,9 +6,6 @@ use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use app\modules\master\models\MasterMaterial;
 
-/**
- * MasterMaterialSearch represents the model behind the search form of `app\modules\master\models\MasterMaterial`.
- */
 class MasterMaterialSearch extends MasterMaterial
 {
     /**
@@ -17,7 +14,7 @@ class MasterMaterialSearch extends MasterMaterial
     public function rules()
     {
         return [
-            [['name', 'type_code', 'created_at', 'updated_at'], 'safe'],
+            [['code', 'name', 'type_code', 'satuan_code', 'material_code'], 'safe'],
         ];
     }
 
@@ -41,7 +38,9 @@ class MasterMaterialSearch extends MasterMaterial
     {
         $query = MasterMaterial::find()
             ->alias('a')
-            ->leftJoin('master_kode b', 'b.code = a.type_code');
+            ->leftJoin('master_kode b', 'b.code = a.type_code')
+            ->leftJoin('master_kode c', 'c.code = a.material_code')
+            ->leftJoin('master_satuan d', 'd.code = a.satuan_code');
 
         // add conditions that should always apply here
 
@@ -59,20 +58,17 @@ class MasterMaterialSearch extends MasterMaterial
 
         // grid filtering conditions
         $query->where(['a.status'=>1]);
-        if(!empty($this->created_at)){
-            $t1 = strtotime($this->created_at);
-			$t2 = strtotime("+1 days", $t1);
-			$query->andWhere('a.created_at >='.$t1.' and a.created_at <'.$t2);
-        }
-        if(!empty($this->updated_at)){
-            $t1 = strtotime($this->updated_at);
-			$t2 = strtotime("+1 days", $t1);
-			$query->andWhere('a.updated_at >='.$t1.' and a.updated_at <'.$t2);
-        }
         if(!empty($this->type_code)){
             $query->andWhere('b.name LIKE "%'.$this->type_code.'%"');
         }
-        $query->andFilterWhere(['like', 'name', $this->name]);
+        if(!empty($this->material_code)){
+            $query->andWhere('c.name LIKE "%'.$this->material_code.'%"');
+        }
+        if(!empty($this->satuan_code)){
+            $query->andWhere('d.name LIKE "%'.$this->satuan_code.'%"');
+        }
+        $query->andFilterWhere(['like', 'a.name', $this->name])
+            ->andFilterWhere(['like', 'a.code', $this->code]);
 
         return $dataProvider;
     }

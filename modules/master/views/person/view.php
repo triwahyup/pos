@@ -7,7 +7,7 @@ use yii\widgets\DetailView;
 /* @var $model app\modules\master\models\MasterPerson */
 
 $this->title = $model->name;
-$this->params['breadcrumbs'][] = ['label' => 'Data Outsourcing', 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => 'Data Person', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
 ?>
@@ -61,6 +61,13 @@ $this->params['breadcrumbs'][] = $this->title;
                 'phone_2',
                 'email:email',
                 'fax',
+                'term_in',
+                [
+                    'attribute' => 'type_user',
+                    'value'=> function ($model, $index) { 
+                        return (isset($model->typePerson)) ? $model->typePerson->name : '-';
+                    }
+                ],
                 'keterangan:ntext',
                 [
                     'attribute' => 'status',
