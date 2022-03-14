@@ -35,27 +35,27 @@ class PurchaseInternalController extends Controller
 				    'rules' => [
                         [
                             'actions' => ['create', 'create-temp', 'send-approval'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('purchase-internal')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('po-internal')),
                             'roles' => ['@'],
                         ],
                         [
                             'actions' => ['index', 'view', 'temp', 'get-temp', 'popup'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('purchase-internal')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('po-internal')),
                             'roles' => ['@'],
                         ], 
                         [
                             'actions' => ['update', 'update-temp'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('purchase-internal')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('po-internal')),
                             'roles' => ['@'],
                         ], 
                         [
                             'actions' => ['delete', 'delete-temp'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('purchase-internal')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('po-internal')),
                             'roles' => ['@'],
                         ],
                         [
                             'actions' => ['approval'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('purchase-internal')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('po-internal')),
                             'roles' => ['@'],
                         ],
                     ],

@@ -41,6 +41,7 @@ class MasterSatuan extends \yii\db\ActiveRecord
     {
         return [
             [['name', 'type_code', 'type_satuan', 'um_1', 'composite'], 'required'],
+            [['konversi_1', 'konversi_2', 'konversi_3'], 'number'],
             [['keterangan'], 'string'],
             [['status', 'created_at', 'updated_at', 'composite'], 'integer'],
             [['code', 'type_code', 'type_satuan'], 'string', 'max' => 3],
@@ -64,9 +65,12 @@ class MasterSatuan extends \yii\db\ActiveRecord
             'status' => 'Status',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
-            'um_1' => 'UM 1',
-            'um_2' => 'UM 2',
-            'um_3' => 'UM 3',
+            'um_1' => 'Um 1',
+            'um_2' => 'Um 2',
+            'um_3' => 'Um 3',
+            'konversi_1' => 'Konv 1',
+            'konversi_2' => 'Konv 2',
+            'konversi_3' => 'Konv 3',
         ];
     }
 

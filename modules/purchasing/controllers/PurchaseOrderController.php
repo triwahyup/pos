@@ -5,7 +5,7 @@ namespace app\modules\purchasing\controllers;
 use app\models\Logs;
 use app\models\LogsMail;
 use app\models\User;
-use app\modules\master\models\MasterMaterialItem;
+use app\modules\master\models\MasterMaterial;
 use app\modules\master\models\MasterPerson;
 use app\modules\master\models\Profile;
 use app\modules\pengaturan\models\PengaturanApproval;
@@ -39,27 +39,27 @@ class PurchaseOrderController extends Controller
 				    'rules' => [
                         [
                             'actions' => ['create', 'create-temp', 'send-approval'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('purchase-order')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('po-material')),
                             'roles' => ['@'],
                         ],
                         [
                             'actions' => ['index', 'view', 'list-item', 'temp', 'get-temp', 'popup', 'search', 'item', 'autocomplete'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('purchase-order')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('po-material')),
                             'roles' => ['@'],
                         ], 
                         [
                             'actions' => ['update', 'update-temp', 'post'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('purchase-order')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('po-material')),
                             'roles' => ['@'],
                         ], 
                         [
                             'actions' => ['delete', 'delete-temp'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('purchase-order')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('po-material')),
                             'roles' => ['@'],
                         ],
                         [
                             'actions' => ['approval'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('purchase-order')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('po-material')),
                             'roles' => ['@'],
                         ],
                     ],
@@ -149,18 +149,19 @@ class PurchaseOrderController extends Controller
         $message = '';
         $temp = new TempPurchaseOrderDetail();
         $model = new PurchaseOrder();
-        $model->no_po = $model->generateCode();
         if ($this->request->isPost) {
             if ($model->load($this->request->post())) {
                 $connection = \Yii::$app->db;
 			    $transaction = $connection->beginTransaction();
                 try{
+                    $model->no_po = $model->generateCode();
                     $model->user_id = \Yii::$app->user->id;
                     if($model->save()){
-                        if(count($model->temps) > 0){
-                            foreach($model->temps as $temp){
+                        if(count($model->temps()) > 0){
+                            foreach($model->temps() as $temp){
                                 $detail = new PurchaseOrderDetail();
                                 $detail->attributes = $temp->attributes;
+                                $detail->no_po = $model->no_po;
                                 if(!$detail->save()){
                                     $success = false;
                                     $message = (count($detail->errors) > 0) ? 'ERROR CREATE PO DETAIL: ' : '';
@@ -431,7 +432,7 @@ class PurchaseOrderController extends Controller
 
     public function actionListItem()
     {
-        $model = MasterMaterialItem::find()
+        $model = MasterMaterial::find()
             ->alias('a')
             ->select(['a.*', 'b.composite'])
             ->leftJoin('master_satuan b', 'b.code = a.satuan_code')
@@ -446,7 +447,7 @@ class PurchaseOrderController extends Controller
     {
         $model = [];
         if(isset($_POST['search'])){
-            $model = MasterMaterialItem::find()
+            $model = MasterMaterial::find()
                 ->select(['code', 'concat(code,"-",name) label', 'concat(code,"-",name) name'])
                 ->where(['status'=>1])
                 ->andWhere('concat(code,"-",name) LIKE "%'.$_POST['search'].'%"')
@@ -461,7 +462,7 @@ class PurchaseOrderController extends Controller
     {
         $model = [];
         if(isset($_POST['code'])){
-            $model = MasterMaterialItem::find()
+            $model = MasterMaterial::find()
                 ->alias('a')
                 ->select(['a.*', 'b.composite'])
                 ->leftJoin('master_satuan b', 'b.code = a.satuan_code')
@@ -474,12 +475,12 @@ class PurchaseOrderController extends Controller
 
     public function actionItem()
     {
-        $model = MasterMaterialItem::find()
+        $model = MasterMaterial::find()
             ->alias('a')
             ->select(['a.*', 'b.*', 'a.name as item_name', 'c.composite'])
-            ->leftJoin('master_material_item_pricelist b', 'b.item_code = a.code')
+            ->leftJoin('master_material_pricelist b', 'b.item_code = a.code')
             ->leftJoin('master_satuan c', 'c.code = a.satuan_code')
-            ->where(['a.code'=>$_POST['code'], 'a.status'=>1, 'b.status_active' => 1])
+            ->where(['item_code'=>$_POST['code'], 'supplier_code'=>$_POST['supplier'], 'a.status'=>1, 'status_active' => 1])
             ->asArray()
             ->one();
         if(empty($model)){
@@ -515,38 +516,41 @@ class PurchaseOrderController extends Controller
     {
         $request = \Yii::$app->request;
         $success = true;
-        $message = '';
+        $message = 'CREATE TEMP SUCCESSFULLY';
         if($request->isPost){
-            $data = $request->post('TempPurchaseOrderDetail');
-            $item = MasterMaterialItem::find()
-                ->alias('a')
-                ->select(['a.*', 'b.*'])
-                ->leftJoin('master_material_item_pricelist b', 'b.item_code = a.code')
-                ->where(['code'=>$data['item_code'], 'a.status'=>1, 'status_active'=>1])
-                ->asArray()
-                ->one();
-            if($item['harga_beli_1'] > 0 && $item['harga_jual_1'] > 0){
-                $temp = new TempPurchaseOrderDetail();
-                $temp->attributes = (array)$data;
-                $temp->attributes = ($temp->item) ? $temp->item->attributes : '';
-                $temp->urutan = $temp->count +1;
-                $temp->user_id = \Yii::$app->user->id;
-                if(!empty($request->post('PurchaseOrder')['no_po'])){
-                    $temp->no_po = $request->post('PurchaseOrder')['no_po'];
-                }
-                $temp->total_order = $temp->totalBeli;
-                if($temp->save()){
-                    $message = 'CREATE TEMP SUCCESSFULLY';
+            $temp = new TempPurchaseOrderDetail();
+            $dataHeader = $request->post('PurchaseOrder');
+            $temp->attributes = (array)$dataHeader;
+            $dataTemp = $request->post('TempPurchaseOrderDetail');
+            $temp->attributes = (array)$dataTemp;
+            if(!empty($dataTemp['item_name'])){
+                if($dataTemp['qty_order_1'] > 0){
+                    if(isset($temp->priceListActive)){
+                        $temp->attributes = $temp->item->attributes;
+                        $temp->attributes = $temp->priceListActive->attributes;
+                        $temp->attributes = $temp->satuan->attributes;
+                        $temp->no_po = (!empty($dataHeader['no_po'])) ? $dataHeader['no_po'] : 'tmp';
+                        $temp->urutan = $temp->count +1;
+                        $temp->user_id = \Yii::$app->user->id;
+                        $temp->total_order = $temp->totalBeli;
+                        if(!$temp->save()){
+                            $success = false;
+                            foreach($temp->errors as $error => $value){
+                                $message = $value[0].', ';
+                            }
+                            $message = substr($message, 0, -2);
+                        }
+                    }else{
+                        $success = false;
+                        $message = 'Harga Beli / Harga Jual masih kosong. Silakan input harga terlebih dahulu di menu Master Material.';
+                    }
                 }else{
                     $success = false;
-                    foreach($temp->errors as $error => $value){
-                        $message = $value[0].', ';
-                    }
-                    $message = substr($message, 0, -2);
+                    $message = 'Qty belum diisi.';
                 }
             }else{
                 $success = false;
-                $message = 'Harga Beli / Harga Jual masih kosong. Silakan input harga terlebih dahulu di menu Master Material Item.';
+                $message = 'Material tidak ditemukan.';
             }
         }else{
             throw new NotFoundHttpException('The requested data does not exist.');
@@ -558,33 +562,37 @@ class PurchaseOrderController extends Controller
     {
         $request = \Yii::$app->request;
         $success = true;
-        $message = '';
+        $message = 'UPDATE TEMP SUCCESSFULLY';
         if($request->isPost){
-            $data = $request->post('TempPurchaseOrderDetail');
-            $item = MasterMaterialItem::find()
-                ->alias('a')
-                ->select(['a.*', 'b.*'])
-                ->leftJoin('master_material_item_pricelist b', 'b.item_code = a.code')
-                ->where(['code'=>$data['item_code'], 'a.status'=>1, 'status_active'=>1])
-                ->asArray()
-                ->one();
-            if($item['harga_beli_1'] > 0 && $item['harga_jual_1'] > 0){
-                $temp = $this->findTemp($data['id']);
-                $temp->attributes = (array)$data;
-                $temp->attributes = ($temp->item) ? $temp->item->attributes : '';
-                $temp->total_order = $temp->totalBeli;
-                if($temp->save()){
-                    $message = 'UPDATE TEMP SUCCESSFULLY';
+            $temp = $this->findTemp($data['id']);
+            $dataHeader = $request->post('PurchaseOrder');
+            $temp->attributes = (array)$dataHeader;
+            $dataTemp = $request->post('TempPurchaseOrderDetail');
+            $temp->attributes = (array)$dataTemp;
+            if(!empty($dataTemp['item_name'])){
+                if($dataTemp['qty_order_1'] > 0){
+                    if(isset($temp->priceListActive)){
+                        $temp->attributes = $temp->item->attributes;
+                        $temp->attributes = $temp->priceListActive->attributes;
+                        $temp->total_order = $temp->totalBeli;
+                        if(!$temp->save()){
+                            $success = false;
+                            foreach($temp->errors as $error => $value){
+                                $message = $value[0].', ';
+                            }
+                            $message = substr($message, 0, -2);
+                        }
+                    }else{
+                        $success = false;
+                        $message = 'Harga Beli / Harga Jual masih kosong. Silakan mengisikan harga terlebih dahulu di menu Master Material.';
+                    }
                 }else{
                     $success = false;
-                    foreach($temp->errors as $error => $value){
-                        $message = $value[0].', ';
-                    }
-                    $message = substr($message, 0, -2);
+                    $message = 'Qty belum diisi.';
                 }
             }else{
                 $success = false;
-                $message = 'Harga Beli / Harga Jual masih kosong. Silakan mengisikan harga terlebih dahulu di menu Master Material Item.';
+                $message = 'Material tidak ditemukan.';
             }
         }else{
             throw new NotFoundHttpException('The requested data does not exist.');
@@ -595,7 +603,7 @@ class PurchaseOrderController extends Controller
     public function actionDeleteTemp($id)
     {
         $success = true;
-        $message = '';
+        $message = 'DELETE TEMP SUCCESSFULLY';
         $temp = $this->findTemp($id);
         if(isset($temp)){
             if($temp->delete()){
@@ -609,7 +617,6 @@ class PurchaseOrderController extends Controller
                         $message = substr($message, 0, -2);
                     }
                 }
-                $message = 'DELETE TEMP SUCCESSFULLY';
             }else{
                 $success = false;
                 foreach($temp->errors as $error => $value){
@@ -651,7 +658,7 @@ class PurchaseOrderController extends Controller
             try{
                 $model->status_approval = 1;
                 if($model->save()){
-                    $approvals = (new PengaturanApproval)->approval('purchase-order');
+                    $approvals = (new PengaturanApproval)->approval('po-material');
                     if(isset($approvals)){
                         $approvaln = PurchaseOrderApproval::findAll(['no_po'=>$no_po]);
                         if(count($approvaln) > 0)

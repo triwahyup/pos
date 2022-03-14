@@ -28,7 +28,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     'class' => 'text-center'
                 ],
                 'value' => function ($model, $key, $index) {
-                    return (isset($model->typeKode)) ? strtolower($model->typeKode->name) : '-';
+                    return (isset($model->typeKode)) ? $model->typeKode->name : '-';
                 }
             ],
             [

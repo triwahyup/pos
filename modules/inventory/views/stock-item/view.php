@@ -10,6 +10,7 @@ $this->params['breadcrumbs'][] = $this->title;
             <thead>
                 <tr>
                     <th class="text-center">No.</th>
+                    <th class="text-center">Supplier</th>
                     <th class="text-center">Type Dokumen</th>
                     <th class="text-center">No. Dokumen</th>
                     <th class="text-center">Tgl. Dokumen</th>
@@ -31,6 +32,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     <?php foreach($transaction as $index=>$val): ?>
                         <tr>
                             <td class="text-center"><?=($index+1)?></td>
+                            <td><?=(isset($val->supplier)) ? $val->supplier->name : '' ?></td>
                             <td><?=$val->type_document ?></td>
                             <td class="text-center"><?=$val->no_document ?></td>
                             <td class="text-center"><?=date('d-m-Y', strtotime($val->tgl_document)) ?></td>

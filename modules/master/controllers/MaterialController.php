@@ -34,22 +34,22 @@ class MaterialController extends Controller
 				    'rules' => [
                         [
                             'actions' => ['create', 'create-temp'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('material-item')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-material')),
                             'roles' => ['@'],
                         ],
                         [
                             'actions' => ['index', 'view', 'generate-code', 'um', 'get-temp', 'temp'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('material-item')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-material')),
                             'roles' => ['@'],
                         ], 
                         [
                             'actions' => ['update', 'update-temp', 'status-active'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('material-item')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-material')),
                             'roles' => ['@'],
                         ], 
                         [
                             'actions' => ['delete', 'delete-temp'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('material-item')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-material')),
                             'roles' => ['@'],
                         ],
                     ],
@@ -455,8 +455,6 @@ class MaterialController extends Controller
             $data = $request->post('TempMasterMaterialPricelist');
             $temp = $this->findTemp($data['id']);
             $temp->attributes = (array)$data;
-            $temp->attributes = $temp->item->attributes;
-            print_r($temp->item->attributes);die;
             if($temp->save()){
                 $message = 'UPDATE TEMP SUCCESSFULLY';
             }else{

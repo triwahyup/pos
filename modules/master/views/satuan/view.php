@@ -45,6 +45,24 @@ $this->params['breadcrumbs'][] = $this->title;
                 'um_1',
                 'um_2',
                 'um_3',
+                [
+                    'attribute' => 'konversi_1',
+                    'value' => function ($model, $index) { 
+                        return (!empty($model->konversi_1)) ? number_format($model->konversi_1) : null;
+                    }
+                ],
+                [
+                    'attribute' => 'konversi_2',
+                    'value' => function ($model, $index) { 
+                        return (!empty($model->konversi_2)) ? number_format($model->konversi_2) : null;
+                    }
+                ],
+                [
+                    'attribute' => 'konversi_3',
+                    'value' => function ($model, $index) { 
+                        return (!empty($model->konversi_3)) ? number_format($model->konversi_3) : null;
+                    }
+                ],
                 'keterangan:ntext',
                 [
                     'attribute' => 'status',

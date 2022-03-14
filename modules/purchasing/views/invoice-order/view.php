@@ -115,9 +115,9 @@ $this->params['breadcrumbs'][] = $this->title;
                             <tr>
                                 <th class="text-center">No.</th>
                                 <th class="text-center">Item</th>
-                                <th class="text-center" colspan="2">QTY Order</th>
-                                <th class="text-center" colspan="2">QTY Terima</th>
-                                <th class="text-center" colspan="2">Harga Beli (Rp)</th>
+                                <th class="text-center">QTY Order</th>
+                                <th class="text-center">QTY Terima</th>
+                                <th class="text-center">Harga Beli (Rp)</th>
                                 <th class="text-center">Ppn (%)</th>
                                 <th class="text-center">Total Order (Rp)</th>
                                 <th class="text-center">Total Invoice (Rp)</th>
@@ -133,22 +133,16 @@ $this->params['breadcrumbs'][] = $this->title;
                                     <tr>
                                         <td class="text-center"><?=$index+1?></td>
                                         <td class="font-size-10"><?=(isset($val->item)) ? '<span class="text-success">'.$val->item->code .'</span><br />'. $val->item->name : '' ?></td>
-                                        <?php for($a=1;$a<3;$a++): ?>
-                                            <td class="text-right"><?=(!empty($val['qty_order_'.$a])) ? number_format($val['qty_order_'.$a]).'<br /><span class="text-muted font-size-10">'.$val['um_'.$a].'</span>' : null ?></td>
-                                        <?php endfor; ?>
-                                        <?php for($a=1;$a<3;$a++): ?>
-                                            <td class="text-right"><?=(!empty($val['qty_terima_'.$a])) ? number_format($val['qty_terima_'.$a]).'<br /><span class="text-muted font-size-10">'.$val['um_'.$a].'</span>' : null ?></td>
-                                        <?php endfor; ?>
-                                        <?php for($a=1;$a<3;$a++): ?>
-                                            <td class="text-right"><?=(!empty($val['qty_order_'.$a])) ? number_format($val['harga_beli_'.$a]).'.- <br /><span class="text-muted font-size-10">Per '.$val['um_'.$a].'</span>' : null ?></td>
-                                        <?php endfor; ?>
+                                        <td class="text-right"><?=number_format($val->qty_order_1).'<br /><span class="text-muted font-size-10">'.$val->um_1.'</span>' ?></td>
+                                        <td class="text-right"><?=number_format($val->qty_terima_1).'<br /><span class="text-muted font-size-10">'.$val->um_1.'</span>'?></td>
+                                        <td class="text-right"><?=number_format($val->harga_beli_1).'.- <br /><span class="text-muted font-size-10">Per '.$val->um_1.'</span>'?></td>
                                         <td class="text-right"><?=(!empty($val->ppn)) ? $val->ppn.'%' : '' ?></td>
                                         <td class="text-right"><?=number_format($val->total_order).'.-' ?></td>
                                         <td class="text-right"><?=number_format($val->total_invoice).'.-' ?></td>
                                     </tr>
                                 <?php endforeach; ?>
                                 <tr>
-                                    <td class="text-right summary" colspan="9"></td>
+                                    <td class="text-right summary" colspan="6"></td>
                                     <td class="text-right summary"><strong><?='Total Order: '.number_format($totalOrder).'.-' ?></strong></td>
                                     <td class="text-right summary"><strong><?='Total Invoice: '.number_format($totalInvoice).'.-' ?></strong></td>
                                 </tr>
@@ -166,7 +160,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <p class="text-right">
         <?php if($model->status_terima==0): ?>
             <?= Html::a('<i class="fontello icon-pencil"></i><span>Update</span>', ['update', 'no_invoice' => $model->no_invoice], ['class' => 'btn btn-warning btn-flat btn-sm']) ?>
-            <?= Html::a('<i class="fontello icon-ok"></i><span>Konfirmasi Terima Item Material</span>', ['terima', 'no_invoice' => $model->no_invoice], ['class' => 'btn btn-primary btn-flat btn-sm']) ?>
+            <?= Html::a('<i class="fontello icon-ok"></i><span>Konfirmasi Terima Material</span>', ['terima', 'no_invoice' => $model->no_invoice], ['class' => 'btn btn-primary btn-flat btn-sm']) ?>
         <?php endif; ?>
     </p>
 </div>

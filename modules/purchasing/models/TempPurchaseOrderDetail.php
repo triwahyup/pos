@@ -3,7 +3,9 @@
 namespace app\modules\purchasing\models;
 
 use Yii;
-use app\modules\master\models\MasterMaterialItem;
+use app\modules\master\models\MasterMaterial;
+use app\modules\master\models\MasterMaterialPricelist;
+use app\modules\master\models\MasterSatuan;
 
 /**
  * This is the model class for table "temp_purchase_order_detail".
@@ -16,8 +18,6 @@ use app\modules\master\models\MasterMaterialItem;
  * @property string|null $name
  * @property string|null $satuan
  * @property float|null $qty_order
- * @property float|null $harga_beli
- * @property float|null $harga_jual
  * @property float|null $ppn
  * @property float|null $total_order
  */
@@ -40,11 +40,11 @@ class TempPurchaseOrderDetail extends \yii\db\ActiveRecord
     {
         return [
             [['id', 'user_id', 'urutan'], 'integer'],
-            [['qty_order_1', 'qty_order_2', 'qty_order_3', 'harga_beli_1', 'harga_beli_2', 'harga_beli_3', 'harga_jual_1', 'harga_jual_2', 'harga_jual_3', 'ppn', 'total_order'], 'safe'],
+            [['qty_order_1', 'qty_order_2', 'qty_order_3', 'harga_beli_1', 'harga_beli_2', 'harga_beli_3', 'ppn', 'total_order', 'konversi_1', 'konversi_2', 'konversi_3'], 'safe'],
             [['no_po'], 'string', 'max' => 12],
             [['item_code'], 'string', 'max' => 7],
             [['name'], 'string', 'max' => 128],
-            [['satuan_code', 'type_code', 'material_code', 'group_material_code', 'group_supplier_code'], 'string', 'max' => 3],
+            [['satuan_code', 'type_code', 'material_code', 'supplier_code'], 'string', 'max' => 3],
             [['um_1', 'um_2', 'um_3'], 'string', 'max' => 5],
             [['id'], 'unique'],
         ];
@@ -71,9 +71,6 @@ class TempPurchaseOrderDetail extends \yii\db\ActiveRecord
             'harga_beli_1' => 'Harga Beli 1',
             'harga_beli_2' => 'Harga Beli 2',
             'harga_beli_3' => 'Harga Beli 3',
-            'harga_jual_1' => 'Harga Jual 1',
-            'harga_jual_2' => 'Harga Jual 2',
-            'harga_jual_3' => 'Harga Jual 3',
             'ppn' => 'Ppn',
             'total_order' => 'Total',
             'satuan' => 'Satuan',
@@ -92,7 +89,18 @@ class TempPurchaseOrderDetail extends \yii\db\ActiveRecord
 
     public function getItem()
     {
-        return $this->hasOne(MasterMaterialItem::className(), ['code' => 'item_code']);
+        return $this->hasOne(MasterMaterial::className(), ['code' => 'item_code']);
+    }
+
+    public $status_active=1;
+    public function getPriceListActive()
+    {
+        return $this->hasOne(MasterMaterialPricelist::className(), ['item_code' => 'item_code', 'supplier_code' => 'supplier_code', 'status_active' => 'status_active']);
+    }
+
+    public function getSatuan()
+    {
+        return $this->hasOne(MasterSatuan::className(), ['code' => 'satuan_code']);
     }
 
     public function beforeSave($attribute)
@@ -100,9 +108,6 @@ class TempPurchaseOrderDetail extends \yii\db\ActiveRecord
         $this->harga_beli_1 = str_replace(',', '', $this->harga_beli_1);
         $this->harga_beli_2 = str_replace(',', '', $this->harga_beli_2);
         $this->harga_beli_3 = str_replace(',', '', $this->harga_beli_3);
-        $this->harga_jual_1 = str_replace(',', '', $this->harga_jual_1);
-        $this->harga_jual_2 = str_replace(',', '', $this->harga_jual_2);
-        $this->harga_jual_3 = str_replace(',', '', $this->harga_jual_3);
         $this->qty_order_1 = str_replace(',', '', $this->qty_order_1);
         $this->qty_order_2 = str_replace(',', '', $this->qty_order_2);
         $this->qty_order_3 = str_replace(',', '', $this->qty_order_3);

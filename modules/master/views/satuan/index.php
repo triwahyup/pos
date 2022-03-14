@@ -38,45 +38,30 @@ $this->params['breadcrumbs'][] = $this->title;
             'um_2',
             'um_3',
             [
-                'attribute' => 'created_at',
+                'attribute' => 'konversi_1',
                 'contentOptions' => [
                     'class' => 'text-center',
                 ],
-                'filter' => DatePicker::widget([
-                    'model' => $searchModel, 
-                    'name' => 'created_at', 
-                    'type' => DatePicker::TYPE_COMPONENT_APPEND,
-                    'pickerButton' => false,
-                    'attribute' => 'created_at',
-                    'pluginOptions' => [
-                        'format' => 'dd-mm-yyyy',
-                        'autoclose' => true,
-                    ],
-                ]),
-                'value' => function($model, $index, $key)
-                {
-                    return date('d-m-Y', $model->created_at);
+                'value' => function ($model, $index) { 
+                    return (!empty($model->konversi_1)) ? number_format($model->konversi_1) : null;
                 }
             ],
             [
-                'attribute' => 'updated_at',
+                'attribute' => 'konversi_2',
                 'contentOptions' => [
                     'class' => 'text-center',
                 ],
-                'filter' => DatePicker::widget([
-                    'model' => $searchModel, 
-                    'name' => 'updated_at', 
-                    'type' => DatePicker::TYPE_COMPONENT_APPEND,
-                    'pickerButton' => false,
-                    'attribute' => 'updated_at',
-                    'pluginOptions' => [
-                        'format' => 'dd-mm-yyyy',
-                        'autoclose' => true,
-                    ],
-                ]),
-                'value' => function($model, $index, $key)
-                {
-                    return date('d-m-Y', $model->updated_at);
+                'value' => function ($model, $index) { 
+                    return (!empty($model->konversi_2)) ? number_format($model->konversi_2) : null;
+                }
+            ],
+            [
+                'attribute' => 'konversi_3',
+                'contentOptions' => [
+                    'class' => 'text-center',
+                ],
+                'value' => function ($model, $index) { 
+                    return (!empty($model->konversi_3)) ? number_format($model->konversi_3) : null;
                 }
             ],
             [

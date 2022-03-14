@@ -14,7 +14,7 @@ class InventoryStockItemSearch extends InventoryStockItem
     public function rules()
     {
         return [
-            [['item_code'], 'safe'],
+            [['item_code', 'supplier_code'], 'safe'],
             [['onhand', 'onsales'], 'integer'],
         ];
     }
@@ -39,7 +39,8 @@ class InventoryStockItemSearch extends InventoryStockItem
     {
         $query = InventoryStockItem::find()
             ->alias('a')
-            ->leftJoin('master_material_item b', 'b.code = a.item_code');
+            ->leftJoin('master_material b', 'b.code = a.item_code')
+            ->leftJoin('master_person c', 'c.code = a.supplier_code');
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -57,6 +58,9 @@ class InventoryStockItemSearch extends InventoryStockItem
         $query->where(['a.status'=>1]);
         if(!empty($this->item_code)){
             $query->andWhere('code LIKE "%'.$this->item_code.'%" OR name LIKE "%'.$this->item_code.'%"');
+        }
+        if(!empty($this->supplier_code)){
+            $query->andWhere('code LIKE "%'.$this->supplier_code.'%" OR name LIKE "%'.$this->supplier_code.'%"');
         }
         $query->andFilterWhere(['like', 'onhand', $this->onhand])
         ->andFilterWhere(['like', 'onsales', $this->onsales]);

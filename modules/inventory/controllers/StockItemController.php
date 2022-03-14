@@ -26,7 +26,7 @@ class StockItemController extends Controller
 				    'rules' => [
                         [
                             'actions' => ['index', 'view'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('stock-item')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('stock-material')),
                             'roles' => ['@'],
                         ],
                     ],

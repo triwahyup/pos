@@ -3,7 +3,8 @@
 namespace app\modules\inventory\models;
 
 use Yii;
-use app\modules\master\models\MasterMaterialItem;
+use app\modules\master\models\MasterMaterial;
+use app\modules\master\models\MasterPerson;
 use yii\behaviors\TimestampBehavior;
 
 /**
@@ -43,7 +44,8 @@ class InventoryStockItem extends \yii\db\ActiveRecord
             [['onhand', 'onsales'], 'number'],
             [['status', 'created_at', 'updated_at'], 'integer'],
             [['item_code'], 'string', 'max' => 7],
-            [['item_code'], 'unique'],
+            [['supplier_code'], 'string', 'max' => 3],
+            [['item_code', 'supplier_code'], 'unique', 'targetAttribute' => ['item_code', 'supplier_code']],
             [['onhand', 'onsales'], 'default', 'value' => 0],
             [['status'], 'default', 'value' => 1],
         ];
@@ -56,6 +58,7 @@ class InventoryStockItem extends \yii\db\ActiveRecord
     {
         return [
             'item_code' => 'Item Code',
+            'supplier_code' => 'Supplier',
             'onhand' => 'Onhand',
             'onsales' => 'Onsales',
             'status' => 'Status',
@@ -66,13 +69,18 @@ class InventoryStockItem extends \yii\db\ActiveRecord
 
     public function getItem()
     {
-        return $this->hasOne(MasterMaterialItem::className(), ['code' => 'item_code']);
+        return $this->hasOne(MasterMaterial::className(), ['code' => 'item_code']);
+    }
+
+    public function getSupplier()
+    {
+        return $this->hasOne(MasterPerson::className(), ['code' => 'supplier_code']);
     }
 
     public function satuanTerkecil($item_code, $qty)
     {
         $total_material = 0;
-        $item = MasterMaterialItem::findOne($item_code);
+        $item = MasterMaterial::findOne($item_code);
         if(isset($item)){
             // KERTAS
             if($item->type_code == '007'){
@@ -103,7 +111,7 @@ class InventoryStockItem extends \yii\db\ActiveRecord
 
     public function konversi($item_code, $qty)
     {
-        $item = MasterMaterialItem::findOne($item_code);
+        $item = MasterMaterial::findOne($item_code);
         $desc = '';
         $result = [];
         if(isset($item)){
@@ -145,7 +153,7 @@ class InventoryStockItem extends \yii\db\ActiveRecord
 
     public function nKonversi($item_code, $qty)
     {
-        $item = MasterMaterialItem::findOne($item_code);
+        $item = MasterMaterial::findOne($item_code);
         $result = [];
         if(isset($item)){
             // KERTAS

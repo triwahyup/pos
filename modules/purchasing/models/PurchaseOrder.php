@@ -50,7 +50,7 @@ class PurchaseOrder extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['no_po', 'tgl_po', 'tgl_kirim', 'term_in', 'supplier_code', 'user_request'], 'required'],
+            [['tgl_po', 'tgl_kirim', 'term_in', 'supplier_code', 'user_request'], 'required'],
             [['tgl_po', 'tgl_kirim', 'total_order'], 'safe'],
             [['term_in', 'user_id', 'user_request', 'status', 'status_approval', 'status_terima', 'created_at', 'updated_at', 'post'], 'integer'],
             [['keterangan'], 'string'],
@@ -127,6 +127,11 @@ class PurchaseOrder extends \yii\db\ActiveRecord
     public function getTemps()
     {
         return $this->hasMany(TempPurchaseOrderDetail::className(), ['no_po' => 'no_po']);
+    }
+
+    public function temps()
+    {
+        return TempPurchaseOrderDetail::findAll(['user_id' => \Yii::$app->user->id]);
     }
 
     public function getApprovals()

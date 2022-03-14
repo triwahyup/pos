@@ -17,7 +17,7 @@ class MasterSatuanSearch extends MasterSatuan
     public function rules()
     {
         return [
-            [['name', 'type_code', 'type_satuan', 'created_at', 'updated_at', 'um_1', 'um_2', 'um_3'], 'safe'],
+            [['name', 'type_code', 'type_satuan', 'um_1', 'um_2', 'um_3', 'konversi_1', 'konversi_2', 'konversi_3'], 'safe'],
         ];
     }
 
@@ -78,7 +78,10 @@ class MasterSatuanSearch extends MasterSatuan
         $query->andFilterWhere(['like', 'a.name', $this->name])
             ->andFilterWhere(['like', 'um_1', $this->um_1])
             ->andFilterWhere(['like', 'um_2', $this->um_2])
-            ->andFilterWhere(['like', 'um_3', $this->um_3]);
+            ->andFilterWhere(['like', 'um_3', $this->um_3])
+            ->andFilterWhere(['like', 'konversi_1', $this->konversi_1])
+            ->andFilterWhere(['like', 'konversi_2', $this->konversi_2])
+            ->andFilterWhere(['like', 'konversi_3', $this->konversi_3]);
 
         return $dataProvider;
     }

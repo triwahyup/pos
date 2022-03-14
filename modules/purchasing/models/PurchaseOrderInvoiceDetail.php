@@ -3,7 +3,7 @@
 namespace app\modules\purchasing\models;
 
 use Yii;
-use app\modules\master\models\MasterMaterialItem;
+use app\modules\master\models\MasterMaterial;
 use yii\behaviors\TimestampBehavior;
 
 /**
@@ -16,8 +16,6 @@ use yii\behaviors\TimestampBehavior;
  * @property string|null $satuan
  * @property float|null $qty_order
  * @property float|null $qty_terima
- * @property float|null $harga_beli
- * @property float|null $harga_jual
  * @property float|null $ppn
  * @property float|null $total_order
  * @property float|null $total_invoice
@@ -50,11 +48,11 @@ class PurchaseOrderInvoiceDetail extends \yii\db\ActiveRecord
         return [
             [['no_invoice', 'urutan'], 'required'],
             [['urutan', 'status', 'created_at', 'updated_at'], 'integer'],
-            [['qty_order_1', 'qty_order_2', 'qty_order_3', 'qty_terima_1', 'qty_terima_2', 'qty_terima_3', 'harga_beli_1', 'harga_beli_2', 'harga_beli_3', 'harga_jual_1', 'harga_jual_2', 'harga_jual_3', 'ppn', 'total_order', 'total_invoice'], 'safe'],
+            [['konversi_1', 'konversi_2', 'konversi_3', 'qty_order_1', 'qty_order_2', 'qty_order_3', 'qty_terima_1', 'qty_terima_2', 'qty_terima_3', 'harga_beli_1', 'harga_beli_2', 'harga_beli_3', 'ppn', 'total_order', 'total_invoice'], 'safe'],
             [['no_invoice'], 'string', 'max' => 12],
             [['item_code'], 'string', 'max' => 7],
             [['name'], 'string', 'max' => 128],
-            [['satuan_code', 'type_code', 'material_code', 'group_material_code', 'group_supplier_code'], 'string', 'max' => 3],
+            [['satuan_code', 'type_code', 'material_code', 'supplier_code'], 'string', 'max' => 3],
             [['um_1', 'um_2', 'um_3'], 'string', 'max' => 5],
             [['no_invoice', 'urutan'], 'unique', 'targetAttribute' => ['no_invoice', 'urutan']],
             [['status'], 'default', 'value' => 1],
@@ -84,9 +82,6 @@ class PurchaseOrderInvoiceDetail extends \yii\db\ActiveRecord
             'harga_beli_1' => 'Harga Beli 1',
             'harga_beli_2' => 'Harga Beli 2',
             'harga_beli_3' => 'Harga Beli 3',
-            'harga_jual_1' => 'Harga Jual 1',
-            'harga_jual_2' => 'Harga Jual 2',
-            'harga_jual_3' => 'Harga Jual 3',
             'ppn' => 'Ppn',
             'total_order' => 'Total Order',
             'total_invoice' => 'Total Invoice',
@@ -98,7 +93,7 @@ class PurchaseOrderInvoiceDetail extends \yii\db\ActiveRecord
 
     public function getItem()
     {
-        return $this->hasOne(MasterMaterialItem::className(), ['code' => 'item_code']);
+        return $this->hasOne(MasterMaterial::className(), ['code' => 'item_code']);
     }
 
     public function beforeSave($attribute)

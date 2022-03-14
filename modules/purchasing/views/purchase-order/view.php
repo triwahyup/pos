@@ -138,8 +138,8 @@ $this->params['breadcrumbs'][] = $this->title;
                             <tr>
                                 <th class="text-center">No.</th>
                                 <th class="text-center">Item</th>
-                                <th class="text-center" colspan="2">QTY</th>
-                                <th class="text-center" colspan="2">Harga Beli</th>
+                                <th class="text-center">QTY</th>
+                                <th class="text-center">Harga Beli</th>
                                 <th class="text-center">Ppn (%)</th>
                                 <th class="text-center">Total (Rp)</th>
                             </tr>
@@ -152,18 +152,14 @@ $this->params['breadcrumbs'][] = $this->title;
                                     <tr>
                                         <td class="text-center"><?=$index+1?></td>
                                         <td class="font-size-10"><?=(isset($val->item)) ? '<span class="text-success">'.$val->item->code .'</span><br />'. $val->item->name : '' ?></td>
-                                        <?php for($a=1;$a<3;$a++): ?>
-                                            <td class="text-right"><?=(!empty($val['qty_order_'.$a])) ? number_format($val['qty_order_'.$a]).'<br /><span class="text-muted font-size-10">'.$val['um_'.$a].'</span>' : null ?></td>
-                                        <?php endfor; ?>
-                                        <?php for($a=1;$a<3;$a++): ?>
-                                            <td class="text-right"><?=(!empty($val['qty_order_'.$a])) ? number_format($val['harga_beli_'.$a]).'.- <br /><span class="text-muted font-size-10">Per '.$val['um_'.$a].'</span>' : null ?></td>
-                                        <?php endfor; ?>
+                                        <td class="text-right"><?=number_format($val->qty_order_1).'<br /><span class="text-muted font-size-10">'.$val->um_1.'</span>' ?></td>
+                                        <td class="text-right"><?=number_format($val->harga_beli_1).'.- <br /><span class="text-muted font-size-10">Per '.$val->um_1.'</span>' ?></td>
                                         <td class="text-right"><?=(!empty($val->ppn)) ? $val->ppn.'%' : '' ?></td>
                                         <td class="text-right"><?=number_format($val->total_order).'.-' ?></td>
                                     </tr>
                                 <?php endforeach; ?>
                                 <tr>
-                                    <td class="summary" colspan="7"><strong>Total Order:</strong></td>
+                                    <td class="summary" colspan="5"><strong>Total Order:</strong></td>
                                     <td class="summary"><strong><?=number_format($totalOrder).'.-' ?></strong></td>
                                 </tr>
                             <?php else : ?>
@@ -214,7 +210,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 <?php endif; ?>
                 <?php if($postInvoice): ?>
                     <div class="text-right">
-                        <?= Html::a('<i class="fontello icon-ok"></i><span>Post to Invoice Order</span>', ['post', 'no_po'=>$model->no_po], ['class' => 'btn btn-primary btn-flat btn-sm']) ?>
+                        <?= Html::a('<i class="fontello icon-ok"></i><span>Post to Invoice</span>', ['post', 'no_po'=>$model->no_po], ['class' => 'btn btn-primary btn-flat btn-sm']) ?>
                     </div>
                 <?php endif; ?>
                 <?php if($typeApproval): ?>
