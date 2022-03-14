@@ -109,6 +109,8 @@ class PurchaseOrderInvoice extends \yii\db\ActiveRecord
 
     public function beforeSave($attribute)
     {
+        $this->tgl_po = date('Y-m-d', strtotime($this->tgl_po));
+        $this->tgl_invoice = date('Y-m-d', strtotime($this->tgl_invoice));
         $this->total_invoice = str_replace(',', '', $this->total_invoice);
         return parent::beforeSave($attribute);
     }
@@ -155,6 +157,10 @@ class PurchaseOrderInvoice extends \yii\db\ActiveRecord
         $message = '';
         if($this->status_terima == 1){
             $message = '<span class="text-label text-success">Sudah Terima</span>';
+        }else if($this->status_terima == 2){
+            $message = '<span class="text-label text-warning">Terima Sebagian</span>';
+        }else if($this->status_terima == 3){
+            $message = '<span class="text-label text-primary">Not Balance</span>';
         }else{
             $message = '<span class="text-label text-default">Belum Terima</span>';
         }

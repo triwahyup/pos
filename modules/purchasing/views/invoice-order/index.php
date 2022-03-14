@@ -43,7 +43,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                 ]),
                 'value' => function($model, $index, $key) {
-                    return date('d-m-Y', strtotime($model->tgl_invoice));
+                    return (!empty($model->tgl_invoice)) ? date('d-m-Y', strtotime($model->tgl_invoice)) : null;
                 }
             ],
             [
@@ -65,12 +65,13 @@ $this->params['breadcrumbs'][] = $this->title;
                 }
             ],
             [
-                'attribute' => 'total_invoice',
+                'attribute' => 'status_terima',
                 'contentOptions' => [
-                    'class' => 'text-right',
+                    'class' => 'text-center',
                 ],
-                'value' => function($model, $index, $key) {
-                    return number_format($model->total_order).'.-';
+                'format' => 'raw',
+                'value' => function ($model, $index, $key) { 
+                    return $model->statusTerima;
                 }
             ],
             [

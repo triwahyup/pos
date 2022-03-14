@@ -17,9 +17,8 @@ class PurchaseOrderInvoiceSearch extends PurchaseOrderInvoice
     public function rules()
     {
         return [
-            [['no_invoice', 'tgl_invoice', 'no_bukti', 'no_po', 'tgl_po', 'tgl_kirim', 'supplier_code', 'keterangan'], 'safe'],
-            [['term_in', 'user_id', 'post', 'status', 'created_at', 'updated_at'], 'integer'],
-            [['total_ppn', 'total_order', 'total_invoice'], 'number'],
+            [['no_invoice', 'tgl_invoice', 'no_bukti', 'no_po', 'supplier_code'], 'safe'],
+            [['post', 'status_terima'], 'integer'],
         ];
     }
 

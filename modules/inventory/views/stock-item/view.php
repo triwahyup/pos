@@ -9,22 +9,20 @@ $this->params['breadcrumbs'][] = $this->title;
         <table class="table table-bordered table-custom">
             <thead>
                 <tr>
-                    <th class="text-center">No.</th>
-                    <th class="text-center">Supplier</th>
-                    <th class="text-center">Type Dokumen</th>
-                    <th class="text-center">No. Dokumen</th>
-                    <th class="text-center">Tgl. Dokumen</th>
-                    <th class="text-center">Status</th>
+                    <th class="text-center" rowspan="2">No.</th>
+                    <th class="text-center" rowspan="2">Supplier</th>
+                    <th class="text-center" rowspan="2">Type Dokumen</th>
+                    <th class="text-center" rowspan="2">No. Dokumen</th>
+                    <th class="text-center" rowspan="2">Tgl. Dokumen</th>
+                    <th class="text-center" rowspan="2">Status</th>
                     <th class="text-center" colspan="3">QTY</th>
-                    <th class="text-center">OnHand</th>
-                    <th class="text-center">OnSales</th>
+                    <th class="text-center" rowspan="2">OnHand</th>
+                    <th class="text-center" rowspan="2">OnSales</th>
                 </tr>
                 <tr>
-                    <th class="text-center" colspan="5"></th>
                     <th class="text-center">In</th>
                     <th class="text-center">Out</th>
                     <th class="text-center">Retur</th>
-                    <th class="text-center" colspan="2"></th>
                 </tr>
             </thead>
             <tbody>

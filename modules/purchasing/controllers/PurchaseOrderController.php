@@ -527,8 +527,9 @@ class PurchaseOrderController extends Controller
                 if($dataTemp['qty_order_1'] > 0){
                     if(isset($temp->priceListActive)){
                         $temp->attributes = $temp->item->attributes;
-                        $temp->attributes = $temp->priceListActive->attributes;
                         $temp->attributes = $temp->satuan->attributes;
+                        $temp->attributes = $temp->priceListActive->attributes;
+                        $temp->name = $temp->item->name;
                         $temp->no_po = (!empty($dataHeader['no_po'])) ? $dataHeader['no_po'] : 'tmp';
                         $temp->urutan = $temp->count +1;
                         $temp->user_id = \Yii::$app->user->id;
@@ -573,7 +574,9 @@ class PurchaseOrderController extends Controller
                 if($dataTemp['qty_order_1'] > 0){
                     if(isset($temp->priceListActive)){
                         $temp->attributes = $temp->item->attributes;
+                        $temp->attributes = $temp->satuan->attributes;
                         $temp->attributes = $temp->priceListActive->attributes;
+                        $temp->name = $temp->item->name;
                         $temp->total_order = $temp->totalBeli;
                         if(!$temp->save()){
                             $success = false;

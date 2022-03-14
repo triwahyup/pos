@@ -134,7 +134,17 @@ $this->params['breadcrumbs'][] = $this->title;
                                         <td class="text-center"><?=$index+1?></td>
                                         <td class="font-size-10"><?=(isset($val->item)) ? '<span class="text-success">'.$val->item->code .'</span><br />'. $val->item->name : '' ?></td>
                                         <td class="text-right"><?=number_format($val->qty_order_1).'<br /><span class="text-muted font-size-10">'.$val->um_1.'</span>' ?></td>
-                                        <td class="text-right"><?=number_format($val->qty_terima_1).'<br /><span class="text-muted font-size-10">'.$val->um_1.'</span>'?></td>
+                                        <td class="text-right">
+                                            <?php if($val->qty_selisih > 0): ?>
+                                                <?=number_format($val->qty_terima_1).' <span class="text-muted font-size-12">'.$val->um_1.'</span>' ?>
+                                                <br />
+                                                <strong class="text-danger">
+                                                    <?='<i>Kurang '.number_format($val->qty_selisih).' '.$val->um_1.'</i>' ?>
+                                                </strong>
+                                            <?php else: ?>
+                                                <?=number_format($val->qty_terima_1).'<br /><span class="text-muted font-size-10">'.$val->um_1.'</span>' ?>
+                                            <?php endif; ?>
+                                        </td>
                                         <td class="text-right"><?=number_format($val->harga_beli_1).'.- <br /><span class="text-muted font-size-10">Per '.$val->um_1.'</span>'?></td>
                                         <td class="text-right"><?=(!empty($val->ppn)) ? $val->ppn.'%' : '' ?></td>
                                         <td class="text-right"><?=number_format($val->total_order).'.-' ?></td>
@@ -158,9 +168,13 @@ $this->params['breadcrumbs'][] = $this->title;
         </div>
     </div>
     <p class="text-right">
-        <?php if($model->status_terima==0): ?>
+        <?php if($model->status_terima != 1 && $model->status_terima != 3): ?>
             <?= Html::a('<i class="fontello icon-pencil"></i><span>Update</span>', ['update', 'no_invoice' => $model->no_invoice], ['class' => 'btn btn-warning btn-flat btn-sm']) ?>
-            <?= Html::a('<i class="fontello icon-ok"></i><span>Konfirmasi Terima Material</span>', ['terima', 'no_invoice' => $model->no_invoice], ['class' => 'btn btn-primary btn-flat btn-sm']) ?>
+            <?php if($model->status_terima==0): ?>
+                <?= Html::a('<i class="fontello icon-ok"></i><span>Konfirmasi Terima Material</span>', ['terima', 'no_invoice' => $model->no_invoice], ['class' => 'btn btn-primary btn-flat btn-sm']) ?>
+            <?php else: ?>
+                <?= Html::a('<i class="fontello icon-cancel"></i><span>Close Penerimaan</span>', ['close', 'no_invoice' => $model->no_invoice], ['class' => 'btn btn-primary btn-flat btn-sm']) ?>
+            <?php endif; ?>
         <?php endif; ?>
     </p>
 </div>

@@ -48,7 +48,7 @@ class PurchaseOrderInvoiceDetail extends \yii\db\ActiveRecord
         return [
             [['no_invoice', 'urutan'], 'required'],
             [['urutan', 'status', 'created_at', 'updated_at'], 'integer'],
-            [['konversi_1', 'konversi_2', 'konversi_3', 'qty_order_1', 'qty_order_2', 'qty_order_3', 'qty_terima_1', 'qty_terima_2', 'qty_terima_3', 'harga_beli_1', 'harga_beli_2', 'harga_beli_3', 'ppn', 'total_order', 'total_invoice'], 'safe'],
+            [['konversi_1', 'konversi_2', 'konversi_3', 'qty_order_1', 'qty_order_2', 'qty_order_3', 'qty_terima_1', 'qty_terima_2', 'qty_terima_3', 'qty_selisih', 'qty_susulan', 'harga_beli_1', 'harga_beli_2', 'harga_beli_3', 'ppn', 'total_order', 'total_invoice'], 'safe'],
             [['no_invoice'], 'string', 'max' => 12],
             [['item_code'], 'string', 'max' => 7],
             [['name'], 'string', 'max' => 128],
@@ -99,11 +99,7 @@ class PurchaseOrderInvoiceDetail extends \yii\db\ActiveRecord
     public function beforeSave($attribute)
     {
         $this->harga_beli_1 = str_replace(',', '', $this->harga_beli_1);
-        $this->harga_beli_2 = str_replace(',', '', $this->harga_beli_2);
-        $this->harga_beli_3 = str_replace(',', '', $this->harga_beli_3);
         $this->qty_terima_1 = str_replace(',', '', $this->qty_terima_1);
-        $this->qty_terima_2 = str_replace(',', '', $this->qty_terima_2);
-        $this->qty_terima_3 = str_replace(',', '', $this->qty_terima_3);
         return parent::beforeSave($attribute);
     }
 
@@ -128,5 +124,30 @@ class PurchaseOrderInvoiceDetail extends \yii\db\ActiveRecord
             $total_invoice += $ppn;
         }
         return $total_invoice;
+    }
+
+    public function getQtySelisih($qty_order, $qty_terima)
+    {
+        $qty = 0;
+        $konversi = 1;
+        $pcs = abs($qty_terima-$qty_order);
+        if($this->konversi_1 > 0){
+            $qty = $total = floor($pcs / $konversi);
+        }
+        
+        $isEmptyQty = false;
+        $selisih = 0;
+        if($qty_terima == 0){
+            $isEmptyQty = true;
+        }else{
+            if(($qty_terima - $qty_order) > 0){
+                $selisih = 1;
+            }else{
+                if(($qty_terima - $qty_order) !=0){
+                    $selisih = -1;
+                }
+            }
+        }
+        return ['qty' => $qty, 'selisih' => $selisih, 'isEmptyQty' => $isEmptyQty];
     }
 }

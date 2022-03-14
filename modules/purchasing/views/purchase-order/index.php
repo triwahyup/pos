@@ -63,15 +63,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 }
             ],
             [
-                'attribute' => 'total_order',
-                'contentOptions' => [
-                    'class' => 'text-right',
-                ],
-                'value' => function($model, $index, $key) {
-                    return number_format($model->total_order).'.-';
-                }
-            ],
-            [
                 'attribute' => 'post',
                 'contentOptions' => [
                     'class' => 'text-center',

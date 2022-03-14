@@ -37,7 +37,7 @@ class InvoiceOrderController extends Controller
                             'roles' => ['@'],
                         ], 
                         [
-                            'actions' => ['update', 'terima', 'update-temp'],
+                            'actions' => ['update', 'terima', 'close', 'update-temp'],
                             'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('invoice-material')),
                             'roles' => ['@'],
                         ], 
@@ -147,6 +147,11 @@ class InvoiceOrderController extends Controller
                 Logs::addLog($logs);
                 \Yii::$app->session->setFlash('error', $message);
             }
+        }else{
+            if($model->status_terima == 1 || $model->status_terima == 3){
+                \Yii::$app->session->setFlash('error', 'Dokumen ini sudah diterima.');
+                return $this->redirect(['index']);
+            }
         }
 
         return $this->render('update', [
@@ -169,7 +174,7 @@ class InvoiceOrderController extends Controller
 
         throw new NotFoundHttpException('The requested page does not exist.');
     }
-
+    
     public function actionTerima($no_invoice)
     {
         $success = true;
@@ -180,56 +185,71 @@ class InvoiceOrderController extends Controller
             $transaction = $connection->beginTransaction();
             try{
                 if(!empty($model->no_bukti) && !empty($model->tgl_invoice)){
+                    $selisih = false;
                     foreach($model->details as $val){
-                        if($val->qty_terima_1==0){
+                        // TERIMA SEBAGIAN
+                        $qtySelisih = $val->getQtySelisih($val->qty_order_1, $val->qty_terima_1);
+                        if(!$qtySelisih['isEmptyQty']){
+                            if($qtySelisih['selisih'] == -1){
+                                $selisih = true;
+                            }
+                            $val->qty_selisih = $qtySelisih['qty'];
+                            if(!$val->save()){
+                                $success = false;
+                                $message = (count($val->errors) > 0) ? 'ERROR SAVE QTY SELISIH ' : '';
+                                foreach($val->errors as $error => $value){
+                                    $message .= strtoupper($value[0].', ');
+                                }
+                                $message = substr($message, 0, -2);
+                            }
+                        }else{
                             $success = false;
                             $message = 'QTY Terima item '.$val->item_code.'-'.$val->name.' masih 0.';
                         }
                     }
 
                     if($success){
-                        $model->status_terima=1;
+                        $model->status_terima = ($selisih) ? 2 : 1;
                         $model->post=1;
                         $purchaseOrder = PurchaseOrder::findOne(['no_po'=>$model->no_po]);
-                        $purchaseOrder->status_terima=1;
+                        $purchaseOrder->status_terima = ($selisih) ? 2 : 1;
                         if($model->save() && $purchaseOrder->save()){
                             foreach($model->details as $val){
-                                $stockItem = InventoryStockItem::findOne(['item_code'=>$val->item_code, 'status'=>1]);
-                                if(isset($stockItem)){
-                                    $konversi = $stockItem->satuanTerkecil($val->item_code, [
-                                        0 => $val->qty_terima_1,
-                                        1 => $val->qty_terima_2
-                                    ]);
-                                    $stockItem->onhand = $stockItem->onhand+$konversi;
-                                    if(!$stockItem->save()){
-                                        $success = false;
-                                        $message = (count($stockItem->errors) > 0) ? 'ERROR UPDATE STOCK ITEM: ' : '';
-                                        foreach($stockItem->errors as $error => $value){
-                                            $message .= strtoupper($value[0].', ');
-                                        }
-                                        $message = substr($message, 0, -2);
-                                    }
-
-                                    $stockTransaction = new InventoryStockTransaction();
-                                    $stockTransaction->item_code = $val->item_code;
-                                    $stockTransaction->supplier_code = $model->supplier_code;
-                                    $stockTransaction->no_document = $model->no_invoice;
-                                    $stockTransaction->tgl_document = $model->tgl_invoice;
-                                    $stockTransaction->type_document = "INVOICE ORDER";
-                                    $stockTransaction->status_document = "IN";
-                                    $stockTransaction->qty_in = $konversi;
-                                    $stockTransaction->onhand = (isset($stockTransaction->onHand)) ? $stockTransaction->onHand->qty_in+$konversi : $konversi;
-                                    if(!$stockTransaction->save()){
-                                        $success = false;
-                                        $message = (count($stockTransaction->errors) > 0) ? 'ERROR UPDATE STOCK TRANSACTION: ' : '';
-                                        foreach($stockTransaction->errors as $error => $value){
-                                            $message .= strtoupper($value[0].', ');
-                                        }
-                                        $message = substr($message, 0, -2);
-                                    }
-                                }else{
+                                // STOCK IN
+                                $stockItem = InventoryStockItem::findOne(['item_code'=>$val->item_code, 'supplier_code'=>$val->supplier_code, 'status'=>1]);
+                                if(empty($stockItem)){
+                                    $stockItem = new InventoryStockItem();
+                                }
+                                $konversi = $stockItem->satuanTerkecil($val->item_code, [
+                                    0 => $val->qty_terima_1,
+                                    1 => $val->qty_terima_2
+                                ]);
+                                $stockItem->attributes = $val->attributes;
+                                $stockItem->onhand = $stockItem->onhand+$konversi;
+                                if(!$stockItem->save()){
                                     $success = false;
-                                    $message = 'Item {'.$val->item_code.'-'.$val->name.'} tidak ditemukan di Inventory Stock Item';
+                                    $message = (count($stockItem->errors) > 0) ? 'ERROR UPDATE STOCK ITEM: ' : '';
+                                    foreach($stockItem->errors as $error => $value){
+                                        $message .= strtoupper($value[0].', ');
+                                    }
+                                    $message = substr($message, 0, -2);
+                                }
+
+                                $stockTransaction = new InventoryStockTransaction();
+                                $stockTransaction->attributes = $val->attributes;
+                                $stockTransaction->no_document = $model->no_invoice;
+                                $stockTransaction->tgl_document = $model->tgl_invoice;
+                                $stockTransaction->type_document = "INVOICE ORDER";
+                                $stockTransaction->status_document = "IN";
+                                $stockTransaction->qty_in = $konversi;
+                                $stockTransaction->onhand = (isset($stockTransaction->onHand)) ? $stockTransaction->onHand->qty_in+$konversi : $konversi;
+                                if(!$stockTransaction->save()){
+                                    $success = false;
+                                    $message = (count($stockTransaction->errors) > 0) ? 'ERROR UPDATE STOCK TRANSACTION: ' : '';
+                                    foreach($stockTransaction->errors as $error => $value){
+                                        $message .= strtoupper($value[0].', ');
+                                    }
+                                    $message = substr($message, 0, -2);
                                 }
                             }
                         }else{
@@ -279,6 +299,105 @@ class InvoiceOrderController extends Controller
         return $this->redirect(['view', 'no_invoice' => $model->no_invoice]);
     }
 
+    public function actionClose($no_invoice)
+    {
+        $success = true;
+        $message = '';
+        $model = $this->findModel($no_invoice);
+        if(isset($model)){
+            $connection = \Yii::$app->db;
+            $transaction = $connection->beginTransaction();
+            try{
+                $selisih = false;
+                foreach($model->details as $val){
+                    $qtySelisih = $val->getQtySelisih($val->qty_order_1, $val->qty_terima_1);
+                    if($qtySelisih['selisih'] == -1){
+                        $selisih = true;
+                    }
+                }
+
+                if($success){
+                    $model->status_terima = ($selisih) ? 3 : 1;
+                    $purchaseOrder = PurchaseOrder::findOne(['no_po'=>$model->no_po]);
+                    $purchaseOrder->status_terima = ($selisih) ? 3 : 1;
+                    if($model->save() && $purchaseOrder->save()){
+                        foreach($model->details as $val){
+                            // STOCK IN SUSULAN
+                            $stockItem = InventoryStockItem::findOne(['item_code'=>$val->item_code, 'supplier_code'=>$val->supplier_code, 'status'=>1]);
+                            $konversi = $stockItem->satuanTerkecil($val->item_code, [
+                                0 => $val->qty_susulan, 1 => 0]);
+                            if($konversi > 0){
+                                $stockItem->onhand = $stockItem->onhand+$konversi;
+                                if(!$stockItem->save()){
+                                    $success = false;
+                                    $message = (count($stockItem->errors) > 0) ? 'ERROR UPDATE STOCK ITEM: ' : '';
+                                    foreach($stockItem->errors as $error => $value){
+                                        $message .= strtoupper($value[0].', ');
+                                    }
+                                    $message = substr($message, 0, -2);
+                                }
+
+                                $stockTransaction = new InventoryStockTransaction();
+                                $stockTransaction->attributes = $val->attributes;
+                                $stockTransaction->no_document = $model->no_invoice;
+                                $stockTransaction->tgl_document = $model->tgl_invoice;
+                                $stockTransaction->type_document = "INVOICE ORDER (S)";
+                                $stockTransaction->status_document = "IN";
+                                $stockTransaction->qty_in = $konversi;
+                                $stockTransaction->onhand = (isset($stockTransaction->onHand)) ? $stockTransaction->onHand->qty_in+$konversi : $konversi;
+                                if(!$stockTransaction->save()){
+                                    $success = false;
+                                    $message = (count($stockTransaction->errors) > 0) ? 'ERROR UPDATE STOCK TRANSACTION: ' : '';
+                                    foreach($stockTransaction->errors as $error => $value){
+                                        $message .= strtoupper($value[0].', ');
+                                    }
+                                    $message = substr($message, 0, -2);
+                                }
+                            }
+                        }
+                    }else{
+                        $success = false;
+                        $message = (count($model->errors) > 0) ? 'ERROR TERIMA INVOICE ORDER: ' : '';
+                        foreach($model->errors as $error => $value){
+                            $message .= strtoupper($value[0].', ');
+                        }
+                        $message = substr($message, 0, -2);
+                    }
+                }
+
+                if($success){
+                    $message = '['.$model->no_invoice.'] SUCCESS TERIMA INVOICE ORDER.';
+                    $transaction->commit();
+                    $logs =	[
+                        'type' => Logs::TYPE_USER,
+                        'description' => $message,
+                    ];
+                    Logs::addLog($logs);
+                    \Yii::$app->session->setFlash('success', $message);
+                    return $this->redirect(['view', 'no_invoice' => $model->no_invoice]);
+                }else{
+                    $transaction->rollback();
+                }
+            }catch(Exception $e){
+                $success = false;
+                $message = $e->getMessage();
+                $transaction->rollBack();
+            }
+            $logs =	[
+                'type' => Logs::TYPE_USER,
+                'description' => $message,
+            ];
+            Logs::addLog($logs);
+        }else{
+            $success = false;
+            $message = 'Data Invoice Order not valid.';
+        }
+        if(!$success){
+            \Yii::$app->session->setFlash('error', $message);
+        }
+        return $this->redirect(['view', 'no_invoice' => $model->no_invoice]);
+    }
+
     public function actionTemp()
     {
         $request = \Yii::$app->request;
@@ -295,16 +414,12 @@ class InvoiceOrderController extends Controller
 
     public function actionGetTemp($no_invoice, $urutan)
     {
-        $temp = PurchaseOrderInvoiceDetail::findOne(['no_invoice'=>$no_invoice, 'urutan'=>$urutan]);
-        $data['urutan'] = $temp->urutan;
-        $data['harga_beli_1'] = $temp->harga_beli_1;
-        $data['harga_beli_2'] = $temp->harga_beli_2;
-        $data['harga_beli_3'] = $temp->harga_beli_3;
-        $data['qty_terima_1'] = (!empty($temp->qty_terima_1)) ? $temp->qty_terima_1 : $temp->qty_order_1;
-        $data['qty_terima_2'] = (!empty($temp->qty_terima_2)) ? $temp->qty_terima_2 : $temp->qty_order_2;
-        $data['qty_terima_3'] = (!empty($temp->qty_terima_3)) ? $temp->qty_terima_3 : $temp->qty_order_3;
-        $data['ppn'] = $temp->ppn;
-        return json_encode($data);
+        $temp = PurchaseOrderInvoiceDetail::find()
+            ->where(['no_invoice'=>$no_invoice, 'urutan'=>$urutan])
+            ->asArray()
+            ->one();
+        $temp['qty_terima_1'] = ($temp['qty_selisih'] > 0) ? $temp['qty_selisih'] : null;
+        return json_encode($temp);
     }
 
     public function actionUpdateTemp()
@@ -315,8 +430,18 @@ class InvoiceOrderController extends Controller
         $invoiceOrder = $request->post('PurchaseOrderInvoice');
         if($request->isPost){
             $temp = PurchaseOrderInvoiceDetail::findOne(['no_invoice'=>$invoiceOrder['no_invoice'], 'urutan'=>$invoiceOrder['urutan']]);
+            $qtyOrder = ($temp->qty_selisih > 0) ? $temp->qty_selisih : $temp->qty_order_1;
+            $qtyTerima = $temp->qty_terima_1;
             $temp->attributes = (array)$invoiceOrder;
-            if(($temp->qty_terima_1 <= $temp->qty_order_1) && ($temp->qty_terima_2 <= $temp->qty_order_2) && ($temp->qty_terima_3 <= $temp->qty_order_3)){
+            if($temp->qty_terima_1 <= $qtyOrder){
+                if($temp->qty_selisih > 0){
+                    $temp->qty_terima_1 = $qtyTerima+$temp->qty_terima_1;
+                }else{
+                    $temp->qty_terima_1 = $temp->qty_terima_1;
+                }
+                $qtySelisih = $temp->getQtySelisih($temp->qty_order_1, $temp->qty_terima_1);
+                $temp->qty_susulan = ($temp->qty_selisih > 0) ? $qtyOrder : 0;
+                $temp->qty_selisih = $qtySelisih['qty'];
                 $temp->total_invoice = $temp->totalInvoice;
                 if($temp->save()){
                     $message = 'UPDATE TERIMA SUCCESSFULLY';

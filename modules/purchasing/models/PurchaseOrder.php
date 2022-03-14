@@ -170,6 +170,10 @@ class PurchaseOrder extends \yii\db\ActiveRecord
         $message = '';
         if($this->status_terima == 1){
             $message = '<span class="text-label text-success">Sudah Terima</span>';
+        }else if($this->status_terima == 2){
+            $message = '<span class="text-label text-warning">Terima Sebagian</span>';
+        }else if($this->status_terima == 3){
+            $message = '<span class="text-label text-primary">Not Balance</span>';
         }else{
             $message = '<span class="text-label text-default">Belum Terima</span>';
         }

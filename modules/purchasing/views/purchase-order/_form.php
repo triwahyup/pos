@@ -15,7 +15,11 @@ use yii\widgets\MaskedInput;
         <div class="col-lg-6 col-md-6 col-xs-12 padding-left-0">
             <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
                 <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-left-0">
-                    <?= $form->field($model, 'no_po')->textInput(['maxlength' => true, 'readonly' => true]) ?>
+                    <?= $form->field($model, 'supplier_code')->widget(Select2::classname(), [
+                        'data' => $supplier,
+                        'options' => ['placeholder' => 'Supplier'],
+                        ]) ?>
+                    <?= $form->field($model, 'no_po')->hiddenInput(['maxlength' => true, 'readonly' => true])->label(false) ?>
                 </div>
                 <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padding-left-0">
                     <?= $form->field($model, 'tgl_po')->widget(DatePicker::classname(), [
@@ -31,14 +35,13 @@ use yii\widgets\MaskedInput;
                 </div>
             </div>
             <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
-                <div class="margin-top-20"></div>
                 <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-left-0">
-                    <?= $form->field($model, 'supplier_code')->widget(Select2::classname(), [
-                            'data' => $supplier,
-                            'options' => ['placeholder' => 'Supplier'],
+                    <?= $form->field($model, 'user_request')->widget(Select2::classname(), [
+                            'data' => $profile,
+                            'options' => ['placeholder' => 'Request By'],
                         ]) ?>
                 </div>
-                <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0">
+                <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padding-left-0">
                     <?= $form->field($model, 'term_in')->textInput() ?>
                 </div>
             </div>
@@ -54,16 +57,8 @@ use yii\widgets\MaskedInput;
                             'format' => 'dd-mm-yyyy',
                             ]]) ?>
                 </div>
-                <div class="col-lg-5 col-md-5 col-sm-12 col-xs-12 padding-left-0">
-                    <?= $form->field($model, 'user_request')->widget(Select2::classname(), [
-                            'data' => $profile,
-                            'options' => ['placeholder' => 'Request By'],
-                        ]) ?>
-                </div>
-            </div>
-            <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
                 <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-left-0">
-                    <?= $form->field($model, 'keterangan')->textarea(['rows' => 2]) ?>
+                    <?= $form->field($model, 'keterangan')->textarea(['rows' => 3]) ?>
                 </div>
             </div>
         </div>
