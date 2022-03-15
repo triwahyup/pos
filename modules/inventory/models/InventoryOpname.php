@@ -4,6 +4,7 @@ namespace app\modules\inventory\models;
 
 use Yii;
 use app\modules\master\models\Profile;
+use app\modules\master\models\MasterPerson;
 use app\modules\inventory\models\InventoryOpnameApproval;
 use app\modules\inventory\models\InventoryOpnameDetail;
 use app\modules\inventory\models\TempInventoryOpnameDetail;
@@ -47,6 +48,7 @@ class InventoryOpname extends \yii\db\ActiveRecord
         return [
             [['date'], 'safe'],
             [['post', 'status_approval', 'status', 'user_id', 'created_at', 'updated_at'], 'integer'],
+            [['supplier_code'], 'string', 'max' => 3],
             [['code'], 'string', 'max' => 12],
             [['keterangan'], 'string', 'max' => 128],
             [['code'], 'unique'],
@@ -62,6 +64,7 @@ class InventoryOpname extends \yii\db\ActiveRecord
     {
         return [
             'code' => 'Code',
+            'supplier_code' => 'Supplier',
             'date' => 'Date',
             'keterangan' => 'Keterangan',
             'post' => 'Post',
@@ -87,6 +90,11 @@ class InventoryOpname extends \yii\db\ActiveRecord
     public function getProfile()
     {
         return $this->hasOne(Profile::className(), ['user_id' => 'user_id']);
+    }
+
+    public function getSupplier()
+    {
+        return $this->hasOne(MasterPerson::className(), ['code' => 'supplier_code']);
     }
     
     public function getDetails()

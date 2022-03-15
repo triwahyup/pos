@@ -4,7 +4,8 @@ namespace app\modules\inventory\models;
 
 use Yii;
 use app\modules\inventory\models\InventoryStockItem;
-use app\modules\master\models\MasterMaterialItem;
+use app\modules\master\models\MasterMaterial;
+use app\modules\master\models\MasterPerson;
 
 /**
  * This is the model class for table "temp_inventory_opname_detail".
@@ -32,7 +33,6 @@ use app\modules\master\models\MasterMaterialItem;
  */
 class TempInventoryOpnameDetail extends \yii\db\ActiveRecord
 {
-    public $item_name;
     public $um_stock_1;
     public $um_stock_2;
     
@@ -50,13 +50,14 @@ class TempInventoryOpnameDetail extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
+            [['supplier_code'], 'required'],
             [['urutan', 'balance', 'user_id'], 'integer'],
-            [['qty_1', 'qty_2', 'qty_3', 'qty_stock_1', 'qty_stock_2', 'qty_stock_3', 'selisih'], 'number'],
+            [['qty_1', 'qty_2', 'qty_3', 'qty_stock_1', 'qty_stock_2', 'qty_stock_3', 'selisih', 'konversi_1', 'konversi_2', 'konversi_3'], 'number'],
             [['code'], 'string', 'max' => 12],
             [['item_code'], 'string', 'max' => 7],
-            [['satuan_code', 'material_code', 'type_code'], 'string', 'max' => 3],
+            [['supplier_code', 'satuan_code', 'material_code', 'type_code'], 'string', 'max' => 3],
             [['um_1', 'um_2', 'um_3'], 'string', 'max' => 5],
-            [['keterangan', 'item_name'], 'string', 'max' => 128],
+            [['item_name', 'keterangan'], 'string', 'max' => 128],
         ];
     }
 
@@ -70,6 +71,8 @@ class TempInventoryOpnameDetail extends \yii\db\ActiveRecord
             'code' => 'Code',
             'urutan' => 'Urutan',
             'item_code' => 'Item Code',
+            'item_name' => 'Item Name',
+            'supplier_code' => 'Supplier',
             'satuan_code' => 'Satuan Code',
             'material_code' => 'Material Code',
             'type_code' => 'Type Code',
@@ -101,7 +104,12 @@ class TempInventoryOpnameDetail extends \yii\db\ActiveRecord
 
     public function getItem()
     {
-        return $this->hasOne(MasterMaterialItem::className(), ['code' => 'item_code']);
+        return $this->hasOne(MasterMaterial::className(), ['code' => 'item_code']);
+    }
+
+    public function getSupplier()
+    {
+        return $this->hasOne(MasterPerson::className(), ['code' => 'supplier_code']);
     }
 
     public function getStock()

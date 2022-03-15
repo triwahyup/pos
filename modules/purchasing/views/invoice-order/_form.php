@@ -188,9 +188,16 @@ function get_temp(el)
         beforeSend: function(){},
         success: function(data){
             var o = $.parseJSON(data);
-            $.each(o, function(index, value){
-                $("#purchaseorderinvoice-"+index).val(value);
-            });
+            if(o.success == true){
+                $.each(o.temp, function(index, value){
+                    $("#purchaseorderinvoice-"+index).val(value);
+                });
+            }else{
+                notification.open("danger", o.message, timeOut);
+                setTimeout(function(){
+                    temp.destroy()
+                }, 30);
+            }
         },
         complete: function(){
             temp.init();

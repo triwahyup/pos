@@ -84,7 +84,7 @@ class InventoryStockItem extends \yii\db\ActiveRecord
         if(isset($item)){
             if(isset($item->satuan)){
                 $konversi_2 = (!empty($item->satuan->konversi_2)) ? $item->satuan->konversi_2 : 1;
-                $total_material = ($qty[0] * $item->satuan->konversi_2) + $qty[1];
+                $total_material = ($qty[0] * $konversi_2) + $qty[1];
             }
         }
         return $total_material;

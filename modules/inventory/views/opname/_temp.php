@@ -9,7 +9,7 @@
             <?php for($a=1;$a<3;$a++): ?>
                 <td class="text-right"><?=(!empty($val['qty_'.$a])) ? number_format($val['qty_'.$a]).'<br /><span class="text-muted font-size-10">'.$val['um_'.$a].'</span>' : null ?></td>
             <?php endfor; ?>
-            <td class="text-right"><?=number_format($val->selisih) .'<br /><span class="text-muted font-size-10">PLANO</span>'?></td>
+            <td class="text-right"><?=number_format($val->selisih) .'<br /><span class="text-muted font-size-10">'.$val->um_2.'</span>'?></td>
             <td class="text-center"><?=$val->statusBalance ?></td>
             <td><?=(!empty($val->keterangan)) ? '<span class="text-muted font-size-10">Keterangan: '.$val->keterangan.'</span>' : '' ?></td>
             <td class="text-center">

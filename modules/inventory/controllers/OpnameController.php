@@ -6,7 +6,8 @@ use app\models\Logs;
 use app\models\LogsMail;
 use app\models\User;
 use app\modules\master\models\Profile;
-use app\modules\master\models\MasterMaterialItem;
+use app\modules\master\models\MasterMaterial;
+use app\modules\master\models\MasterPerson;
 use app\modules\inventory\models\InventoryOpname;
 use app\modules\inventory\models\InventoryOpnameApproval;
 use app\modules\inventory\models\InventoryOpnameDetail;
@@ -117,6 +118,12 @@ class OpnameController extends Controller
      */
     public function actionCreate()
     {
+        $supplier = MasterPerson::find()
+            ->select(['name'])
+            ->where(['type_user'=>\Yii::$app->params['TYPE_SUPPLIER'], 'status' => 1])
+            ->indexBy('code')
+            ->column();
+
         $success = true;
         $message = '';
         $model = new InventoryOpname();
@@ -192,6 +199,7 @@ class OpnameController extends Controller
         return $this->render('create', [
             'model' => $model,
             'temp' => $temp,
+            'supplier' => $supplier,
         ]);
     }
 
@@ -204,6 +212,12 @@ class OpnameController extends Controller
      */
     public function actionUpdate($code)
     {
+        $supplier = MasterPerson::find()
+            ->select(['name'])
+            ->where(['type_user'=>\Yii::$app->params['TYPE_SUPPLIER'], 'status' => 1])
+            ->indexBy('code')
+            ->column();
+
         $success = true;
         $message = '';
         $model = $this->findModel($code);
@@ -300,6 +314,7 @@ class OpnameController extends Controller
         return $this->render('update', [
             'model' => $model,
             'temp' => $temp,
+            'supplier' => $supplier,
         ]);
     }
 
@@ -390,7 +405,7 @@ class OpnameController extends Controller
 
     public function actionListItem()
     {
-        $model = MasterMaterialItem::find()
+        $model = MasterMaterial::find()
             ->alias('a')
             ->select(['a.*', 'b.composite'])
             ->leftJoin('master_satuan b', 'b.code = a.satuan_code')
@@ -405,7 +420,7 @@ class OpnameController extends Controller
     {
         $model = [];
         if(isset($_POST['search'])){
-            $model = MasterMaterialItem::find()
+            $model = MasterMaterial::find()
                 ->select(['code', 'concat(code,"-",name) label', 'concat(code,"-",name) name'])
                 ->where(['status'=>1])
                 ->andWhere('concat(code,"-",name) LIKE "%'.$_POST['search'].'%"')
@@ -420,7 +435,7 @@ class OpnameController extends Controller
     {
         $model = [];
         if(isset($_POST['code'])){
-            $model = MasterMaterialItem::find()
+            $model = MasterMaterial::find()
                 ->alias('a')
                 ->select(['a.*', 'b.composite'])
                 ->leftJoin('master_satuan b', 'b.code = a.satuan_code')
@@ -433,21 +448,26 @@ class OpnameController extends Controller
     
     public function actionItem()
     {
-        $model['item'] = MasterMaterialItem::find()
+        $model = MasterMaterial::find()
             ->alias('a')
-            ->select(['a.code as item_code', 'a.name as item_name', 'b.composite', 'b.um_1', 'b.um_2'])
+            ->select(['b.*', 'b.code as xxx', 'a.code as item_code', 'a.name as item_name'])
             ->leftJoin('master_satuan b', 'b.code = a.satuan_code')
             ->where(['a.code'=>$_POST['code'], 'a.status'=>1])
             ->asArray()
             ->one();
-        if(empty($model['item'])){
+        $stock = 0;
+        if(empty($model)){
             $model = [];
         }else{
-            $stockItem = InventoryStockItem::findOne(['item_code'=>$model['item']['item_code']]);
-            $konversi = $stockItem->nKonversi($model['item']['item_code'], $stockItem['onhand']);
-            $model['stock'] = $konversi;
+            $stockItem = InventoryStockItem::findOne(['item_code'=>$model['item_code']]);
+            if(isset($stockItem)){
+                $konversi = $stockItem->nKonversi($model['item_code'], $stockItem['onhand']);
+            }else{
+                $konversi = [0, 0];
+            }
+            $stock = $konversi;
         }
-        return json_encode($model);
+        return json_encode(['item'=>$model, 'stock'=>$stock]);
     }
 
     public function actionTemp()
@@ -474,26 +494,26 @@ class OpnameController extends Controller
         $success = true;
         $message = '';
         if($request->isPost){
-            $data = $request->post('TempInventoryOpnameDetail');
-            $citem = TempInventoryOpnameDetail::findOne(['item_code'=>$data['item_code'], 'user_id'=>\Yii::$app->user->id]);
-            if(empty($citem)){
-                if($data['qty_1'] > 0 || $data['qty_2'] > 0){
+            $dataTemp = $request->post('TempInventoryOpnameDetail');
+            $ctemp = TempInventoryOpnameDetail::findOne(['item_code'=>$dataTemp['item_code'], 'user_id'=>\Yii::$app->user->id]);
+            if(empty($ctemp)){
+                $dataHeader = $request->post('InventoryOpname');
+                if($dataTemp['qty_1'] > 0 || $dataTemp['qty_2'] > 0){
                     $temp = new TempInventoryOpnameDetail();
-                    $temp->attributes = (array)$data;
+                    $temp->attributes = (array)$dataTemp;
                     $temp->attributes = ($temp->item) ? $temp->item->attributes : '';
-                    if(!empty($_POST['InventoryOpname']['code'])){
-                        $temp->code = $_POST['InventoryOpname']['code'];
-                    }
+                    $temp->attributes = ($temp->item->satuan) ? $temp->item->satuan->attributes : '';
+                    $temp->code = (!empty($dataHeader['code'])) ? $dataHeader['code'] : 'tmp';
+                    $temp->supplier_code = $dataHeader['supplier_code'];
                     $temp->urutan = $temp->count +1;
                     $temp->user_id = \Yii::$app->user->id;
-    
-                    $stock = $temp->stock;
-                    $opname = $stock->satuanTerkecil($data['item_code'], [
-                        0=>$data['qty_1'],
-                        1=>$data['qty_2'],
-                    ]);
+                    
+                    $stock = (isset($temp->stock)) ? $temp->stock : (new InventoryStockItem());
+                    $opname = $stock->satuanTerkecil($dataTemp['item_code'], [
+                        0=>$dataTemp['qty_1'],
+                        1=>$dataTemp['qty_2']]);
                     $temp->selisih = $stock->onhand - $opname;
-                    $temp->keterangan = $data['keterangan'];
+                    $temp->keterangan = $dataTemp['keterangan'];
                     if($stock->onhand != $opname){
                         if($stock->onhand > $opname){
                             $temp->balance = 0; // MINUS
@@ -532,23 +552,22 @@ class OpnameController extends Controller
         $success = true;
         $message = '';
         if($request->isPost){
-            $data = $request->post('TempInventoryOpnameDetail');
-            if($data['qty_1'] > 0 || $data['qty_2'] > 0){
-                $temp = $this->findTemp($data['id']);
-                $temp->attributes = (array)$data;
+            $dataTemp = $request->post('TempInventoryOpnameDetail');
+            $dataHeader = $request->post('InventoryOpname');
+            if($dataTemp['qty_1'] > 0 || $dataTemp['qty_2'] > 0){
+                $temp = $this->findTemp($dataTemp['id']);
+                $temp->attributes = (array)$dataTemp;
                 $temp->attributes = ($temp->item) ? $temp->item->attributes : '';
-                if(!empty($_POST['InventoryOpname']['code'])){
-                    $temp->code = $_POST['InventoryOpname']['code'];
-                }
+                $temp->attributes = ($temp->item->satuan) ? $temp->item->satuan->attributes : '';
+                $temp->code = (!empty($dataHeader['code'])) ? $dataHeader['code'] : 'tmp';
                 $temp->user_id = \Yii::$app->user->id;
 
-                $stock = $temp->stock;
-                $opname = $stock->satuanTerkecil($data['item_code'], [
-                    0=>$data['qty_1'],
-                    1=>$data['qty_2'],
-                ]);
+                $stock = (isset($temp->stock)) ? $temp->stock : (new InventoryStockItem());
+                $opname = $stock->satuanTerkecil($dataTemp['item_code'], [
+                    0=>$dataTemp['qty_1'],
+                    1=>$dataTemp['qty_2']]);
                 $temp->selisih = $stock->onhand - $opname;
-                $temp->keterangan = $data['keterangan'];
+                $temp->keterangan = $dataTemp['keterangan'];
                 if($stock->onhand != $opname){
                     if($stock->onhand > $opname){
                         $temp->balance = 0; // MINUS
@@ -1010,12 +1029,16 @@ class OpnameController extends Controller
                 if($model->save()){
                     foreach($model->details as $val){
                         if($val->balance != 1){
-                            $stockItem = InventoryStockItem::findOne(['item_code'=>$val->item_code, 'status'=>1]);
+                            $stockItem = InventoryStockItem::findOne(['item_code'=>$val->item_code, 'supplier_code'=>$val->supplier_code, 'status'=>1]);
+                            if(empty($stockItem)){
+                                $stockItem = new InventoryStockItem();
+                            }
                             if(isset($stockItem)){
                                 $konversi = $stockItem->satuanTerkecil($val->item_code, [
                                     0 => $val->qty_1,
                                     1 => $val->qty_2
                                 ]);
+                                $stockItem->attributes = $val->attributes;
                                 $stockItem->onhand = $konversi;
                                 if(!$stockItem->save()){
                                     $success = false;
@@ -1027,7 +1050,7 @@ class OpnameController extends Controller
                                 }
                                 
                                 $stockTransaction = new InventoryStockTransaction();
-                                $stockTransaction->item_code = $val->item_code;
+                                $stockTransaction->attributes = $val->attributes;
                                 $stockTransaction->no_document = $model->code;
                                 $stockTransaction->tgl_document = $model->date;
                                 $stockTransaction->type_document = "STOCK OPNAME";

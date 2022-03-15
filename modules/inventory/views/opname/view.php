@@ -7,7 +7,7 @@ use yii\widgets\DetailView;
 /* @var $model app\modules\inventory\models\InventoryOpname */
 
 $this->title = 'Kode Opname: '.$model->code;
-$this->params['breadcrumbs'][] = ['label' => 'Inventory Opnames', 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => 'Inventory Opname', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
 ?>
@@ -29,6 +29,13 @@ $this->params['breadcrumbs'][] = $this->title;
             'model' => $model,
             'attributes' => [
                 'code',
+                [
+                    'attribute' => 'supplier_code',
+                    'format' => 'raw',
+                    'value' => function ($model, $index) { 
+                        return (isset($model->supplier)) ? $model->supplier->name : '-';
+                    }
+                ],
                 [
                     'attribute'=>'date',
                     'value' => function ($model, $index) { 

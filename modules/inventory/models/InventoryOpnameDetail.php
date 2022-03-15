@@ -3,7 +3,8 @@
 namespace app\modules\inventory\models;
 
 use Yii;
-use app\modules\master\models\MasterMaterialItem;
+use app\modules\master\models\MasterMaterial;
+use app\modules\master\models\MasterPerson;
 use yii\behaviors\TimestampBehavior;
 
 /**
@@ -56,13 +57,13 @@ class InventoryOpnameDetail extends \yii\db\ActiveRecord
         return [
             [['code', 'urutan', 'item_code'], 'required'],
             [['urutan', 'balance', 'status', 'created_at', 'updated_at'], 'integer'],
-            [['qty_1', 'qty_2', 'qty_3', 'qty_stock_1', 'qty_stock_2', 'qty_stock_3', 'selisih'], 'number'],
+            [['qty_1', 'qty_2', 'qty_3', 'qty_stock_1', 'qty_stock_2', 'qty_stock_3', 'selisih', 'konversi_1', 'konversi_2', 'konversi_3'], 'number'],
             [['code'], 'string', 'max' => 12],
             [['item_code'], 'string', 'max' => 7],
-            [['satuan_code', 'material_code', 'type_code'], 'string', 'max' => 3],
+            [['supplier_code', 'satuan_code', 'material_code', 'type_code'], 'string', 'max' => 3],
             [['um_1', 'um_2', 'um_3'], 'string', 'max' => 5],
-            [['keterangan'], 'string', 'max' => 128],
-            [['code', 'urutan', 'item_code'], 'unique', 'targetAttribute' => ['code', 'urutan', 'item_code']],
+            [['item_name', 'keterangan'], 'string', 'max' => 128],
+            [['code', 'urutan', 'item_code', 'supplier_code'], 'unique', 'targetAttribute' => ['code', 'urutan', 'item_code', 'supplier_code']],
             [['status'], 'default', 'value' => 1],
         ];
     }
@@ -76,6 +77,8 @@ class InventoryOpnameDetail extends \yii\db\ActiveRecord
             'code' => 'Code',
             'urutan' => 'Urutan',
             'item_code' => 'Item Code',
+            'item_name' => 'Item Name',
+            'supplier_code' => 'Supplier',
             'satuan_code' => 'Satuan Code',
             'material_code' => 'Material Code',
             'type_code' => 'Type Code',
@@ -99,7 +102,12 @@ class InventoryOpnameDetail extends \yii\db\ActiveRecord
 
     public function getItem()
     {
-        return $this->hasOne(MasterMaterialItem::className(), ['code' => 'item_code']);
+        return $this->hasOne(MasterMaterial::className(), ['code' => 'item_code']);
+    }
+
+    public function getSupplier()
+    {
+        return $this->hasOne(MasterPerson::className(), ['code' => 'supplier_code']);
     }
 
     public function getStatusBalance()

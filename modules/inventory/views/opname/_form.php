@@ -1,4 +1,5 @@
 <?php
+use kartik\widgets\Select2;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\ActiveForm;
@@ -12,13 +13,24 @@ use yii\widgets\MaskedInput;
 <div class="inventory-opname-form">
     <?php $form = ActiveForm::begin(['id'=>'form']); ?>
         <div class="col-lg-12 col-md-12 col-xs-12">
-            <?= $form->field($model, 'code')->hiddenInput(['value' => (!$model->isNewRecord) ? $model->code : ''])->label(false) ?>
+            <?= $form->field($model, 'code')->hiddenInput()->label(false) ?>
             <?= $form->field($temp, 'item_code')->hiddenInput(['data-temp' => true])->label(false) ?>
             <?= $form->field($temp, 'id')->hiddenInput(['data-temp' => true])->label(false) ?>
         </div>
         <div class="col-lg-12 col-md-12 col-xs-12">
             <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
-                <label class="font-size-12 font-bold">Pilih Material:</label>
+                <label class="font-size-12 font-bold">Supplier:</label>
+            </div>
+            <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padding-right-0">
+                <?= $form->field($model, 'supplier_code')->widget(Select2::classname(), [
+                        'data' => $supplier,
+                        'options' => ['placeholder' => 'Supplier'],
+                    ])->label(false) ?>
+            </div>
+        </div>
+        <div class="col-lg-12 col-md-12 col-xs-12">
+            <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
+                <label class="font-size-12 font-bold">Item Name:</label>
             </div>
             <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padding-right-0">
                 <?= $form->field($temp, 'item_name')->textInput(['placeholder' => 'Pilih material tekan F4', 'data-temp' => true])->label(false) ?>
@@ -229,7 +241,7 @@ function select_item(code)
             $.each(o.item, function(index, value){
                 $("#tempinventoryopnamedetail-"+index).val(value);
             });
-            
+            console.log(o);
             $("#tempinventoryopnamedetail-qty_stock_1").val(o.stock[0]);
             $("#tempinventoryopnamedetail-qty_stock_2").val(o.stock[1]);
             $("#tempinventoryopnamedetail-um_stock_1").val(o.item.um_1);

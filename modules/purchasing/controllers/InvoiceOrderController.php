@@ -193,15 +193,6 @@ class InvoiceOrderController extends Controller
                             if($qtySelisih['selisih'] == -1){
                                 $selisih = true;
                             }
-                            $val->qty_selisih = $qtySelisih['qty'];
-                            if(!$val->save()){
-                                $success = false;
-                                $message = (count($val->errors) > 0) ? 'ERROR SAVE QTY SELISIH ' : '';
-                                foreach($val->errors as $error => $value){
-                                    $message .= strtoupper($value[0].', ');
-                                }
-                                $message = substr($message, 0, -2);
-                            }
                         }else{
                             $success = false;
                             $message = 'QTY Terima item '.$val->item_code.'-'.$val->name.' masih 0.';
@@ -418,8 +409,21 @@ class InvoiceOrderController extends Controller
             ->where(['no_invoice'=>$no_invoice, 'urutan'=>$urutan])
             ->asArray()
             ->one();
-        $temp['qty_terima_1'] = ($temp['qty_selisih'] > 0) ? $temp['qty_selisih'] : null;
-        return json_encode($temp);
+        
+        $success = true;
+        $message = '';
+        $model = PurchaseOrderInvoice::findOne(['no_invoice'=>$no_invoice]); 
+        if($model->post == 1){
+            if(($temp['qty_order_1'] - $temp['qty_terima_1']) == 0){
+                $success = false;
+                $message = 'Item ini sudah balance. Dokumen sudah di post, tidak bisa edit data ini.';
+            }else{
+                $temp['qty_terima_1'] = ($temp['qty_selisih'] > 0) ? $temp['qty_selisih'] : $temp['qty_terima_1'];
+            }
+        }else{
+            $temp['qty_terima_1'] = ($temp['qty_terima_1'] > 0) ? $temp['qty_terima_1'] : $temp['qty_order_1'];
+        }
+        return json_encode(['temp'=>$temp, 'success'=>$success, 'message'=>$message]);
     }
 
     public function actionUpdateTemp()
@@ -428,17 +432,28 @@ class InvoiceOrderController extends Controller
         $success = true;
         $message = '';
         $invoiceOrder = $request->post('PurchaseOrderInvoice');
+        $model = PurchaseOrderInvoice::findOne(['no_invoice'=>$invoiceOrder]);
         if($request->isPost){
             $temp = PurchaseOrderInvoiceDetail::findOne(['no_invoice'=>$invoiceOrder['no_invoice'], 'urutan'=>$invoiceOrder['urutan']]);
-            $qtyOrder = ($temp->qty_selisih > 0) ? $temp->qty_selisih : $temp->qty_order_1;
             $qtyTerima = $temp->qty_terima_1;
             $temp->attributes = (array)$invoiceOrder;
+            if($model->post == 1){
+                $qtyOrder = ($temp->qty_selisih > 0) ? $temp->qty_selisih : $temp->qty_order_1;
+            }else{
+                $qtyOrder = $temp->qty_order_1;
+            }
+            
             if($temp->qty_terima_1 <= $qtyOrder){
                 if($temp->qty_selisih > 0){
-                    $temp->qty_terima_1 = $qtyTerima+$temp->qty_terima_1;
+                    if($model->post == 1){
+                        $temp->qty_terima_1 = $qtyTerima+$temp->qty_terima_1;
+                    }else{
+                        $temp->qty_terima_1 = $temp->qty_terima_1;
+                    }
                 }else{
                     $temp->qty_terima_1 = $temp->qty_terima_1;
                 }
+
                 $qtySelisih = $temp->getQtySelisih($temp->qty_order_1, $temp->qty_terima_1);
                 $temp->qty_susulan = ($temp->qty_selisih > 0) ? $qtyOrder : 0;
                 $temp->qty_selisih = $qtySelisih['qty'];

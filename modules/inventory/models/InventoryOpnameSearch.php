@@ -17,8 +17,7 @@ class InventoryOpnameSearch extends InventoryOpname
     public function rules()
     {
         return [
-            [['code', 'date', 'keterangan'], 'safe'],
-            [['post', 'status_approval', 'status', 'user_id', 'created_at', 'updated_at'], 'integer'],
+            [['code', 'date', 'supplier_code', 'post', 'status_approval'], 'safe'],
         ];
     }
 
@@ -40,8 +39,10 @@ class InventoryOpnameSearch extends InventoryOpname
      */
     public function search($params)
     {
-        $query = InventoryOpname::find();
-
+        $query = InventoryOpname::find()
+            ->alias('a')
+            ->leftJoin('master_person b', 'b.code = a.supplier_code');
+        
         // add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([
@@ -60,17 +61,15 @@ class InventoryOpnameSearch extends InventoryOpname
         $query->andFilterWhere([
             'post' => $this->post,
             'status_approval' => $this->status_approval,
-            'status' => 1,
-            'user_id' => $this->user_id,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
+            'a.status' => 1
         ]);
         if(!empty($this->date)){
             $query->andFilterWhere(['date' => date('Y-m-d', strtotime($this->date))]);
         }
-
-        $query->andFilterWhere(['like', 'code', $this->code])
-            ->andFilterWhere(['like', 'keterangan', $this->keterangan]);
+        if(!empty($this->supplier_code)){
+            $query->andWhere('b.name LIKE "%'.$this->supplier_code.'%"');
+        }
+        $query->andFilterWhere(['like', 'a.code', $this->code]);
 
         return $dataProvider;
     }

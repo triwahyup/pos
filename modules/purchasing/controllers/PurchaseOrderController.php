@@ -565,10 +565,10 @@ class PurchaseOrderController extends Controller
         $success = true;
         $message = 'UPDATE TEMP SUCCESSFULLY';
         if($request->isPost){
-            $temp = $this->findTemp($data['id']);
             $dataHeader = $request->post('PurchaseOrder');
-            $temp->attributes = (array)$dataHeader;
             $dataTemp = $request->post('TempPurchaseOrderDetail');
+            $temp = $this->findTemp($dataTemp['id']);
+            $temp->attributes = (array)$dataHeader;
             $temp->attributes = (array)$dataTemp;
             if(!empty($dataTemp['item_name'])){
                 if($dataTemp['qty_order_1'] > 0){

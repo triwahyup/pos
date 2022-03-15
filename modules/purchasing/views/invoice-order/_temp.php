@@ -24,11 +24,9 @@
             <td class="text-right"><?=number_format($val->total_order).'.-' ?></td>
             <td class="text-right"><?=number_format($val->total_invoice).'.-' ?></td>
             <td class="text-center">
-                <?php if(empty($val->qty_terima_1) || $val->qty_selisih > 0): ?>
-                    <button class="btn btn-warning btn-xs btn-sm" data-invoice="<?=$val->no_invoice ?>" data-urutan="<?=$val->urutan ?>" data-button="update_temp">
-                        <i class="fontello icon-pencil"></i>
-                    </button>
-                <?php endif; ?>
+                <button class="btn btn-warning btn-xs btn-sm" data-invoice="<?=$val->no_invoice ?>" data-urutan="<?=$val->urutan ?>" data-button="update_temp">
+                    <i class="fontello icon-pencil"></i>
+                </button>
             </td>
         </tr>
 <?php endforeach; ?>

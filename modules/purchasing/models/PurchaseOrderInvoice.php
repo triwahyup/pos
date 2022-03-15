@@ -109,9 +109,9 @@ class PurchaseOrderInvoice extends \yii\db\ActiveRecord
 
     public function beforeSave($attribute)
     {
-        $this->tgl_po = date('Y-m-d', strtotime($this->tgl_po));
-        $this->tgl_invoice = date('Y-m-d', strtotime($this->tgl_invoice));
-        $this->total_invoice = str_replace(',', '', $this->total_invoice);
+        $this->tgl_po = (!empty($this->tgl_po)) ? date('Y-m-d', strtotime($this->tgl_po)) : null;
+        $this->tgl_invoice = (!empty($this->tgl_invoice)) ? date('Y-m-d', strtotime($this->tgl_invoice)) : null;
+        $this->total_invoice = (!empty($this->total_invoice)) ? str_replace(',', '', $this->total_invoice) : null;
         return parent::beforeSave($attribute);
     }
 

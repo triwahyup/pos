@@ -28,6 +28,13 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
             ],
             [
+                'attribute' => 'supplier_code',
+                'value' => function($model, $index, $key)
+                {
+                    return (isset($model->supplier)) ? $model->supplier->name : '-';
+                }
+            ],
+            [
                 'attribute' => 'date',
                 'contentOptions' => [
                     'class' => 'text-center',
