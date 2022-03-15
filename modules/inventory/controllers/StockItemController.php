@@ -56,10 +56,10 @@ class StockItemController extends Controller
         ]);
     }
 
-    public function actionView($item_code)
+    public function actionView($item_code, $supplier_code)
     {
-        $model = InventoryStockItem::findOne(['item_code'=>$item_code]);
-        $transaction = InventoryStockTransaction::findAll(['item_code'=>$item_code]);
+        $model = InventoryStockItem::findOne(['item_code'=>$item_code, 'supplier_code'=>$supplier_code]);
+        $transaction = InventoryStockTransaction::findAll(['item_code'=>$item_code, 'supplier_code'=>$supplier_code]);
         return $this->render('view', [
             'model' => $model,
             'transaction' => $transaction,

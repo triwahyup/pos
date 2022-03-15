@@ -15,7 +15,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'item_code',
                 'format' => 'raw',
                 'value' => function($model, $index, $key) {
-                    return (isset($model->item)) ? (Html::a('<strong>'.$model->item->code.'</strong><br />'.$model->item->name, ['view', 'item_code' => $model->item_code])) : '';
+                    return (isset($model->item)) ? (Html::a('<strong>'.$model->item->code.'</strong><br />'.$model->item->name, ['view', 'item_code' => $model->item_code, 'supplier_code' => $model->supplier_code])) : '';
                 }
             ],
             [
