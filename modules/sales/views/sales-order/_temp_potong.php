@@ -3,6 +3,9 @@
         <table class="table table-bordered table-custom margin-top-10">
             <thead>
                 <tr>
+                    <th class="text-center" colspan="4">Detail Potong</th>
+                </tr>
+                <tr>
                     <th class="text-center">No.</th>
                     <th class="text-center">PxL</th>
                     <th class="text-center">Objek</th>
@@ -27,6 +30,12 @@
                             </td>
                         </tr>
                     <?php endforeach; ?>
+                    <?php for($i=count($temps)+1; $i<(count($tempsProses))+1; $i++) : ?>
+                        <tr>
+                            <td class="text-center"><?=$i ?></td>
+                            <td class="text-center" colspan="3">-</td>
+                        </tr>
+                    <?php endfor; ?>
                 <?php else: ?>
                     <tr>
                         <td class="text-danger" colspan="5">Data masih kosong.</td>
@@ -38,6 +47,9 @@
     <div class="col-lg-6 col-md-6 col-xs-12 padding-right-0">
         <table class="table table-bordered table-custom margin-top-10">
             <thead>
+                <tr>
+                    <th class="text-center" colspan="4">Detail Proses Produksi</th>
+                </tr>
                 <tr>
                     <th class="text-center">No.</th>
                     <th class="text-center">Proses Produksi</th>

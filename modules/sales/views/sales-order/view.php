@@ -178,9 +178,15 @@ $this->params['breadcrumbs'][] = $this->title;
                 </div>
                 <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
                     <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                        <label class="font-size-12">Lb. Ikat</label>
+                        <label class="font-size-12">Supplier</label>
                     </div>
                     <div class="col-lg-5 col-md-5 col-sm-12 col-xs-12 padding-right-0">
+                        <span><?=(isset($item->supplier)) ? $item->supplier->name : '-' ?></span>
+                    </div>
+                    <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
+                        <label class="font-size-12">Lb. Ikat</label>
+                    </div>
+                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-right-0">
                         <span class="font-size-10">
                             <?=(!empty($item->lembar_ikat_1) ? number_format($item->lembar_ikat_1) .' '.$item->lembar_ikat_um_1 .' / ' : '') ?>
                             <?=(!empty($item->lembar_ikat_2) ? number_format($item->lembar_ikat_2) .' '.$item->lembar_ikat_um_2 .' / ' : '') ?>
@@ -189,9 +195,12 @@ $this->params['breadcrumbs'][] = $this->title;
                     </div>
                 </div>
                 <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
-                    <div class="col-lg-6 col-md-6 col-xs-12 padding-left-0 padding-right-0">
+                    <div class="col-lg-6 col-md-12 col-xs-12 padding-left-0">
                         <table class="table table-bordered table-custom margin-top-10">
                             <thead>
+                                <tr>
+                                    <th class="text-center" colspan="3">Detail Potong</th>
+                                </tr>
                                 <tr>
                                     <th class="text-center">No.</th>
                                     <th class="text-center">PxL</th>
@@ -209,15 +218,24 @@ $this->params['breadcrumbs'][] = $this->title;
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
+                                <?php for($i=count($item->potongs)+1; $i<(count($item->proses))+1; $i++) : ?>
+                                    <tr>
+                                        <td class="text-center"><?=$i ?></td>
+                                        <td class="text-center" colspan="2">-</td>
+                                    </tr>
+                                <?php endfor; ?>
                             </tbody>
                         </table>
                     </div>
-                    <div class="col-lg-6 col-md-6 col-xs-12 padding-right-0">
+                    <div class="col-lg-6 col-md-12 col-xs-12 padding-right-0">
                         <table class="table table-bordered table-custom margin-top-10">
                             <thead>
                                 <tr>
+                                    <th class="text-center" colspan="3">Detail Proses Produksi</th>
+                                </tr>
+                                <tr>
                                     <th class="text-center">No.</th>
-                                    <th class="text-center">Proses Produksi</th>
+                                    <th class="text-center">Proses</th>
                                     <th class="text-center">Keterangan</th>
                                 </tr>
                             </thead>
@@ -248,13 +266,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 <thead>
                     <tr>
                         <th class="text-center" rowspan="2">No.</th>
-                        <th class="text-center" colspan="2">Item</th>
+                        <th class="text-center" colspan="3">Item</th>
                         <th class="text-center" colspan="2">QTY</th>
                         <th class="text-center" rowspan="2">Jenis</th>
                     </tr>
                     <tr>
                         <th class="text-center">Code</th>
                         <th class="text-center">Name</th>
+                        <th class="text-center">Supplier</th>
                         <th class="text-center">Um 1</th>
                         <th class="text-center">Um 2</th>
                     </tr>
@@ -266,6 +285,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                 <td class="text-center"><?=$no+1 ?></td>
                                 <td class="text-center"><?=$val->item_code ?></td>
                                 <td><?=(isset($val->item)) ? $val->item->name : '-' ?></td>
+                                <td><?=(isset($val->supplier)) ? $val->supplier->name : '-' ?></td>
                                 <?php for($a=1;$a<3;$a++):?>
                                     <td class="text-center"><?=($val['qty_order_'.$a] !=0) ? $val['qty_order_'.$a] .' '.$val['um_'.$a] : '' ?></td>
                                 <?php endfor; ?>

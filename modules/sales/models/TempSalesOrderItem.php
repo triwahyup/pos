@@ -4,8 +4,10 @@ namespace app\modules\sales\models;
 
 use Yii;
 use app\modules\inventory\models\InventoryStockItem;
-use app\modules\master\models\MasterMaterialItem;
-use app\modules\master\models\MasterMaterialItemPricelist;
+use app\modules\master\models\MasterMaterial;
+use app\modules\master\models\MasterMaterialPricelist;
+use app\modules\master\models\MasterPerson;
+use app\modules\master\models\MasterSatuan;
 use app\modules\sales\models\TempSalesOrderPotong;
 use app\modules\sales\models\TempSalesOrderProses;
 
@@ -19,8 +21,6 @@ use app\modules\sales\models\TempSalesOrderProses;
  * @property string|null $satuan_code
  * @property string|null $material_code
  * @property string|null $type_code
- * @property string|null $group_supplier_code
- * @property string|null $group_material_code
  * @property float|null $qty_order_1
  * @property float|null $qty_order_2
  * @property float|null $qty_order_3
@@ -69,10 +69,10 @@ class TempSalesOrderItem extends \yii\db\ActiveRecord
     {
         return [
             [['urutan', 'total_potong', 'total_warna', 'lembar_ikat_1', 'lembar_ikat_2', 'lembar_ikat_3', 'user_id'], 'integer'],
-            [['qty_order_1', 'qty_order_2', 'qty_order_3', 'harga_beli_1', 'harga_beli_2', 'harga_beli_3', 'harga_jual_1', 'harga_jual_2', 'harga_jual_3', 'jumlah_cetak', 'total_order', 'bahan_qty_order_1', 'bahan_qty_order_2'], 'number'],
+            [['konversi_1', 'konversi_2', 'konversi_3', 'qty_order_1', 'qty_order_2', 'qty_order_3', 'harga_beli_1', 'harga_beli_2', 'harga_beli_3', 'harga_jual_1', 'harga_jual_2', 'harga_jual_3', 'jumlah_cetak', 'total_order', 'bahan_qty_order_1', 'bahan_qty_order_2'], 'number'],
             [['code'], 'string', 'max' => 12],
             [['item_code', 'bahan_item_code'], 'string', 'max' => 7],
-            [['satuan_code', 'material_code', 'type_code', 'group_supplier_code', 'group_material_code', 'satuan_ikat_code'], 'string', 'max' => 3],
+            [['satuan_code', 'material_code', 'type_code', 'supplier_code', 'satuan_ikat_code'], 'string', 'max' => 3],
             [['um_1', 'um_2', 'um_3', 'lembar_ikat_um_1', 'lembar_ikat_um_2', 'lembar_ikat_um_3'], 'string', 'max' => 5],
             [['keterangan', 'item_name'], 'string', 'max' => 128],
         ];
@@ -91,8 +91,7 @@ class TempSalesOrderItem extends \yii\db\ActiveRecord
             'satuan_code' => 'Satuan Code',
             'material_code' => 'Material Code',
             'type_code' => 'Type Code',
-            'group_supplier_code' => 'Group Supplier Code',
-            'group_material_code' => 'Group Material Code',
+            'supplier_code' => 'Supplier',
             'qty_order_1' => 'Qty Order 1',
             'qty_order_2' => 'Qty Order 2',
             'qty_order_3' => 'Qty Order 3',
@@ -135,15 +134,25 @@ class TempSalesOrderItem extends \yii\db\ActiveRecord
 
     public function getItem()
     {
-        return $this->hasOne(MasterMaterialItem::className(), ['code' => 'item_code']);
+        return $this->hasOne(MasterMaterial::className(), ['code' => 'item_code']);
     }
 
     public function getItemBahan()
     {
-        return $this->hasOne(MasterMaterialItem::className(), ['code' => 'bahan_item_code']);
+        return $this->hasOne(MasterMaterial::className(), ['code' => 'bahan_item_code']);
     }
 
-    public $type_material = '007';
+    public function getSupplier()
+    {
+        return $this->hasOne(MasterPerson::className(), ['code' => 'supplier_code']);
+    }
+
+    public function getSatuan()
+    {
+        return $this->hasOne(MasterSatuan::className(), ['code' => 'satuan_code']);
+    }
+
+    public $type_material = '012';
     public function getItemMaterial()
     {
         return $this->hasOne(TempSalesOrderItem::className(), ['code' => 'code', 'type_code' => 'type_material']);
@@ -151,7 +160,7 @@ class TempSalesOrderItem extends \yii\db\ActiveRecord
 
     public function getItemPricelist()
     {
-        return $this->hasOne(MasterMaterialItemPricelist::className(), ['item_code' => 'item_code']);
+        return $this->hasOne(MasterMaterialPricelist::className(), ['item_code' => 'item_code']);
     }
 
     public function getInventoryStock()
@@ -199,11 +208,12 @@ class TempSalesOrderItem extends \yii\db\ActiveRecord
     public function getTotalOrder()
     {
         $total_order=0;
+        $konversi_2 = (!empty($item->satuan->konversi_2)) ? $item->satuan->konversi_2 : 1;
         if(!empty($this->qty_order_1)){
             $total_order += $this->qty_order_1 * $this->harga_jual_1;
         }
         if(!empty($this->qty_order_2)){
-            $total_order += ($this->qty_order_2 / 1000) * $this->harga_jual_2;
+            $total_order += ($this->qty_order_2 / $konversi_2) * $this->harga_jual_2;
         }
         return $total_order;
     }

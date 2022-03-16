@@ -4,7 +4,8 @@ namespace app\modules\sales\models;
 
 use Yii;
 use app\modules\inventory\models\InventoryStockItem;
-use app\modules\master\models\MasterMaterialItem;
+use app\modules\master\models\MasterMaterial;
+use app\modules\master\models\MasterPerson;
 use app\modules\sales\models\SalesOrderPotong;
 use app\modules\sales\models\SalesOrderProses;
 use yii\behaviors\TimestampBehavior;
@@ -18,8 +19,6 @@ use yii\behaviors\TimestampBehavior;
  * @property string|null $satuan_code
  * @property string|null $material_code
  * @property string|null $type_code
- * @property string|null $group_supplier_code
- * @property string|null $group_material_code
  * @property float|null $qty_order_1
  * @property float|null $qty_order_2
  * @property float|null $qty_order_3
@@ -73,10 +72,10 @@ class SalesOrderItem extends \yii\db\ActiveRecord
         return [
             [['code', 'urutan', 'item_code'], 'required'],
             [['urutan', 'total_potong', 'total_warna', 'lembar_ikat_1', 'lembar_ikat_2', 'lembar_ikat_3', 'status', 'created_at', 'updated_at'], 'integer'],
-            [['qty_order_1', 'qty_order_2', 'qty_order_3', 'harga_beli_1', 'harga_beli_2', 'harga_beli_3', 'harga_jual_1', 'harga_jual_2', 'harga_jual_3', 'jumlah_cetak', 'total_order'], 'number'],
+            [['konversi_1', 'konversi_2', 'konversi_3', 'qty_order_1', 'qty_order_2', 'qty_order_3', 'harga_beli_1', 'harga_beli_2', 'harga_beli_3', 'harga_jual_1', 'harga_jual_2', 'harga_jual_3', 'jumlah_cetak', 'total_order'], 'number'],
             [['code'], 'string', 'max' => 12],
             [['item_code'], 'string', 'max' => 7],
-            [['satuan_code', 'material_code', 'type_code', 'group_supplier_code', 'group_material_code', 'satuan_ikat_code'], 'string', 'max' => 3],
+            [['satuan_code', 'material_code', 'type_code', 'supplier_code', 'satuan_ikat_code'], 'string', 'max' => 3],
             [['um_1', 'um_2', 'um_3', 'lembar_ikat_um_1', 'lembar_ikat_um_2', 'lembar_ikat_um_3'], 'string', 'max' => 5],
             [['keterangan'], 'string', 'max' => 128],
             [['code', 'urutan', 'item_code'], 'unique', 'targetAttribute' => ['code', 'urutan', 'item_code']],
@@ -96,8 +95,7 @@ class SalesOrderItem extends \yii\db\ActiveRecord
             'satuan_code' => 'Satuan Code',
             'material_code' => 'Material Code',
             'type_code' => 'Type Code',
-            'group_supplier_code' => 'Group Supplier Code',
-            'group_material_code' => 'Group Material Code',
+            'supplier_code' => 'Supplier',
             'qty_order_1' => 'Qty Order 1',
             'qty_order_2' => 'Qty Order 2',
             'qty_order_3' => 'Qty Order 3',
@@ -130,7 +128,12 @@ class SalesOrderItem extends \yii\db\ActiveRecord
 
     public function getItem()
     {
-        return $this->hasOne(MasterMaterialItem::className(), ['code' => 'item_code']);
+        return $this->hasOne(MasterMaterial::className(), ['code' => 'item_code']);
+    }
+
+    public function getSupplier()
+    {
+        return $this->hasOne(MasterPerson::className(), ['code' => 'supplier_code']);
     }
 
     public function getInventoryStock()
@@ -161,14 +164,12 @@ class SalesOrderItem extends \yii\db\ActiveRecord
     public function getTotalOrder()
     {
         $total_order=0;
+        $konversi_2 = (!empty($item->satuan->konversi_2)) ? $item->satuan->konversi_2 : 1;
         if(!empty($this->qty_order_1)){
             $total_order += $this->qty_order_1 * $this->harga_jual_1;
         }
         if(!empty($this->qty_order_2)){
-            $total_order += $this->qty_order_2 * $this->harga_jual_2;
-        }
-        if(!empty($this->qty_order_3)){
-            $total_order += $this->qty_order_3 * $this->harga_jual_3;
+            $total_order += ($this->qty_order_2 / $konversi_2) * $this->harga_jual_2;
         }
         return $total_order;
     }

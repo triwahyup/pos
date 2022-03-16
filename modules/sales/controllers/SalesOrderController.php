@@ -4,9 +4,10 @@ namespace app\modules\sales\controllers;
 
 use app\models\Logs;
 use app\models\User;
+use app\modules\inventory\models\InventoryStockItem;
 use app\modules\inventory\models\InventoryStockTransaction;
-use app\modules\master\models\MasterMaterialItem;
-use app\modules\master\models\MasterMaterialItemPricelist;
+use app\modules\master\models\MasterMaterial;
+use app\modules\master\models\MasterMaterialPricelist;
 use app\modules\master\models\MasterPerson;
 use app\modules\master\models\MasterProses;
 use app\modules\master\models\MasterSatuan;
@@ -289,7 +290,7 @@ class SalesOrderController extends Controller
                         foreach($model->itemTemps as $temp){
                             $salesItem = new SalesOrderItem();
                             $salesItem->attributes = $temp->attributes;
-                            if($salesItem->item->typeCode->value == \Yii::$app->params['TYPE_MATERIAL_KERTAS']){
+                            if($salesItem->item->typeCode->value == \Yii::$app->params['TYPE_KERTAS']){
                                 $salesItem->qty_order_1 = $tempItem->qty_order_1;
                                 $salesItem->qty_order_2 = $tempItem->qty_order_2;
                                 $salesItem->total_order = $salesItem->totalOrder;
@@ -480,6 +481,7 @@ class SalesOrderController extends Controller
                                         1=>$val->qty_order_2
                                     ]);
                                     
+                                    $stockItem->attributes = $val->attributes;
                                     $stockItem->onhand = $stockItem->onhand + $stock;
                                     $stockItem->onsales = $stockItem->onsales - $stock;
                                     if(!$stockItem->save()){
@@ -524,6 +526,7 @@ class SalesOrderController extends Controller
                             }
                             if(!empty($model->up_produksi) || $model->up_produksi != 0){
                                 $upproduksi = $stock * ($model->up_produksi/100);
+                                $stockItem->attributes = $val->attributes;
                                 $stockItem->onhand = $stockItem->onhand + $upproduksi;
                                 $stockItem->onsales = $stockItem->onsales - $upproduksi;
                                 if(!$stockItem->save()){
@@ -540,7 +543,7 @@ class SalesOrderController extends Controller
                                 $stockTransaction->no_document = $model->code;
                                 $stockTransaction->tgl_document = $model->tgl_so;
                                 $stockTransaction->type_document = "CANCEL ORDER";
-                                $stockTransaction->status_document = "IN (UP PRODUKSI ".$model->up_produksi." %)";
+                                $stockTransaction->status_document = "IN (UP ".$model->up_produksi." %)";
                                 $stockTransaction->qty_in = $upproduksi;
                                 if(!$stockTransaction->save()){
                                     $success = false;
@@ -654,7 +657,7 @@ class SalesOrderController extends Controller
 
     public function actionTypeOrder($type)
     {
-        $item = MasterMaterialItem::findOne(['material_code'=>\Yii::$app->params['TYPE_PRODUK_JASA']]);
+        $item = MasterMaterial::findOne(['material_code'=>\Yii::$app->params['TYPE_PRODUK_JASA']]);
         $data = ['item_name' => null, 'item_code' => null, 'qty_order_1' => 20, 'qty_order_2' => 0];
         if($type == 2){
             $data = ['item_name' => $item->name, 'item_code' => $item->code, 'qty_order_1' => 0, 'qty_order_2' => 0];
@@ -772,20 +775,28 @@ class SalesOrderController extends Controller
     {
         $andWhere = '';
         if($type == 'item')
-            $andWhere = 'value = "'.\Yii::$app->params['TYPE_MATERIAL_KERTAS'].'"';
+            $andWhere = 'value = "'.\Yii::$app->params['TYPE_KERTAS'].'" 
+                and um_1 <> "'.\Yii::$app->params['TYPE_ROLL'].'"';
         if($type == 'bahan')
-            $andWhere = 'value <> "'.\Yii::$app->params['TYPE_MATERIAL_KERTAS'].'"';
+            $andWhere = 'value <> "'.\Yii::$app->params['TYPE_KERTAS'].'"';
 
-        $model = MasterMaterialItem::find()
+        $model = InventoryStockItem::find()
             ->alias('a')
-            ->select(['a.*', 'b.composite'])
-            ->leftJoin('master_satuan b', 'b.code = a.satuan_code')
-            ->leftJoin('master_kode c', 'c.code = a.type_code')
+            ->select(['item_code', 'onhand', 'b.code as supplier_code', 'b.name as supplier_name',
+                'c.name as item_name', 'd.name as type_name', 'e.name as satuan_name'])
+            ->leftJoin('master_person b', 'b.code = a.supplier_code')
+            ->leftJoin('master_material c', 'c.code = a.item_code')
+            ->leftJoin('master_kode d', 'd.code = c.type_code')
+            ->leftJoin('master_satuan e', 'e.code = c.satuan_code')
             ->where(['a.status'=>1])
             ->andWhere($andWhere)
-            ->orderBy(['a.code'=>SORT_ASC])
+            ->orderBy(['item_code'=>SORT_ASC])
+            ->asArray()
             ->limit(10)
             ->all();
+        foreach($model as $index=>$val){
+            $model[$index]['stock'] = InventoryStockItem::konversi($val['item_code'], $val['onhand']);
+        }
         return json_encode(['data'=>$this->renderPartial('_list_item', [
             'model'=>$model, 'type'=>$type])
         ]);
@@ -797,20 +808,30 @@ class SalesOrderController extends Controller
         if(isset($_POST['search'])){
             $andWhere = '';
             if($_POST['type'] == 'item')
-                $andWhere = 'value = "'.\Yii::$app->params['TYPE_MATERIAL_KERTAS'].'"';
+                $andWhere = 'value = "'.\Yii::$app->params['TYPE_KERTAS'].'" 
+                    and um_1 <> "'.\Yii::$app->params['TYPE_ROLL'].'"';
             if($_POST['type'] == 'bahan')
-                $andWhere = 'value <> "'.\Yii::$app->params['TYPE_MATERIAL_KERTAS'].'"';
+                $andWhere = 'value <> "'.\Yii::$app->params['TYPE_KERTAS'].'"';
 
-            $model = MasterMaterialItem::find()
+            $model = InventoryStockItem::find()
                 ->alias('a')
-                ->select(['a.code', 'concat(a.code,"-",a.name) label'])
-                ->leftJoin('master_kode b', 'b.code = a.type_code')
+                ->select(['concat(c.code, "-", c.name, " (", b.name, ")") as label', 'item_code', 'onhand',
+                    'b.code as supplier_code', 'b.name as supplier_name', 'c.name as item_name', 
+                    'd.name as type_name', 'e.name as satuan_name'])
+                ->leftJoin('master_person b', 'b.code = a.supplier_code')
+                ->leftJoin('master_material c', 'c.code = a.item_code')
+                ->leftJoin('master_kode d', 'd.code = c.type_code')
+                ->leftJoin('master_satuan e', 'e.code = c.satuan_code')
                 ->where(['a.status'=>1])
-                ->andWhere('concat(a.code,"-", a.name) LIKE "%'.$_POST['search'].'%"')
+                ->andWhere('concat(c.code,"-", c.name, " (", b.name, ")") LIKE "%'.$_POST['search'].'%"')
                 ->andWhere($andWhere)
+                ->orderBy(['item_code'=>SORT_ASC])
                 ->asArray()
                 ->limit(10)
                 ->all();
+            foreach($model as $index=>$val){
+                $model[$index]['stock'] = InventoryStockItem::konversi($val['item_code'], $val['onhand']);
+            }
         }
         return  json_encode($model);
     }
@@ -821,18 +842,28 @@ class SalesOrderController extends Controller
         if(isset($_POST['code'])){
             $andWhere = '';
             if($_POST['type'] == 'item')
-                $andWhere = 'value = "'.\Yii::$app->params['TYPE_MATERIAL_KERTAS'].'"';
+                $andWhere = 'value = "'.\Yii::$app->params['TYPE_KERTAS'].'" 
+                    and um_1 <> "'.\Yii::$app->params['TYPE_ROLL'].'"';
             if($_POST['type'] == 'bahan')
-                $andWhere = 'value <> "'.\Yii::$app->params['TYPE_MATERIAL_KERTAS'].'"';
+                $andWhere = 'value <> "'.\Yii::$app->params['TYPE_KERTAS'].'"';
 
-            $model = MasterMaterialItem::find()
+            $model = InventoryStockItem::find()
                 ->alias('a')
-                ->select(['a.*', 'b.composite'])
-                ->leftJoin('master_satuan b', 'b.code = a.satuan_code')
-                ->leftJoin('master_kode c', 'c.code = a.type_code')
-                ->where(['a.code'=>$_POST['code'], 'a.status'=>1])
+                ->select(['item_code', 'onhand', 'b.code as supplier_code', 'b.name as supplier_name', 
+                    'c.name as item_name', 'd.name as type_name', 'e.name as satuan_name'])
+                ->leftJoin('master_person b', 'b.code = a.supplier_code')
+                ->leftJoin('master_material c', 'c.code = a.item_code')
+                ->leftJoin('master_kode d', 'd.code = c.type_code')
+                ->leftJoin('master_satuan e', 'e.code = c.satuan_code')
+                ->where(['item_code'=>$_POST['code'], 'b.code'=>$_POST['supplier'], 'a.status'=>1])
                 ->andWhere($andWhere)
+                ->orderBy(['item_code'=>SORT_ASC])
+                ->asArray()
+                ->limit(10)
                 ->all();
+            foreach($model as $index=>$val){
+                $model[$index]['stock'] = InventoryStockItem::konversi($val['item_code'], $val['onhand']);
+            }
         }
         return json_encode(['data'=>$this->renderPartial('_list_item', [
             'model'=>$model, 'type'=>$_POST['type']])
@@ -841,11 +872,13 @@ class SalesOrderController extends Controller
 
     public function actionSelectItem()
     {
-        $model = MasterMaterialItem::find()
+        $model = InventoryStockItem::find()
             ->alias('a')
-            ->select(['a.code as item_code', 'a.name as item_name', 'b.composite'])
-            ->leftJoin('master_satuan b', 'b.code = a.satuan_code')
-            ->where(['a.code'=>$_POST['code'], 'a.status'=>1])
+            ->select(['item_code', 'b.code as supplier_code', 'c.name as item_name', 'd.composite'])
+            ->leftJoin('master_person b', 'b.code = a.supplier_code')
+            ->leftJoin('master_material c', 'c.code = a.item_code')
+            ->leftJoin('master_satuan d', 'd.code = c.satuan_code')
+            ->where(['item_code'=>$_POST['code'], 'a.status'=>1])
             ->asArray()
             ->one();
         return json_encode($model);
@@ -896,7 +929,7 @@ class SalesOrderController extends Controller
         $temps = TempSalesOrderItem::find()
             ->alias('a')
             ->leftJoin('master_kode b', 'b.code = a.type_code')
-            ->where(['value'=>\Yii::$app->params['TYPE_MATERIAL_KERTAS'], 'user_id'=> \Yii::$app->user->id])
+            ->where(['value'=>\Yii::$app->params['TYPE_KERTAS'], 'user_id'=> \Yii::$app->user->id])
             ->all();
         $model = $this->renderAjax('_temp_item', [
             'temps'=>$temps]);
@@ -909,7 +942,7 @@ class SalesOrderController extends Controller
             ->alias('a')
             ->leftJoin('master_kode b', 'b.code = a.type_code')
             ->where(['user_id' => \Yii::$app->user->id])
-            ->andWhere('value <> "'.\Yii::$app->params['TYPE_MATERIAL_KERTAS'].'"')
+            ->andWhere('value <> "'.\Yii::$app->params['TYPE_KERTAS'].'"')
             ->all();
         $model = $this->renderAjax('_temp_bahan', [
             'temps' => $temps]);
@@ -951,9 +984,9 @@ class SalesOrderController extends Controller
                         $message = 'Objek tidak boleh kosong.';
                     }else{
                         $tempPotong = new TempSalesOrderPotong();
+                        $tempPotong->attributes = (array)$dataItem;
                         $tempPotong->attributes = (array)$dataPotong;
                         $tempPotong->code = $code;
-                        $tempPotong->item_code = $tempItem->item_code;
                         $tempPotong->urutan = $tempPotong->countTemp +1;
                         $tempPotong->user_id = \Yii::$app->user->id;
                         $tempPotong->total_objek = $tempItem->jumlahCetak * $tempPotong->objek;
@@ -1082,11 +1115,12 @@ class SalesOrderController extends Controller
                 $tempItem->attributes = $tempItem->item->attributes;
                 if(isset($tempItem->itemPricelist)){
                     $tempItem->attributes = $tempItem->itemPricelist->attributes;
+                    $tempItem->attributes = $tempItem->satuan->attributes;
                     $tempItem->code = $code;
                     $tempItem->urutan = $tempItem->countTemp +1;
                     $tempItem->total_order = $tempItem->totalOrder;
                     $tempItem->user_id = \Yii::$app->user->id;
-                    if($tempItem->item->typeCode->value == \Yii::$app->params['TYPE_MATERIAL_KERTAS']){
+                    if($tempItem->item->typeCode->value == \Yii::$app->params['TYPE_KERTAS']){
                         if(!$tempItem->total_potong){
                             $success = false;
                             $message = 'Total potong tidak boleh kosong.';
@@ -1269,6 +1303,7 @@ class SalesOrderController extends Controller
                 'type' => ($val->type == 1) ? 'Cetak' : 'Pond',
                 'code' => $tempItem->code,
                 'item_code' => $tempItem->item_code,
+                'supplier_code' => $tempItem->supplier_code,
             ];
         }
         if(count($tempItem->prosesTemps) > 0){
@@ -1280,6 +1315,7 @@ class SalesOrderController extends Controller
                     'type' => ($val->type == 1) ? 'Cetak' : 'Pond',
                     'code' => $val->code,
                     'item_code' => $val->item_code,
+                    'supplier_code' => $val->supplier_code,
                     'keterangan' => $val->keterangan,
                 ];
             }
@@ -1355,6 +1391,7 @@ class SalesOrderController extends Controller
                                 1=>$val->qty_order_2
                             ]);
                             if($stockItem->onhand > $stock){
+                                $stockItem->attributes = $val->attributes;
                                 $stockItem->onhand = $stockItem->onhand - $stock;
                                 $stockItem->onsales = $stockItem->onsales + $stock;
                                 if(!$stockItem->save()){
@@ -1404,6 +1441,7 @@ class SalesOrderController extends Controller
                     if(!empty($model->up_produksi) || $model->up_produksi != 0){
                         $upproduksi = $stock * ($model->up_produksi/100);
                         if($stockItem->onhand > $upproduksi){
+                            $stockItem->attributes = $val->attributes;
                             $stockItem->onhand = $stockItem->onhand - $upproduksi;
                             $stockItem->onsales = $stockItem->onsales + $upproduksi;
                             if(!$stockItem->save()){
@@ -1420,7 +1458,7 @@ class SalesOrderController extends Controller
                             $stockTransaction->no_document = $model->code;
                             $stockTransaction->tgl_document = $model->tgl_so;
                             $stockTransaction->type_document = "SALES ORDER";
-                            $stockTransaction->status_document = "OUT (UP PRODUKSI ".$model->up_produksi." %)";
+                            $stockTransaction->status_document = "OUT (UP ".$model->up_produksi." %)";
                             $stockTransaction->qty_out = $upproduksi;
                             if(!$stockTransaction->save()){
                                 $success = false;

@@ -127,7 +127,7 @@ class SalesOrder extends \yii\db\ActiveRecord
         return $this->hasOne(MasterPerson::className(), ['code' => 'ekspedisi_code']);
     }
 
-    public $type_material = '007';
+    public $type_material='012';
     public function getItemsMaterial()
     {
         return $this->hasMany(SalesOrderItem::className(), ['code' => 'code', 'type_code' => 'type_material']);

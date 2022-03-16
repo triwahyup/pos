@@ -47,6 +47,7 @@ class SalesOrderPotong extends \yii\db\ActiveRecord
             [['panjang', 'lebar', 'waste', 'total_objek'], 'number'],
             [['code'], 'string', 'max' => 12],
             [['item_code'], 'string', 'max' => 7],
+            [['supplier_code'], 'string', 'max' => 7],
             [['code', 'item_code', 'urutan'], 'unique', 'targetAttribute' => ['code', 'item_code', 'urutan']],
             [['status'], 'default', 'value' => 1],
         ];

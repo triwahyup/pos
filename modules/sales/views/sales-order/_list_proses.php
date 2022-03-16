@@ -44,6 +44,7 @@
     <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
         <input type="hidden" name="TempSalesOrderProses[code]" value="<?=$tempItem->code ?>">
         <input type="hidden" name="TempSalesOrderProses[item_code]" value="<?=$tempItem->item_code ?>">
+        <input type="hidden" name="TempSalesOrderProses[supplier_code]" value="<?=$tempItem->supplier_code ?>">
         <button class="btn btn-primary margin-bottom-20" data-button="create_proses">
             <i class="fontello icon-floppy"></i>
             <span>Simpan</span>

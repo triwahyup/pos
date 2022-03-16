@@ -58,7 +58,6 @@ class InventoryStockTransaction extends \yii\db\ActiveRecord
             [['type_document'], 'string', 'max' => 32],
             [['status_document'], 'string', 'max' => 255],
             [['status'], 'default', 'value' => 1],
-            [['item_code', 'supplier_code', 'created_at'], 'unique', 'targetAttribute' => ['item_code', 'supplier_code', 'created_at']],
         ];
     }
 

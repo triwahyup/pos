@@ -200,7 +200,7 @@ use yii\widgets\MaskedInput;
                         <label>PPN:</label>
                     </div>
                     <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                        <?= $form->field($model, 'ppn')->textInput()->label(false) ?>
+                        <?= $form->field($model, 'ppn')->textInput(['data-align'=>'text-right'])->label(false) ?>
                     </div>
                 </div>
                 <!-- Keterangan -->
@@ -232,6 +232,7 @@ use yii\widgets\MaskedInput;
                     <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
                         <?= $form->field($tempItem, 'item_name')->textInput(['placeholder' => 'Pilih material tekan F4', 'data-type'=>'item'])->label(false) ?>
                         <?= $form->field($tempItem, 'item_code')->hiddenInput()->label(false) ?>
+                        <?= $form->field($tempItem, 'supplier_code')->hiddenInput()->label(false) ?>
                     </div>
                 </div>
                 <!-- Total Potong -->
@@ -522,7 +523,7 @@ use yii\widgets\MaskedInput;
                                 <thead>
                                     <tr>
                                         <th class="text-center" rowspan="2">No.</th>
-                                        <th class="text-center" colspan="2">Item</th>
+                                        <th class="text-center" colspan="3">Item</th>
                                         <th class="text-center" colspan="2">QTY</th>
                                         <th class="text-center" rowspan="2">Jenis</th>
                                         <th class="text-center" rowspan="2">Action</th>
@@ -530,6 +531,7 @@ use yii\widgets\MaskedInput;
                                     <tr>
                                         <th class="text-center">Code</th>
                                         <th class="text-center">Name</th>
+                                        <th class="text-center">Supplier</th>
                                         <th class="text-center">Um 1</th>
                                         <th class="text-center">Um 2</th>
                                     </tr>
@@ -717,7 +719,7 @@ function load_item(type)
 				container: "popup",
 				title: 'List Data Material',
 				styleOptions: {
-					width: 600
+					width: 800
 				}
 			});
         },
@@ -725,13 +727,14 @@ function load_item(type)
     });
 }
 
-function search_item(code, type)
+function search_item(code, supplier, type)
 {
     $.ajax({
         url: "<?=Url::to(['sales-order/search-item'])?>",
 		type: "POST",
         data: {
             code: code,
+            supplier: supplier,
             type: type,
         },
 		dataType: "text",
@@ -745,7 +748,7 @@ function search_item(code, type)
 				container: "popup",
 				title: 'List Data Material',
 				styleOptions: {
-					width: 600
+					width: 800
 				}
 			});
         },
@@ -753,13 +756,14 @@ function search_item(code, type)
     });
 }
 
-function select_item(code, type)
+function select_item(code, supplier, type)
 {
     $.ajax({
         url: "<?=Url::to(['sales-order/select-item'])?>",
 		type: "POST",
         data: {
             code: code,
+            supplier: supplier,
         },
 		dataType: "text",
         error: function(xhr, status, error) {},
@@ -1137,7 +1141,7 @@ $(document).ready(function(){
     $("body").on("click","table[data-table=\"master_item_material\"] > tbody tr[data-code]", function(e){
         e.preventDefault();
         var data = $(this).data();
-        select_item(data.code, data.type);
+        select_item(data.code, data.supplier, data.type);
     });
     /** END LOAD ITEM MATERIAL & BAHAN */
 

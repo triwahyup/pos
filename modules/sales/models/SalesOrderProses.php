@@ -51,7 +51,7 @@ class SalesOrderProses extends \yii\db\ActiveRecord
             [['index', 'harga', 'total_biaya'], 'number'],
             [['code'], 'string', 'max' => 12],
             [['item_code'], 'string', 'max' => 7],
-            [['proses_code', 'mesin_type'], 'string', 'max' => 3],
+            [['proses_code', 'mesin_type', 'supplier_code'], 'string', 'max' => 3],
             [['keterangan'], 'string', 'max' => 128],
             [['code', 'item_code', 'proses_code'], 'unique', 'targetAttribute' => ['code', 'item_code', 'proses_code']],
             [['status'], 'default', 'value' => 1],

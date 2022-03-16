@@ -3,7 +3,7 @@
 namespace app\modules\sales\models;
 
 use Yii;
-use app\modules\master\models\MasterMaterialItem;
+use app\modules\master\models\MasterMaterial;
 
 /**
  * This is the model class for table "temp_sales_order_potong".
@@ -39,6 +39,7 @@ class TempSalesOrderPotong extends \yii\db\ActiveRecord
             [['panjang', 'lebar', 'waste', 'total_objek'], 'number'],
             [['code'], 'string', 'max' => 12],
             [['item_code'], 'string', 'max' => 7],
+            [['supplier_code'], 'string', 'max' => 3],
         ];
     }
 
@@ -77,7 +78,7 @@ class TempSalesOrderPotong extends \yii\db\ActiveRecord
         $temps = TempSalesOrderPotong::find()
             ->where(['code'=>$code, 'item_code'=>$item_code, 'user_id'=> \Yii::$app->user->id])
             ->all();
-        $item = MasterMaterialItem::findOne(['code'=>$item_code]);
+        $item = MasterMaterial::findOne(['code'=>$item_code]);
         $item_lebar = $item->lebar;
         $total_lebar = 0;
         foreach($temps as $val){
