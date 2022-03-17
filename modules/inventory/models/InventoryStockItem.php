@@ -90,7 +90,7 @@ class InventoryStockItem extends \yii\db\ActiveRecord
         return $total_material;
     }
 
-    public function konversi($item_code, $qty)
+    public static function konversi($item_code, $qty)
     {
         $item = MasterMaterial::findOne($item_code);
         $desc = '';
