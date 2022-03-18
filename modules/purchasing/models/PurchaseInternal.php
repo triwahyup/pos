@@ -3,6 +3,7 @@
 namespace app\modules\purchasing\models;
 
 use Yii;
+use app\modules\master\models\MasterPerson;
 use app\modules\master\models\Profile;
 use app\modules\purchasing\models\PurchaseInternalApproval;
 use app\modules\purchasing\models\PurchaseInternalDetail;
@@ -12,8 +13,8 @@ use yii\behaviors\TimestampBehavior;
 /**
  * This is the model class for table "purchase_internal".
  *
- * @property string $no_pi
- * @property string|null $tgl_pi
+ * @property string $no_po
+ * @property string|null $tgl_po
  * @property string|null $keterangan
  * @property float|null $total_order
  * @property int|null $user_id
@@ -46,12 +47,13 @@ class PurchaseInternal extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['tgl_pi', 'user_request'], 'required'],
-            [['tgl_pi', 'total_order'], 'safe'],
+            [['tgl_po', 'user_request', 'tgl_kirim', 'term_in'], 'required'],
+            [['tgl_po', 'tgl_kirim', 'total_order'], 'safe'],
             [['keterangan'], 'string'],
-            [['user_id', 'user_request', 'status', 'status_approval', 'created_at', 'updated_at'], 'integer'],
-            [['no_pi'], 'string', 'max' => 12],
-            [['no_pi'], 'unique'],
+            [['term_in', 'user_id', 'user_request', 'post', 'status', 'status_approval', 'status_terima', 'created_at', 'updated_at'], 'integer'],
+            [['supplier_code'], 'string', 'max' => 3],
+            [['no_po'], 'string', 'max' => 12],
+            [['no_po'], 'unique'],
             [['status_approval'], 'default', 'value' => 0],
             [['status'], 'default', 'value' => 1],
         ];
@@ -63,12 +65,15 @@ class PurchaseInternal extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'no_pi' => 'No PO Internal',
-            'tgl_pi' => 'Tgl PO Internal',
+            'no_po' => 'No PO',
+            'tgl_po' => 'Tgl PO',
+            'tgl_kirim' => 'Tgl. Kirim',
+            'term_in' => 'Term In',
+            'supplier_code' => 'Supplier',
             'keterangan' => 'Keterangan',
             'total_order' => 'Total Order',
-            'user_id' => 'User ID',
-            'user_request' => 'User Request',
+            'user_id' => 'User Create',
+            'user_request' => 'Request By',
             'status' => 'Status',
             'status_approval' => 'Status Approval',
             'created_at' => 'Created At',
@@ -78,7 +83,8 @@ class PurchaseInternal extends \yii\db\ActiveRecord
 
     public function beforeSave($attribute)
     {
-        $this->tgl_pi = date('Y-m-d', strtotime($this->tgl_pi));
+        $this->tgl_po = date('Y-m-d', strtotime($this->tgl_po));
+        $this->tgl_kirim = date('Y-m-d', strtotime($this->tgl_kirim));
         $this->total_order = str_replace(',', '', $this->total_order);
         return parent::beforeSave($attribute);
     }
@@ -88,10 +94,15 @@ class PurchaseInternal extends \yii\db\ActiveRecord
         $model = PurchaseInternal::find()->count();
         $total=0;
         if($model > 0){
-            $model = PurchaseInternal::find()->orderBy(['no_pi'=>SORT_DESC])->one();
-            $total = (int)substr($model->no_pi, -4);
+            $model = PurchaseInternal::find()->orderBy(['no_po'=>SORT_DESC])->one();
+            $total = (int)substr($model->no_po, -4);
         }
         return (string)date('Ymd').sprintf('%04s', ($total+1));
+    }
+
+    public function getSupplier()
+    {
+        return $this->hasOne(MasterPerson::className(), ['code' => 'supplier_code']);
     }
 
     public function getProfile()
@@ -106,12 +117,12 @@ class PurchaseInternal extends \yii\db\ActiveRecord
 
     public function getDetails()
     {
-        return $this->hasMany(PurchaseInternalDetail::className(), ['no_pi' => 'no_pi']);
+        return $this->hasMany(PurchaseInternalDetail::className(), ['no_po' => 'no_po']);
     }
 
     public function getTemps()
     {
-        return $this->hasMany(TempPurchaseInternalDetail::className(), ['no_pi' => 'no_pi']);
+        return $this->hasMany(TempPurchaseInternalDetail::className(), ['no_po' => 'no_po']);
     }
 
     public function temps()
@@ -121,7 +132,18 @@ class PurchaseInternal extends \yii\db\ActiveRecord
 
     public function getApprovals()
     {
-        return $this->hasMany(PurchaseInternalApproval::className(), ['no_pi' => 'no_pi']);
+        return $this->hasMany(PurchaseInternalApproval::className(), ['no_po' => 'no_po']);
+    }
+
+    public function getStatusPost()
+    {
+        $message = '';
+        if($this->post == 1){
+            $message = '<span class="text-label text-success">Sudah Post</span>';
+        }else{
+            $message = '<span class="text-label text-default">Belum Post</span>';
+        }
+        return $message;
     }
 
     public function getStatusApproval()
@@ -135,6 +157,21 @@ class PurchaseInternal extends \yii\db\ActiveRecord
             $message = '<span class="text-label text-danger">Rejected</span>';
         }else{
             $message = '<span class="text-label text-default">Not Send</span>';
+        }
+        return $message;
+    }
+
+    public function getStatusTerima()
+    {
+        $message = '';
+        if($this->status_terima == 1){
+            $message = '<span class="text-label text-success">Sudah Terima</span>';
+        }else if($this->status_terima == 2){
+            $message = '<span class="text-label text-warning">Terima Sebagian</span>';
+        }else if($this->status_terima == 3){
+            $message = '<span class="text-label text-primary">Not Balance</span>';
+        }else{
+            $message = '<span class="text-label text-default">Belum Terima</span>';
         }
         return $message;
     }

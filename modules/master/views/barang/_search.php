@@ -4,32 +4,26 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model app\modules\purchasing\models\PurchaseInternalSearch */
+/* @var $model app\modules\master\models\MasterBarangSearch */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 
-<div class="purchase-internal-search">
+<div class="master-barang-search">
 
     <?php $form = ActiveForm::begin([
         'action' => ['index'],
         'method' => 'get',
     ]); ?>
 
-    <?= $form->field($model, 'no_po') ?>
+    <?= $form->field($model, 'code') ?>
 
-    <?= $form->field($model, 'tgl_po') ?>
+    <?= $form->field($model, 'name') ?>
+
+    <?= $form->field($model, 'satuan_code') ?>
 
     <?= $form->field($model, 'keterangan') ?>
 
-    <?= $form->field($model, 'total_order') ?>
-
-    <?= $form->field($model, 'user_id') ?>
-
-    <?php // echo $form->field($model, 'user_request') ?>
-
-    <?php // echo $form->field($model, 'status') ?>
-
-    <?php // echo $form->field($model, 'status_approval') ?>
+    <?= $form->field($model, 'status') ?>
 
     <?php // echo $form->field($model, 'created_at') ?>
 

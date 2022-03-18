@@ -39,7 +39,7 @@ use yii\widgets\MaskedInput;
                         <?= $form->field($model, 'satuan_code')->widget(Select2::classname(), [
                                 'data' => $satuan,
                                 'options' => ['placeholder' => 'Satuan'],
-                            ]) ?>    
+                            ]) ?>
                     </div>
                 </div>
             </div>

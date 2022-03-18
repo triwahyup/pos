@@ -5,6 +5,8 @@ namespace app\modules\purchasing\controllers;
 use app\models\Logs;
 use app\models\LogsMail;
 use app\models\User;
+use app\modules\master\models\MasterBarang;
+use app\modules\master\models\MasterPerson;
 use app\modules\master\models\Profile;
 use app\modules\pengaturan\models\PengaturanApproval;
 use app\modules\purchasing\models\PurchaseInternal;
@@ -40,6 +42,7 @@ class PurchaseInternalController extends Controller
                         ],
                         [
                             'actions' => ['index', 'view', 'temp', 'get-temp', 'popup'],
+                            'actions' => ['index', 'view', 'list-barang', 'temp', 'get-temp', 'popup', 'search', 'barang', 'autocomplete'],
                             'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('po-internal')),
                             'roles' => ['@'],
                         ], 
@@ -87,22 +90,27 @@ class PurchaseInternalController extends Controller
 
     /**
      * Displays a single PurchaseInternal model.
-     * @param string $no_pi No Pi
+     * @param string $no_po No Po
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionView($no_pi)
+    public function actionView($no_po)
     {
-        $model = $this->findModel($no_pi);
+        $model = $this->findModel($no_po);
         $typeuser = \Yii::$app->user->identity->profile->typeUser->value;
         $sendApproval = false;
+        $postInvoice = false;
         if($typeuser == 'ADMINISTRATOR' || $typeuser == 'ADMIN'){
             if($model->status_approval == 0 || $model->status_approval == 3){
                 $sendApproval = true;
             }
+            if($model->status_approval == 2 && ($model->post == 0 || empty($model->post))){
+                $postInvoice = true;
+            }
+            
         }
         $typeApproval = false;
-        $approval = PurchaseInternalApproval::findOne(['no_pi'=>$no_pi, 'status'=>2]);
+        $approval = PurchaseInternalApproval::findOne(['no_po'=>$no_po, 'status'=>2]);
         if(isset($approval)){
             if(($model->status_approval==1) && ($approval->user_id == \Yii::$app->user->id) || ($approval->typeuser_code == \Yii::$app->user->identity->profile->typeuser_code)){
                 $typeApproval = true;
@@ -112,6 +120,7 @@ class PurchaseInternalController extends Controller
         return $this->render('view', [
             'model' => $model,
             'sendApproval' => $sendApproval,
+            'postInvoice' => $postInvoice,
             'typeApproval' => $typeApproval,
             'typeuser' => $typeuser,
         ]);
@@ -124,6 +133,11 @@ class PurchaseInternalController extends Controller
      */
     public function actionCreate()
     {
+        $supplier = MasterPerson::find()
+            ->select(['name'])
+            ->where(['type_user'=>\Yii::$app->params['TYPE_SUPPLIER_BARANG'], 'status' => 1])
+            ->indexBy('code')
+            ->column();
         $profile = Profile::find()
             ->select(['name'])
             ->where(['status' => 1])
@@ -139,14 +153,14 @@ class PurchaseInternalController extends Controller
                 $connection = \Yii::$app->db;
 			    $transaction = $connection->beginTransaction();
                 try{
-                    $model->no_pi = $model->generateCode();
+                    $model->no_po = $model->generateCode();
                     $model->user_id = \Yii::$app->user->id;
                     if($model->save()){
                         if(count($model->temps()) > 0){
                             foreach($model->temps() as $temp){
                                 $detail = new PurchaseInternalDetail();
                                 $detail->attributes = $temp->attributes;
-                                $detail->no_pi = $model->no_pi;
+                                $detail->no_po = $model->no_po;
                                 if(!$detail->save()){
                                     $success = false;
                                     $message = (count($detail->errors) > 0) ? 'ERROR CREATE PO INTERNAL DETAIL: ' : '';
@@ -172,7 +186,7 @@ class PurchaseInternalController extends Controller
                     if($success){
                         $this->emptyTemp();
                         $transaction->commit();
-                        $message = '['.$model->no_pi.'] SUCCESS CREATE PO INTERNAL.';
+                        $message = '['.$model->no_po.'] SUCCESS CREATE PO INTERNAL.';
                         $logs =	[
                             'type' => Logs::TYPE_USER,
                             'description' => $message,
@@ -180,7 +194,7 @@ class PurchaseInternalController extends Controller
                         Logs::addLog($logs);
 
                         \Yii::$app->session->setFlash('success', $message);
-                        return $this->redirect(['view', 'no_pi' => $model->no_pi]);
+                        return $this->redirect(['view', 'no_po' => $model->no_po]);
                     }else{
                         $transaction->rollBack();
                     }
@@ -202,6 +216,7 @@ class PurchaseInternalController extends Controller
         }
 
         return $this->render('create', [
+            'supplier' => $supplier,
             'profile' => $profile,
             'model' => $model,
             'temp' => $temp,
@@ -211,12 +226,17 @@ class PurchaseInternalController extends Controller
     /**
      * Updates an existing PurchaseInternal model.
      * If update is successful, the browser will be redirected to the 'view' page.
-     * @param string $no_pi No Pi
+     * @param string $no_po No Po
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionUpdate($no_pi)
+    public function actionUpdate($no_po)
     {
+        $supplier = MasterPerson::find()
+            ->select(['name'])
+            ->where(['type_user'=>\Yii::$app->params['TYPE_SUPPLIER_BARANG'], 'status' => 1])
+            ->indexBy('code')
+            ->column();
         $profile = Profile::find()
             ->select(['name'])
             ->where(['status' => 1])
@@ -226,7 +246,7 @@ class PurchaseInternalController extends Controller
         $success = true;
         $message = '';
         $temp = new TempPurchaseInternalDetail();
-        $model = $this->findModel($no_pi);
+        $model = $this->findModel($no_po);
         if ($this->request->isPost) {
             if ($model->load($this->request->post())){
                 $connection = \Yii::$app->db;
@@ -265,7 +285,7 @@ class PurchaseInternalController extends Controller
                     if($success){
                         $this->emptyTemp();
                         $transaction->commit();
-                        $message = '['.$model->no_pi.'] SUCCESS UPDATE PO INTERNAL.';
+                        $message = '['.$model->no_po.'] SUCCESS UPDATE PO INTERNAL.';
                         $logs =	[
                             'type' => Logs::TYPE_USER,
                             'description' => $message,
@@ -273,7 +293,7 @@ class PurchaseInternalController extends Controller
                         Logs::addLog($logs);
 
                         \Yii::$app->session->setFlash('success', $message);
-                        return $this->redirect(['view', 'no_pi' => $model->no_pi]);
+                        return $this->redirect(['view', 'no_po' => $model->no_po]);
                     }else{
                         $transaction->rollBack();
                     }
@@ -315,6 +335,7 @@ class PurchaseInternalController extends Controller
         }
 
         return $this->render('update', [
+            'supplier' => $supplier,
             'profile' => $profile,
             'model' => $model,
             'temp' => $temp,
@@ -324,15 +345,15 @@ class PurchaseInternalController extends Controller
     /**
      * Deletes an existing PurchaseInternal model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param string $no_pi No Pi
+     * @param string $no_po No Po
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionDelete($no_pi)
+    public function actionDelete($no_po)
     {
         $success = true;
 		$message = '';
-        $model = $this->findModel($no_pi);
+        $model = $this->findModel($no_po);
         if(isset($model)){
             if($model->status_approval == 1){
                 \Yii::$app->session->setFlash('error', 'Dokumen ini masih dalam proses Approval.');
@@ -366,7 +387,7 @@ class PurchaseInternalController extends Controller
     
                     if($success){
                         $transaction->commit();
-                        $message = '['.$model->no_pi.'] SUCCESS DELETE PO INTERNAL.';
+                        $message = '['.$model->no_po.'] SUCCESS DELETE PO INTERNAL.';
                         \Yii::$app->session->setFlash('success', $message);
                     }else{
                         $transaction->rollBack();
@@ -391,17 +412,62 @@ class PurchaseInternalController extends Controller
     /**
      * Finds the PurchaseInternal model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param string $no_pi No Pi
+     * @param string $no_po No Po
      * @return PurchaseInternal the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findModel($no_pi)
+    protected function findModel($no_po)
     {
-        if (($model = PurchaseInternal::findOne($no_pi)) !== null) {
+        if (($model = PurchaseInternal::findOne($no_po)) !== null) {
             return $model;
         }
 
         throw new NotFoundHttpException('The requested page does not exist.');
+    }
+
+    public function actionListBarang()
+    {
+        $model = MasterBarang::find()->where(['status'=>1])->orderBy(['code'=>SORT_ASC])->limit(10)->all();
+        return json_encode(['data'=>$this->renderPartial('_list_barang', ['model'=>$model])]);
+    }
+
+    public function actionAutocomplete()
+    {
+        $model = [];
+        if(isset($_POST['search'])){
+            $model = MasterBarang::find()
+                ->select(['code', 'concat(code,"-",name) label', 'concat(code,"-",name) name'])
+                ->where(['status'=>1])
+                ->andWhere('concat(code,"-",name) LIKE "%'.$_POST['search'].'%"')
+                ->asArray()
+                ->limit(10)
+                ->all();
+        }
+        return  json_encode($model);
+    }
+
+    public function actionSearch()
+    {
+        $model = [];
+        if(isset($_POST['code'])){
+            $model = MasterBarang::find()->where(['code'=>$_POST['code'], 'status'=>1])->all();
+        }
+        return json_encode(['data'=>$this->renderPartial('_list_barang', ['model'=>$model])]);
+    }
+
+    public function actionBarang()
+    {
+        $model = MasterBarang::find()
+            ->alias('a')
+            ->select(['a.*', 'a.code as barang_code', 'b.name as um'])
+            ->leftJoin('master_satuan b', 'b.code = a.satuan_code')
+            ->where(['a.code'=>$_POST['code'], 'a.status'=>1])
+            ->asArray()
+            ->one();
+        if(empty($model)){
+            $model = [];
+        }
+        return json_encode($model);
     }
 
     public function actionTemp()
@@ -425,25 +491,33 @@ class PurchaseInternalController extends Controller
     {
         $request = \Yii::$app->request;
         $success = true;
-        $message = '';
+        $message = 'CREATE TEMP SUCCESSFULLY';
         if($request->isPost){
-            $data = $request->post('TempPurchaseInternalDetail');
             $temp = new TempPurchaseInternalDetail();
-            $temp->attributes = (array)$data;
-            $temp->urutan = $temp->count +1;
-            $temp->user_id = \Yii::$app->user->id;
-            if(!empty($request->post('PurchaseInternal')['no_pi'])){
-                $temp->no_pi = $request->post('PurchaseInternal')['no_pi'];
-            }
-            $temp->total_order = $temp->totalBeli;
-            if($temp->save()){
-                $message = 'CREATE TEMP SUCCESSFULLY';
+            $dataHeader = $request->post('PurchaseInternal');
+            $temp->attributes = (array)$dataHeader;
+            $dataTemp = $request->post('TempPurchaseInternalDetail');
+            $temp->attributes = (array)$dataTemp;
+            if(!empty($dataTemp['name'])){
+                if($dataTemp['qty'] > 0){
+                    $temp->no_po = (!empty($dataHeader['no_po'])) ? $dataHeader['no_po'] : 'tmp';
+                    $temp->urutan = $temp->count +1;
+                    $temp->user_id = \Yii::$app->user->id;
+                    $temp->total_order = $temp->totalBeli;
+                    if(!$temp->save()){
+                        $success = false;
+                        foreach($temp->errors as $error => $value){
+                            $message = $value[0].', ';
+                        }
+                        $message = substr($message, 0, -2);
+                    }
+                }else{
+                    $success = false;
+                    $message = 'Qty wajib diisi.';
+                }
             }else{
                 $success = false;
-                foreach($temp->errors as $error => $value){
-                    $message = $value[0].', ';
-                }
-                $message = substr($message, 0, -2);
+                $message = 'Barang wajib diisi.';
             }
         }else{
             throw new NotFoundHttpException('The requested data does not exist.');
@@ -455,20 +529,30 @@ class PurchaseInternalController extends Controller
     {
         $request = \Yii::$app->request;
         $success = true;
-        $message = '';
+        $message = 'UPDATE TEMP SUCCESSFULLY';
         if($request->isPost){
-            $data = $request->post('TempPurchaseInternalDetail');
-            $temp = $this->findTemp($data['id']);
-            $temp->attributes = (array)$data;
-            $temp->total_order = $temp->totalBeli;
-            if($temp->save()){
-                $message = 'UPDATE TEMP SUCCESSFULLY';
+            $dataHeader = $request->post('PurchaseInternal');
+            $dataTemp = $request->post('TempPurchaseInternalDetail');
+            $temp = $this->findTemp($dataTemp['id']);
+            $temp->attributes = (array)$dataHeader;
+            $temp->attributes = (array)$dataTemp;
+            if(!empty($dataTemp['name'])){
+                if($dataTemp['qty'] > 0){
+                    $temp->total_order = $temp->totalBeli;
+                    if(!$temp->save()){
+                        $success = false;
+                        foreach($temp->errors as $error => $value){
+                            $message = $value[0].', ';
+                        }
+                        $message = substr($message, 0, -2);
+                    }
+                }else{
+                    $success = false;
+                    $message = 'Qty wajib diisi.';
+                }
             }else{
                 $success = false;
-                foreach($temp->errors as $error => $value){
-                    $message = $value[0].', ';
-                }
-                $message = substr($message, 0, -2);
+                $message = 'Barang wajib diisi.';
             }
         }else{
             throw new NotFoundHttpException('The requested data does not exist.');
@@ -479,7 +563,7 @@ class PurchaseInternalController extends Controller
     public function actionDeleteTemp($id)
     {
         $success = true;
-        $message = '';
+        $message = 'DELETE TEMP SUCCESSFULLY';
         $temp = $this->findTemp($id);
         if(isset($temp)){
             if($temp->delete()){
@@ -493,7 +577,6 @@ class PurchaseInternalController extends Controller
                         $message = substr($message, 0, -2);
                     }
                 }
-                $message = 'DELETE TEMP SUCCESSFULLY';
             }else{
                 $success = false;
                 foreach($temp->errors as $error => $value){
@@ -524,26 +607,26 @@ class PurchaseInternalController extends Controller
         }
     }
 
-    public function actionSendApproval($no_pi)
+    public function actionSendApproval($no_po)
     {
         $success = true;
 		$message = '';
-        $model = $this->findModel($no_pi);
+        $model = $this->findModel($no_po);
         if(isset($model)){
             $connection = \Yii::$app->db;
             $transaction = $connection->beginTransaction();
             try{
                 $model->status_approval = 1;
                 if($model->save()){
-                    $approvals = (new PengaturanApproval)->approval('purchase-order-internal');
+                    $approvals = (new PengaturanApproval)->approval('po-internal');
                     if(isset($approvals)){
-                        $approvaln = PurchaseInternalApproval::findAll(['no_pi'=>$no_pi]);
+                        $approvaln = PurchaseInternalApproval::findAll(['no_po'=>$no_po]);
                         if(count($approvaln) > 0)
-                            PurchaseInternalApproval::deleteAll('no_pi=:no_pi', [':no_pi'=>$no_pi]);
+                            PurchaseInternalApproval::deleteAll('no_po=:no_po', [':no_po'=>$no_po]);
                         foreach($approvals as $approval){
                             $app = new PurchaseInternalApproval();
                             $app->attributes = $approval->attributes;
-                            $app->no_pi = $no_pi;
+                            $app->no_po = $no_po;
                             $app->status = 1;
                             if(!$app->save()){
                                 $success = false;
@@ -567,9 +650,9 @@ class PurchaseInternalController extends Controller
                 }
 
                 if($success){
-                    $mailapproval = json_decode($this->mailapproval($model->no_pi));
+                    $mailapproval = json_decode($this->mailapproval($model->no_po));
                     if($mailapproval->success){
-                        $message = '['.$model->no_pi.'] SUCCESS SEND APPROVAL PO INTERNAL.';
+                        $message = '['.$model->no_po.'] SUCCESS SEND APPROVAL PO INTERNAL.';
                         $transaction->commit();
                         \Yii::$app->session->setFlash('success', $message);
                     }else{
@@ -591,7 +674,7 @@ class PurchaseInternalController extends Controller
         if(!$success){
             \Yii::$app->session->setFlash('error', $message);
         }
-        return $this->redirect(['view', 'no_pi' => $model->no_pi]);
+        return $this->redirect(['view', 'no_po' => $model->no_po]);
     }
 
     public function actionApproval()
@@ -600,12 +683,12 @@ class PurchaseInternalController extends Controller
         $data = $request->post('PurchaseInternalApproval');
         $success = true;
 		$message = '';
-        $model = $this->findModel($data['no_pi']);
+        $model = $this->findModel($data['no_po']);
         if(isset($model)){
             $connection = \Yii::$app->db;
             $transaction = $connection->beginTransaction();
             try{
-                $approval = PurchaseInternalApproval::findOne(['no_pi'=>$model->no_pi, 'status'=>2]);
+                $approval = PurchaseInternalApproval::findOne(['no_po'=>$model->no_po, 'status'=>2]);
                 if(isset($approval)){
                     if(($approval->user_id == \Yii::$app->user->id) || ($approval->typeuser_code == \Yii::$app->user->identity->profile->typeuser_code)){
                         // APPROVE
@@ -616,11 +699,11 @@ class PurchaseInternalController extends Controller
 								$approval->user_id = \Yii::$app->user->id;
 							}
                             if($approval->save()){
-                                $mailapproval = json_decode($this->mailapproval($model->no_pi));
+                                $mailapproval = json_decode($this->mailapproval($model->no_po));
                                 if($mailapproval->success){
                                     $is_akhir = true;
                                     if($mailapproval->akhir){
-                                        $mailakhir = json_decode($this->mailapproval_akhir($model->no_pi, $approval->comment));
+                                        $mailakhir = json_decode($this->mailapproval_akhir($model->no_po, $approval->comment));
                                         if($mailakhir->success){
                                             $model->status_approval=2;
                                             if(!$model->save()){
@@ -636,9 +719,9 @@ class PurchaseInternalController extends Controller
                                     }
                                     if($is_akhir){
                                         $transaction->commit();
-                                        $message = '['.$model->no_pi.'] SUCCESS APPROVE PO INTERNAL.';
+                                        $message = '['.$model->no_po.'] SUCCESS APPROVE PO INTERNAL.';
                                         \Yii::$app->session->setFlash('success', $message);
-                                        return $this->redirect(['view', 'no_pi' => $model->no_pi]);
+                                        return $this->redirect(['view', 'no_po' => $model->no_po]);
                                     }else{
                                         $transaction->rollBack();
 										$message = $mailapproval->message;
@@ -676,12 +759,12 @@ class PurchaseInternalController extends Controller
 								}
 
                                 if($success){
-                                    $mailakhir = json_decode($this->mailapproval_akhir($model->no_pi, $approval->comment));
+                                    $mailakhir = json_decode($this->mailapproval_akhir($model->no_po, $approval->comment));
                                     if($mailakhir->success){
                                         $transaction->commit();
-                                        $message = '['.$model->no_pi.'] SUCCESS REJECT PO INTERNAL.';
+                                        $message = '['.$model->no_po.'] SUCCESS REJECT PO INTERNAL.';
                                         \Yii::$app->session->setFlash('success', $message);
-                                        return $this->redirect(['view', 'no_pi' => $model->no_pi]);
+                                        return $this->redirect(['view', 'no_po' => $model->no_po]);
                                     }else{
                                         $success = false;
 										$message .= $mailakhir->message;
@@ -714,14 +797,14 @@ class PurchaseInternalController extends Controller
         if(!$success){
             \Yii::$app->session->setFlash('error', $message);
         }
-        return $this->redirect(['view', 'no_pi' => $model->no_pi]);
+        return $this->redirect(['view', 'no_po' => $model->no_po]);
     }
 
     public function actionPopup()
     {
         $request = \Yii::$app->request;
-        $approval = PurchaseInternalApproval::findOne(['no_pi'=>$request->post('no_pi'), 'status'=>2]);
-        $model = $this->findModel($request->post('no_pi'));
+        $approval = PurchaseInternalApproval::findOne(['no_po'=>$request->post('no_po'), 'status'=>2]);
+        $model = $this->findModel($request->post('no_po'));
         if($request->post('type') == 'APPROVE'){
             return $this->renderPartial('_popup_approve', [
                 'model' => $model,
@@ -738,14 +821,14 @@ class PurchaseInternalController extends Controller
         }
     }
 
-    function mailapproval($no_pi)
+    function mailapproval($no_po)
     {
         $success = true;
 		$message = '';
         $akhir = false;
 		$urutan = 0;
 		$profile = [];
-        $approvals = PurchaseInternalApproval::find()->where(['no_pi'=>$no_pi])->orderBy(['urutan'=>SORT_ASC])->all();
+        $approvals = PurchaseInternalApproval::find()->where(['no_po'=>$no_po])->orderBy(['urutan'=>SORT_ASC])->all();
         if(count($approvals) > 0){
             foreach($approvals as $approval){
                 if(!$urutan){
@@ -770,7 +853,7 @@ class PurchaseInternalController extends Controller
                 }
             }
             if($urutan){
-                $app = PurchaseInternalApproval::findOne(['no_pi'=>$no_pi, 'urutan'=>$urutan]);
+                $app = PurchaseInternalApproval::findOne(['no_po'=>$no_po, 'urutan'=>$urutan]);
                 if(isset($app)){
                     $name = '';
                     if(!empty($app->user_id)){
@@ -791,14 +874,14 @@ class PurchaseInternalController extends Controller
                         $body = $this->renderPartial('_mailapproval', [
                             'approval' => $app,
 							'name' => $name,
-                            'url' => \Yii::$app->params['URL'].'/purchasing/purchase-internal/view&no_pi='.$approval->no_pi,
+                            'url' => \Yii::$app->params['URL'].'/purchasing/purchase-internal/view&no_po='.$approval->no_po,
                         ]);
                         
                         $logs_mail = new LogsMail();
                         $logs_mail->type = 'APPROVAL PURCHASE ORDER INTERNAL';
                         $logs_mail->email = substr($str_mail, 0, -2);
                         $logs_mail->bcc = '';
-                        $logs_mail->subject = 'Approval Purchase Order Internal '. $app->no_pi;
+                        $logs_mail->subject = 'Approval Purchase Order Internal '. $app->no_po;
 						$logs_mail->body = $body;
 						$logs_mail->keterangan = '';
                         
@@ -847,12 +930,12 @@ class PurchaseInternalController extends Controller
         return json_encode(['success'=>$success, 'message'=>$message, 'akhir'=>$akhir]);
     }
 
-    function mailapproval_akhir($no_pi, $comment=NULL)
+    function mailapproval_akhir($no_po, $comment=NULL)
     {
         $success = true;
 		$message = '';
         $approval = PurchaseInternalApproval::find()
-            ->where(['no_pi'=>$no_pi])
+            ->where(['no_po'=>$no_po])
             ->orderBy(['urutan'=>SORT_DESC])
             ->one();
         $str_mail = '';
@@ -860,14 +943,14 @@ class PurchaseInternalController extends Controller
             $body = $this->renderPartial('_mailapproval_akhir', [
                 'approval' => $approval,
 				'description' => $comment,
-                'url' => \Yii::$app->params['URL'].'/purchasing/purchase-internal/view&no_pi='.$approval->no_pi,
+                'url' => \Yii::$app->params['URL'].'/purchasing/purchase-internal/view&no_po='.$approval->no_po,
             ]);
 
             $logs_mail = new LogsMail();
             $logs_mail->type = 'APPROVAL PURCHASE ORDER INTERNAL';
             $logs_mail->email = (isset($approval->poInternal->profile)) ? $approval->poInternal->profile->email : '';
             $logs_mail->bcc = '';
-            $logs_mail->subject = 'Approval Purchase Order Internal '. $approval->no_pi;
+            $logs_mail->subject = 'Approval Purchase Order Internal '. $approval->no_po;
             $logs_mail->body = $body;
             $logs_mail->keterangan = '';
             

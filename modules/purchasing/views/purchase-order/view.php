@@ -63,6 +63,12 @@ $this->params['breadcrumbs'][] = $this->title;
                         }
                     ],
                     [
+                        'attribute' => 'user_request',
+                        'value' => function($model, $value) {
+                            return (isset($model->request)) ? $model->request->name : '';
+                        }
+                    ],
+                    [
                         'attribute' => 'user_id',
                         'value' => function($model, $value) {
                             return (isset($model->profile)) ? $model->profile->name : '';

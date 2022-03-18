@@ -432,14 +432,7 @@ class PurchaseOrderController extends Controller
 
     public function actionListItem()
     {
-        $model = MasterMaterial::find()
-            ->alias('a')
-            ->select(['a.*', 'b.composite'])
-            ->leftJoin('master_satuan b', 'b.code = a.satuan_code')
-            ->where(['a.status'=>1])
-            ->orderBy(['a.code'=>SORT_ASC])
-            ->limit(10)
-            ->all();
+        $model = MasterMaterial::find()->where(['status'=>1])->orderBy(['code'=>SORT_ASC])->limit(10)->all();
         return json_encode(['data'=>$this->renderPartial('_list_item', ['model'=>$model])]);
     }
 
@@ -462,13 +455,7 @@ class PurchaseOrderController extends Controller
     {
         $model = [];
         if(isset($_POST['code'])){
-            $model = MasterMaterial::find()
-                ->alias('a')
-                ->select(['a.*', 'b.composite'])
-                ->leftJoin('master_satuan b', 'b.code = a.satuan_code')
-                ->leftJoin('master_kode c', 'c.code = a.type_code')
-                ->where(['a.code'=>$_POST['code'], 'a.status'=>1])
-                ->all();
+            $model = MasterMaterial::find()->where(['code'=>$_POST['code'], 'status'=>1])->all();
         }
         return json_encode(['data'=>$this->renderPartial('_list_item', ['model'=>$model])]);
     }
@@ -477,7 +464,7 @@ class PurchaseOrderController extends Controller
     {
         $model = MasterMaterial::find()
             ->alias('a')
-            ->select(['a.*', 'b.*', 'a.name as item_name', 'c.composite'])
+            ->select(['a.*', 'b.*', 'a.name as item_name'])
             ->leftJoin('master_material_pricelist b', 'b.item_code = a.code')
             ->leftJoin('master_satuan c', 'c.code = a.satuan_code')
             ->where(['item_code'=>$_POST['code'], 'supplier_code'=>$_POST['supplier'], 'a.status'=>1, 'status_active' => 1])
@@ -547,11 +534,11 @@ class PurchaseOrderController extends Controller
                     }
                 }else{
                     $success = false;
-                    $message = 'Qty belum diisi.';
+                    $message = 'Qty wajib diisi.';
                 }
             }else{
                 $success = false;
-                $message = 'Material tidak ditemukan.';
+                $message = 'Material wajib diisi.';
             }
         }else{
             throw new NotFoundHttpException('The requested data does not exist.');
@@ -595,7 +582,7 @@ class PurchaseOrderController extends Controller
                 }
             }else{
                 $success = false;
-                $message = 'Material tidak ditemukan.';
+                $message = 'Material belum diisi.';
             }
         }else{
             throw new NotFoundHttpException('The requested data does not exist.');

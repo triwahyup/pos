@@ -3,12 +3,14 @@
 namespace app\modules\purchasing\models;
 
 use Yii;
+use app\modules\master\models\MasterBarang;
+use app\modules\master\models\MasterSatuan;
 use yii\behaviors\TimestampBehavior;
 
 /**
  * This is the model class for table "purchase_internal_detail".
  *
- * @property string $no_pi
+ * @property string $no_po
  * @property int $urutan
  * @property string|null $item_name
  * @property float|null $qty
@@ -41,13 +43,15 @@ class PurchaseInternalDetail extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['no_pi', 'urutan'], 'required'],
+            [['no_po', 'urutan'], 'required'],
             [['urutan', 'status', 'created_at', 'updated_at'], 'integer'],
             [['qty', 'harga_beli', 'total_order'], 'number'],
-            [['um'], 'string', 'max' => 16],
-            [['no_pi'], 'string', 'max' => 12],
-            [['item_name'], 'string', 'max' => 128],
-            [['no_pi', 'urutan'], 'unique', 'targetAttribute' => ['no_pi', 'urutan']],
+            [['supplier_code', 'satuan_code'], 'string', 'max' => 3],
+            [['um'], 'string', 'max' => 5],
+            [['barang_code'], 'string', 'max' => 7],
+            [['no_po'], 'string', 'max' => 12],
+            [['name'], 'string', 'max' => 128],
+            [['no_po', 'urutan'], 'unique', 'targetAttribute' => ['no_po', 'urutan']],
         ];
     }
 
@@ -57,7 +61,7 @@ class PurchaseInternalDetail extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'no_pi' => 'No Pi',
+            'no_po' => 'No Po',
             'urutan' => 'Urutan',
             'item_name' => 'Item Name',
             'qty' => 'Qty',
@@ -67,5 +71,15 @@ class PurchaseInternalDetail extends \yii\db\ActiveRecord
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
         ];
+    }
+
+    public function getBarang()
+    {
+        return $this->hasOne(MasterBarang::className(), ['code' => 'barang_code']);
+    }
+    
+    public function getSatuan()
+    {
+        return $this->hasOne(MasterSatuan::className(), ['code' => 'satuan_code']);
     }
 }

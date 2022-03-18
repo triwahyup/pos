@@ -14,13 +14,16 @@ use yii\widgets\MaskedInput;
 <div class="purchase-internal-form">
     <?php $form = ActiveForm::begin(['id'=>'form']); ?>
         <div class="col-lg-6 col-md-6 col-xs-12 padding-left-0">
-            <div class="margin-top-20"></div>
             <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
-                <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-right-0">
-                    <label class="font-size-12 font-bold">Tgl PO Internal:</label>
+                <div class="col-lg-6 col-md-6 col-xs-12 padding-left-0">
+                    <?= $form->field($model, 'supplier_code')->widget(Select2::classname(), [
+                        'data' => $supplier,
+                        'options' => ['placeholder' => 'Supplier'],
+                        ]) ?>
+                    <?= $form->field($model, 'no_po')->hiddenInput()->label(false) ?>
                 </div>
-                <div class="col-lg-6 col-md-6 col-xs-12">
-                    <?= $form->field($model, 'tgl_pi')->widget(DatePicker::classname(), [
+                <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padding-left-0">
+                    <?= $form->field($model, 'tgl_po')->widget(DatePicker::classname(), [
                         'type' => DatePicker::TYPE_INPUT,
                         'options' => [
                             'placeholder' => 'dd-mm-yyyy',
@@ -29,27 +32,34 @@ use yii\widgets\MaskedInput;
                         'pluginOptions' => [
                             'autoclose' => true,
                             'format' => 'dd-mm-yyyy',
-                        ]])->label(false) ?>
-                    <?= $form->field($model, 'no_pi')->hiddenInput()->label(false) ?>
+                        ]]) ?>
                 </div>
             </div>
             <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
-                <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-right-0">
-                    <label class="font-size-12 font-bold">User Request:</label>
-                </div>
-                <div class="col-lg-6 col-md-6 col-xs-12">
+                <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-left-0">
                     <?= $form->field($model, 'user_request')->widget(Select2::classname(), [
                             'data' => $profile,
                             'options' => ['placeholder' => 'Request By'],
-                        ])->label(false) ?>
+                        ]) ?>
+                </div>
+                <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padding-left-0">
+                    <?= $form->field($model, 'term_in')->textInput() ?>
                 </div>
             </div>
             <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
-                <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-right-0">
-                    <label class="font-size-12 font-bold">Keterangan:</label>
+                <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padding-left-0">
+                    <?= $form->field($model, 'tgl_kirim')->widget(DatePicker::classname(), [
+                        'type' => DatePicker::TYPE_INPUT,
+                        'options' => [
+                            'placeholder' => 'dd-mm-yyyy',
+                        ],
+                        'pluginOptions' => [
+                            'autoclose' => true,
+                            'format' => 'dd-mm-yyyy',
+                            ]]) ?>
                 </div>
-                <div class="col-lg-6 col-md-6 col-xs-12">
-                    <?= $form->field($model, 'keterangan')->textarea(['rows' => 3])->label(false) ?>
+                <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-left-0">
+                    <?= $form->field($model, 'keterangan')->textarea(['rows' => 3]) ?>
                 </div>
             </div>
         </div>
@@ -61,26 +71,24 @@ use yii\widgets\MaskedInput;
             </div>
         </div>
         <!-- DETAIL -->
-        <div class="col-lg-12 col-md-12 col-xs-12">
+        <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
             <div class="margin-top-20"></div>
             <fieldset class="fieldset-box padding-20">
                 <legend>Detail Item</legend>
                 <div class="form-container">
                     <div class="margin-top-20"></div>
                     <div class="col-lg-12 col-md-12 col-xs-12">
-                        <?= $form->field($temp, 'id')->hiddenInput(['data-temp' => true])->label(false) ?>
-                    </div>
-                    <div class="col-lg-12 col-md-12 col-xs-12">
                         <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
-                            <label class="font-size-12">Item:</label>
+                            <label>Pilih Barang:</label>
                         </div>
                         <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padding-right-0">
-                            <?= $form->field($temp, 'item_name')->textInput(['placeholder' => 'Masukkan Item Name ...', 'data-temp' => true])->label(false) ?>
+                            <?= $form->field($temp, 'name')->textInput(['placeholder' => 'Pilih barang tekan F4', 'data-temp' => true])->label(false) ?>
+                            <?= $form->field($temp, 'barang_code')->hiddenInput(['data-temp' => true])->label(false) ?>
                         </div>
                     </div>
                     <div class="col-lg-12 col-md-12 col-xs-12">
                         <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
-                            <label class="font-size-12">Qty / Satuan:</label>
+                            <label>Qty / Satuan:</label>
                         </div>
                         <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
                             <?= $form->field($temp, 'qty')->widget(MaskedInput::className(), [
@@ -97,12 +105,13 @@ use yii\widgets\MaskedInput;
                                 ])->label(false) ?>
                         </div>
                         <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
-                            <?= $form->field($temp, 'um')->textInput(['placeholder' => 'Satuan', 'data-temp' => true])->label(false) ?>
+                            <?= $form->field($temp, 'um')->textInput(['placeholder' => 'Satuan', 'data-temp' => true, 'data-align' => 'text-right', 'readonly' => true])->label(false) ?>
+                            <?= $form->field($temp, 'satuan_code')->hiddenInput(['placeholder' => 'Satuan', 'data-temp' => true])->label(false) ?>
                         </div>
                     </div>
                     <div class="col-lg-12 col-md-12 col-xs-12">
                         <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
-                            <label class="font-size-12">Harga Beli:</label>
+                            <label>Harga Beli:</label>
                         </div>
                         <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-right-0">
                             <?= $form->field($temp, 'harga_beli')->widget(MaskedInput::className(), [
@@ -120,6 +129,10 @@ use yii\widgets\MaskedInput;
                                 ]
                             ])->label(false) ?>
                         </div>
+                        <div class="col-lg-1 col-md-1 col-sm-12 col-xs-12 padding-right-0 hidden">
+                            <?= $form->field($temp, 'id')->hiddenInput(['data-temp' => true])->label(false) ?>
+                            <?= $form->field($temp, 'no_po')->hiddenInput(['data-temp' => true])->label(false) ?>
+                        </div>
                     </div>
                     <div class="col-lg-12 col-md-12 col-xs-12 text-right">
                         <button class="btn btn-success margin-bottom-20" data-button="create_temp">
@@ -134,7 +147,7 @@ use yii\widgets\MaskedInput;
                             <thead>
                                 <tr>
                                     <th class="text-center">No.</th>
-                                    <th class="text-center">Item Name</th>
+                                    <th class="text-center">Name</th>
                                     <th class="text-center">QTY</th>
                                     <th class="text-center">Satuan</th>
                                     <th class="text-center">Harga Beli</th>
@@ -160,7 +173,83 @@ use yii\widgets\MaskedInput;
         </div>
     <?php ActiveForm::end(); ?>
 </div>
+<div data-popup="popup"></div>
 <script>
+function load_barang()
+{
+    $.ajax({
+        url: "<?=Url::to(['purchase-internal/list-barang'])?>",
+		type: "GET",
+		dataType: "text",
+        error: function(xhr, status, error) {},
+		beforeSend: function (data){},
+        success: function(data){
+            var o = $.parseJSON(data);
+            $("[data-popup=\"popup\"]").html(o.data);
+            $("[data-popup=\"popup\"]").popup("open", {
+				container: "popup",
+				title: 'List Data Barang',
+				styleOptions: {
+					width: 600
+				}
+			});
+        },
+        complete: function(){}
+    });
+}
+
+function search_barang(code)
+{
+    $.ajax({
+        url: "<?=Url::to(['purchase-internal/search'])?>",
+		type: "POST",
+        data: {
+            code: code,
+        },
+		dataType: "text",
+        error: function(xhr, status, error) {},
+		beforeSend: function(){},
+        success: function(data){
+            popup.close();
+            var o = $.parseJSON(data);
+            $("[data-popup=\"popup\"]").html(o.data);
+            $("[data-popup=\"popup\"]").popup("open", {
+				container: "popup",
+				title: 'List Data Barang',
+				styleOptions: {
+					width: 600
+				}
+			});
+        },
+        complete: function(){
+		}
+    });
+}
+
+function select_barang(code)
+{
+    $.ajax({
+        url: "<?=Url::to(['purchase-internal/barang'])?>",
+		type: "POST",
+        data: {
+            code: code
+        },
+		dataType: "text",
+        error: function(xhr, status, error) {},
+		beforeSend: function(){},
+        success: function(data){
+            var o = $.parseJSON(data);
+            console.log(o);
+            $.each(o, function(index, value){
+                $("#temppurchaseinternaldetail-"+index).val(value);
+            });
+        },
+        complete: function(){
+            popup.close();
+        }
+    });
+}
+
 function init_temp()
 {
     $.ajax({
@@ -286,22 +375,41 @@ function delete_temp(id)
 
 var timeOut = 6000;
 $(document).ready(function(){
+    $("body").off("keydown","#temppurchaseinternaldetail-name")
+    $("body").on("keydown","#temppurchaseinternaldetail-name", function(e){
+        var key = e.charCode ? e.charCode : e.keyCode ? e.keyCode : 0;
+        if(key == KEY.F4){
+            load_barang();
+        }
+    });
+    
+    $("body").off("click","[data-id=\"popup\"] table > tbody tr")
+    $("body").on("click","[data-id=\"popup\"] table > tbody tr", function(e){
+        e.preventDefault();
+        var data = $(this).data();
+        select_barang(data.code);
+    });
+
     $("body").off("click","[data-button=\"create_temp\"]").on("click","[data-button=\"create_temp\"]", function(e){
         e.preventDefault();
-        var success = true,
-            message = "";
-        $.each($("[id^=\"temppurchaseinternaldetail-\"]:not([id=\"temppurchaseinternaldetail-id\"])"), function(index, element){
+        success = true;
+        $.each($("[aria-required]:not([readonly])"), function(index, element){
             var a = $(element).attr("id").split("-"),
                 b = a[1].replace("_", " ");
             if(!$(element).val()){
                 success = false;
-                message += parsing.toUpper(b, 2)+', ';
+                errorMsg = parsing.toUpper(b, 2) +' cannot be blank.';
+                if($(element).parent().hasClass("input-container")){
+                    $(element).parent(".input-container").parent().removeClass("has-error").addClass("has-error");
+                    $(element).parent(".input-container").siblings("[class=\"help-block\"]").text(errorMsg);
+                }else{
+                    $(element).parent().removeClass("has-error").addClass("has-error");
+                    $(element).siblings("[class=\"help-block\"]").text(errorMsg);
+                }
             }
         });
         if(success){
             create_temp($(this));
-        }else{
-            notification.open("danger", message+' tidak boleh kosong!', timeOut);
         }
     });
 

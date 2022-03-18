@@ -22,29 +22,29 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
             [
-                'attribute' => 'no_pi',
+                'attribute' => 'no_po',
                 'contentOptions' => [
                     'class' => 'text-center',
                 ],
             ],
             [
-                'attribute' => 'tgl_pi',
+                'attribute' => 'tgl_po',
                 'contentOptions' => [
                     'class' => 'text-center',
                 ],
                 'filter' => DatePicker::widget([
                     'model' => $searchModel, 
-                    'name' => 'tgl_pi', 
+                    'name' => 'tgl_po', 
                     'type' => DatePicker::TYPE_COMPONENT_APPEND,
                     'pickerButton' => false,
-                    'attribute' => 'tgl_pi',
+                    'attribute' => 'tgl_po',
                     'pluginOptions' => [
                         'format' => 'dd-mm-yyyy',
                         'autoclose' => true,
                     ],
                 ]),
                 'value' => function($model, $index, $key) {
-                    return date('d-m-Y', strtotime($model->tgl_pi));
+                    return date('d-m-Y', strtotime($model->tgl_po));
                 }
             ],
             [
@@ -71,14 +71,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 'buttons' => [
                     'view' => function ($url, $model) {
                         return Html::a(Helper::buttonIcons()['eye-open'],
-                            ['view', 'no_pi'=>$model->no_pi],
+                            ['view', 'no_po'=>$model->no_po],
                             ['title'=>'View', 'aria-label'=>'View', 'data-pjax'=>true]);
                     },
                     'update' => function ($url, $model) {
                         if(\Yii::$app->user->identity->profile->typeUser->value == 'ADMINISTRATOR' 
                             || \Yii::$app->user->identity->profile->typeUser->value == 'ADMIN'){
                             return Html::a(Helper::buttonIcons()['pencil'],
-                                ['update', 'no_pi'=>$model->no_pi],
+                                ['update', 'no_po'=>$model->no_po],
                                 ['title'=>'Update', 'aria-label'=>'Update', 'data-pjax'=>true]);
                         }
                     },
@@ -86,7 +86,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         if(\Yii::$app->user->identity->profile->typeUser->value == 'ADMINISTRATOR' 
                             || \Yii::$app->user->identity->profile->typeUser->value == 'ADMIN'){
                             return Html::a(Helper::buttonIcons()['trash'],
-                                ['delete', 'no_pi'=>$model->no_pi],
+                                ['delete', 'no_po'=>$model->no_po],
                                 [
                                     'title'=>'Delete',
                                     'aria-label'=>'Delete', 

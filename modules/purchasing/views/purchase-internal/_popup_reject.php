@@ -11,7 +11,7 @@ use yii\widgets\ActiveForm;
 	</div>
 	<div class="popup-form-body">
 		<?php $form = ActiveForm::begin(['id'=>'form']); ?>
-			<p class="title"><u><?='NO. PO Internal: '. $model->no_pi ?></u></p>
+			<p class="title"><u><?='NO. PO Internal: '. $model->no_po ?></u></p>
 			<table class="table table-bordered">
 				<thead>
 					<tr>
@@ -27,7 +27,7 @@ use yii\widgets\ActiveForm;
 				</tbody>
 			</table>
 			<div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
-				<?= $form->field($approval, 'no_pi')->hiddenInput()->label(false) ?>
+				<?= $form->field($approval, 'no_po')->hiddenInput()->label(false) ?>
 				<?= $form->field($approval, 'type')->hiddenInput(['value' => 'REJECT'])->label(false) ?>
 				<?= $form->field($approval, 'comment')->textarea() ?>
 			</div>

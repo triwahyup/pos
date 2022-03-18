@@ -136,10 +136,10 @@ class SiteController extends Controller
             if($val->user_id == \Yii::$app->user->id OR $val->typeuser_code == \Yii::$app->user->identity->profile->typeuser_code){
                 $userApproval = true;
                 $countPoInternalApp += 1;
-                $listPoInternalApp .= '<li><a href="'.\Yii::$app->params['URL'].'/purchasing/purchase-internal/view&no_pi='.$val->no_pi.'">'.$countPoInternalApp.'). Approval PO INTERNAL: '.$val->no_pi.'<i>'.$user.'</i></a></li>';
+                $listPoInternalApp .= '<li><a href="'.\Yii::$app->params['URL'].'/purchasing/purchase-internal/view&no_po='.$val->no_po.'">'.$countPoInternalApp.'). Approval PO INTERNAL: '.$val->no_po.'<i>'.$user.'</i></a></li>';
             }else{
                 $countPoInternalApp += 1;
-                $listPoInternalApp .= '<li><span>'.$countPoInternalApp.'). Approval PO INTERNAL: '.$val->no_pi.'<i>'.$user.'</i></span></li>';
+                $listPoInternalApp .= '<li><span>'.$countPoInternalApp.'). Approval PO INTERNAL: '.$val->no_po.'<i>'.$user.'</i></span></li>';
             }
         }
         // END PO INTERNAL

@@ -17,7 +17,7 @@ class PurchaseInternalSearch extends PurchaseInternal
     public function rules()
     {
         return [
-            [['no_pi', 'tgl_pi', 'keterangan'], 'safe'],
+            [['no_po', 'tgl_po', 'keterangan'], 'safe'],
             [['total_order'], 'number'],
             [['user_id', 'user_request', 'status', 'status_approval', 'created_at', 'updated_at'], 'integer'],
         ];
@@ -67,11 +67,11 @@ class PurchaseInternalSearch extends PurchaseInternal
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ]);
-        if(!empty($this->tgl_pi)){
-            $query->andFilterWhere(['tgl_pi' => date('Y-m-d', strtotime($this->tgl_pi))]);
+        if(!empty($this->tgl_po)){
+            $query->andFilterWhere(['tgl_po' => date('Y-m-d', strtotime($this->tgl_po))]);
         }
 
-        $query->andFilterWhere(['like', 'no_pi', $this->no_pi])
+        $query->andFilterWhere(['like', 'no_po', $this->no_po])
             ->andFilterWhere(['like', 'keterangan', $this->keterangan]);
 
         return $dataProvider;

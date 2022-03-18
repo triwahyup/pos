@@ -4,21 +4,21 @@ namespace app\modules\purchasing\controllers;
 
 use app\models\Logs;
 use app\models\User;
-use app\modules\inventory\models\InventoryStockItem;
-use app\modules\inventory\models\InventoryStockTransaction;
-use app\modules\purchasing\models\PurchaseOrder;
-use app\modules\purchasing\models\PurchaseOrderInvoice;
-use app\modules\purchasing\models\PurchaseOrderInvoiceDetail;
-use app\modules\purchasing\models\PurchaseOrderInvoiceSearch;
+use app\modules\inventory\models\InventoryStockBarang;
+use app\modules\inventory\models\InventoryStockBast;
+use app\modules\purchasing\models\PurchaseInternal;
+use app\modules\purchasing\models\PurchaseInternalInvoice;
+use app\modules\purchasing\models\PurchaseInternalInvoiceDetail;
+use app\modules\purchasing\models\PurchaseInternalInvoiceSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 
 /**
- * InvoiceOrderController implements the CRUD actions for PurchaseOrderInvoice model.
+ * InvoiceInternalController implements the CRUD actions for PurchaseInternalInvoice model.
  */
-class InvoiceOrderController extends Controller
+class InvoiceInternalController extends Controller
 {
     /**
      * @inheritDoc
@@ -33,12 +33,12 @@ class InvoiceOrderController extends Controller
 				    'rules' => [
                         [
                             'actions' => ['index', 'view', 'temp', 'get-temp'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('invoice-material')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('invoice-internal')),
                             'roles' => ['@'],
                         ], 
                         [
                             'actions' => ['update', 'terima', 'close', 'update-temp'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('invoice-material')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('invoice-internal')),
                             'roles' => ['@'],
                         ], 
                     ],
@@ -54,12 +54,12 @@ class InvoiceOrderController extends Controller
     }
 
     /**
-     * Lists all PurchaseOrderInvoice models.
+     * Lists all PurchaseInternalInvoice models.
      * @return mixed
      */
     public function actionIndex()
     {
-        $searchModel = new PurchaseOrderInvoiceSearch();
+        $searchModel = new PurchaseInternalInvoiceSearch();
         $dataProvider = $searchModel->search($this->request->queryParams);
 
         return $this->render('index', [
@@ -69,7 +69,7 @@ class InvoiceOrderController extends Controller
     }
 
     /**
-     * Displays a single PurchaseOrderInvoice model.
+     * Displays a single PurchaseInternalInvoice model.
      * @param string $no_invoice No Invoice
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
@@ -82,7 +82,7 @@ class InvoiceOrderController extends Controller
     }
 
     /**
-     * Updates an existing PurchaseOrderInvoice model.
+     * Updates an existing PurchaseInternalInvoice model.
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param string $no_invoice No Invoice
      * @return mixed
@@ -101,9 +101,9 @@ class InvoiceOrderController extends Controller
                     if($model->no_bukti!="" && $model->tgl_invoice!=""){
                         $total_ppn=0;
                         foreach($model->details as $val){
-                            if($val->qty_terima_1==0){
+                            if($val->qty_terima==0){
                                 $success = false;
-                                $message = 'QTY Terima item '.$val->item_code.'-'.$val->name.' masih 0.';
+                                $message = 'QTY Terima Barang '.$val->barang_code.'-'.$val->name.' masih 0.';
                             }
                             $total_ppn += $val->ppn;
                         }
@@ -111,7 +111,7 @@ class InvoiceOrderController extends Controller
                             $model->total_ppn = $total_ppn;
                             if($model->save()){
                                 $transaction->commit();
-                                $message = '['.$model->no_invoice.'] SUCCESS UPDATE INVOICE ORDER.';
+                                $message = '['.$model->no_invoice.'] SUCCESS UPDATE INVOICE INTERNAL.';
                                 $logs =	[
                                     'type' => Logs::TYPE_USER,
                                     'description' => $message,
@@ -122,7 +122,7 @@ class InvoiceOrderController extends Controller
                                 return $this->redirect(['view', 'no_invoice' => $model->no_invoice]);
                             }else{
                                 $success = false;
-                                $message = (count($model->errors) > 0) ? 'ERROR UPDATE INVOICE ORDER: ' : '';
+                                $message = (count($model->errors) > 0) ? 'ERROR UPDATE INVOICE INTERNAL: ' : '';
                                 foreach($model->errors as $error => $value){
                                     $message .= $value[0].', ';
                                 }
@@ -160,21 +160,21 @@ class InvoiceOrderController extends Controller
     }
 
     /**
-     * Finds the PurchaseOrderInvoice model based on its primary key value.
+     * Finds the PurchaseInternalInvoice model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param string $no_invoice No Invoice
-     * @return PurchaseOrderInvoice the loaded model
+     * @return PurchaseInternalInvoice the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($no_invoice)
     {
-        if (($model = PurchaseOrderInvoice::findOne($no_invoice)) !== null) {
+        if (($model = PurchaseInternalInvoice::findOne($no_invoice)) !== null) {
             return $model;
         }
 
         throw new NotFoundHttpException('The requested page does not exist.');
     }
-    
+
     public function actionTerima($no_invoice)
     {
         $success = true;
@@ -188,56 +188,56 @@ class InvoiceOrderController extends Controller
                     $selisih = false;
                     foreach($model->details as $val){
                         // TERIMA SEBAGIAN
-                        $qtySelisih = $val->getQtySelisih($val->qty_order_1, $val->qty_terima_1);
+                        $qtySelisih = $val->getQtySelisih($val->qty_order, $val->qty_terima);
                         if(!$qtySelisih['isEmptyQty']){
                             if($qtySelisih['selisih'] == -1){
                                 $selisih = true;
                             }
                         }else{
                             $success = false;
-                            $message = 'QTY Terima item '.$val->item_code.'-'.$val->name.' masih 0.';
+                            $message = 'QTY Terima Barang '.$val->barang_code.'-'.$val->name.' masih 0.';
                         }
                     }
 
                     if($success){
                         $model->status_terima = ($selisih) ? 2 : 1;
                         $model->post=1;
-                        $purchaseOrder = PurchaseOrder::findOne(['no_po'=>$model->no_po]);
-                        $purchaseOrder->status_terima = ($selisih) ? 2 : 1;
-                        if($model->save() && $purchaseOrder->save()){
+                        $purchaseInternal = PurchaseInternal::findOne(['no_po'=>$model->no_po]);
+                        $purchaseInternal->status_terima = ($selisih) ? 2 : 1;
+                        if($model->save() && $purchaseInternal->save()){
                             foreach($model->details as $val){
                                 // STOCK IN
-                                $stockItem = InventoryStockItem::findOne(['item_code'=>$val->item_code, 'supplier_code'=>$val->supplier_code, 'status'=>1]);
-                                if(empty($stockItem)){
-                                    $stockItem = new InventoryStockItem();
+                                $stockBarang = InventoryStockBarang::findOne(['barang_code'=>$val->barang_code, 'supplier_code'=>$val->supplier_code, 'status'=>1]);
+                                if(empty($stockBarang)){
+                                    $stockBarang = new InventoryStockBarang();
                                 }
-                                $konversi = $stockItem->satuanTerkecil($val->item_code, [
-                                    0 => $val->qty_terima_1,
-                                    1 => $val->qty_terima_2
+                                $konversi = $stockBarang->satuanTerkecil($val->barang_code, [
+                                    0 => $val->qty_terima,
+                                    1 => 0
                                 ]);
-                                $stockItem->attributes = $val->attributes;
-                                $stockItem->onhand = $stockItem->onhand+$konversi;
-                                if(!$stockItem->save()){
+                                $stockBarang->attributes = $val->attributes;
+                                $stockBarang->onhand = $stockBarang->onhand+$konversi;
+                                if(!$stockBarang->save()){
                                     $success = false;
-                                    $message = (count($stockItem->errors) > 0) ? 'ERROR UPDATE STOCK ITEM: ' : '';
-                                    foreach($stockItem->errors as $error => $value){
+                                    $message = (count($stockBarang->errors) > 0) ? 'ERROR UPDATE STOCK ITEM: ' : '';
+                                    foreach($stockBarang->errors as $error => $value){
                                         $message .= strtoupper($value[0].', ');
                                     }
                                     $message = substr($message, 0, -2);
                                 }
 
-                                $stockTransaction = new InventoryStockTransaction();
-                                $stockTransaction->attributes = $val->attributes;
-                                $stockTransaction->no_document = $model->no_invoice;
-                                $stockTransaction->tgl_document = $model->tgl_invoice;
-                                $stockTransaction->type_document = "INVOICE ORDER";
-                                $stockTransaction->status_document = "IN";
-                                $stockTransaction->qty_in = $konversi;
-                                $stockTransaction->onhand = (isset($stockTransaction->onHand)) ? $stockTransaction->onHand->qty_in+$konversi : $konversi;
-                                if(!$stockTransaction->save()){
+                                $stockBast = new InventoryStockTransaction();
+                                $stockBast->attributes = $val->attributes;
+                                $stockBast->no_bast = $model->no_invoice;
+                                $stockBast->tgl_bast = $model->tgl_invoice;
+                                $stockBast->type_bast = "INVOICE INTERNAL";
+                                $stockBast->status_bast = "IN";
+                                $stockBast->qty_in = $konversi;
+                                $stockBast->stock = 0;
+                                if(!$stockBast->save()){
                                     $success = false;
-                                    $message = (count($stockTransaction->errors) > 0) ? 'ERROR UPDATE STOCK TRANSACTION: ' : '';
-                                    foreach($stockTransaction->errors as $error => $value){
+                                    $message = (count($stockBast->errors) > 0) ? 'ERROR UPDATE STOCK TRANSACTION: ' : '';
+                                    foreach($stockBast->errors as $error => $value){
                                         $message .= strtoupper($value[0].', ');
                                     }
                                     $message = substr($message, 0, -2);
@@ -245,7 +245,7 @@ class InvoiceOrderController extends Controller
                             }
                         }else{
                             $success = false;
-                            $message = (count($model->errors) > 0) ? 'ERROR TERIMA INVOICE ORDER: ' : '';
+                            $message = (count($model->errors) > 0) ? 'ERROR TERIMA INVOICE INTERNAL: ' : '';
                             foreach($model->errors as $error => $value){
                                 $message .= strtoupper($value[0].', ');
                             }
@@ -254,7 +254,7 @@ class InvoiceOrderController extends Controller
                     }
 
                     if($success){
-                        $message = '['.$model->no_invoice.'] SUCCESS TERIMA INVOICE ORDER.';
+                        $message = '['.$model->no_invoice.'] SUCCESS TERIMA INVOICE INTERNAL.';
                         $transaction->commit();
                         $logs =	[
                             'type' => Logs::TYPE_USER,
@@ -301,7 +301,7 @@ class InvoiceOrderController extends Controller
             try{
                 $selisih = false;
                 foreach($model->details as $val){
-                    $qtySelisih = $val->getQtySelisih($val->qty_order_1, $val->qty_terima_1);
+                    $qtySelisih = $val->getQtySelisih($val->qty_order, $val->qty_terima);
                     if($qtySelisih['selisih'] == -1){
                         $selisih = true;
                     }
@@ -309,37 +309,37 @@ class InvoiceOrderController extends Controller
 
                 if($success){
                     $model->status_terima = ($selisih) ? 3 : 1;
-                    $purchaseOrder = PurchaseOrder::findOne(['no_po'=>$model->no_po]);
-                    $purchaseOrder->status_terima = ($selisih) ? 3 : 1;
-                    if($model->save() && $purchaseOrder->save()){
+                    $purchaseInternal = PurchaseInternal::findOne(['no_po'=>$model->no_po]);
+                    $purchaseInternal->status_terima = ($selisih) ? 3 : 1;
+                    if($model->save() && $purchaseInternal->save()){
                         foreach($model->details as $val){
                             // STOCK IN SUSULAN
-                            $stockItem = InventoryStockItem::findOne(['item_code'=>$val->item_code, 'supplier_code'=>$val->supplier_code, 'status'=>1]);
-                            $konversi = $stockItem->satuanTerkecil($val->item_code, [
+                            $stockBarang = InventoryStockBarang::findOne(['barang_code'=>$val->barang_code, 'supplier_code'=>$val->supplier_code, 'status'=>1]);
+                            $konversi = $stockBarang->satuanTerkecil($val->barang_code, [
                                 0 => $val->qty_susulan, 1 => 0]);
                             if($konversi > 0){
-                                $stockItem->onhand = $stockItem->onhand+$konversi;
-                                if(!$stockItem->save()){
+                                $stockBarang->stock = $stockBarang->stock+$konversi;
+                                if(!$stockBarang->save()){
                                     $success = false;
-                                    $message = (count($stockItem->errors) > 0) ? 'ERROR UPDATE STOCK ITEM: ' : '';
-                                    foreach($stockItem->errors as $error => $value){
+                                    $message = (count($stockBarang->errors) > 0) ? 'ERROR UPDATE STOCK BARANG: ' : '';
+                                    foreach($stockBarang->errors as $error => $value){
                                         $message .= strtoupper($value[0].', ');
                                     }
                                     $message = substr($message, 0, -2);
                                 }
 
-                                $stockTransaction = new InventoryStockTransaction();
-                                $stockTransaction->attributes = $val->attributes;
-                                $stockTransaction->no_document = $model->no_invoice;
-                                $stockTransaction->tgl_document = $model->tgl_invoice;
-                                $stockTransaction->type_document = "INVOICE ORDER (S)";
-                                $stockTransaction->status_document = "IN";
-                                $stockTransaction->qty_in = $konversi;
-                                $stockTransaction->onhand = (isset($stockTransaction->onHand)) ? $stockTransaction->onHand->qty_in+$konversi : $konversi;
-                                if(!$stockTransaction->save()){
+                                $stockBast = new InventoryStockBast();
+                                $stockBast->attributes = $val->attributes;
+                                $stockBast->no_bast = $model->no_invoice;
+                                $stockBast->tgl_bast = $model->tgl_invoice;
+                                $stockBast->type_bast = "INVOICE INTERNAL (S)";
+                                $stockBast->status_bast = "IN";
+                                $stockBast->qty_in = $konversi;
+                                $stockBast->onhand = 0;
+                                if(!$stockBast->save()){
                                     $success = false;
-                                    $message = (count($stockTransaction->errors) > 0) ? 'ERROR UPDATE STOCK TRANSACTION: ' : '';
-                                    foreach($stockTransaction->errors as $error => $value){
+                                    $message = (count($stockBast->errors) > 0) ? 'ERROR UPDATE STOCK BAST: ' : '';
+                                    foreach($stockBast->errors as $error => $value){
                                         $message .= strtoupper($value[0].', ');
                                     }
                                     $message = substr($message, 0, -2);
@@ -348,7 +348,7 @@ class InvoiceOrderController extends Controller
                         }
                     }else{
                         $success = false;
-                        $message = (count($model->errors) > 0) ? 'ERROR TERIMA INVOICE ORDER: ' : '';
+                        $message = (count($model->errors) > 0) ? 'ERROR TERIMA INVOICE INTERNAL: ' : '';
                         foreach($model->errors as $error => $value){
                             $message .= strtoupper($value[0].', ');
                         }
@@ -357,7 +357,7 @@ class InvoiceOrderController extends Controller
                 }
 
                 if($success){
-                    $message = '['.$model->no_invoice.'] SUCCESS TERIMA INVOICE ORDER.';
+                    $message = '['.$model->no_invoice.'] SUCCESS TERIMA INVOICE INTERNAL.';
                     $transaction->commit();
                     $logs =	[
                         'type' => Logs::TYPE_USER,
@@ -392,7 +392,7 @@ class InvoiceOrderController extends Controller
     public function actionTemp()
     {
         $request = \Yii::$app->request;
-        $temps = PurchaseOrderInvoiceDetail::findAll(['no_invoice'=>$request->post('PurchaseOrderInvoice')['no_invoice']]);
+        $temps = PurchaseInternalInvoiceDetail::findAll(['no_invoice'=>$request->post('PurchaseInternalInvoice')['no_invoice']]);
         $total_invoice=0;
         foreach($temps as $temp){
             $total_invoice += $temp->total_invoice;
@@ -405,23 +405,23 @@ class InvoiceOrderController extends Controller
 
     public function actionGetTemp($no_invoice, $urutan)
     {
-        $temp = PurchaseOrderInvoiceDetail::find()
+        $temp = PurchaseInternalInvoiceDetail::find()
             ->where(['no_invoice'=>$no_invoice, 'urutan'=>$urutan])
             ->asArray()
             ->one();
         
         $success = true;
         $message = '';
-        $model = PurchaseOrderInvoice::findOne(['no_invoice'=>$no_invoice]); 
+        $model = PurchaseInternalInvoice::findOne(['no_invoice'=>$no_invoice]); 
         if($model->post == 1){
-            if(($temp['qty_order_1'] - $temp['qty_terima_1']) == 0){
+            if(($temp['qty_order'] - $temp['qty_terima']) == 0){
                 $success = false;
                 $message = 'Item ini sudah balance. Dokumen sudah di post, tidak bisa edit data ini.';
             }else{
-                $temp['qty_terima_1'] = ($temp['qty_selisih'] > 0) ? $temp['qty_selisih'] : $temp['qty_terima_1'];
+                $temp['qty_terima'] = ($temp['qty_selisih'] > 0) ? $temp['qty_selisih'] : $temp['qty_terima'];
             }
         }else{
-            $temp['qty_terima_1'] = ($temp['qty_terima_1'] > 0) ? $temp['qty_terima_1'] : $temp['qty_order_1'];
+            $temp['qty_terima'] = ($temp['qty_terima'] > 0) ? $temp['qty_terima'] : $temp['qty_order'];
         }
         return json_encode(['temp'=>$temp, 'success'=>$success, 'message'=>$message]);
     }
@@ -431,30 +431,30 @@ class InvoiceOrderController extends Controller
         $request = \Yii::$app->request;
         $success = true;
         $message = 'UPDATE TERIMA SUCCESSFULLY';
-        $invoiceOrder = $request->post('PurchaseOrderInvoice');
-        $model = PurchaseOrderInvoice::findOne(['no_invoice'=>$invoiceOrder]);
+        $invoiceInternal = $request->post('PurchaseInternalInvoice');
+        $model = PurchaseInternalInvoice::findOne(['no_invoice'=>$invoiceInternal]);
         if($request->isPost){
-            $temp = PurchaseOrderInvoiceDetail::findOne(['no_invoice'=>$invoiceOrder['no_invoice'], 'urutan'=>$invoiceOrder['urutan']]);
-            $qtyTerima = $temp->qty_terima_1;
-            $temp->attributes = (array)$invoiceOrder;
+            $temp = PurchaseInternalInvoice::findOne(['no_invoice'=>$invoiceInternal['no_invoice'], 'urutan'=>$invoiceInternal['urutan']]);
+            $qtyTerima = $temp->qty_terima;
+            $temp->attributes = (array)$invoiceInternal;
             if($model->post == 1){
-                $qtyOrder = ($temp->qty_selisih > 0) ? $temp->qty_selisih : $temp->qty_order_1;
+                $qtyOrder = ($temp->qty_selisih > 0) ? $temp->qty_selisih : $temp->qty_order;
             }else{
-                $qtyOrder = $temp->qty_order_1;
+                $qtyOrder = $temp->qty_order;
             }
             
-            if($temp->qty_terima_1 <= $qtyOrder){
+            if($temp->qty_terima <= $qtyOrder){
                 if($temp->qty_selisih > 0){
                     if($model->post == 1){
-                        $temp->qty_terima_1 = $qtyTerima+$temp->qty_terima_1;
+                        $temp->qty_terima = $qtyTerima+$temp->qty_terima;
                     }else{
-                        $temp->qty_terima_1 = $temp->qty_terima_1;
+                        $temp->qty_terima = $temp->qty_terima;
                     }
                 }else{
-                    $temp->qty_terima_1 = $temp->qty_terima_1;
+                    $temp->qty_terima = $temp->qty_terima;
                 }
 
-                $qtySelisih = $temp->getQtySelisih($temp->qty_order_1, $temp->qty_terima_1);
+                $qtySelisih = $temp->getQtySelisih($temp->qty_order, $temp->qty_terima);
                 $temp->qty_susulan = ($temp->qty_selisih > 0) ? $qtyOrder : 0;
                 $temp->qty_selisih = $qtySelisih['qty'];
                 $temp->total_invoice = $temp->totalInvoice;

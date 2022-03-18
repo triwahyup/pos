@@ -12,7 +12,7 @@ use yii\behaviors\TimestampBehavior;
 /**
  * This is the model class for table "purchase_internal_approval".
  *
- * @property string $no_pi
+ * @property string $no_po
  * @property int $urutan
  * @property int|null $user_id
  * @property string|null $typeuser_code
@@ -44,12 +44,12 @@ class PurchaseInternalApproval extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['no_pi', 'urutan'], 'required'],
+            [['no_po', 'urutan'], 'required'],
             [['urutan', 'user_id', 'status', 'created_at', 'updated_at'], 'integer'],
-            [['no_pi'], 'string', 'max' => 12],
+            [['no_po'], 'string', 'max' => 12],
             [['typeuser_code'], 'string', 'max' => 3],
             [['comment'], 'string', 'max' => 64],
-            [['no_pi', 'urutan'], 'unique', 'targetAttribute' => ['no_pi', 'urutan']],
+            [['no_po', 'urutan'], 'unique', 'targetAttribute' => ['no_po', 'urutan']],
         ];
     }
 
@@ -59,7 +59,7 @@ class PurchaseInternalApproval extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'no_pi' => 'No Pi',
+            'no_po' => 'No Po',
             'urutan' => 'Urutan',
             'user_id' => 'User ID',
             'typeuser_code' => 'Typeuser Code',
@@ -72,7 +72,7 @@ class PurchaseInternalApproval extends \yii\db\ActiveRecord
 
     public function getPoInternal()
     {
-        return $this->hasOne(PurchaseInternal::className(), ['no_pi' => 'no_pi']);
+        return $this->hasOne(PurchaseInternal::className(), ['no_po' => 'no_po']);
     }
 
     public function getTypeUser()

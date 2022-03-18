@@ -4,7 +4,7 @@
         $totalOrder += $val->total_order; ?>
         <tr>
             <td class="text-center"><?=$index+1?></td>
-            <td><?=$val->item_name ?></td>
+            <td><?=$val->name ?></td>
             <td class="text-right"><?=number_format($val->qty) ?></td>
             <td class="text-center"><?=$val->um ?></td>
             <td class="text-right"><?=number_format($val->harga_beli).'.-' ?></td>
@@ -20,8 +20,9 @@
         </tr>
     <?php endforeach; ?>
     <tr>
-        <td class="summary" colspan="6"><strong>Total Order:</strong></td>
+        <td class="summary" colspan="5"><strong>Total Order:</strong></td>
         <td class="summary"><strong><?=number_format($totalOrder).'.-' ?></strong></td>
+        <td class="last-row"></td>
     </tr>
 <?php else : ?>
     <tr>

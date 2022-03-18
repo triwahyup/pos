@@ -197,7 +197,7 @@
 											<tr>
 												<td>No. PO Internal</td>
 												<td class="semicolon">:</td>
-												<td><strong><?= $approval->no_pi ?></strong></td>
+												<td><strong><?= $approval->no_po ?></strong></td>
 											</tr>
 											<tr>
 												<!-- Create, Reject, Approve -->

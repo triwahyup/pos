@@ -52,12 +52,18 @@ use yii\widgets\MaskedInput;
                 <?= $form->field($model, 'provinsi_id')->widget(Select2::classname(), [
                         'data' => $dataProvinsi,
                         'options' => ['placeholder' => 'Provinisi'],
+                        'pluginOptions' => [
+                            'allowClear' => true,
+                        ],
                     ]) ?>
                 <?= $form->field($model, 'kabupaten_id')->widget(Select2::classname(), [
                         'data' => (!$model->isNewRecord) ? (isset($model->kabupaten)) ? [
                             $model->kabupaten->id => $model->kabupaten->name
                         ] : '' : [],
                         'options' => ['placeholder' => 'Kabupaten'],
+                        'pluginOptions' => [
+                            'allowClear' => true,
+                        ],
                     ]) ?>
             </div>
             <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
@@ -66,12 +72,18 @@ use yii\widgets\MaskedInput;
                             $model->kecamatan->id => $model->kecamatan->name,
                         ] : '' : [],
                         'options' => ['placeholder' => 'Kecamatan'],
+                        'pluginOptions' => [
+                            'allowClear' => true,
+                        ],
                     ]) ?>
                 <?= $form->field($model, 'kelurahan_id')->widget(Select2::classname(), [
                         'data' => (!$model->isNewRecord) ? (isset($model->kelurahan)) ? [
                             $model->kelurahan->id => $model->kelurahan->name,
                         ] : '' : [],
                         'options' => ['placeholder' => 'Kelurahan'],
+                        'pluginOptions' => [
+                            'allowClear' => true,
+                        ],
                     ]) ?>
             </div>
             <div class="margin-bottom-20 full-width"></div>

@@ -1,6 +1,8 @@
 <?php
 
 namespace app\modules\purchasing\models;
+use app\modules\master\models\MasterBarang;
+use app\modules\master\models\MasterSatuan;
 
 use Yii;
 
@@ -8,7 +10,7 @@ use Yii;
  * This is the model class for table "temp_purchase_internal_detail".
  *
  * @property int $id
- * @property string $no_pi
+ * @property string $no_po
  * @property int $urutan
  * @property string|null $item_name
  * @property float|null $qty
@@ -34,9 +36,11 @@ class TempPurchaseInternalDetail extends \yii\db\ActiveRecord
         return [
             [['id', 'urutan', 'user_id'], 'integer'],
             [['qty', 'harga_beli', 'total_order'], 'safe'],
-            [['um'], 'string', 'max' => 16],
-            [['no_pi'], 'string', 'max' => 12],
-            [['item_name'], 'string', 'max' => 128],
+            [['supplier_code', 'satuan_code'], 'string', 'max' => 3],
+            [['um'], 'string', 'max' => 5],
+            [['barang_code'], 'string', 'max' => 7],
+            [['no_po'], 'string', 'max' => 12],
+            [['name'], 'string', 'max' => 128],
         ];
     }
 
@@ -47,7 +51,7 @@ class TempPurchaseInternalDetail extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
-            'no_pi' => 'No Pi',
+            'no_po' => 'No Pi',
             'urutan' => 'Urutan',
             'item_name' => 'Item Name',
             'qty' => 'Qty',
@@ -55,6 +59,16 @@ class TempPurchaseInternalDetail extends \yii\db\ActiveRecord
             'total_order' => 'Total Order',
             'user_id' => 'User ID',
         ];
+    }
+
+    public function getBarang()
+    {
+        return $this->hasOne(MasterBarang::className(), ['code' => 'barang_code']);
+    }
+    
+    public function getSatuan()
+    {
+        return $this->hasOne(MasterSatuan::className(), ['code' => 'satuan_code']);
     }
 
     public function getCount()

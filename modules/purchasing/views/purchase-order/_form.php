@@ -145,6 +145,7 @@ use yii\widgets\MaskedInput;
                         </div>
                         <div class="col-lg-1 col-md-1 col-sm-12 col-xs-12 padding-right-0 hidden">
                             <?= $form->field($temp, 'id')->hiddenInput(['data-temp' => true])->label(false) ?>
+                            <?= $form->field($temp, 'no_po')->hiddenInput(['data-temp' => true])->label(false) ?>
                         </div>
                     </div>
                     <div class="col-lg-12 col-md-12 col-xs-12 text-right">

@@ -6,7 +6,7 @@ use yii\widgets\DetailView;
 /* @var $this yii\web\View */
 /* @var $model app\modules\purchasing\models\PurchaseInternal */
 
-$this->title = 'No. PO Internal: '.$model->no_pi;
+$this->title = 'No. PO Internal: '.$model->no_po;
 $this->params['breadcrumbs'][] = ['label' => 'Purchase Order Internal', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
@@ -15,8 +15,8 @@ $this->params['breadcrumbs'][] = $this->title;
     <p class="text-right">
         <?php if($typeuser == 'ADMINISTRATOR' || $typeuser == 'ADMIN'): ?>
             <?= Html::a('<i class="fontello icon-plus"></i><span>Create</span>', ['create'], ['class' => 'btn btn-success btn-flat btn-sm']) ?>
-            <?= Html::a('<i class="fontello icon-pencil"></i><span>Update</span>', ['update', 'no_pi' => $model->no_pi], ['class' => 'btn btn-warning btn-flat btn-sm']) ?>
-            <?= Html::a('<i class="fontello icon-trash"></i><span>Delete</span>', ['delete', 'no_pi' => $model->no_pi], [
+            <?= Html::a('<i class="fontello icon-pencil"></i><span>Update</span>', ['update', 'no_po' => $model->no_po], ['class' => 'btn btn-warning btn-flat btn-sm']) ?>
+            <?= Html::a('<i class="fontello icon-trash"></i><span>Delete</span>', ['delete', 'no_po' => $model->no_po], [
                     'class' => 'btn btn-danger btn-flat btn-sm',
                     'data' => [
                         'confirm' => 'Are you sure you want to delete this item?',
@@ -27,76 +27,123 @@ $this->params['breadcrumbs'][] = $this->title;
     </p>
 
     <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 pading-right-0">
-        <?= DetailView::widget([
-            'model' => $model,
-            'attributes' => [
-                'no_pi',
-                [
-                    'attribute' => 'tgl_pi',
-                    'value' => function($model, $value) {
-                        return date('d-m-Y', strtotime($model->tgl_pi));
-                    }
-                ],
-                [
-                    'attribute' => 'total_order',
-                    'value' => function($model, $value) {
-                        return number_format($model->total_order).'.-';
-                    }
-                ],
-                [
-                    'attribute' => 'user_request',
-                    'value' => function($model, $value) {
-                        return (isset($model->request)) ? $model->request->name : '';
-                    }
-                ],
-                [
-                    'attribute' => 'status_approval',
-                    'format' => 'raw',
-                    'value' => function ($model, $index) { 
-                        return $model->statusApproval;
-                    }
-                ],
-                'keterangan:ntext',
-                [
-                    'attribute' => 'status',
-                    'value' => function ($model, $index) { 
-                        return ($model->status == 1) ? 'Active' : 'Delete';
-                    }
-                ],
-                [
-                    'attribute'=>'created_at',
-                    'value' => function ($model, $index) { 
-                        if(!empty($model->created_at))
-                        {
-                            return date('d-m-Y H:i:s',$model->created_at);
+    <div class="col-lg-6 col-md-6 col-xs-12 padding-left-0">
+            <?= DetailView::widget([
+                'model' => $model,
+                'attributes' => [
+                    'no_po',
+                    [
+                        'attribute' => 'tgl_po',
+                        'value' => function($model, $value) {
+                            return date('d-m-Y', strtotime($model->tgl_po));
                         }
-                    }
-                ],
-                [
-                    'attribute'=>'updated_at',
-                    'value'=> function ($model, $index) { 
-                        if(!empty($model->updated_at))
-                        {
-                            return date('d-m-Y H:i:s',$model->updated_at);
+                    ],
+                    [
+                        'attribute' => 'tgl_kirim',
+                        'value' => function($model, $value) {
+                            return date('d-m-Y', strtotime($model->tgl_kirim));
                         }
-                    }
+                    ],
+                    [
+                        'attribute' => 'term_in',
+                        'value' => function($model, $value) {
+                            return $model->term_in .' Hari';
+                        }
+                    ],
+                    [
+                        'attribute' => 'supplier_code',
+                        'value' => function($model, $value) {
+                            return (isset($model->supplier)) ? $model->supplier->name : '';
+                        }
+                    ],
+                    [
+                        'attribute' => 'total_order',
+                        'value' => function($model, $value) {
+                            return number_format($model->total_order).'.-';
+                        }
+                    ],
+                    [
+                        'attribute' => 'user_request',
+                        'value' => function($model, $value) {
+                            return (isset($model->request)) ? $model->request->name : '';
+                        }
+                    ],
+                    [
+                        'attribute' => 'user_id',
+                        'value' => function($model, $value) {
+                            return (isset($model->profile)) ? $model->profile->name : '';
+                        }
+                    ],
                 ],
-            ],
-        ]) ?>
+            ]) ?>
+        </div>
+        <div class="col-lg-6 col-md-6 col-xs-12 padding-right-0">
+            <?= DetailView::widget([
+                'model' => $model,
+                'attributes' => [
+                    'keterangan:ntext',
+                    [
+                        'attribute' => 'post',
+                        'format' => 'raw',
+                        'value' => function ($model, $index) { 
+                            return $model->statusPost;
+                        }
+                    ],
+                    [
+                        'attribute' => 'status_approval',
+                        'format' => 'raw',
+                        'value' => function ($model, $index) { 
+                            return $model->statusApproval;
+                        }
+                    ],
+                    [
+                        'attribute' => 'status_terima',
+                        'format' => 'raw',
+                        'value' => function ($model, $index) { 
+                            return $model->statusTerima;
+                        }
+                    ],
+                    [
+                        'attribute' => 'status',
+                        'value' => function ($model, $index) { 
+                            return ($model->status == 1) ? 'Active' : 'Delete';
+                        }
+                    ],
+                    [
+                        'attribute'=>'created_at',
+                        'value' => function ($model, $index) { 
+                            if(!empty($model->created_at))
+                            {
+                                return date('d-m-Y H:i:s',$model->created_at);
+                            }
+                        }
+                    ],
+                    [
+                        'attribute'=>'updated_at',
+                        'value'=> function ($model, $index) { 
+                            if(!empty($model->updated_at))
+                            {
+                                return date('d-m-Y H:i:s',$model->updated_at);
+                            }
+                        }
+                    ],
+                ],
+            ]) ?>
+        </div>
     </div>
     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
         <div class="margin-top-20"></div>
         <div class="document-container">
-            <div class="document-header">No. PO Internal: <?=$model->no_pi ?></div>
+            <div class="document-header">No. PO Internal: <?=$model->no_po ?></div>
             <div class="document-body">
                 <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
-                    <h6>Detail Barang / Item</h6>
+                    <h6>Detail Barang</h6>
                     <hr />
                     <table class="table table-bordered table-custom">
                         <thead>
                             <tr>
                                 <th class="text-center">No.</th>
-                                <th class="text-center">Item Name</th>
+                                <th class="text-center">Name</th>
                                 <th class="text-center">QTY</th>
                                 <th class="text-center">Satuan</th>
                                 <th class="text-center">Harga Beli</th>
@@ -110,7 +157,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                     $totalOrder += $val->total_order; ?>
                                     <tr>
                                         <td class="text-center"><?=$index+1?></td>
-                                        <td><?=$val->item_name ?></td>
+                                        <td><?=$val->name ?></td>
                                         <td class="text-right"><?=number_format($val->qty) ?></td>
                                         <td class="text-center"><?=$val->um ?></td>
                                         <td class="text-right"><?=number_format($val->harga_beli).'.-' ?></td>
@@ -164,16 +211,21 @@ $this->params['breadcrumbs'][] = $this->title;
                 <?php endif; ?>
                 <?php if($sendApproval): ?>
                     <div class="text-right">
-                        <?= Html::a('<i class="fontello icon-paper-plane-1"></i><span>Send Approval</span>', ['send-approval', 'no_pi'=>$model->no_pi], ['class' => 'btn btn-primary btn-flat btn-sm']) ?>
+                        <?= Html::a('<i class="fontello icon-paper-plane-1"></i><span>Send Approval</span>', ['send-approval', 'no_po'=>$model->no_po], ['class' => 'btn btn-primary btn-flat btn-sm']) ?>
+                    </div>
+                <?php endif; ?>
+                <?php if($postInvoice): ?>
+                    <div class="text-right">
+                        <?= Html::a('<i class="fontello icon-ok"></i><span>Post to Invoice</span>', ['post', 'no_po'=>$model->no_po], ['class' => 'btn btn-primary btn-flat btn-sm']) ?>
                     </div>
                 <?php endif; ?>
                 <?php if($typeApproval): ?>
                     <div class="text-right">
-                        <button data-button="popup_approval" class="btn btn-success" data-code="<?=$model->no_pi ?>" data-type="APPROVE">
+                        <button data-button="popup_approval" class="btn btn-success" data-code="<?=$model->no_po ?>" data-type="APPROVE">
                             <i class="fontello icon-ok"></i>
                             <span>Approve</span>
                         </button>
-                        <button data-button="popup_reject" class="btn btn-danger" data-code="<?=$model->no_pi ?>" data-type="REJECT">
+                        <button data-button="popup_reject" class="btn btn-danger" data-code="<?=$model->no_po ?>" data-type="REJECT">
                             <i class="fontello icon-reply"></i>
                             <span>Reject</span>
                         </button>
@@ -192,7 +244,7 @@ function popup_approval(el)
         type: "POST",
         url: "<?= Url::to(['purchase-internal/popup']) ?>",
         data: {
-            no_pi: data.code,
+            no_po: data.code,
             type: data.type
         },
         dataType: "text",
