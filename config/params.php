@@ -12,6 +12,7 @@ $data = [
     'TYPE_SATUAN' => 'SATUAN',
     'TYPE_USER' => 'USER',
     'TYPE_PERSON' => 'PERSON',
+    'TYPE_BAST' => 'BAST',
     // MASTER KODE VALUE
     'TYPE_MENU_LEFT' => 'NAVBAR LEFT',
     'TYPE_MENU_TOP' => 'NAVBAR TOP',

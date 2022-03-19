@@ -99,7 +99,7 @@ class InventoryStockTransaction extends \yii\db\ActiveRecord
     {
         $model = InventoryStockTransaction::find()
             ->where(['item_code'=>$this->item_code, 'supplier_code'=>$this->supplier_code])
-            ->orderBy(['created_at'=>SORT_DESC])
+            ->orderBy(['updated_at'=>SORT_DESC])
             ->one();
         return $model;
     }

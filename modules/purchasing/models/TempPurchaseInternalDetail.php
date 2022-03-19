@@ -1,10 +1,11 @@
 <?php
 
 namespace app\modules\purchasing\models;
+
+use Yii;
 use app\modules\master\models\MasterBarang;
 use app\modules\master\models\MasterSatuan;
 
-use Yii;
 
 /**
  * This is the model class for table "temp_purchase_internal_detail".

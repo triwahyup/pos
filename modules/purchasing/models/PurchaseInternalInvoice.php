@@ -84,7 +84,7 @@ class PurchaseInternalInvoice extends \yii\db\ActiveRecord
             'tgl_po' => 'Tgl Po',
             'tgl_kirim' => 'Tgl Kirim',
             'term_in' => 'Term In',
-            'supplier_code' => 'Supplier Code',
+            'supplier_code' => 'Supplier',
             'keterangan' => 'Keterangan',
             'total_ppn' => 'Total Ppn',
             'total_order' => 'Total Order',

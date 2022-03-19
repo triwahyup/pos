@@ -10,8 +10,10 @@ use app\modules\master\models\MasterPerson;
 use app\modules\master\models\Profile;
 use app\modules\pengaturan\models\PengaturanApproval;
 use app\modules\purchasing\models\PurchaseInternal;
-use app\modules\purchasing\models\PurchaseInternalDetail;
 use app\modules\purchasing\models\PurchaseInternalApproval;
+use app\modules\purchasing\models\PurchaseInternalDetail;
+use app\modules\purchasing\models\PurchaseInternalInvoice;
+use app\modules\purchasing\models\PurchaseInternalInvoiceDetail;
 use app\modules\purchasing\models\PurchaseInternalSearch;
 use app\modules\purchasing\models\TempPurchaseInternalDetail;
 use yii\web\Controller;
@@ -41,13 +43,12 @@ class PurchaseInternalController extends Controller
                             'roles' => ['@'],
                         ],
                         [
-                            'actions' => ['index', 'view', 'temp', 'get-temp', 'popup'],
                             'actions' => ['index', 'view', 'list-barang', 'temp', 'get-temp', 'popup', 'search', 'barang', 'autocomplete'],
                             'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('po-internal')),
                             'roles' => ['@'],
                         ], 
                         [
-                            'actions' => ['update', 'update-temp'],
+                            'actions' => ['update', 'update-temp', 'post'],
                             'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('po-internal')),
                             'roles' => ['@'],
                         ], 
@@ -977,5 +978,85 @@ class PurchaseInternalController extends Controller
 			$message = 'Pengaturan Approval belum di setting.';
         }
         return json_encode(['success'=>$success, 'message'=>$message]);
+    }
+
+    public function actionPost($no_po)
+    {
+        $success = true;
+		$message = '';
+        $model = $this->findModel($no_po);
+        if(isset($model)){
+            $connection = \Yii::$app->db;
+            $transaction = $connection->beginTransaction();
+            try{
+                $model->post=1;
+                if($model->save()){
+                    $invoiceInternal = new PurchaseInternalInvoice();
+                    $invoiceInternal->attributes = $model->attributes;
+                    $invoiceInternal->no_invoice = $invoiceInternal->generateCode();
+                    $invoiceInternal->post=0;
+                    if($invoiceInternal->save()){
+                        foreach($model->details as $detail){
+                            $invoiceInternalDetail = new PurchaseInternalInvoiceDetail();
+                            $invoiceInternalDetail->attributes = $detail->attributes;
+                            $invoiceInternalDetail->no_invoice = $invoiceInternal->no_invoice;
+                            $invoiceInternalDetail->qty_order =  $detail->qty;
+                            if(!$invoiceInternalDetail->save()){
+                                $success = false;
+                                $message = (count($invoiceInternalDetail->errors) > 0) ? 'ERROR CREATE INVOICE INTERNAL DETAIL: ' : '';
+                                foreach($invoiceInternalDetail->errors as $error => $value){
+                                    $message .= strtoupper($value[0].', ');
+                                }
+                                $message = substr($message, 0, -2);
+                            }
+                        }
+                    }else{
+                        $success = false;
+                        $message = (count($invoiceInternal->errors) > 0) ? 'ERROR CREATE INVOICE INTERNAL: ' : '';
+                        foreach($invoiceInternal->errors as $error => $value){
+                            $message .= strtoupper($value[0].', ');
+                        }
+                        $message = substr($message, 0, -2);
+                    }
+                }else{
+                    $success = false;
+                    $message = (count($model->errors) > 0) ? 'ERROR POST PO TO INVOICE INTERNAL: ' : '';
+                    foreach($model->errors as $error => $value){
+                        $message .= strtoupper($value[0].', ');
+                    }
+                    $message = substr($message, 0, -2);
+                }
+
+                if($success){
+                    $message = '['.$model->no_po.'] SUCCESS POST PO TO INVOICE INTERNAL.';
+                    $transaction->commit();
+                    $logs =	[
+                        'type' => Logs::TYPE_USER,
+                        'description' => $message,
+                    ];
+                    Logs::addLog($logs);
+                    \Yii::$app->session->setFlash('success', $message);
+                    return $this->redirect(['view', 'no_po' => $model->no_po]);
+                }else{
+                    $transaction->rollBack();
+                }
+            }catch(Exception $e){
+                $success = false;
+                $message = $e->getMessage();
+                $transaction->rollBack();
+            }
+            $logs =	[
+                'type' => Logs::TYPE_USER,
+                'description' => $message,
+            ];
+            Logs::addLog($logs);
+        }else{
+            $success = false;
+            $message = 'Data Purchase Order not valid.';
+        }
+        if(!$success){
+            \Yii::$app->session->setFlash('error', $message);
+        }
+        return $this->redirect(['view', 'no_po' => $model->no_po]);
     }
 }

@@ -13,6 +13,7 @@ use yii\widgets\MaskedInput;
 
 <div class="purchase-order-invoice-form">
     <?php $form = ActiveForm::begin(['id'=>'form']); ?>
+        <!-- Header -->
         <div class="col-lg-6 col-md-6 col-xs-12 padding-left-0">
             <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
                 <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-left-0">
@@ -52,97 +53,96 @@ use yii\widgets\MaskedInput;
                 <?= $form->field($model, 'total_invoice')->textInput(['readonly' => true, 'value'=>0])->label(false) ?>
             </div>
         </div>
+        <!-- /Header -->
+        <!-- Form Terima -->
         <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
-            <fieldset class="fieldset-box padding-20">
-                <legend>Detail Item</legend>
-                <div class="form-container">
-                    <div class="margin-top-20"></div>
-                    <div class="col-lg-12 col-md-12 col-xs-12">
-                        <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
-                            <label>QTY Terima:</label>
-                        </div>
-                        <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padding-right-0">
-                            <?= $form->field($model, 'qty_terima_1')->widget(MaskedInput::className(), [
-                                'clientOptions' => [
-                                    'alias' =>  'decimal',
-                                    'groupSeparator' => ',',
-                                    'autoGroup' => true
-                                ],
-                                'options' => [
-                                    'data-temp' => 1, 
-                                    'data-align' => 'text-right'
-                                ]
-                            ])->label(false) ?>
-                        </div>
-                    </div>
-                    <div class="col-lg-12 col-md-12 col-xs-12">
-                        <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
-                            <label>Harga Beli:</label>
-                        </div>
-                        <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padding-right-0">
-                            <?= $form->field($model, 'harga_beli_1')->widget(MaskedInput::className(), [
-                                    'clientOptions' => [
-                                        'alias' =>  'decimal',
-                                        'groupSeparator' => ',',
-                                        'autoGroup' => true
-                                    ],
-                                    'options' => [
-                                        'data-align' => 'text-right',
-                                        'data-name' => 'iconbox',
-                                        'data-icons' => 'rupiah',
-                                        'data-temp' => 1,
-                                        'readonly' => true,
-                                    ]
-                                ])->label(false) ?>
-                        </div>
-                    </div>
-                    <div class="col-lg-12 col-md-12 col-xs-12">
-                        <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
-                            <label>PPN (%):</label>
-                        </div>
-                        <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padding-right-0">
-                            <?= $form->field($model, 'ppn')->textInput(['data-temp' => 1, 'data-align' => 'text-right'])->label(false) ?>
-                        </div>
-                        <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
-                            <?= $form->field($model, 'no_invoice')->hiddenInput()->label(false) ?>
-                            <?= $form->field($model, 'urutan')->hiddenInput(['data-temp' => 1])->label(false) ?>
-                        </div>
-                    </div>
-                    <div class="col-lg-12 col-md-12 col-xs-12">
-                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 text-right">
-                            <button class="btn btn-success margin-bottom-20" data-button="create_temp">
-                                <i class="fontello icon-block"></i>
-                                <span>Disabled Button</span>
-                            </button>
-                        </div>
-                        <div class="margin-bottom-40"></div>
-                    </div>
-                </div>
-                <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
-                    <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
-                        <table class="table table-bordered table-custom" data-table="detail">
-                            <thead>
-                                <tr>
-                                    <th class="text-center">No.</th>
-                                    <th class="text-center">Item</th>
-                                    <th class="text-center">QTY Order</th>
-                                    <th class="text-center">QTY Terima</th>
-                                    <th class="text-center">Harga Beli</th>
-                                    <th class="text-center">Ppn (%)</th>
-                                    <th class="text-center">Total Order</th>
-                                    <th class="text-center">Total Invoice</th>
-                                    <th class="text-center">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
-                    </div>
-                </div>
-            </fieldset>
-            <div class="margin-bottom-20"></div>
+            <div class="margin-top-30"></div>
+            <h4>Detail Material</h4>
+            <hr>
         </div>
+        <div class="col-lg-12 col-md-12 col-xs-12">
+            <div class="margin-top-20"></div>
+            <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
+                <label>QTY Terima:</label>
+            </div>
+            <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padding-right-0">
+                <?= $form->field($model, 'qty_terima_1')->widget(MaskedInput::className(), [
+                    'clientOptions' => [
+                        'alias' =>  'decimal',
+                        'groupSeparator' => ',',
+                        'autoGroup' => true
+                    ],
+                    'options' => [
+                        'data-temp' => 1, 
+                        'data-align' => 'text-right'
+                    ]
+                ])->label(false) ?>
+            </div>
+        </div>
+        <div class="col-lg-12 col-md-12 col-xs-12">
+            <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
+                <label>Harga Beli:</label>
+            </div>
+            <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padding-right-0">
+                <?= $form->field($model, 'harga_beli_1')->widget(MaskedInput::className(), [
+                        'clientOptions' => [
+                            'alias' =>  'decimal',
+                            'groupSeparator' => ',',
+                            'autoGroup' => true
+                        ],
+                        'options' => [
+                            'data-align' => 'text-right',
+                            'data-name' => 'iconbox',
+                            'data-icons' => 'rupiah',
+                            'data-temp' => 1,
+                            'readonly' => true,
+                        ]
+                    ])->label(false) ?>
+            </div>
+        </div>
+        <div class="col-lg-12 col-md-12 col-xs-12">
+            <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
+                <label>PPN (%):</label>
+            </div>
+            <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padding-right-0">
+                <?= $form->field($model, 'ppn')->textInput(['data-temp' => 1, 'data-align' => 'text-right'])->label(false) ?>
+            </div>
+            <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
+                <?= $form->field($model, 'no_invoice')->hiddenInput()->label(false) ?>
+                <?= $form->field($model, 'urutan')->hiddenInput(['data-temp' => 1])->label(false) ?>
+            </div>
+        </div>
+        <div class="col-lg-12 col-md-12 col-xs-12 text-right">
+            <button class="btn btn-success margin-bottom-20" data-button="create_temp">
+                <i class="fontello icon-block"></i>
+                <span>Disabled Button</span>
+            </button>
+        </div>
+        <!-- /Form Terima -->
+        <!-- Detail Barang -->
+        <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
+            <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
+                <table class="table table-bordered table-custom" data-table="detail">
+                    <thead>
+                        <tr>
+                            <th class="text-center">No.</th>
+                            <th class="text-center">Item</th>
+                            <th class="text-center">QTY Order</th>
+                            <th class="text-center">QTY Terima</th>
+                            <th class="text-center">Harga Beli</th>
+                            <th class="text-center">Ppn (%)</th>
+                            <th class="text-center">Total Order</th>
+                            <th class="text-center">Total Invoice</th>
+                            <th class="text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+        <!-- /Detail Barang -->
         <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
-            <div class="form-group text-right">
+            <div class="form-group text-right margin-top-20">
                 <?= Html::submitButton('<i class="fontello icon-floppy"></i><span>Save</span>', ['class' => 'btn btn-success']) ?>
             </div>
         </div>

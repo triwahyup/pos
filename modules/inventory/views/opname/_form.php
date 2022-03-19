@@ -225,13 +225,14 @@ function search_item(code)
     });
 }
 
-function select_item(code)
+function select_item(code, supplier)
 {
     $.ajax({
         url: "<?=Url::to(['opname/item'])?>",
 		type: "POST",
         data: {
             code: code,
+            supplier: supplier,
         },
 		dataType: "text",
         error: function(xhr, status, error) {},
@@ -393,7 +394,7 @@ $(document).ready(function(){
     $("body").off("click","[data-id=\"popup\"] table > tbody tr").on("click","[data-id=\"popup\"] table > tbody tr", function(e){
         e.preventDefault();
         var data = $(this).data();
-        select_item(data.code);
+        select_item(data.code, $("#inventoryopname-supplier_code").val());
     });
 
     $("body").off("click","[data-button=\"create_temp\"]").on("click","[data-button=\"create_temp\"]", function(e){

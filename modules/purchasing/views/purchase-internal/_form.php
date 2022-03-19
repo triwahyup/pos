@@ -72,98 +72,93 @@ use yii\widgets\MaskedInput;
         </div>
         <!-- DETAIL -->
         <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
+            <div class="margin-top-30"></div>
+            <h4>Detail Barang</h4>
+            <hr>
+        </div>
+        <div class="col-lg-12 col-md-12 col-xs-12">
             <div class="margin-top-20"></div>
-            <fieldset class="fieldset-box padding-20">
-                <legend>Detail Item</legend>
-                <div class="form-container">
-                    <div class="margin-top-20"></div>
-                    <div class="col-lg-12 col-md-12 col-xs-12">
-                        <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
-                            <label>Pilih Barang:</label>
-                        </div>
-                        <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padding-right-0">
-                            <?= $form->field($temp, 'name')->textInput(['placeholder' => 'Pilih barang tekan F4', 'data-temp' => true])->label(false) ?>
-                            <?= $form->field($temp, 'barang_code')->hiddenInput(['data-temp' => true])->label(false) ?>
-                        </div>
-                    </div>
-                    <div class="col-lg-12 col-md-12 col-xs-12">
-                        <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
-                            <label>Qty / Satuan:</label>
-                        </div>
-                        <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
-                            <?= $form->field($temp, 'qty')->widget(MaskedInput::className(), [
-                                    'clientOptions' => [
-                                        'alias' => 'decimal',
-                                        'groupSeparator' => ',',
-                                        'autoGroup' => true
-                                    ],
-                                    'options' => [
-                                        'data-align' => 'text-right',
-                                        'data-temp' => true,
-                                        'placeholder' => 'QTY',
-                                    ]
-                                ])->label(false) ?>
-                        </div>
-                        <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
-                            <?= $form->field($temp, 'um')->textInput(['placeholder' => 'Satuan', 'data-temp' => true, 'data-align' => 'text-right', 'readonly' => true])->label(false) ?>
-                            <?= $form->field($temp, 'satuan_code')->hiddenInput(['placeholder' => 'Satuan', 'data-temp' => true])->label(false) ?>
-                        </div>
-                    </div>
-                    <div class="col-lg-12 col-md-12 col-xs-12">
-                        <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
-                            <label>Harga Beli:</label>
-                        </div>
-                        <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-right-0">
-                            <?= $form->field($temp, 'harga_beli')->widget(MaskedInput::className(), [
-                                'clientOptions' => [
-                                    'alias' =>  'decimal',
-                                    'groupSeparator' => ',',
-                                    'autoGroup' => true
-                                ],
-                                'options' => [
-                                    'data-align' => 'text-right',
-                                    'data-temp' => true,
-                                    'data-name' => 'iconbox',
-                                    'data-icons' => 'rupiah',
-                                    'placeholder' => 'Harga Beli'
-                                ]
-                            ])->label(false) ?>
-                        </div>
-                        <div class="col-lg-1 col-md-1 col-sm-12 col-xs-12 padding-right-0 hidden">
-                            <?= $form->field($temp, 'id')->hiddenInput(['data-temp' => true])->label(false) ?>
-                            <?= $form->field($temp, 'no_po')->hiddenInput(['data-temp' => true])->label(false) ?>
-                        </div>
-                    </div>
-                    <div class="col-lg-12 col-md-12 col-xs-12 text-right">
-                        <button class="btn btn-success margin-bottom-20" data-button="create_temp">
-                            <i class="fontello icon-plus"></i>
-                            <span>Tambah Data Detail</span>
-                        </button>
-                    </div>
-                </div>
-                <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
-                    <div class="margin-top-20"></div>
-                        <table class="table table-bordered table-custom" data-table="detail">
-                            <thead>
-                                <tr>
-                                    <th class="text-center">No.</th>
-                                    <th class="text-center">Name</th>
-                                    <th class="text-center">QTY</th>
-                                    <th class="text-center">Satuan</th>
-                                    <th class="text-center">Harga Beli</th>
-                                    <th class="text-center">Total (Rp)</th>
-                                    <th class="text-center">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td class="text-center text-danger" colspan="15">Data is empty</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                </div>
-            </fieldset>
-            <div class="margin-bottom-20"></div>
+            <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
+                <label>Pilih Barang:</label>
+            </div>
+            <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padding-right-0">
+                <?= $form->field($temp, 'name')->textInput(['placeholder' => 'Pilih barang tekan F4', 'data-temp' => true])->label(false) ?>
+                <?= $form->field($temp, 'barang_code')->hiddenInput(['data-temp' => true])->label(false) ?>
+            </div>
+        </div>
+        <div class="col-lg-12 col-md-12 col-xs-12">
+            <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
+                <label>Qty / Satuan:</label>
+            </div>
+            <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
+                <?= $form->field($temp, 'qty')->widget(MaskedInput::className(), [
+                        'clientOptions' => [
+                            'alias' => 'decimal',
+                            'groupSeparator' => ',',
+                            'autoGroup' => true
+                        ],
+                        'options' => [
+                            'data-align' => 'text-right',
+                            'data-temp' => true,
+                            'placeholder' => 'QTY',
+                        ]
+                    ])->label(false) ?>
+            </div>
+            <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
+                <?= $form->field($temp, 'um')->textInput(['placeholder' => 'Satuan', 'data-temp' => true, 'data-align' => 'text-right', 'readonly' => true])->label(false) ?>
+                <?= $form->field($temp, 'satuan_code')->hiddenInput(['placeholder' => 'Satuan', 'data-temp' => true])->label(false) ?>
+            </div>
+        </div>
+        <div class="col-lg-12 col-md-12 col-xs-12">
+            <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
+                <label>Harga Beli:</label>
+            </div>
+            <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-right-0">
+                <?= $form->field($temp, 'harga_beli')->widget(MaskedInput::className(), [
+                    'clientOptions' => [
+                        'alias' =>  'decimal',
+                        'groupSeparator' => ',',
+                        'autoGroup' => true
+                    ],
+                    'options' => [
+                        'data-align' => 'text-right',
+                        'data-temp' => true,
+                        'data-name' => 'iconbox',
+                        'data-icons' => 'rupiah',
+                        'placeholder' => 'Harga Beli'
+                    ]
+                ])->label(false) ?>
+            </div>
+            <div class="col-lg-1 col-md-1 col-sm-12 col-xs-12 padding-right-0 hidden">
+                <?= $form->field($temp, 'id')->hiddenInput(['data-temp' => true])->label(false) ?>
+                <?= $form->field($temp, 'no_po')->hiddenInput(['data-temp' => true])->label(false) ?>
+            </div>
+        </div>
+        <div class="col-lg-12 col-md-12 col-xs-12 text-right">
+            <button class="btn btn-success margin-bottom-20" data-button="create_temp">
+                <i class="fontello icon-plus"></i>
+                <span>Tambah Data Detail</span>
+            </button>
+        </div>
+        <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
+            <table class="table table-bordered table-custom" data-table="detail">
+                <thead>
+                    <tr>
+                        <th class="text-center">No.</th>
+                        <th class="text-center">Name</th>
+                        <th class="text-center">QTY</th>
+                        <th class="text-center">Satuan</th>
+                        <th class="text-center">Harga Beli</th>
+                        <th class="text-center">Total (Rp)</th>
+                        <th class="text-center">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="text-center text-danger" colspan="15">Data is empty</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
         <!-- /DETAIL -->
         <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">

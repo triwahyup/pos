@@ -17,9 +17,9 @@ class PurchaseInternalSearch extends PurchaseInternal
     public function rules()
     {
         return [
-            [['no_po', 'tgl_po', 'keterangan'], 'safe'],
+            [['no_po', 'tgl_po', 'tgl_kirim', 'supplier_code'], 'safe'],
+            [['term_in', 'status_approval', 'status_terima', 'post'], 'integer'],
             [['total_order'], 'number'],
-            [['user_id', 'user_request', 'status', 'status_approval', 'created_at', 'updated_at'], 'integer'],
         ];
     }
 
@@ -41,7 +41,9 @@ class PurchaseInternalSearch extends PurchaseInternal
      */
     public function search($params)
     {
-        $query = PurchaseInternal::find();
+        $query = PurchaseInternal::find()
+            ->alias('a')
+            ->leftJoin('master_person b', 'b.code = a.supplier_code');
 
         // add conditions that should always apply here
 
@@ -58,21 +60,22 @@ class PurchaseInternalSearch extends PurchaseInternal
         }
 
         // grid filtering conditions
+        $query->where(['a.status'=>1]);
         $query->andFilterWhere([
+            'tgl_kirim' => $this->tgl_kirim,
+            'term_in' => $this->term_in,
             'total_order' => $this->total_order,
-            'user_id' => $this->user_id,
-            'user_request' => $this->user_request,
-            'status' => 1,
             'status_approval' => $this->status_approval,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
+            'status_terima' => $this->status_terima,
+            'post' => $this->post,
         ]);
+        if(!empty($this->supplier_code)){
+            $query->andWhere('b.code LIKE "%'.$this->supplier_code.'%" OR b.name LIKE "%'.$this->supplier_code.'%"');
+        }
         if(!empty($this->tgl_po)){
             $query->andFilterWhere(['tgl_po' => date('Y-m-d', strtotime($this->tgl_po))]);
         }
-
-        $query->andFilterWhere(['like', 'no_po', $this->no_po])
-            ->andFilterWhere(['like', 'keterangan', $this->keterangan]);
+        $query->andFilterWhere(['like', 'no_po', $this->no_po]);
 
         return $dataProvider;
     }

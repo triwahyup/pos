@@ -48,12 +48,28 @@ $this->params['breadcrumbs'][] = $this->title;
                 }
             ],
             [
-                'attribute' => 'total_order',
+                'attribute' => 'term_in',
                 'contentOptions' => [
-                    'class' => 'text-right',
+                    'class' => 'text-center',
                 ],
                 'value' => function($model, $index, $key) {
-                    return number_format($model->total_order).'.-';
+                    return $model->term_in .' Hari';
+                }
+            ],
+            [
+                'attribute' => 'supplier_code',
+                'value' => function($model, $index, $key) {
+                    return (isset($model->supplier)) ? $model->supplier->name : '';
+                }
+            ],
+            [
+                'attribute' => 'post',
+                'contentOptions' => [
+                    'class' => 'text-center',
+                ],
+                'format' => 'raw',
+                'value' => function ($model, $index, $key) { 
+                    return $model->statusPost;
                 }
             ],
             [
@@ -65,6 +81,17 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw',
                 'value' => function ($model, $index, $key) { 
                     return $model->statusApproval;
+                }
+            ],
+            [
+                'attribute' => 'status_terima',
+                'label' => 'Terima',
+                'contentOptions' => [
+                    'class' => 'text-center',
+                ],
+                'format' => 'raw',
+                'value' => function ($model, $index, $key) { 
+                    return $model->statusTerima;
                 }
             ],
             [

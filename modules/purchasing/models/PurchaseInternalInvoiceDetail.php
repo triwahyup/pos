@@ -53,7 +53,7 @@ class PurchaseInternalInvoiceDetail extends \yii\db\ActiveRecord
         return [
             [['no_invoice', 'urutan'], 'required'],
             [['urutan', 'status', 'created_at', 'updated_at'], 'integer'],
-            [['qty_order', 'qty_terima', 'qty_selisih', 'qty_susulan', 'harga_beli', 'ppn', 'total_order', 'total_invoice'], 'number'],
+            [['qty_order', 'qty_terima', 'qty_selisih', 'qty_susulan', 'harga_beli', 'ppn', 'total_order', 'total_invoice'], 'safe'],
             [['no_invoice'], 'string', 'max' => 12],
             [['barang_code'], 'string', 'max' => 7],
             [['name'], 'string', 'max' => 128],
@@ -118,28 +118,25 @@ class PurchaseInternalInvoiceDetail extends \yii\db\ActiveRecord
         return $total_invoice;
     }
 
-    // public function getQtySelisih($qty_order, $qty_terima)
-    // {
-    //     $qty = 0;
-    //     $konversi = 1;
-    //     $pcs = abs($qty_terima-$qty_order);
-    //     if($this->konversi_1 > 0){
-    //         $qty = $total = floor($pcs / $konversi);
-    //     }
-        
-    //     $isEmptyQty = false;
-    //     $selisih = 0;
-    //     if($qty_terima == 0){
-    //         $isEmptyQty = true;
-    //     }else{
-    //         if(($qty_terima - $qty_order) > 0){
-    //             $selisih = 1;
-    //         }else{
-    //             if(($qty_terima - $qty_order) !=0){
-    //                 $selisih = -1;
-    //             }
-    //         }
-    //     }
-    //     return ['qty' => $qty, 'selisih' => $selisih, 'isEmptyQty' => $isEmptyQty];
-    // }
+    public function getQtySelisih($qty_order, $qty_terima)
+    {
+        $qty = 0;
+        $konversi = 1;
+        $pcs = abs($qty_terima-$qty_order);
+        $qty = $total = floor($pcs / $konversi);
+        $isEmptyQty = false;
+        $selisih = 0;
+        if($qty_terima == 0){
+            $isEmptyQty = true;
+        }else{
+            if(($qty_terima - $qty_order) > 0){
+                $selisih = 1;
+            }else{
+                if(($qty_terima - $qty_order) !=0){
+                    $selisih = -1;
+                }
+            }
+        }
+        return ['qty' => $qty, 'selisih' => $selisih, 'isEmptyQty' => $isEmptyQty];
+    }
 }

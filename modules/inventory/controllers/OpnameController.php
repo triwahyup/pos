@@ -405,14 +405,7 @@ class OpnameController extends Controller
 
     public function actionListItem()
     {
-        $model = MasterMaterial::find()
-            ->alias('a')
-            ->select(['a.*', 'b.composite'])
-            ->leftJoin('master_satuan b', 'b.code = a.satuan_code')
-            ->where(['a.status'=>1])
-            ->orderBy(['a.code'=>SORT_ASC])
-            ->limit(10)
-            ->all();
+        $model = MasterMaterial::find()->where(['status'=>1])->orderBy(['code'=>SORT_ASC])->limit(10)->all();
         return json_encode(['data'=>$this->renderPartial('_list_item', ['model'=>$model])]);
     }
 
@@ -435,13 +428,7 @@ class OpnameController extends Controller
     {
         $model = [];
         if(isset($_POST['code'])){
-            $model = MasterMaterial::find()
-                ->alias('a')
-                ->select(['a.*', 'b.composite'])
-                ->leftJoin('master_satuan b', 'b.code = a.satuan_code')
-                ->leftJoin('master_kode c', 'c.code = a.type_code')
-                ->where(['a.code'=>$_POST['code'], 'a.status'=>1])
-                ->all();
+            $model = MasterMaterial::find()->where(['code'=>$_POST['code'], 'status'=>1])->all();
         }
         return json_encode(['data'=>$this->renderPartial('_list_item', ['model'=>$model])]);
     }
@@ -450,7 +437,7 @@ class OpnameController extends Controller
     {
         $model = MasterMaterial::find()
             ->alias('a')
-            ->select(['b.*', 'b.code as xxx', 'a.code as item_code', 'a.name as item_name'])
+            ->select(['b.*', 'b.code as satuan_code', 'a.code as item_code', 'a.name as item_name'])
             ->leftJoin('master_satuan b', 'b.code = a.satuan_code')
             ->where(['a.code'=>$_POST['code'], 'a.status'=>1])
             ->asArray()
@@ -459,7 +446,7 @@ class OpnameController extends Controller
         if(empty($model)){
             $model = [];
         }else{
-            $stockItem = InventoryStockItem::findOne(['item_code'=>$model['item_code']]);
+            $stockItem = InventoryStockItem::findOne(['item_code'=>$model['item_code'], 'supplier_code'=>$_POST['supplier']]);
             if(isset($stockItem)){
                 $konversi = $stockItem->nKonversi($model['item_code'], $stockItem['onhand']);
             }else{
@@ -492,7 +479,7 @@ class OpnameController extends Controller
     {
         $request = \Yii::$app->request;
         $success = true;
-        $message = '';
+        $message = 'CREATE TEMP SUCCESSFULLY';
         if($request->isPost){
             $dataTemp = $request->post('TempInventoryOpnameDetail');
             $ctemp = TempInventoryOpnameDetail::findOne(['item_code'=>$dataTemp['item_code'], 'user_id'=>\Yii::$app->user->id]);
@@ -523,9 +510,7 @@ class OpnameController extends Controller
                     }else{
                         $temp->balance = 1; // BALANCE
                     }
-                    if($temp->save()){
-                        $message = 'CREATE TEMP SUCCESSFULLY';
-                    }else{
+                    if(!$temp->save()){
                         $success = false;
                         foreach($temp->errors as $error => $value){
                             $message = $value[0].', ';
@@ -550,7 +535,7 @@ class OpnameController extends Controller
     {
         $request = \Yii::$app->request;
         $success = true;
-        $message = '';
+        $message = 'UPDATE TEMP SUCCESSFULLY';
         if($request->isPost){
             $dataTemp = $request->post('TempInventoryOpnameDetail');
             $dataHeader = $request->post('InventoryOpname');
@@ -577,9 +562,7 @@ class OpnameController extends Controller
                 }else{
                     $temp->balance = 1; // BALANCE
                 }
-                if($temp->save()){
-                    $message = 'UPDATE TEMP SUCCESSFULLY';
-                }else{
+                if(!$temp->save()){
                     $success = false;
                     foreach($temp->errors as $error => $value){
                         $message = $value[0].', ';
@@ -599,7 +582,7 @@ class OpnameController extends Controller
     public function actionDeleteTemp($id)
     {
         $success = true;
-        $message = '';
+        $message = 'DELETE TEMP SUCCESSFULLY';
         $temp = $this->findTemp($id);
         if(isset($temp)){
             if($temp->delete()){
@@ -613,7 +596,6 @@ class OpnameController extends Controller
                         $message = substr($message, 0, -2);
                     }
                 }
-                $message = 'DELETE TEMP SUCCESSFULLY';
             }else{
                 $success = false;
                 foreach($temp->errors as $error => $value){

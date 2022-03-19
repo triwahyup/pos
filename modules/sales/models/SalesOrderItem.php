@@ -138,7 +138,7 @@ class SalesOrderItem extends \yii\db\ActiveRecord
 
     public function getInventoryStock()
     {
-        return $this->hasOne(InventoryStockItem::className(), ['item_code' => 'item_code']);
+        return $this->hasOne(InventoryStockItem::className(), ['item_code' => 'item_code', 'supplier_code' => 'supplier_code']);
     }
 
     public function getPotongs()

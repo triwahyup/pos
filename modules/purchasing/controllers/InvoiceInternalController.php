@@ -198,7 +198,7 @@ class InvoiceInternalController extends Controller
                             $message = 'QTY Terima Barang '.$val->barang_code.'-'.$val->name.' masih 0.';
                         }
                     }
-
+                    
                     if($success){
                         $model->status_terima = ($selisih) ? 2 : 1;
                         $model->post=1;
@@ -211,12 +211,8 @@ class InvoiceInternalController extends Controller
                                 if(empty($stockBarang)){
                                     $stockBarang = new InventoryStockBarang();
                                 }
-                                $konversi = $stockBarang->satuanTerkecil($val->barang_code, [
-                                    0 => $val->qty_terima,
-                                    1 => 0
-                                ]);
                                 $stockBarang->attributes = $val->attributes;
-                                $stockBarang->onhand = $stockBarang->onhand+$konversi;
+                                $stockBarang->stock = $stockBarang->stock+$val->qty_terima;
                                 if(!$stockBarang->save()){
                                     $success = false;
                                     $message = (count($stockBarang->errors) > 0) ? 'ERROR UPDATE STOCK ITEM: ' : '';
@@ -226,14 +222,14 @@ class InvoiceInternalController extends Controller
                                     $message = substr($message, 0, -2);
                                 }
 
-                                $stockBast = new InventoryStockTransaction();
+                                $stockBast = new InventoryStockBast();
                                 $stockBast->attributes = $val->attributes;
-                                $stockBast->no_bast = $model->no_invoice;
-                                $stockBast->tgl_bast = $model->tgl_invoice;
-                                $stockBast->type_bast = "INVOICE INTERNAL";
-                                $stockBast->status_bast = "IN";
-                                $stockBast->qty_in = $konversi;
-                                $stockBast->stock = 0;
+                                $stockBast->no_document = $model->no_invoice;
+                                $stockBast->tgl_document = $model->tgl_invoice;
+                                $stockBast->type_document = "INVOICE INTERNAL";
+                                $stockBast->status_document = "IN";
+                                $stockBast->qty_in = $val->qty_terima;
+                                $stockBast->stock = (isset($stockBast->onHand)) ? $stockBast->onHand->stock+$val->qty_terima : $val->qty_terima;
                                 if(!$stockBast->save()){
                                     $success = false;
                                     $message = (count($stockBast->errors) > 0) ? 'ERROR UPDATE STOCK TRANSACTION: ' : '';
@@ -315,10 +311,8 @@ class InvoiceInternalController extends Controller
                         foreach($model->details as $val){
                             // STOCK IN SUSULAN
                             $stockBarang = InventoryStockBarang::findOne(['barang_code'=>$val->barang_code, 'supplier_code'=>$val->supplier_code, 'status'=>1]);
-                            $konversi = $stockBarang->satuanTerkecil($val->barang_code, [
-                                0 => $val->qty_susulan, 1 => 0]);
-                            if($konversi > 0){
-                                $stockBarang->stock = $stockBarang->stock+$konversi;
+                            if($val->qty_susulan > 0){
+                                $stockBarang->stock = $stockBarang->stock+$val->qty_susulan;
                                 if(!$stockBarang->save()){
                                     $success = false;
                                     $message = (count($stockBarang->errors) > 0) ? 'ERROR UPDATE STOCK BARANG: ' : '';
@@ -330,12 +324,12 @@ class InvoiceInternalController extends Controller
 
                                 $stockBast = new InventoryStockBast();
                                 $stockBast->attributes = $val->attributes;
-                                $stockBast->no_bast = $model->no_invoice;
-                                $stockBast->tgl_bast = $model->tgl_invoice;
-                                $stockBast->type_bast = "INVOICE INTERNAL (S)";
-                                $stockBast->status_bast = "IN";
-                                $stockBast->qty_in = $konversi;
-                                $stockBast->onhand = 0;
+                                $stockBast->no_document = $model->no_invoice;
+                                $stockBast->tgl_document = $model->tgl_invoice;
+                                $stockBast->type_document = "INVOICE INTERNAL (S)";
+                                $stockBast->status_document = "IN";
+                                $stockBast->qty_in = $val->qty_susulan;
+                                $stockBast->stock = (isset($stockBast->onHand)) ? $stockBast->onHand->stock+$val->qty_susulan : $val->qty_susulan;
                                 if(!$stockBast->save()){
                                     $success = false;
                                     $message = (count($stockBast->errors) > 0) ? 'ERROR UPDATE STOCK BAST: ' : '';
@@ -434,7 +428,7 @@ class InvoiceInternalController extends Controller
         $invoiceInternal = $request->post('PurchaseInternalInvoice');
         $model = PurchaseInternalInvoice::findOne(['no_invoice'=>$invoiceInternal]);
         if($request->isPost){
-            $temp = PurchaseInternalInvoice::findOne(['no_invoice'=>$invoiceInternal['no_invoice'], 'urutan'=>$invoiceInternal['urutan']]);
+            $temp = PurchaseInternalInvoiceDetail::findOne(['no_invoice'=>$invoiceInternal['no_invoice'], 'urutan'=>$invoiceInternal['urutan']]);
             $qtyTerima = $temp->qty_terima;
             $temp->attributes = (array)$invoiceInternal;
             if($model->post == 1){

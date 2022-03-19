@@ -233,7 +233,7 @@ class InvoiceOrderController extends Controller
                                 $stockTransaction->type_document = "INVOICE ORDER";
                                 $stockTransaction->status_document = "IN";
                                 $stockTransaction->qty_in = $konversi;
-                                $stockTransaction->onhand = (isset($stockTransaction->onHand)) ? $stockTransaction->onHand->qty_in+$konversi : $konversi;
+                                $stockTransaction->onhand = (isset($stockTransaction->onHand)) ? $stockTransaction->onHand->onhand+$konversi : $konversi;
                                 if(!$stockTransaction->save()){
                                     $success = false;
                                     $message = (count($stockTransaction->errors) > 0) ? 'ERROR UPDATE STOCK TRANSACTION: ' : '';
@@ -335,7 +335,7 @@ class InvoiceOrderController extends Controller
                                 $stockTransaction->type_document = "INVOICE ORDER (S)";
                                 $stockTransaction->status_document = "IN";
                                 $stockTransaction->qty_in = $konversi;
-                                $stockTransaction->onhand = (isset($stockTransaction->onHand)) ? $stockTransaction->onHand->qty_in+$konversi : $konversi;
+                                $stockTransaction->onhand = (isset($stockTransaction->onHand)) ? $stockTransaction->onHand->onhand+$konversi : $konversi;
                                 if(!$stockTransaction->save()){
                                     $success = false;
                                     $message = (count($stockTransaction->errors) > 0) ? 'ERROR UPDATE STOCK TRANSACTION: ' : '';
