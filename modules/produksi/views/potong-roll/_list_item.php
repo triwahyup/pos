@@ -1,11 +1,11 @@
 <?php use yii\helpers\Url; ?>
-<input type="text" name="search" id="search" class="form-control" placeholder="Cari berdasarkan Kode dan Nama Barang ...">
+<input type="text" name="search" id="search" class="form-control" placeholder="Cari berdasarkan Kode dan Nama Material ...">
 <table class="table table-bordered table-custom margin-top-10">
 	<thead>
 		<tr>
 			<th class="text-center">No.</th>
-			<th class="text-center">Kode Barang</th>
-			<th class="text-center">Nama Barang</th>
+			<th class="text-center">Kode Item</th>
+			<th class="text-center">Nama Item</th>
 			<th class="text-center">Um</th>
 			<th class="text-center">Supplier</th>
 		</tr>
@@ -13,12 +13,12 @@
 	<tbody>
 		<?php if(count($model) > 0): ?>
 			<?php foreach($model as $index=>$val) : ?>
-				<tr data-code="<?=$val->barang_code ?>">
+				<tr data-code="<?=$val['item_code'] ?>">
                     <td class="text-center"><?=($index+1) ?></td>
-                    <td class="text-center"><?=$val->barang_code ?></td>
-                    <td><?=(isset($val->barang)) ? $val->barang->name : '-' ?></td>
-                    <td class="text-center"><?=(isset($val->barang->satuan)) ? $val->barang->satuan->name : '-' ?></td>
-                    <td><?=(isset($val->supplier)) ? $val->supplier->name : '-' ?></td>
+                    <td class="text-center"><?=$val['item_code'] ?></td>
+                    <td><?=$val['item_name'] ?></td>
+                    <td class="text-center"><?=$val['satuan_name'] ?></td>
+                    <td><?=$val['supplier_name'] ?></td>
                 </tr>
 			<?php endforeach; ?>
 		<?php else : ?>
@@ -33,11 +33,11 @@ $(document).ready(function(){
 	$("#search").autocomplete({
         minLength: 1,
         select: function(event, value){
-			search_barang(value.item.code);
+			search_item(value.item.item_code);
         },
         source: function(request, response){
             $.ajax({
-                url: "<?=Url::to(['bast/autocomplete'])?>",
+                url: "<?=Url::to(['potong-roll/autocomplete'])?>",
                 type: "POST",
                 dataType: "text",
                 error: function(xhr, status, error) {},

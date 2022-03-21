@@ -121,6 +121,7 @@ $this->params['breadcrumbs'][] = $this->title;
             </tbody>
         </table>
     </div>
+    <!-- /DETAIL -->
     <?php if($model->post == 0): ?>
         <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
             <div class="text-right">

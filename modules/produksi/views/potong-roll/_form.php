@@ -1,28 +1,19 @@
 <?php
 use kartik\date\DatePicker;
-use kartik\widgets\Select2;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\ActiveForm;
 use yii\widgets\MaskedInput;
 
 /* @var $this yii\web\View */
-/* @var $model app\modules\inventory\models\InventoryBast */
+/* @var $model app\modules\produksi\models\SpkPotongRoll */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 
-<div class="inventory-bast-form">
+<div class="spk-potong-roll-form">
     <?php $form = ActiveForm::begin(['id'=>'form']); ?>
         <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
-            <div class="hidden">
-                <?= $form->field($model, 'code')->textInput(['maxlength' => true]) ?>
-            </div>
             <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padding-left-0">
-                <?= $form->field($model, 'user_id')->widget(Select2::classname(), [
-                    'data' => $profile,
-                    'options' => ['placeholder' => 'User'],
-                    ]) ?>
-
                 <?= $form->field($model, 'date')->widget(DatePicker::classname(), [
                     'type' => DatePicker::TYPE_INPUT,
                     'options' => [
@@ -33,18 +24,21 @@ use yii\widgets\MaskedInput;
                         'autoclose' => true,
                         'format' => 'dd-mm-yyyy',
                     ]]) ?>
-
-                <?= $form->field($model, 'type_code')->widget(Select2::classname(), [
-                    'data' => $type,
-                    'options' => ['placeholder' => 'Type'],
-                    ]) ?>
-                <?= $form->field($model, 'keterangan')->textarea(['maxlength' => true]) ?>
+                <?= $form->field($model, 'item_name')->textInput(['placeholder' => 'Pilih material tekan F4', 'maxlength' => true]) ?>
+                <?= $form->field($model, 'keterangan')->textarea(['rows' => 2]) ?>
+                <div class="hidden">
+                    <?= $form->field($model, 'item_code')->textInput(['maxlength' => true]) ?>
+                    <?= $form->field($model, 'supplier_code')->textInput(['maxlength' => true]) ?>
+                    <?= $form->field($model, 'type_code')->textInput(['maxlength' => true]) ?>
+                    <?= $form->field($model, 'material_code')->textInput(['maxlength' => true]) ?>
+                    <?= $form->field($model, 'satuan_code')->textInput(['maxlength' => true]) ?>
+                </div>
             </div>
         </div>
         <!-- DETAIL -->
         <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
             <div class="margin-top-30"></div>
-            <h4>Detail Barang</h4>
+            <h4>Detail Proses Potong</h4>
             <hr>
         </div>
         <div class="col-lg-12 col-md-12 col-xs-12">
@@ -53,18 +47,47 @@ use yii\widgets\MaskedInput;
                 <?= $form->field($temp, 'id')->hiddenInput(['data-temp' => true])->label(false) ?>
             </div>
             <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
-                <label>Pilih Barang:</label>
+                <label>Panjang:</label>
             </div>
             <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padding-right-0">
-                <?= $form->field($temp, 'name')->textInput(['placeholder' => 'Pilih barang tekan F4', 'data-temp' => true])->label(false) ?>
-                <?= $form->field($temp, 'barang_code')->hiddenInput(['data-temp' => true])->label(false) ?>
+                <?= $form->field($temp, 'panjang')->widget(MaskedInput::className(), [
+                        'clientOptions' => [
+                            'alias' => 'decimal',
+                            'groupSeparator' => ',',
+                            'autoGroup' => true
+                        ],
+                        'options' => [
+                            'data-align' => 'text-right',
+                            'data-temp' => true,
+                            'placeholder' => 'Panjang',
+                        ]
+                    ])->label(false) ?>
             </div>
         </div>
         <div class="col-lg-12 col-md-12 col-xs-12">
             <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
-                <label>Qty / Satuan:</label>
+                <label>Lebar:</label>
             </div>
+            <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padding-right-0">
+                <?= $form->field($temp, 'lebar')->widget(MaskedInput::className(), [
+                        'clientOptions' => [
+                            'alias' => 'decimal',
+                            'groupSeparator' => ',',
+                            'autoGroup' => true
+                        ],
+                        'options' => [
+                            'data-align' => 'text-right',
+                            'data-temp' => true,
+                            'placeholder' => 'Lebar',
+                        ]
+                    ])->label(false) ?>
+            </div>
+        </div>
+        <div class="col-lg-12 col-md-12 col-xs-12">
             <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
+                <label>Qty:</label>
+            </div>
+            <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padding-right-0">
                 <?= $form->field($temp, 'qty')->widget(MaskedInput::className(), [
                         'clientOptions' => [
                             'alias' => 'decimal',
@@ -74,41 +97,9 @@ use yii\widgets\MaskedInput;
                         'options' => [
                             'data-align' => 'text-right',
                             'data-temp' => true,
-                            'placeholder' => 'QTY',
+                            'placeholder' => 'Qty',
                         ]
                     ])->label(false) ?>
-            </div>
-            <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
-                <?= $form->field($temp, 'um')->textInput(['placeholder' => 'Satuan', 'data-temp' => true, 'data-align' => 'text-right', 'readonly' => true])->label(false) ?>
-                <?= $form->field($temp, 'satuan_code')->hiddenInput(['data-temp' => true])->label(false) ?>
-                <?= $form->field($temp, 'supplier_code')->hiddenInput(['data-temp' => true])->label(false) ?>
-            </div>
-        </div>
-        <div class="col-lg-12 col-md-12 col-xs-12">
-            <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
-                <label>Kode Serial:</label>
-            </div>
-            <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padding-right-0">
-                <?= $form->field($temp, 'kode_sn')->textInput(['placeholder' => 'Kode Serial', 'data-temp' => true])->label(false) ?>
-            </div>
-        </div>
-        <div class="col-lg-12 col-md-12 col-xs-12">
-            <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
-                <label>Kode Unik:</label>
-            </div>
-            <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padding-right-0">
-                <?= $form->field($temp, 'kode_unik')->textInput(['placeholder' => 'Kode Unik', 'data-temp' => true])->label(false) ?>
-            </div>
-            <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padding-right-0">
-                <span class="font-size-10 text-primary">Kode unik berisi kode informasi tambahan. Bisa diisi dengan No / ID inventaris, dll.</span>
-            </div>
-        </div>
-        <div class="col-lg-12 col-md-12 col-xs-12">
-            <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
-                <label>Keterangan:</label>
-            </div>
-            <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padding-right-0">
-                <?= $form->field($temp, 'keterangan')->textarea(['data-temp' => true])->label(false) ?>
             </div>
         </div>
         <div class="col-lg-12 col-md-12 col-xs-12 text-right">
@@ -122,12 +113,10 @@ use yii\widgets\MaskedInput;
                 <thead>
                     <tr>
                         <th class="text-center">No.</th>
-                        <th class="text-center">Name</th>
-                        <th class="text-center">QTY</th>
-                        <th class="text-center">Satuan</th>
-                        <th class="text-center">Kode Serial</th>
-                        <th class="text-center">Kode Unik</th>
-                        <th class="text-center">Supplier</th>
+                        <th class="text-center">Panjang</th>
+                        <th class="text-center">Lebar</th>
+                        <th class="text-center">Qty</th>
+                        <th class="text-center">PxL</th>
                         <th class="text-center">Action</th>
                     </tr>
                 </thead>
@@ -148,10 +137,10 @@ use yii\widgets\MaskedInput;
 </div>
 <div data-popup="popup"></div>
 <script>
-function load_barang()
+function load_item()
 {
     $.ajax({
-        url: "<?=Url::to(['bast/list-barang'])?>",
+        url: "<?=Url::to(['potong-roll/list-item'])?>",
 		type: "GET",
 		dataType: "text",
         error: function(xhr, status, error) {},
@@ -161,7 +150,7 @@ function load_barang()
             $("[data-popup=\"popup\"]").html(o.data);
             $("[data-popup=\"popup\"]").popup("open", {
 				container: "popup",
-				title: 'List Data Barang',
+				title: 'List Data Material',
 				styleOptions: {
 					width: 600
 				}
@@ -171,10 +160,10 @@ function load_barang()
     });
 }
 
-function search_barang(code)
+function search_item(code)
 {
     $.ajax({
-        url: "<?=Url::to(['bast/search'])?>",
+        url: "<?=Url::to(['potong-roll/search'])?>",
 		type: "POST",
         data: {
             code: code,
@@ -188,7 +177,7 @@ function search_barang(code)
             $("[data-popup=\"popup\"]").html(o.data);
             $("[data-popup=\"popup\"]").popup("open", {
 				container: "popup",
-				title: 'List Data Barang',
+				title: 'List Data Material',
 				styleOptions: {
 					width: 600
 				}
@@ -199,10 +188,10 @@ function search_barang(code)
     });
 }
 
-function select_barang(code)
+function select_item(code)
 {
     $.ajax({
-        url: "<?=Url::to(['bast/barang'])?>",
+        url: "<?=Url::to(['potong-roll/item'])?>",
 		type: "POST",
         data: {
             code: code
@@ -213,7 +202,7 @@ function select_barang(code)
         success: function(data){
             var o = $.parseJSON(data);
             $.each(o, function(index, value){
-                $("#tempinventorybastdetail-"+index).val(value);
+                $("#spkpotongroll-"+index).val(value);
             });
         },
         complete: function(){
@@ -225,7 +214,7 @@ function select_barang(code)
 function init_temp()
 {
     $.ajax({
-        url: "<?= Url::to(['bast/temp']) ?>",
+        url: "<?= Url::to(['potong-roll/temp']) ?>",
         type: "POST",
         dataType: "text",
         error: function(xhr, status, error) {},
@@ -243,7 +232,7 @@ function init_temp()
 function get_temp(id)
 {
     $.ajax({
-        url: "<?= Url::to(['bast/get-temp']) ?>",
+        url: "<?= Url::to(['potong-roll/get-temp']) ?>",
         type: "GET",
         dataType: "text",
         data: {
@@ -254,7 +243,7 @@ function get_temp(id)
         success: function(data){
             var o = $.parseJSON(data);
             $.each(o, function(index, value){
-                $("#tempinventorybastdetail-"+index).val(value);
+                $("#tempspkpotongrolldetail-"+index).val(value);
             });
         },
         complete: function(){
@@ -266,7 +255,7 @@ function get_temp(id)
 function create_temp(el)
 {
     $.ajax({
-        url: "<?= Url::to(['bast/create-temp']) ?>",
+        url: "<?= Url::to(['potong-roll/create-temp']) ?>",
         type: "POST",
         dataType: "text",
         error: function(xhr, status, error) {},
@@ -292,7 +281,7 @@ function create_temp(el)
 function update_temp(el)
 {
     $.ajax({
-        url: "<?= Url::to(['bast/update-temp']) ?>",
+        url: "<?= Url::to(['potong-roll/update-temp']) ?>",
         type: "POST",
         dataType: "text",
         error: function(xhr, status, error) {},
@@ -318,7 +307,7 @@ function update_temp(el)
 function delete_temp(id)
 {
     $.ajax({
-        url: "<?= Url::to(['bast/delete-temp']) ?>",
+        url: "<?= Url::to(['potong-roll/delete-temp']) ?>",
         type: "GET",
         dataType: "text",
         error: function(xhr, status, error) {},
@@ -346,11 +335,11 @@ function delete_temp(id)
 
 var timeOut = 6000;
 $(document).ready(function(){
-    $("body").off("keydown","#tempinventorybastdetail-name")
-    $("body").on("keydown","#tempinventorybastdetail-name", function(e){
+    $("body").off("keydown","#spkpotongroll-item_name")
+    $("body").on("keydown","#spkpotongroll-item_name", function(e){
         var key = e.charCode ? e.charCode : e.keyCode ? e.keyCode : 0;
         if(key == KEY.F4){
-            load_barang();
+            load_item();
         }
     });
     
@@ -358,7 +347,7 @@ $(document).ready(function(){
     $("body").on("click","[data-id=\"popup\"] table > tbody tr", function(e){
         e.preventDefault();
         var data = $(this).data();
-        select_barang(data.code);
+        select_item(data.code);
     });
 
     $("body").off("click","[data-button=\"create_temp\"]").on("click","[data-button=\"create_temp\"]", function(e){
