@@ -41,6 +41,7 @@ class TempInventoryBastDetail extends \yii\db\ActiveRecord
             [['qty'], 'number'],
             [['code'], 'string', 'max' => 12],
             [['barang_code'], 'string', 'max' => 7],
+            [['kode_sn', 'kode_unik'], 'string', 'max' => 64],
             [['name', 'keterangan'], 'string', 'max' => 128],
             [['supplier_code', 'satuan_code'], 'string', 'max' => 3],
             [['um'], 'string', 'max' => 5],
@@ -62,6 +63,8 @@ class TempInventoryBastDetail extends \yii\db\ActiveRecord
             'satuan_code' => 'Satuan Code',
             'qty' => 'Qty',
             'um' => 'Um',
+            'kode_sn' => 'Kode Serial',
+            'kode_unik' => 'Kode Unik',
             'keterangan' => 'Keterangan',
             'user_id' => 'User ID',
         ];

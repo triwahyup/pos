@@ -45,7 +45,7 @@ class InventoryBast extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['code'], 'required'],
+            [['date', 'user_id', 'type_code'], 'required'],
             [['date'], 'safe'],
             [['user_id', 'post', 'status', 'created_at', 'updated_at'], 'integer'],
             [['code'], 'string', 'max' => 12],
@@ -64,8 +64,8 @@ class InventoryBast extends \yii\db\ActiveRecord
         return [
             'code' => 'Code',
             'date' => 'Date',
-            'user_id' => 'User ID',
-            'type_code' => 'Type Code',
+            'user_id' => 'User',
+            'type_code' => 'Type',
             'keterangan' => 'Keterangan',
             'post' => 'Post',
             'status' => 'Status',
@@ -87,7 +87,7 @@ class InventoryBast extends \yii\db\ActiveRecord
 
     public function beforeSave($attribute)
     {
-        $this->date = str_replace(',', '', $this->date);
+        $this->date = date('Y-m-d', strtotime($this->date));
         return parent::beforeSave($attribute);
     }
 

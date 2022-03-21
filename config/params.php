@@ -21,6 +21,7 @@ $data = [
     'TYPE_PRODUK_JASA' => 'PRODUK JASA',
     'TYPE_ROLL' => 'ROLL',
     'TYPE_BARANG' => 'BARANG',
+    'TYPE_SUP' => 'ADMINISTRATOR',
     // MASTER PERSON TYPE
     'TYPE_CUSTOMER' => 1,
     'TYPE_EKSPEDISI' => 2,

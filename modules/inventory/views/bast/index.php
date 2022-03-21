@@ -1,5 +1,6 @@
 <?php
-
+use app\commands\Helper;
+use kartik\date\DatePicker;
 use yii\helpers\Html;
 use yii\grid\GridView;
 
@@ -11,34 +12,101 @@ $this->title = 'Inventory Bast';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="inventory-bast-index">
-
-    <h1><?= Html::encode($this->title) ?></h1>
-
-    <p>
-        <?= Html::a('Create Inventory Bast', ['create'], ['class' => 'btn btn-success']) ?>
+    <p class="text-right">
+        <?= Html::a('<i class="fontello icon-plus"></i><span>Create Bast</span>', ['create'], ['class' => 'btn btn-success btn-flat btn-sm']) ?>
     </p>
-
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
-
-            'code',
-            'date',
-            'user_id',
-            'type_code',
-            'keterangan',
-            //'post',
-            //'status',
-            //'created_at',
-            //'updated_at',
-
-            ['class' => 'yii\grid\ActionColumn'],
+            [
+                'attribute' => 'code',
+                'contentOptions' => [
+                    'class' => 'text-center',
+                ],
+            ],
+            [
+                'attribute' => 'date',
+                'contentOptions' => [
+                    'class' => 'text-center',
+                ],
+                'filter' => DatePicker::widget([
+                    'model' => $searchModel, 
+                    'name' => 'date', 
+                    'type' => DatePicker::TYPE_COMPONENT_APPEND,
+                    'pickerButton' => false,
+                    'attribute' => 'date',
+                    'pluginOptions' => [
+                        'format' => 'dd-mm-yyyy',
+                        'autoclose' => true,
+                    ],
+                ]),
+                'value' => function($model, $index, $key) {
+                    return date('d-m-Y', strtotime($model->date));
+                }
+            ],
+            [
+                'attribute' => 'user_id',
+                'value' => function($model, $index, $key) {
+                    return (isset($model->profile)) ? $model->profile->name : '';
+                }
+            ],
+            [
+                'attribute' => 'type_code',
+                'value' => function($model, $index, $key) {
+                    return (isset($model->type)) ? $model->type->name : '';
+                }
+            ],
+            [
+                'attribute' => 'post',
+                'contentOptions' => [
+                    'class' => 'text-center',
+                ],
+                'format' => 'raw',
+                'value' => function ($model, $index, $key) { 
+                    return $model->statusPost;
+                }
+            ],
+            [
+                'buttons' => [
+                    'view' => function ($url, $model) {
+                        return Html::a(Helper::buttonIcons()['eye-open'],
+                            ['view', 'code'=>$model->code],
+                            ['title'=>'View', 'aria-label'=>'View', 'data-pjax'=>true]);
+                    },
+                    'update' => function ($url, $model) {
+                        if(\Yii::$app->user->identity->profile->typeUser->value == 'ADMINISTRATOR' 
+                            || \Yii::$app->user->identity->profile->typeUser->value == 'ADMIN'){
+                            return Html::a(Helper::buttonIcons()['pencil'],
+                                ['update', 'code'=>$model->code],
+                                ['title'=>'Update', 'aria-label'=>'Update', 'data-pjax'=>true]);
+                        }
+                    },
+                    'delete' => function ($url, $model) {
+                        if(\Yii::$app->user->identity->profile->typeUser->value == 'ADMINISTRATOR' 
+                            || \Yii::$app->user->identity->profile->typeUser->value == 'ADMIN'){
+                            return Html::a(Helper::buttonIcons()['trash'],
+                                ['delete', 'code'=>$model->code],
+                                [
+                                    'title'=>'Delete',
+                                    'aria-label'=>'Delete', 
+                                    'data-pjax'=>true,
+                                    'data' => [
+                                        'confirm' => 'Are you sure you want to delete this item?',
+                                        'method' => 'post',
+                                    ],
+                                ]);
+                        }
+                    },
+                ],
+                'class' => 'yii\grid\ActionColumn',
+                'contentOptions' => [
+                    'class' => 'text-center column-action',
+                ],
+                'template' => '{view} {update} {delete}',
+            ],
         ],
     ]); ?>
-
-
 </div>

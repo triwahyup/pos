@@ -7,6 +7,8 @@ use app\models\User;
 use app\modules\inventory\models\InventoryBast;
 use app\modules\inventory\models\InventoryBastDetail;
 use app\modules\inventory\models\InventoryBastSearch;
+use app\modules\inventory\models\InventoryStockBarang;
+use app\modules\inventory\models\InventoryStockBast;
 use app\modules\inventory\models\TempInventoryBastDetail;
 use app\modules\master\models\MasterKode;
 use app\modules\master\models\Profile;
@@ -87,7 +89,19 @@ class BastController extends Controller
      */
     public function actionCreate()
     {
-        $profile = Profile::find()->select(['name'])->where(['status' => 1])->indexBy('user_id')->column();
+        $profile = Profile::find()
+            ->select(['profile.name'])
+            ->leftJoin('master_kode b', 'b.code = profile.typeuser_code')
+            ->where(['profile.status' => 1])
+            ->andWhere('value <> "'.\Yii::$app->params['TYPE_SUP'].'"')
+            ->indexBy('user_id')
+            ->column();
+        $type = MasterKode::find()
+            ->select(['name'])
+            ->where(['type'=>\Yii::$app->params['TYPE_BAST'], 'status'=>1])
+            ->indexBy('code')
+            ->column();
+
         $success = true;
         $message = '';
         $model = new InventoryBast();
@@ -162,6 +176,7 @@ class BastController extends Controller
             'model' => $model,
             'profile' => $profile,
             'temp' => $temp,
+            'type' => $type,
         ]);
     }
 
@@ -174,7 +189,19 @@ class BastController extends Controller
      */
     public function actionUpdate($code)
     {
-        $profile = Profile::find()->select(['name'])->where(['status' => 1])->indexBy('user_id')->column();
+        $profile = Profile::find()
+            ->select(['profile.name'])
+            ->leftJoin('master_kode b', 'b.code = profile.typeuser_code')
+            ->where(['profile.status' => 1])
+            ->andWhere('value <> "'.\Yii::$app->params['TYPE_SUP'].'"')
+            ->indexBy('user_id')
+            ->column();
+        $type = MasterKode::find()
+            ->select(['name'])
+            ->where(['type'=>\Yii::$app->params['TYPE_BAST'], 'status'=>1])
+            ->indexBy('code')
+            ->column();
+
         $success = true;
         $message = '';
         $model = $this->findModel($code);
@@ -264,6 +291,7 @@ class BastController extends Controller
             'model' => $model,
             'profile' => $profile,
             'temp' => $temp,
+            'type' => $type,
         ]);
     }
 
@@ -350,7 +378,11 @@ class BastController extends Controller
 
     public function actionListBarang()
     {
-        $model = MasterBarang::find()->where(['status'=>1])->orderBy(['code'=>SORT_ASC])->limit(10)->all();
+        $model = InventoryStockBarang::find()
+            ->where(['status'=>1])
+            ->orderBy(['barang_code'=>SORT_ASC])
+            ->limit(10)
+            ->all();
         return json_encode(['data'=>$this->renderPartial('_list_barang', ['model'=>$model])]);
     }
 
@@ -358,10 +390,13 @@ class BastController extends Controller
     {
         $model = [];
         if(isset($_POST['search'])){
-            $model = MasterBarang::find()
-                ->select(['code', 'concat(code,"-",name) label', 'concat(code,"-",name) name'])
-                ->where(['status'=>1])
-                ->andWhere('concat(code,"-",name) LIKE "%'.$_POST['search'].'%"')
+            $model = InventoryStockBarang::find()
+                ->alias('a')
+                ->select(['b.code', 'concat(b.code,"-",b.name) label', 'concat(b.code,"-",b.name) name'])
+                ->leftJoin('master_barang b', 'b.code = barang_code')
+                ->where(['b.status'=>1])
+                ->andWhere('concat(b.code,"-",b.name) LIKE "%'.$_POST['search'].'%"')
+                ->orderBy(['b.code'=>SORT_ASC])
                 ->asArray()
                 ->limit(10)
                 ->all();
@@ -373,18 +408,23 @@ class BastController extends Controller
     {
         $model = [];
         if(isset($_POST['code'])){
-            $model = MasterBarang::find()->where(['code'=>$_POST['code'], 'status'=>1])->all();
+            $model = InventoryStockBarang::find()
+                ->where(['barang_code'=>$_POST['code'], 'status'=>1])
+                ->orderBy(['barang_code'=>SORT_ASC])
+                ->limit(10)
+                ->all();
         }
         return json_encode(['data'=>$this->renderPartial('_list_barang', ['model'=>$model])]);
     }
 
     public function actionBarang()
     {
-        $model = MasterBarang::find()
+        $model = InventoryStockBarang::find()
             ->alias('a')
-            ->select(['a.*', 'a.code as barang_code', 'b.name as um'])
-            ->leftJoin('master_satuan b', 'b.code = a.satuan_code')
-            ->where(['a.code'=>$_POST['code'], 'a.status'=>1])
+            ->select(['a.*', 'b.name as name', 'b.satuan_code', 'c.name as um'])
+            ->leftJoin('master_barang b', 'b.code = a.barang_code')
+            ->leftJoin('master_satuan c', 'c.code = b.satuan_code')
+            ->where(['b.code'=>$_POST['code'], 'a.status'=>1])
             ->asArray()
             ->one();
         if(empty($model)){
@@ -412,7 +452,30 @@ class BastController extends Controller
         $success = true;
         $message = 'CREATE TEMP SUCCESSFULLY';
         if($request->isPost){
-
+            $temp = new TempInventoryBastDetail();
+            $dataHeader = $request->post('InventoryBast');
+            $dataTemp = $request->post('TempInventoryBastDetail');
+            $temp->attributes = (array)$dataTemp;
+            if(!empty($dataTemp['name'])){
+                if($dataTemp['qty'] > 0){
+                    $temp->code = (!empty($dataHeader['code'])) ? $dataHeader['code'] : 'tmp';
+                    $temp->urutan = $temp->count +1;
+                    $temp->user_id = \Yii::$app->user->id;
+                    if(!$temp->save()){
+                        $success = false;
+                        foreach($temp->errors as $error => $value){
+                            $message = $value[0].', ';
+                        }
+                        $message = substr($message, 0, -2);
+                    }
+                }else{
+                    $success = false;
+                    $message = 'Qty wajib diisi.';
+                }
+            }else{
+                $success = false;
+                $message = 'Barang wajib diisi.';
+            }
         }else{
             throw new NotFoundHttpException('The requested data does not exist.');
         }
@@ -425,7 +488,28 @@ class BastController extends Controller
         $success = true;
         $message = 'UPDATE TEMP SUCCESSFULLY';
         if($request->isPost){
-
+            $dataHeader = $request->post('InventoryBast');
+            $dataTemp = $request->post('TempInventoryBastDetail');
+            $temp = $this->findTemp($dataTemp['id']);
+            $temp->attributes = (array)$dataTemp;
+            if(!empty($dataTemp['name'])){
+                if($dataTemp['qty'] > 0){
+                    $temp->code = (!empty($dataHeader['code'])) ? $dataHeader['code'] : 'tmp';
+                    if(!$temp->save()){
+                        $success = false;
+                        foreach($temp->errors as $error => $value){
+                            $message = $value[0].', ';
+                        }
+                        $message = substr($message, 0, -2);
+                    }
+                }else{
+                    $success = false;
+                    $message = 'Qty wajib diisi.';
+                }
+            }else{
+                $success = false;
+                $message = 'Barang wajib diisi.';
+            }
         }else{
             throw new NotFoundHttpException('The requested data does not exist.');
         }
@@ -490,6 +574,45 @@ class BastController extends Controller
             try{
                 $model->post=1;
                 if($model->save()){
+                    foreach($model->details as $val){
+                        $stockBarang = InventoryStockBarang::findOne(['barang_code'=>$val->barang_code, 'supplier_code'=>$val->supplier_code, 'status'=>1]);
+                        if(isset($stockBarang)){
+                            if($stockBarang->stock > $val->qty){
+                                $stockBarang->stock = $stockBarang->stock-$val->qty;
+                                if(!$stockBarang->save()){
+                                    $success = false;
+                                    $message = (count($stockBarang->errors) > 0) ? 'ERROR UPDATE STOCK ITEM: ' : '';
+                                    foreach($stockBarang->errors as $error => $value){
+                                        $message .= strtoupper($value[0].', ');
+                                    }
+                                    $message = substr($message, 0, -2);
+                                }
+
+                                $stockBast = new InventoryStockBast();
+                                $stockBast->attributes = $val->attributes;
+                                $stockBast->no_document = $model->code;
+                                $stockBast->tgl_document = $model->date;
+                                $stockBast->type_document = "BAST";
+                                $stockBast->status_document = "OUT";
+                                $stockBast->qty_out = $val->qty;
+                                $stockBast->stock = $stockBarang->stock;
+                                if(!$stockBast->save()){
+                                    $success = false;
+                                    $message = (count($stockBast->errors) > 0) ? 'ERROR UPDATE STOCK TRANSACTION: ' : '';
+                                    foreach($stockBast->errors as $error => $value){
+                                        $message .= strtoupper($value[0].', ');
+                                    }
+                                    $message = substr($message, 0, -2);
+                                }
+                            }else{
+                                $success = false;
+                                $message = 'SISA STOCK BARANG '.$val->barang_code.' TIDAK MENCUKUPI. SISA '.$stockBarang->stock;
+                            }
+                        }else{
+                            $success = false;
+                            $message = 'STOCK BARANG '.$val->BARANG.' TIDAK DITEMUKAN.';
+                        }
+                    }
                 }else{
                     $success = false;
                     $message = (count($model->errors) > 0) ? 'ERROR POST BAST TO STOCK BAST: ' : '';

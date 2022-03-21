@@ -234,7 +234,6 @@ function select_barang(code)
 		beforeSend: function(){},
         success: function(data){
             var o = $.parseJSON(data);
-            console.log(o);
             $.each(o, function(index, value){
                 $("#temppurchaseinternaldetail-"+index).val(value);
             });
