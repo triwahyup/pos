@@ -1,5 +1,4 @@
 <?php
-use app\commands\Helper;
 use kartik\date\DatePicker;
 use yii\helpers\Html;
 use yii\grid\GridView;
@@ -114,17 +113,17 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'buttons' => [
                     'view' => function ($url, $model) {
-                        return Html::a(Helper::buttonIcons()['eye-open'],
+                        return Html::a('<i class="fontello icon-eye-1"></i>',
                             ['view', 'no_request'=>$model->no_request],
                             ['title'=>'View', 'aria-label'=>'View', 'data-pjax'=>true]);
                     },
                     'update' => function ($url, $model) {
-                        return Html::a(Helper::buttonIcons()['pencil'],
-                            ['update', 'no_request'=>$model->no_request],
-                            ['title'=>'Update', 'aria-label'=>'Update', 'data-pjax'=>true]);
+                        return Html::a('<i class="fontello icon-pencil-3"></i>',
+                                ['update', 'no_request'=>$model->no_request],
+                                ['title'=>'Update', 'aria-label'=>'Update', 'data-pjax'=>true]);
                     },
                     'delete' => function ($url, $model) {
-                        return Html::a(Helper::buttonIcons()['trash'],
+                        return Html::a('<i class="fontello icon-trash-4"></i>',
                             ['delete', 'no_request'=>$model->no_request],
                             [
                                 'title'=>'Delete',
@@ -145,6 +144,4 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
         ],
     ]); ?>
-
-
 </div>

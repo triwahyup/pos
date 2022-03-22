@@ -1,5 +1,4 @@
 <?php
-use app\commands\Helper;
 use kartik\date\DatePicker;
 use yii\helpers\Html;
 use yii\grid\GridView;
@@ -97,14 +96,14 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'buttons' => [
                     'view' => function ($url, $model) {
-                        return Html::a(Helper::buttonIcons()['eye-open'],
+                        return Html::a('<i class="fontello icon-eye-1"></i>',
                             ['view', 'no_po'=>$model->no_po],
                             ['title'=>'View', 'aria-label'=>'View', 'data-pjax'=>true]);
                     },
                     'update' => function ($url, $model) {
                         if(\Yii::$app->user->identity->profile->typeUser->value == 'ADMINISTRATOR' 
                             || \Yii::$app->user->identity->profile->typeUser->value == 'ADMIN'){
-                            return Html::a(Helper::buttonIcons()['pencil'],
+                            return Html::a('<i class="fontello icon-pencil-3"></i>',
                                 ['update', 'no_po'=>$model->no_po],
                                 ['title'=>'Update', 'aria-label'=>'Update', 'data-pjax'=>true]);
                         }
@@ -112,7 +111,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     'delete' => function ($url, $model) {
                         if(\Yii::$app->user->identity->profile->typeUser->value == 'ADMINISTRATOR' 
                             || \Yii::$app->user->identity->profile->typeUser->value == 'ADMIN'){
-                            return Html::a(Helper::buttonIcons()['trash'],
+                            return Html::a('<i class="fontello icon-trash-4"></i>',
                                 ['delete', 'no_po'=>$model->no_po],
                                 [
                                     'title'=>'Delete',

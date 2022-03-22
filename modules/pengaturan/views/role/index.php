@@ -1,7 +1,6 @@
 <?php
 use yii\helpers\Html;
 use yii\grid\GridView;
-use app\commands\Helper;
 
 /* @var $this yii\web\View */
 /* @var $searchModel app\modules\pengaturan\models\RoleSearch */
@@ -31,9 +30,9 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'buttons' => [
                     'update' => function ($url, $model) {
-                        return Html::a(Helper::buttonIcons()['pencil'],
-                            ['update', 'code'=>$model->code],
-                            ['title'=>'Update', 'aria-label'=>'Update', 'data-pjax'=>true]);
+                        return Html::a('<i class="fontello icon-pencil-3"></i>',
+                                ['update', 'code'=>$model->code],
+                                ['title'=>'Update', 'aria-label'=>'Update', 'data-pjax'=>true]);
                     },
                 ],
                 'class' => 'yii\grid\ActionColumn',

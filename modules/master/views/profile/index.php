@@ -1,5 +1,4 @@
 <?php
-use app\commands\Helper;
 use kartik\date\DatePicker;
 use yii\helpers\Html;
 use yii\grid\GridView;
@@ -38,17 +37,17 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'buttons' => [
                     'view' => function ($url, $model) {
-                        return Html::a(Helper::buttonIcons()['eye-open'],
+                        return Html::a('<i class="fontello icon-eye-1"></i>',
                             ['view', 'user_id'=>$model->user_id],
                             ['title'=>'View', 'aria-label'=>'View', 'data-pjax'=>true]);
                     },
                     'update' => function ($url, $model) {
-                        return Html::a(Helper::buttonIcons()['pencil'],
-                            ['update', 'user_id'=>$model->user_id],
-                            ['title'=>'Update', 'aria-label'=>'Update', 'data-pjax'=>true]);
+                        return Html::a('<i class="fontello icon-pencil-3"></i>',
+                                ['update', 'user_id'=>$model->user_id],
+                                ['title'=>'Update', 'aria-label'=>'Update', 'data-pjax'=>true]);
                     },
                     'delete' => function ($url, $model) {
-                        return Html::a(Helper::buttonIcons()['trash'],
+                        return Html::a('<i class="fontello icon-trash-4"></i>',
                             ['delete', 'user_id'=>$model->user_id],
                             [
                                 'title'=>'Delete',
@@ -69,6 +68,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                 'method' => 'post',
                             ],
                             'class' => 'btn-switch-user',
+                            'style' => 'top: -6px',
                             'title' => 'Switch User to '.$model->name,
                         ]);
 					},
@@ -76,7 +76,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'class' => 'yii\grid\ActionColumn',
                 'contentOptions' => [
                     'class' => 'text-center column-action',
-                    'style' => 'width: 200px',
+                    'style' => 'width: 200px;',
                 ],
                 'template' => '{view} {update} {delete} {switch}',
             ],

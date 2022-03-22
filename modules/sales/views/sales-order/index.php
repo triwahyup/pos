@@ -1,5 +1,4 @@
 <?php
-use app\commands\Helper;
 use kartik\date\DatePicker;
 use yii\helpers\Html;
 use yii\grid\GridView;
@@ -94,14 +93,14 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'buttons' => [
                     'view' => function ($url, $model) {
-                        return Html::a(Helper::buttonIcons()['eye-open'],
+                        return Html::a('<i class="fontello icon-eye-1"></i>',
                             ['view', 'code'=>$model->code],
                             ['title'=>'View', 'aria-label'=>'View', 'data-pjax'=>true]);
                     },
                     'update' => function ($url, $model) {
-                        return Html::a(Helper::buttonIcons()['pencil'],
-                            ['update', 'code'=>$model->code],
-                            ['title'=>'Update', 'aria-label'=>'Update', 'data-pjax'=>true]);
+                        return Html::a('<i class="fontello icon-pencil-3"></i>',
+                                ['update', 'code'=>$model->code],
+                                ['title'=>'Update', 'aria-label'=>'Update', 'data-pjax'=>true]);
                     },
                 ],
                 'class' => 'yii\grid\ActionColumn',
