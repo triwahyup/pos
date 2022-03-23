@@ -54,10 +54,10 @@ use yii\widgets\MaskedInput;
                 </div>
                 <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
                     <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0">
-                        <?= $form->field($model, 'panjang')->textInput() ?>
+                        <?= $form->field($model, 'lebar')->textInput() ?>
                     </div>
                     <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0">
-                        <?= $form->field($model, 'lebar')->textInput() ?>
+                        <?= $form->field($model, 'panjang')->textInput() ?>
                     </div>
                     <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0">
                         <?= $form->field($model, 'gram')->textInput() ?>

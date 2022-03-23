@@ -31,8 +31,9 @@ $this->params['breadcrumbs'][] = $this->title;
                     'code',
                     [
                         'attribute' => 'item_code',
+                        'label' => 'Item Name',
                         'value' => function($model, $value) {
-                            return (isset($model->item)) ? $model->item->code.' - '.$model->item->name : '';
+                            return (isset($model->item)) ? $model->item->name : '';
                         }
                     ],
                     [
@@ -113,10 +114,11 @@ $this->params['breadcrumbs'][] = $this->title;
             <thead>
                 <tr>
                     <th class="text-center">No.</th>
-                    <th class="text-center">Panjang</th>
-                    <th class="text-center">Lebar</th>
-                    <th class="text-center">Qty</th>
+                    <th class="text-center">New Name</th>
                     <th class="text-center">PxL</th>
+                    <th class="text-center">Gram</th>
+                    <th class="text-center">Qty</th>
+                    <th class="text-center">Waste</th>
                 </tr>
             </thead>
             <tbody>
@@ -124,10 +126,11 @@ $this->params['breadcrumbs'][] = $this->title;
                     <?php foreach($model->details as $index=>$val):  ?>
                         <tr>
                             <td class="text-center"><?=$index+1?></td>
-                            <td class="text-center"><?=$val->panjang ?></td>
-                            <td class="text-center"><?=$val->lebar ?></td>
-                            <td class="text-center"><?=$val->qty ?></td>
+                            <td><?=$val->name ?></td>
                             <td class="text-center"><?=$val->panjang.' x '. $val->lebar ?></td>
+                            <td class="text-right"><?=$val->gram .'<span class="text-muted"> Gram</span>' ?></td>
+                            <td class="text-right"><?=$val->qty .'<span class="text-muted"> Lembar</span>' ?></td>
+                            <td class="text-right"><?=(!empty($val->qty_sisa)) ? $val->qty_sisa : 0 ?></td>
                         </tr>
                     <?php endforeach; ?>
                 <?php else : ?>

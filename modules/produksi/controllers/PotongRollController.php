@@ -5,6 +5,9 @@ namespace app\modules\produksi\controllers;
 use app\models\Logs;
 use app\models\User;
 use app\modules\inventory\models\InventoryStockItem;
+use app\modules\inventory\models\InventoryStockTransaction;
+use app\modules\master\models\MasterMaterial;
+use app\modules\master\models\MasterSatuan;
 use app\modules\produksi\models\SpkPotongRoll;
 use app\modules\produksi\models\SpkPotongRollDetail;
 use app\modules\produksi\models\SpkPotongRollSearch;
@@ -33,8 +36,8 @@ class PotongRollController extends Controller
                         [
                             'actions' => [
                                 'index', 'view', 'create', 'update', 'delete', 'post',
-                                'temp', 'get-temp', 'create-temp', 'update-temp', 'delete-temp',
-                                'list-item', 'search', 'item', 'autocomplete'
+                                'temp', 'get-temp', 'create-temp', 'delete-temp',
+                                'list-item', 'search', 'item', 'autocomplete',
                             ],
                             'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('potong-material-roll')),
                             'roles' => ['@'],
@@ -175,6 +178,7 @@ class PotongRollController extends Controller
         $message = '';
         $temp = new TempSpkPotongRollDetail();
         $model = $this->findModel($code);
+        $model->item_name = (isset($model->item)) ? $model->item->name : null;
         if ($this->request->isPost && $model->load($this->request->post())) {
             $connection = \Yii::$app->db;
             $transaction = $connection->beginTransaction();
@@ -281,6 +285,7 @@ class PotongRollController extends Controller
                 $connection = \Yii::$app->db;
                 $transaction = $connection->beginTransaction();
                 try{
+                    $model->item_name = $model->item->name;
                     $model->status = 0;
                     if($model->save()){
                         foreach($model->details as $detail){
@@ -408,13 +413,24 @@ class PotongRollController extends Controller
     {
         $model = InventoryStockItem::find()
             ->alias('a')
-            ->select(['a.*', 'b.*', 'b.name as item_name'])
+            ->select(['a.*', 'b.*',
+                'b.name as item_name', 'c.name as material', 'd.name as satuan', 'e.name as supplier'])
             ->leftJoin('master_material  b', 'b.code = a.item_code')
+            ->leftJoin('master_kode c', 'c.code = b.material_code')
+            ->leftJoin('master_satuan d', 'd.code = b.satuan_code')
+            ->leftJoin('master_person e', 'e.code = a.supplier_code')
             ->where(['item_code'=>$_POST['code'], 'a.status'=>1])
             ->orderBy(['item_code'=>SORT_ASC])
             ->asArray()
             ->one();
-        return json_encode($model);
+
+        $stock = InventoryStockItem::findOne(['item_code'=>$model['item_code'], 'supplier_code'=>$model['supplier_code']]);
+        $model['PxL'] = $model['panjang'] .' x '. $model['lebar'];
+        $model['panjang'] = 0;
+        $model['stock'] = $stock->konversi($stock->item, $stock->onhand);
+        
+        $data = $this->renderAjax('_stock', ['model'=>$model]);
+        return json_encode(['data'=>$data, 'model'=>$model]);
     }
 
     public function actionTemp()
@@ -436,66 +452,66 @@ class PotongRollController extends Controller
         $success = true;
         $message = 'CREATE TEMP SUCCESSFULLY';
         if($request->isPost){
-            $dataTemp = $request->post('TempSpkPotongRollDetail');
-            if(!$dataTemp['panjang']){
+            $dataHeader = $request->post('SpkPotongRoll');
+            if(!$dataHeader['panjang']){
                 $success = false;
                 $message = 'Panjang tidak boleh kosong.';
-            }else if(!$dataTemp['lebar']){
+            }else if(!$dataHeader['lebar']){
                 $success = false;
                 $message = 'Lebar tidak boleh kosong.';
-            }else if(!$dataTemp['total']){
+            }else if(!$dataHeader['potong']){
                 $success = false;
-                $message = 'Total Potong tidak boleh kosong.';
+                $message = 'Total potong tidak boleh kosong.';
             }else{
-                $dataHeader = $request->post('SpkPotongRoll');
-                $temp = new TempSpkPotongRollDetail();
-                $temp->attributes = (array)$dataTemp;
-                $temp->attributes = (array)$dataHeader;
-                $temp->code = (!empty($temp->code)) ? $temp->code : 'tmp';
-                $temp->urutan = $temp->count +1;
-                $temp->user_id = \Yii::$app->user->id;
-                if(!$temp->save()){
+                $dataTemp = $request->post('TempSpkPotongRollDetail');
+                if(!$dataTemp['panjang'] || !$dataTemp['lebar']){
                     $success = false;
-                    foreach($temp->errors as $error => $value){
-                        $message = $value[0].', ';
-                    }
-                    $message = substr($message, 0, -2);
-                }
-            }
-        }else{
-            throw new NotFoundHttpException('The requested data does not exist.');
-        }
-        return json_encode(['success'=>$success, 'message'=>$message]);
-    }
-
-    public function actionUpdateTemp()
-    {
-        $request = \Yii::$app->request;
-        $success = true;
-        $message = 'UPDATE TEMP SUCCESSFULLY';
-        if($request->isPost){
-            $dataTemp = $request->post('TempSpkPotongRollDetail');
-            if(!$dataTemp['panjang']){
-                $success = false;
-                $message = 'Panjang tidak boleh kosong.';
-            }else if(!$dataTemp['lebar']){
-                $success = false;
-                $message = 'Lebar tidak boleh kosong.';
-            }else if(!$dataTemp['total']){
-                $success = false;
-                $message = 'Total Potong tidak boleh kosong.';
-            }else{
-                $dataHeader = $request->post('SpkPotongRoll');
-                $temp = $this->findTemp($dataTemp['id']);
-                $temp->attributes = (array)$dataTemp;
-                $temp->attributes = (array)$dataHeader;
-                $temp->code = (!empty($temp->code)) ? $temp->code : 'tmp';
-                if(!$temp->save()){
+                    $message = 'Potong (PxL) tidak boleh kosong.';
+                }else if(!$dataTemp['gram']){
                     $success = false;
-                    foreach($temp->errors as $error => $value){
-                        $message = $value[0].', ';
+                    $message = 'Gram tidak boleh kosong.';
+                }else if(!$dataTemp['first_name']){
+                    $success = false;
+                    $message = 'Nama Depan tidak boleh kosong.';
+                }else{
+                    $temp = new TempSpkPotongRollDetail();
+                    $temp->attributes = (array)$dataHeader;
+                    if($temp->count < $dataHeader['potong']){
+                        $temp->attributes = (array)$dataTemp;
+                        $temp->code = (!empty($temp->code)) ? $temp->code : 'tmp';
+                        $checkUkPotong = $temp->checkUkPotong($temp);
+                        if($checkUkPotong['success']){
+                            $checkPanjang = $temp->checkPanjang($dataHeader['panjang'], $dataTemp['panjang']);
+                            if($checkPanjang['success']){
+                                $temp->name = $temp->newItemName();
+                                $temp->urutan = $temp->count +1;
+                                $temp->user_id = \Yii::$app->user->id;
+                                $pembagian = $temp->item->lebar / $dataTemp['lebar'];
+                                $hasilQTY = $checkPanjang['hPanjang'] / $checkPanjang['tPanjang'];
+                                if($pembagian == 2){
+                                    $temp->qty = floor($hasilQTY * $pembagian);
+                                }else{
+                                    $temp->qty = floor($hasilQTY);
+                                }
+                                if(!$temp->save()){
+                                    $success = false;
+                                    foreach($temp->errors as $error => $value){
+                                        $message = $value[0].', ';
+                                    }
+                                    $message = substr($message, 0, -2);
+                                }
+                            }else{
+                                $success = false;
+                                $message = 'Panjang tidak boleh lebih dari '.$checkPanjang['hPanjang'];
+                            }
+                        }else{
+                            $success = false;
+                            $message = 'Lebar tidak boleh lebih dari sisa potong. Sisa potong '.$checkUkPotong['sisa_potong'];
+                        }
+                    }else{
+                        $success = false;
+                        $message = 'Maksimal Detail Potong '.$dataHeader['potong'];
                     }
-                    $message = substr($message, 0, -2);
                 }
             }
         }else{
@@ -549,5 +565,150 @@ class PotongRollController extends Controller
             $connection = \Yii::$app->db;
 			$connection->createCommand('ALTER TABLE temp_spk_potong_roll_detail AUTO_INCREMENT=1')->query();
         }
+    }
+
+    public function actionPost($code)
+    {
+        $success = true;
+		$message = '';
+        $model = $this->findModel($code);
+        if(isset($model)){
+            $connection = \Yii::$app->db;
+            $transaction = $connection->beginTransaction();
+            try{
+                $model->item_name = $model->item->name;
+                $model->post=1;
+                if($model->save()){
+                    foreach($model->details as $val){
+                        // CREATE NEW MATERIAL
+                        $material = MasterMaterial::findOne(['name'=>$val->name, 'status'=>1]);
+                        if(empty($material)){
+                            $material = new MasterMaterial();
+                            $material->attributes = $model->attributes;
+                            $material->attributes = $val->attributes;
+                            $material->code = $material->generateCode($model->type_code);
+                            
+                            $satuan = MasterSatuan::findOne(['name'=>\Yii::$app->params['TYPE_RIM_PLANO'], 'status'=>1]);
+                            $material->satuan_code = $satuan->code;
+                            if(!$material->save()){
+                                $success = false;
+                                $message = (count($material->errors) > 0) ? 'ERROR CREATE NEW MASTER MATERIAL: ' : '';
+                                foreach($material->errors as $error => $value){
+                                    $message .= strtoupper($value[0].', ');
+                                }
+                                $message = substr($message, 0, -2);
+                            }
+                        }
+                        
+                        // STOCK OUT
+                        {
+                            $stockItem = InventoryStockItem::findOne(['item_code'=>$val->item_code, 'supplier_code'=>$val->supplier_code]);
+                            $stockItem->attributes = $val->attributes;
+                            $stockItem->onhand = $stockItem->onhand-$model->panjang;
+                            $stockItem->onsales = $stockItem->onsales+$model->panjang;
+                            if(!$stockItem->save()){
+                                $success = false;
+                                $message = (count($stockItem->errors) > 0) ? 'ERROR UPDATE STOCK ITEM: ' : '';
+                                foreach($stockItem->errors as $error => $value){
+                                    $message .= strtoupper($value[0].', ');
+                                }
+                                $message = substr($message, 0, -2);
+                            }
+
+                            $stockTransaction = new InventoryStockTransaction();
+                            $stockTransaction->attributes = $stockItem->attributes;
+                            $stockTransaction->no_document = $model->code;
+                            $stockTransaction->tgl_document = $model->date;
+                            $stockTransaction->type_document = "ROLL MATERIAL";
+                            $stockTransaction->status_document = "OUT";
+                            $stockTransaction->qty_out = $model->panjang;
+                            if(!$stockTransaction->save()){
+                                $success = false;
+                                $message = (count($stockTransaction->errors) > 0) ? 'ERROR UPDATE STOCK TRANSACTION: ' : '';
+                                foreach($stockTransaction->errors as $error => $value){
+                                    $message .= strtoupper($value[0].', ');
+                                }
+                                $message = substr($message, 0, -2);
+                            }
+                        }
+                        // END STOCK OUT
+                        
+                        // STOCK IN
+                        {
+                            $newItem = $material->code;
+                            $stockItem = InventoryStockItem::findOne(['item_code'=>$newItem, 'supplier_code'=>$val->supplier_code]);
+                            if(empty($stockItem)){
+                                $stockItem = new InventoryStockItem();
+                            }
+                            $stockItem->item_code = $newItem;
+                            $stockItem->supplier_code = $val->supplier_code;
+                            $stockItem->onhand = $stockItem->onhand+$val->qty;
+                            if(!$stockItem->save()){
+                                $success = false;
+                                $message = (count($stockItem->errors) > 0) ? 'ERROR UPDATE STOCK ITEM: ' : '';
+                                foreach($stockItem->errors as $error => $value){
+                                    $message .= strtoupper($value[0].', ');
+                                }
+                                $message = substr($message, 0, -2);
+                            }
+
+                            $stockTransaction = new InventoryStockTransaction();
+                            $stockTransaction->attributes = $stockItem->attributes;
+                            $stockTransaction->no_document = $model->code;
+                            $stockTransaction->tgl_document = $model->date;
+                            $stockTransaction->type_document = "ROLL MATERIAL";
+                            $stockTransaction->status_document = "IN";
+                            $stockTransaction->qty_in = $val->qty;
+                            if(!$stockTransaction->save()){
+                                $success = false;
+                                $message = (count($stockTransaction->errors) > 0) ? 'ERROR UPDATE STOCK TRANSACTION: ' : '';
+                                foreach($stockTransaction->errors as $error => $value){
+                                    $message .= strtoupper($value[0].', ');
+                                }
+                                $message = substr($message, 0, -2);
+                            }
+                        }
+                        // END STOCK IN
+                    }
+                }else{
+                    $success = false;
+                    $message = (count($model->errors) > 0) ? 'ERROR POST ROLL MATERIAL TO STOCK GUDANG ITEM: ' : '';
+                    foreach($model->errors as $error => $value){
+                        $message .= strtoupper($value[0].', ');
+                    }
+                    $message = substr($message, 0, -2);
+                }
+
+                if($success){
+                    $message = '['.$model->code.'] SUCCESS POST ROLL MATERIAL TO STOCK GUDANG ITEM.';
+                    $transaction->commit();
+                    $logs =	[
+                        'type' => Logs::TYPE_USER,
+                        'description' => $message,
+                    ];
+                    Logs::addLog($logs);
+                    \Yii::$app->session->setFlash('success', $message);
+                    return $this->redirect(['view', 'code' => $model->code]);
+                }else{
+                    $transaction->rollBack();
+                }
+            }catch(Exception $e){
+                $success = false;
+                $message = $e->getMessage();
+                $transaction->rollBack();
+            }
+            $logs =	[
+                'type' => Logs::TYPE_USER,
+                'description' => $message,
+            ];
+            Logs::addLog($logs);
+        }else{
+            $success = false;
+            $message = 'Data Potong Roll not valid.';
+        }
+        if(!$success){
+            \Yii::$app->session->setFlash('error', $message);
+        }
+        return $this->redirect(['view', 'code' => $model->code]);
     }
 }

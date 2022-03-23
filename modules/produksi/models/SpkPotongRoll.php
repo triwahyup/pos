@@ -3,6 +3,7 @@
 namespace app\modules\produksi\models;
 
 use Yii;
+use app\modules\inventory\models\InventoryStockItem;
 use app\modules\master\models\MasterKode;
 use app\modules\master\models\MasterMaterial;
 use app\modules\master\models\MasterPerson;
@@ -51,7 +52,7 @@ class SpkPotongRoll extends \yii\db\ActiveRecord
     {
         return [
             [['date', 'item_name'], 'required'],
-            [['date'], 'safe'],
+            [['date', 'panjang', 'lebar', 'potong'], 'safe'],
             [['keterangan'], 'string'],
             [['post', 'status', 'created_at', 'updated_at'], 'integer'],
             [['code'], 'string', 'max' => 12],
@@ -74,6 +75,9 @@ class SpkPotongRoll extends \yii\db\ActiveRecord
             'type_code' => 'Type',
             'material_code' => 'Material',
             'satuan_code' => 'Satuan',
+            'panjang' => 'Panjang',
+            'lebar' => 'Lebar',
+            'potong' => 'Potong',
             'keterangan' => 'Keterangan',
             'status' => 'Status',
             'created_at' => 'Created At',
@@ -95,7 +99,15 @@ class SpkPotongRoll extends \yii\db\ActiveRecord
     public function beforeSave($attribute)
     {
         $this->date = date('Y-m-d', strtotime($this->date));
+        $this->panjang = str_replace(',', '', $this->panjang);
+        $this->lebar = str_replace(',', '', $this->lebar);
+        $this->potong = str_replace(',', '', $this->potong);
         return parent::beforeSave($attribute);
+    }
+
+    public function getStock()
+    {
+        return $this->hasOne(InventoryStockItem::className(), ['item_code' => 'item_code', 'supplier_code' => 'supplier_code']);
     }
 
     public function getItem()

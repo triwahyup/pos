@@ -14,9 +14,6 @@ use app\modules\master\models\MasterPerson;
  * @property string $item_code
  * @property int $urutan
  * @property string|null $supplier_code
- * @property float|null $panjang
- * @property float|null $lebar
- * @property float|null $qty
  * @property int|null $user_id
  */
 class TempSpkPotongRollDetail extends \yii\db\ActiveRecord
@@ -37,8 +34,11 @@ class TempSpkPotongRollDetail extends \yii\db\ActiveRecord
         return [
             [['code', 'item_code', 'urutan'], 'required'],
             [['urutan', 'user_id'], 'integer'],
-            [['panjang', 'lebar', 'qty'], 'number'],
+            [['panjang', 'lebar', 'gram'], 'safe'],
+            [['qty'], 'number'],
             [['code'], 'string', 'max' => 12],
+            [['first_name', 'last_name'], 'string', 'max' => 32],
+            [['name', 'keterangan'], 'string', 'max' => 128],
             [['item_code'], 'string', 'max' => 7],
             [['supplier_code'], 'string', 'max' => 3],
         ];
@@ -55,19 +55,8 @@ class TempSpkPotongRollDetail extends \yii\db\ActiveRecord
             'item_code' => 'Item Code',
             'urutan' => 'Urutan',
             'supplier_code' => 'Supplier',
-            'panjang' => 'Panjang',
-            'lebar' => 'Lebar',
-            'qty' => 'Qty',
             'user_id' => 'User ID',
         ];
-    }
-
-    public function beforeSave($attribute)
-    {
-        $this->panjang = str_replace(',', '', $this->panjang);
-        $this->lebar = str_replace(',', '', $this->lebar);
-        $this->qty = str_replace(',', '', $this->qty);
-        return parent::beforeSave($attribute);
     }
 
     public function getItem()
@@ -88,5 +77,54 @@ class TempSpkPotongRollDetail extends \yii\db\ActiveRecord
     public function getTmps()
     {
         return TempSpkPotongRollDetail::find()->where(['user_id'=> \Yii::$app->user->id])->all();
+    }
+
+    public function newItemName()
+    {
+        $str = $this->first_name.' ';
+        $str .= $this->panjang.'x'.$this->lebar.'/'.$this->gram;
+        if(!empty($this->last_name)){
+            $str .= ' ('.$this->last_name.')';
+        }
+        return $str;
+    }
+
+    public function checkPanjang($hP, $tP)
+    {
+        $hPanjang = str_replace(',', '', $hP);
+        $tPanjang = str_replace(',', '', $tP);
+        $success = false;
+        if($hPanjang >= $tPanjang){
+            $success = true;
+        }
+        return ['success'=>$success, 'hPanjang'=>$hPanjang, 'tPanjang'=>$tPanjang];
+    }
+
+    public function checkUkPotong($temp)
+    {
+        $temps = TempSpkPotongRollDetail::find()
+            ->where(['code'=>$temp->code, 'item_code'=>$temp->item_code, 'user_id'=> \Yii::$app->user->id])
+            ->all();
+        $item = MasterMaterial::findOne(['code'=>$temp->item_code]);
+        $item_L = $item->lebar;
+        $total_L = 0;
+        foreach($temps as $val){
+            $total_L += $val->lebar;
+        }
+        
+        $pembagian = (!empty($total_L)) ? $item_L / $total_L : 0;
+        if($pembagian == 2){
+            $sisa_potong = 0;
+            $total_L = ($total_L*$pembagian);
+        }else{
+            $sisa_potong = $item_L - $total_L;
+        }
+        
+        $success = true;
+        $total_all = $total_L + $temp->lebar;
+        if($total_all > $item_L){
+            $success = false;
+        }
+        return ['success' => $success, 'sisa_potong' => $sisa_potong];
     }
 }

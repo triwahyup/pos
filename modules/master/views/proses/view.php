@@ -35,6 +35,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             return $model->typeOngkos;
                         }
                     ],
+                    'urutan',
                     'index',
                     [
                         'attribute' => 'harga',

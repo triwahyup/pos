@@ -46,8 +46,10 @@ class SpkPotongRollDetail extends \yii\db\ActiveRecord
         return [
             [['code', 'item_code', 'urutan'], 'required'],
             [['urutan', 'status', 'created_at', 'updated_at'], 'integer'],
-            [['panjang', 'lebar', 'qty'], 'number'],
+            [['panjang', 'lebar', 'qty', 'qty_sisa', 'gram'], 'number'],
             [['code'], 'string', 'max' => 12],
+            [['first_name', 'last_name'], 'string', 'max' => 32],
+            [['name', 'keterangan'], 'string', 'max' => 128],
             [['item_code'], 'string', 'max' => 7],
             [['supplier_code'], 'string', 'max' => 3],
             [['code', 'item_code', 'urutan'], 'unique', 'targetAttribute' => ['code', 'item_code', 'urutan']],

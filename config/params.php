@@ -28,6 +28,8 @@ $data = [
     'TYPE_OUTSOURCE' => 3,
     'TYPE_SUPPLIER' => 4,
     'TYPE_SUPPLIER_BARANG' => 5,
+    // MASTER SATUAN
+    'TYPE_RIM_PLANO' => 'RIM-PLANO',
     
     // TYPE STATUS
     'IN_PROGRESS' => 'IN_PROGRESS',

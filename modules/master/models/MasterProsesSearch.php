@@ -17,7 +17,7 @@ class MasterProsesSearch extends MasterProses
     public function rules()
     {
         return [
-            [['name', 'type', 'harga', 'index', 'created_at', 'updated_at', 'mesin_type'], 'safe'],
+            [['name', 'type', 'harga', 'index', 'created_at', 'updated_at', 'mesin_type', 'urutan'], 'safe'],
         ];
     }
 
@@ -75,7 +75,8 @@ class MasterProsesSearch extends MasterProses
         $query->andFilterWhere([
             'harga' => $this->harga,
             'index' => $this->index,
-            'status' => $this->status
+            'status' => $this->status,
+            'urutan' => $this->urutan
         ]);
 
         $query->andFilterWhere(['like', 'a.name', $this->name]);

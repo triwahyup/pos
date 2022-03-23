@@ -47,8 +47,8 @@ $this->params['breadcrumbs'][] = $this->title;
                         return (isset($model->satuan)) ? $model->satuan->name : '';
                     }
                 ],
-                'panjang',
                 'lebar',
+                'panjang',
                 'gram',
                 'keterangan:ntext',
                 [

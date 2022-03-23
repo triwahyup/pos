@@ -39,9 +39,9 @@ class MasterProses extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['name', 'type', 'harga'], 'required'],
+            [['name', 'type', 'harga', 'urutan'], 'required'],
             [['harga', 'index'], 'safe'],
-            [['status', 'created_at', 'updated_at', 'type'], 'integer'],
+            [['status', 'created_at', 'updated_at', 'type', 'urutan'], 'integer'],
             [['code', 'mesin_type'], 'string', 'max' => 3],
             [['name', 'keterangan'], 'string', 'max' => 128],
             [['code'], 'unique'],
