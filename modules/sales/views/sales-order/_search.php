@@ -17,7 +17,7 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'code') ?>
 
-    <?= $form->field($model, 'nama_order') ?>
+    <?= $form->field($model, 'name') ?>
 
     <?= $form->field($model, 'tgl_so') ?>
 
@@ -27,19 +27,27 @@ use yii\widgets\ActiveForm;
 
     <?php // echo $form->field($model, 'customer_code') ?>
 
+    <?php // echo $form->field($model, 'ekspedisi_flag') ?>
+
+    <?php // echo $form->field($model, 'ekspedisi_code') ?>
+
+    <?php // echo $form->field($model, 'term_in') ?>
+
+    <?php // echo $form->field($model, 'deadline') ?>
+
     <?php // echo $form->field($model, 'type_order') ?>
 
     <?php // echo $form->field($model, 'up_produksi') ?>
 
-    <?php // echo $form->field($model, 'ekspedisi_name') ?>
-
-    <?php // echo $form->field($model, 'biaya_pengiriman') ?>
-
     <?php // echo $form->field($model, 'ppn') ?>
 
-    <?php // echo $form->field($model, 'total_order') ?>
+    <?php // echo $form->field($model, 'total_order_material') ?>
+
+    <?php // echo $form->field($model, 'total_order_bahan') ?>
 
     <?php // echo $form->field($model, 'total_biaya_produksi') ?>
+
+    <?php // echo $form->field($model, 'total_ppn') ?>
 
     <?php // echo $form->field($model, 'grand_total') ?>
 

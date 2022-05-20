@@ -155,27 +155,21 @@ $this->params['breadcrumbs'][] = $this->title;
                     </tr>
                 </thead>
                 <tbody>
-                    <?php if(count($model->produksiInAlls) > 0): ?>
-                        <?php foreach($model->produksiInAlls as $index=>$val): ?>
-                            <tr>
-                                <td class="text-center"><?=$index+1 ?></td>
-                                <td class="text-center"><?=date('d-m-Y', strtotime($val->tgl_spk)) ?></td>
-                                <td><?=(isset($val->proses)) ? $val->proses->name : '' ?></td>
-                                <td class="text-center"><?=$val->uk_potong ?></td>
-                                <td><?=(isset($val->mesin)) ? $val->mesin->name : '-' ?></td>
-                                <td><?=(isset($val->operator)) ? $val->operator->name : '-' ?></td>
-                                <td><?=(isset($val->outsource)) ? $val->outsource->name : '-' ?></td>
-                                <td class="text-right"><?=number_format($val->qty_proses).' LB' ?></td>
-                                <td class="text-right"><?=number_format($val->qty_hasil).' LB' ?></td>
-                                <td class="text-right"><?=number_format($val->qty_rusak).' LB' ?></td>
-                                <td class="text-center"><?=$val->statusProduksi ?></td>
-                            </tr>
-                        <?php endforeach; ?>
-                    <?php else: ?>
+                    <?php foreach($model->produksiInAlls as $index=>$val): ?>
                         <tr>
-                            <td class="text-danger" colspan="10">Data masih kosong.</td>
+                            <td class="text-center"><?=$index+1 ?></td>
+                            <td class="text-center"><?=(!empty($val->tgl_spk)) ? date('d-m-Y', strtotime($val->tgl_spk)) : '-' ?></td>
+                            <td><?=(isset($val->proses)) ? $val->proses->name : '' ?></td>
+                            <td class="text-center"><?=(!empty($val->uk_potong)) ? $val->uk_potong : '-' ?></td>
+                            <td><?=(isset($val->mesin)) ? $val->mesin->name : '-' ?></td>
+                            <td><?=(isset($val->operator)) ? $val->operator->name : '-' ?></td>
+                            <td><?=(isset($val->outsource)) ? $val->outsource->name : '-' ?></td>
+                            <td class="text-right"><?=number_format($val->qty_proses).' LB' ?></td>
+                            <td class="text-right"><?=number_format($val->qty_hasil).' LB' ?></td>
+                            <td class="text-right"><?=number_format($val->qty_rusak).' LB' ?></td>
+                            <td class="text-center"><?=$val->statusProduksi ?></td>
                         </tr>
-                    <?php endif; ?>
+                    <?php endforeach; ?>
                 </tbody>
             </table>
         </div>

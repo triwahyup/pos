@@ -5,9 +5,7 @@
             <td class="text-center"><?=$val->item_code ?></td>
             <td><?=(isset($val->item)) ? $val->item->name : '-' ?></td>
             <td><?=(isset($val->supplier)) ? $val->supplier->name : '-' ?></td>
-            <?php for($a=1;$a<3;$a++):?>
-                <td class="text-center"><?=($val['qty_order_'.$a] !=0) ? $val['qty_order_'.$a] .' '.$val['um_'.$a] : '' ?></td>
-            <?php endfor; ?>
+            <td class="text-center"><?=$val->qty_order_1.' '.$val->um_1 ?></td>
             <td class="text-center"><?=$val->item->material->name ?></td>
             <td class="text-center">
                 <a class="custom-btn" href="javascript:void(0)" data-button="delete_temp" data-id="<?=$val->id ?>">

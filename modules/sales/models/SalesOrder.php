@@ -3,14 +3,8 @@
 namespace app\modules\sales\models;
 
 use Yii;
-use yii\behaviors\TimestampBehavior;
 use app\modules\master\models\MasterPerson;
-use app\modules\sales\models\SalesOrderItem;
-use app\modules\sales\models\SalesOrderPotong;
-use app\modules\sales\models\SalesOrderProses;
-use app\modules\sales\models\TempSalesOrderItem;
-use app\modules\sales\models\TempSalesOrderPotong;
-use app\modules\sales\models\TempSalesOrderProses;
+use yii\behaviors\TimestampBehavior;
 
 /**
  * This is the model class for table "sales_order".
@@ -21,12 +15,17 @@ use app\modules\sales\models\TempSalesOrderProses;
  * @property string|null $no_po
  * @property string|null $tgl_po
  * @property string|null $customer_code
+ * @property int|null $ekspedisi_flag
+ * @property string|null $ekspedisi_code
+ * @property int|null $term_in
+ * @property string|null $deadline
  * @property int|null $type_order
  * @property int|null $up_produksi
- * @property string|null $ekspedisi_code
  * @property float|null $ppn
  * @property float|null $total_order_material
+ * @property float|null $total_order_bahan
  * @property float|null $total_biaya_produksi
+ * @property float|null $total_ppn
  * @property float|null $grand_total
  * @property string|null $keterangan
  * @property int|null $post
@@ -59,7 +58,7 @@ class SalesOrder extends \yii\db\ActiveRecord
         return [
             [['name', 'type_order', 'customer_code', 'no_po', 'ekspedisi_flag'], 'required'],
             [['tgl_so', 'tgl_po', 'deadline'], 'safe'],
-            [['term_in', 'ekspedisi_flag', 'type_order', 'up_produksi', 'post', 'status', 'created_at', 'updated_at'], 'integer'],
+            [['ekspedisi_flag', 'term_in', 'type_order', 'up_produksi', 'post', 'status', 'created_at', 'updated_at'], 'integer'],
             [['ppn', 'total_order_material', 'total_order_bahan', 'total_biaya_produksi', 'total_ppn', 'grand_total'], 'number'],
             [['code', 'no_po'], 'string', 'max' => 12],
             [['name', 'keterangan'], 'string', 'max' => 128],
@@ -76,19 +75,22 @@ class SalesOrder extends \yii\db\ActiveRecord
     {
         return [
             'code' => 'Code',
-            'name' => 'Nama Job',
+            'name' => 'Name',
             'tgl_so' => 'Tgl So',
             'no_po' => 'No Po',
             'tgl_po' => 'Tgl Po',
             'customer_code' => 'Customer',
+            'ekspedisi_flag' => 'Ekspedisi Flag',
+            'ekspedisi_code' => 'Ekspedisi',
             'term_in' => 'Term In',
+            'deadline' => 'Deadline',
             'type_order' => 'Type Order',
             'up_produksi' => 'Up Produksi',
-            'ekspedisi_flag' => 'Pengambilan Barang',
-            'ekspedisi_code' => 'Ekspedisi Code',
             'ppn' => 'Ppn',
-            'total_order_material' => 'Total Order',
+            'total_order_material' => 'Total Order Material',
+            'total_order_bahan' => 'Total Order Bahan',
             'total_biaya_produksi' => 'Total Biaya Produksi',
+            'total_ppn' => 'Total Ppn',
             'grand_total' => 'Grand Total',
             'keterangan' => 'Keterangan',
             'post' => 'Post',
@@ -127,17 +129,6 @@ class SalesOrder extends \yii\db\ActiveRecord
         return $this->hasOne(MasterPerson::className(), ['code' => 'ekspedisi_code']);
     }
 
-    public $type_material='012';
-    public function getItemsMaterial()
-    {
-        return $this->hasMany(SalesOrderItem::className(), ['code' => 'code', 'type_code' => 'type_material']);
-    }
-
-    public function getItemsNonMaterial()
-    {
-        return SalesOrderItem::find()->where(['code' => $this->code])->andWhere('type_code <> "'.$this->type_material.'"')->all();
-    }
-
     public function getItems()
     {
         return $this->hasMany(SalesOrderItem::className(), ['code' => 'code']);
@@ -151,6 +142,27 @@ class SalesOrder extends \yii\db\ActiveRecord
     public function getProses()
     {
         return $this->hasMany(SalesOrderProses::className(), ['code' => 'code']);
+    }
+
+    public function getItemsMaterial()
+    {
+        $model = SalesOrderItem::find()
+            ->alias('a')
+            ->leftJoin('master_kode b', 'b.code = a.type_code')
+            ->where(['a.code'=>$this->code, 'value'=>\Yii::$app->params['TYPE_KERTAS']])
+            ->all();
+        return $model;
+    }
+
+    public function getItemsNonMaterial()
+    {
+        $model = SalesOrderItem::find()
+            ->alias('a')
+            ->leftJoin('master_kode b', 'b.code = a.type_code')
+            ->where(['a.code'=>$this->code])
+            ->andWhere('value <> "'.\Yii::$app->params['TYPE_KERTAS'].'"')
+            ->all();
+        return $model;
     }
 
     public function getPotongTemps()
@@ -183,14 +195,25 @@ class SalesOrder extends \yii\db\ActiveRecord
         return TempSalesOrderProses::findAll(['user_id' => \Yii::$app->user->id]);
     }
 
-    public function itemsMaterialTemps()
+    public function itemsMaterial()
     {
-        return TempSalesOrderItem::findAll(['type_code'=>$this->type_material, 'user_id' => \Yii::$app->user->id]);
+        $model = TempSalesOrderItem::find()
+            ->alias('a')
+            ->leftJoin('master_kode b', 'b.code = a.type_code')
+            ->where(['a.code'=>$this->code, 'value'=>\Yii::$app->params['TYPE_KERTAS']])
+            ->all();
+        return $model;
     }
 
-    public function itemsNonMaterialTemps()
+    public function itemsNonMaterial()
     {
-        return TempSalesOrderItem::find()->where('type_code <> "'.$this->type_material.'"')->all();
+        $model = TempSalesOrderItem::find()
+            ->alias('a')
+            ->leftJoin('master_kode b', 'b.code = a.type_code')
+            ->where(['a.code'=>$this->code])
+            ->andWhere('value <> "'.\Yii::$app->params['TYPE_KERTAS'].'"')
+            ->all();
+        return $model;
     }
 
     public function getTypeOrder()
@@ -220,12 +243,12 @@ class SalesOrder extends \yii\db\ActiveRecord
     public function getTotalOrder()
     {
         $total_order_material=0;
-        foreach($this->itemsMaterialTemps() as $val){
+        foreach($this->itemsMaterial() as $val){
             $total_order_material += $val->total_order;
         }
         $this->total_order_material = $total_order_material;
         $total_order_bahan=0;
-        foreach($this->itemsNonMaterialTemps() as $val){
+        foreach($this->itemsNonMaterial() as $val){
             $total_order_bahan += $val->total_order;
         }
         $this->total_order_bahan = $total_order_bahan;

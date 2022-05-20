@@ -4,12 +4,12 @@ namespace app\modules\produksi\models;
 
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use app\modules\produksi\models\Spk;
+use app\modules\produksi\models\SpkOrder;
 
 /**
- * SpkSearch represents the model behind the search form of `app\modules\produksi\models\Spk`.
+ * SpkOrderSearch represents the model behind the search form of `app\modules\produksi\models\SpkOrder`.
  */
-class SpkSearch extends Spk
+class SpkOrderSearch extends SpkOrder
 {
     /**
      * {@inheritdoc}
@@ -39,7 +39,7 @@ class SpkSearch extends Spk
      */
     public function search($params)
     {
-        $query = Spk::find();
+        $query = SpkOrder::find();
 
         // add conditions that should always apply here
 

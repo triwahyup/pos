@@ -4,34 +4,46 @@ namespace app\modules\produksi\models;
 
 use Yii;
 use app\models\Profile;
+use app\modules\master\models\MasterMaterial;
 use app\modules\master\models\MasterMesin;
 use app\modules\master\models\MasterPerson;
 use app\modules\master\models\MasterProses;
 use yii\behaviors\TimestampBehavior;
 
 /**
- * This is the model class for table "spk_detail".
+ * This is the model class for table "spk_order_detail".
  *
  * @property string $no_spk
  * @property string $item_code
- * @property string|null $proses_code
+ * @property int $urutan
+ * @property string|null $tgl_spk
+ * @property string $proses_code
  * @property int|null $proses_type
+ * @property string|null $outsource_code
  * @property string|null $mesin_code
  * @property string|null $mesin_type
+ * @property string|null $uk_potong
+ * @property string|null $no_sj
+ * @property string|null $nopol
  * @property float|null $qty_hasil
+ * @property float|null $qty_rusak
+ * @property float|null $qty_proses
+ * @property float|null $gram
+ * @property int|null $user_id
  * @property string|null $keterangan
+ * @property int|null $status_produksi
  * @property int|null $status
  * @property int|null $created_at
  * @property int|null $updated_at
  */
-class SpkDetail extends \yii\db\ActiveRecord
+class SpkOrderDetail extends \yii\db\ActiveRecord
 {
     /**
      * {@inheritdoc}
      */
     public static function tableName()
     {
-        return 'spk_detail';
+        return 'spk_order_detail';
     }
 
     public function behaviors()
@@ -47,14 +59,15 @@ class SpkDetail extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['no_spk', 'item_code', 'proses_code', 'mesin_code', 'qty_proses', 'user_id', 'uk_potong'], 'required'],
-            [['status_produksi', 'potong_id', 'urutan', 'proses_type', 'user_id', 'status', 'created_at', 'updated_at'], 'integer'],
-            [['qty_hasil', 'qty_rusak', 'qty_proses', 'tgl_spk', 'gram'], 'safe'],
+            [['no_spk', 'item_code', 'urutan', 'proses_code'], 'required'],
+            [['urutan', 'urutan_proses', 'proses_type', 'potong_id', 'user_id', 'status_produksi', 'status', 'created_at', 'updated_at'], 'integer'],
+            [['tgl_spk'], 'safe'],
+            [['qty_hasil', 'qty_rusak', 'qty_proses', 'gram'], 'number'],
             [['no_spk', 'uk_potong', 'no_sj', 'nopol'], 'string', 'max' => 12],
             [['item_code'], 'string', 'max' => 7],
-            [['proses_code', 'mesin_code', 'mesin_type', 'outsource_code'], 'string', 'max' => 3],
+            [['proses_code', 'outsource_code', 'mesin_code', 'mesin_type'], 'string', 'max' => 3],
             [['keterangan'], 'string', 'max' => 128],
-            [['no_spk', 'item_code', 'potong_id', 'urutan'], 'unique', 'targetAttribute' => ['no_spk', 'item_code', 'potong_id', 'urutan']],
+            [['no_spk', 'item_code', 'urutan'], 'unique', 'targetAttribute' => ['no_spk', 'item_code', 'urutan']],
             [['status'], 'default', 'value' => 1],
         ];
     }
@@ -67,33 +80,42 @@ class SpkDetail extends \yii\db\ActiveRecord
         return [
             'no_spk' => 'No Spk',
             'item_code' => 'Item Code',
-            'proses_code' => 'Produksi',
+            'urutan' => 'Urutan',
+            'tgl_spk' => 'Tgl Spk',
+            'proses_code' => 'Proses Code',
             'proses_type' => 'Proses Type',
-            'mesin_code' => 'Mesin',
+            'outsource_code' => 'Outsource Code',
+            'mesin_code' => 'Mesin Code',
             'mesin_type' => 'Mesin Type',
+            'uk_potong' => 'Uk Potong',
+            'no_sj' => 'No Sj',
+            'nopol' => 'Nopol',
             'qty_hasil' => 'Qty Hasil',
+            'qty_rusak' => 'Qty Rusak',
+            'qty_proses' => 'Qty Proses',
+            'gram' => 'Gram',
+            'user_id' => 'User ID',
             'keterangan' => 'Keterangan',
+            'status_produksi' => 'Status Produksi',
             'status' => 'Status',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
-            'outsource_code' => 'Outsource',
-            'user_id' => 'Operator Mesin',
         ];
     }
 
     public function beforeSave($attribute)
     {
-        $this->tgl_spk = date('Y-m-d', strtotime($this->tgl_spk));
-        $this->qty_proses = str_replace(',', '', $this->qty_proses);
-        $this->qty_hasil = str_replace(',', '', $this->qty_hasil);
-        $this->qty_rusak = str_replace(',', '', $this->qty_rusak);
+        $this->tgl_spk = (!empty($this->tgl_spk)) ? date('Y-m-d', strtotime($this->tgl_spk)) : null;
+        $this->qty_proses = (!empty($this->qty_proses)) ? str_replace(',', '', $this->qty_proses) : null;
+        $this->qty_hasil = (!empty($this->qty_hasil)) ? str_replace(',', '', $this->qty_hasil) : null;
+        $this->qty_rusak = (!empty($this->qty_rusak)) ? str_replace(',', '', $this->qty_rusak) : null;
         return parent::beforeSave($attribute);
     }
 
     public function getQtyProses()
     {
-        $models = SpkDetail::find()
-            ->where(['no_spk'=>$this->no_spk, 'item_code'=>$this->item_code, 'potong_id'=>$this->potong_id, 'proses_code'=>$this->proses_code])
+        $models = SpkOrderDetail::find()
+            ->where(['no_spk'=>$this->no_spk, 'item_code'=>$this->item_code, 'proses_code'=>$this->proses_code])
             ->all();
         $total = 0;
         foreach($models as $val){
@@ -108,12 +130,17 @@ class SpkDetail extends \yii\db\ActiveRecord
 
     public function getCount()
     {
-        return SpkDetail::find()->where(['no_spk'=>$this->no_spk, 'item_code'=>$this->item_code, 'potong_id'=>$this->potong_id])->count();
+        return SpkOrderDetail::find()->where(['no_spk'=>$this->no_spk, 'item_code'=>$this->item_code])->count();
     }
 
     public function getAlls()
     {
-        return SpkDetail::find()->where(['no_spk'=>$this->no_spk, 'item_code'=>$this->item_code, 'potong_id'=>$this->potong_id])->all();
+        return SpkOrderDetail::find()->where(['no_spk'=>$this->no_spk, 'item_code'=>$this->item_code])->all();
+    }
+
+    public function getitem()
+    {
+        return $this->hasOne(MasterMaterial::className(), ['code' => 'item_code']);
     }
 
     public function getMesin()
@@ -149,6 +176,8 @@ class SpkDetail extends \yii\db\ActiveRecord
             $message = '<span class="text-label text-warning">Done Sebagian</span>';
         }else if($this->status_produksi==5){
             $message = '<span class="text-label text-danger">Rusak Sebagian</span>';
+        }else{
+            $message = '<span class="text-label text-warning">Belum Proses</span>';
         }
         return $message;
     }

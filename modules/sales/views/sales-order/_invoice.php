@@ -176,220 +176,139 @@ $this->params['breadcrumbs'][] = $this->title;
                 </div>
             </div>
         </div>
+        <!-- detail item -->
         <div class="col-lg-12 col-md-12 col-xs-12 margin-top-20">
             <h6>Detail Item</h6>
-            <hr />
-        </div>
-        <?php foreach($model->itemsMaterial as $item): ?>
-            <div class="col-lg-12 col-md-12 col-xs-12">
-                <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
-                    <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                        <label class="font-size-12">Material</label>
-                    </div>
-                    <div class="col-lg-5 col-md-5 col-sm-12 col-xs-12 padding-right-0">
-                        <span><?=(isset($item->item->name)) ? $item->item->code.' - '.$item->item->name : '' ?></span>
-                    </div>
-                    <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                        <label class="font-size-12">Total Potong</label>
-                    </div>
-                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-right-0">
-                        <span><?=$item->total_potong.'<span class="text-muted font-size-10"> ('.number_format($item->jumlah_cetak).' cetak)</span>' ?></span>
-                    </div>
-                </div>
-                <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
-                    <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                        <label class="font-size-12">QTY Order</label>
-                    </div>
-                    <div class="col-lg-5 col-md-5 col-sm-12 col-xs-12 padding-right-0">
-                        <strong class="font-size-12">
-                            <?php for($a=1;$a<3;$a++): ?>
-                                <?=(!empty($item['qty_order_'.$a])) ? number_format($item['qty_order_'.$a]).' '.$item['um_'.$a] : null ?>
-                            <?php endfor; ?>
-                        </strong>
-                        <span class="text-muted font-size-12">
-                            <?='('.number_format($item->inventoryStock->satuanTerkecil($item->item_code, [0=>$item->qty_order_1, 1=>$item->qty_order_2])).' LEMBAR)' ?>
-                        </span>
-                    </div>
-                    <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                        <label class="font-size-12">Total Warna</label>
-                    </div>
-                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-right-0">
-                        <span><?=$item->total_warna ?></span>
-                    </div>
-                </div>
-                <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
-                    <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                        <label class="font-size-12">Supplier</label>
-                    </div>
-                    <div class="col-lg-5 col-md-5 col-sm-12 col-xs-12 padding-right-0">
-                        <span><?=(isset($item->supplier)) ? $item->supplier->name : '-' ?></span>
-                    </div>
-                    <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                        <label class="font-size-12">Total Order</label>
-                    </div>
-                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-right-0">
-                        <strong class="font-size-12"><?='Rp.'.number_format($item->total_order).'.-' ?></strong>
-                    </div>
-                </div>
-                <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
-                    <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-left-0 padding-right-0">    
-                        <label class="font-size-12">Harga</label>
-                    </div>
-                    <div class="col-lg-5 col-md-5 col-sm-12 col-xs-12 padding-right-0">
-                        <strong class="font-size-12">
-                            <?php for($a=1;$a<3;$a++): ?>
-                                <?=(!empty($item['harga_jual_'.$a])) ? 
-                                    '<span class="text-money">Rp.'.number_format($item['harga_jual_'.$a]).'.-</span>
-                                    <span class="text-muted font-size-10">(Per Lembar '.$item['um_'.$a].')</span><br />' 
-                                    : null ?>
-                            <?php endfor; ?>
-                        </strong>
-                    </div>
-                    <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                        <label class="font-size-12">Lb. Ikat</label>
-                    </div>
-                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-right-0">
-                        <span class="font-size-10">
-                            <?=(!empty($item->lembar_ikat_1) ? number_format($item->lembar_ikat_1) .' '.$item->lembar_ikat_um_1 .' / ' : '') ?>
-                            <?=(!empty($item->lembar_ikat_2) ? number_format($item->lembar_ikat_2) .' '.$item->lembar_ikat_um_2 .' / ' : '') ?>
-                            <?=(!empty($item->lembar_ikat_3) ? number_format($item->lembar_ikat_3) .' '.$item->lembar_ikat_um_3 : '') ?>
-                        </span>
-                    </div>
-                </div>
-                <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
-                    <div class="col-lg-4 col-md-4 col-xs-12 padding-left-0 padding-right-0">
-                        <table class="table table-bordered table-custom margin-top-10">
-                            <thead>
-                                <tr>
-                                    <th class="text-center" colspan="3">Detail Potong</th>
-                                </tr>
-                                <tr>
-                                    <th class="text-center">No.</th>
-                                    <th class="text-center">PxL</th>
-                                    <th class="text-center">Objek</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach($item->potongs as $no=>$val): ?>
-                                    <tr>
-                                        <td class="text-center"><?=$no+1 ?></td>
-                                        <td class="text-center"><?=$val->panjang.'x'.$val->lebar ?></td>
-                                        <td class="text-right">
-                                            <?=$val->objek .'
-                                            <span class="text-muted font-size-10">('.number_format($val->total_objek).' objek)</span>' ?>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                                <?php for($i=count($item->potongs)+1; $i<(count($item->proses))+1; $i++) : ?>
-                                    <tr>
-                                        <td class="text-center"><?=$i ?></td>
-                                        <td class="text-center" colspan="2">-</td>
-                                    </tr>
-                                <?php endfor; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="col-lg-8 col-md-8 col-xs-12 padding-right-0">
-                        <table class="table table-bordered table-custom margin-top-10">
-                            <thead>
-                                <tr>
-                                    <th class="text-center" colspan="5">Detail Proses Produksi</th>
-                                </tr>
-                                <tr>
-                                    <th class="text-center">No.</th>
-                                    <th class="text-center">Proses Produksi</th>
-                                    <th class="text-center">Keterangan</th>
-                                    <th class="text-center">Index</th>
-                                    <th class="text-center">Biaya</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php 
-                                    $totalBiaya=0;
-                                    foreach($item->proses as $no=>$val):
-                                        $totalBiaya += $val->total_biaya; ?>
-                                    <tr>
-                                        <td class="text-center"><?=$no+1 ?></td>
-                                        <td class="text-left text-muted">
-                                            <?='<i>'.$val->prosesProduksi->name.'</i>' ?>
-                                        </td>
-                                        <td class="text-muted text-left">
-                                            <?='<i>'.$val->keterangan.'</i>' ?>
-                                        </td>
-                                        <td class="text-muted text-right">
-                                            <?='<i>'.$val->index.'</i>' ?>
-                                        </td>
-                                        <td class="text-right">
-                                            <?='<strong>'.number_format($val->total_biaya).'</strong>.-' ?>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                                <tr>
-                                    <td class="summary" colspan="4"><strong>Total Biaya:</strong></td>
-                                    <td class="summary"><strong><?=number_format($totalBiaya).'.-' ?></strong></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        <?php endforeach; ?>
-        <div class="col-lg-12 col-md-12 col-xs-12 margin-top-20">
-            <h6>Detail Bahan Pembantu</h6>
-            <hr />
-        </div>
-        <div class="col-lg-12 col-md-12 col-xs-12">
-            <table class="table table-bordered table-custom margin-top-10">
+            <hr class="margin-top-0" />
+            <table class="table table-bordered table-custom">
                 <thead>
                     <tr>
-                        <th class="text-center" rowspan="2">No.</th>
-                        <th class="text-center" colspan="3">Item</th>
-                        <th class="text-center" colspan="2">QTY</th>
-                        <th class="text-center" rowspan="2">Jenis</th>
-                        <th class="text-center" colspan="2">Harga</th>
-                        <th class="text-center" rowspan="2">Total Order</th>
-                    </tr>
-                    <tr>
+                        <th class="text-center">No.</th>
                         <th class="text-center">Code</th>
                         <th class="text-center">Name</th>
                         <th class="text-center">Supplier</th>
-                        <th class="text-center">Um 1</th>
-                        <th class="text-center">Um 2</th>
-                        <th class="text-center">Um 1</th>
-                        <th class="text-center">Um 2</th>
+                        <th class="text-center">Qty</th>
+                        <th class="text-center">Lb. Ikat</th>
+                        <th class="text-center">Potong</th>
+                        <th class="text-center">Warna</th>
+                        <th class="text-center">PxL</th>
+                        <th class="text-center">Objek</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php if(count($model->itemsNonMaterial) > 0):
-                        $totalOrder=0; ?>
-                        <?php foreach($model->itemsNonMaterial as $no=>$val):
-                            $totalOrder += $val->total_order; ?>
+                    <?php if(count($model->itemsMaterial) > 0): ?>
+                        <?php foreach($model->itemsMaterial as $no=>$val): ?>
                             <tr>
                                 <td class="text-center"><?=$no+1 ?></td>
                                 <td class="text-center"><?=$val->item_code ?></td>
                                 <td><?=(isset($val->item)) ? $val->item->name : '-' ?></td>
                                 <td><?=(isset($val->supplier)) ? $val->supplier->name : '-' ?></td>
-                                <?php for($a=1;$a<3;$a++):?>
-                                    <td class="text-center"><?=($val['qty_order_'.$a] !=0) ? $val['qty_order_'.$a] .' '.$val['um_'.$a] : '' ?></td>
-                                <?php endfor; ?>
-                                <td class="text-center"><?=$val->item->material->name ?></td>
-                                <?php for($a=1;$a<3;$a++):?>
-                                    <td class="text-right"><?=($val['qty_order_'.$a] !=0) ? number_format($val['harga_jual_'.$a]).'.-' : '' ?></td>
-                                <?php endfor; ?>
-                                <td class="text-right"><?=number_format($val->total_order).'.-' ?></td>
+                                <td class="text-center"><?=$val->qty_order_1 .' '.$val->um_1 ?></td>
+                                <td class="text-right">
+                                    <strong>
+                                        <?=(!empty($val->lembar_ikat_1) ? number_format($val->lembar_ikat_1) .' '.$val->lembar_ikat_um_1 .' / ' : '') ?>
+                                        <?=(!empty($val->lembar_ikat_2) ? number_format($val->lembar_ikat_2) .' '.$val->lembar_ikat_um_2 .' / ' : '') ?>
+                                        <?=(!empty($val->lembar_ikat_3) ? number_format($val->lembar_ikat_3) .' '.$val->lembar_ikat_um_3 : '') ?>
+                                    </strong>
+                                </td>
+                                <td class="text-center"><?=$val->total_potong ?></td>
+                                <td class="text-center"><?=$val->total_warna ?></td>
+                                <td class="text-center">
+                                    <?php foreach($val->potongs as $pt): ?>
+                                        <div class="border-custom">
+                                            <?='<span>'.$pt->panjang.'x'.$pt->lebar .'</span>' ?>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </td>
+                                <td class="text-center">
+                                    <?php foreach($val->potongs as $pt): ?>
+                                        <div class="border-custom">
+                                            <?='<span>'.$pt->objek .'</span>' ?>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </td>
                             </tr>
                         <?php endforeach; ?>
+                    <?php else : ?>
                         <tr>
-                            <td class="summary" colspan="9"><strong>Total Order:</strong></td>
-                            <td class="summary"><strong><?=number_format($totalOrder).'.-' ?></strong></td>
-                        </tr>
-                    <?php else: ?>
-                        <tr>
-                            <td class="text-danger" colspan="10">Data tidak ditemukan</td>
+                            <td class="text-center text-danger" colspan="15"><i>Data is empty ...</i></td>
                         </tr>
                     <?php endif; ?>
                 </tbody>
             </table>
         </div>
+        <!-- /detail item -->
+        <!-- detail proses -->
+        <div class="col-lg-12 col-md-12 col-xs-12 margin-top-20">
+            <h6>Detail Proses</h6>
+            <hr class="margin-top-0" />
+            <table class="table table-bordered table-custom">
+                <thead>
+                    <tr>
+                        <th class="text-center">No.</th>
+                        <th class="text-center">Proses Produksi</th>
+                        <th class="text-center">Keterangan</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if(count($model->proses) > 0): ?>
+                        <?php foreach($model->proses as $no=>$val): ?>
+                            <tr>
+                                <td class="text-center"><?=$no+1 ?></td>
+                                <td class="text-muted text-left">
+                                    <?='<i>'.$val->prosesProduksi->name.'</i>' ?>
+                                </td>
+                                <td class="text-muted text-left">
+                                    <?='<i>'.$val->keterangan.'</i>' ?>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <tr>
+                            <td class="text-danger" colspan="5">Data masih kosong.</td>
+                        </tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+        <!-- /detail proses -->
+        <!-- detail bahan pembantu -->
+        <div class="col-lg-12 col-md-12 col-xs-12 margin-top-20">
+            <h6>Detail Bahan Pembantu</h6>
+            <hr class="margin-top-0" />
+        </div>
+        <div class="col-lg-12 col-md-12 col-xs-12">
+            <table class="table table-bordered table-custom">
+                <thead>
+                    <tr>
+                        <th class="text-center">No.</th>
+                        <th class="text-center">Code</th>
+                        <th class="text-center">Name</th>
+                        <th class="text-center">Supplier</th>
+                        <th class="text-center">Qty</th>
+                        <th class="text-center">Jenis</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if(count($model->itemsNonMaterial) > 0): ?>
+                        <?php foreach($model->itemsNonMaterial as $no=>$val): ?>
+                            <tr>
+                                <td class="text-center"><?=$no+1 ?></td>
+                                <td class="text-center"><?=$val->item_code ?></td>
+                                <td><?=(isset($val->item)) ? $val->item->name : '-' ?></td>
+                                <td><?=(isset($val->supplier)) ? $val->supplier->name : '-' ?></td>
+                                <td class="text-center"><?=$val->qty_order_1 .' '.$val->um_1 ?></td>
+                                <td class="text-center"><?=$val->item->material->name ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <tr>
+                            <td class="text-danger" colspan="8">Data tidak ditemukan</td>
+                        </tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+        <!-- /detail bahan pembantu -->
     </div>
 </div>

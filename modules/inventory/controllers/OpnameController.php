@@ -468,7 +468,7 @@ class OpnameController extends Controller
         $temp = TempInventoryOpnameDetail::find()
             ->alias('a')
             ->select(['a.*', 'b.name as item_name'])
-            ->leftJoin('master_material_item b', 'b.code = a.item_code')
+            ->leftJoin('master_material b', 'b.code = a.item_code')
             ->where(['id'=>$id])
             ->asArray()
             ->one();

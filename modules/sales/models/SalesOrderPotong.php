@@ -14,7 +14,7 @@ use yii\behaviors\TimestampBehavior;
  * @property float|null $panjang
  * @property float|null $lebar
  * @property int|null $objek
- * @property float|null $total_objek
+ * @property float|null $qty_sisa
  * @property int|null $status
  * @property int|null $created_at
  * @property int|null $updated_at
@@ -44,12 +44,11 @@ class SalesOrderPotong extends \yii\db\ActiveRecord
         return [
             [['code', 'item_code', 'urutan'], 'required'],
             [['urutan', 'objek', 'status', 'created_at', 'updated_at'], 'integer'],
-            [['panjang', 'lebar', 'waste', 'total_objek'], 'number'],
+            [['panjang', 'lebar', 'qty_sisa'], 'number'],
             [['code'], 'string', 'max' => 12],
             [['item_code'], 'string', 'max' => 7],
             [['supplier_code'], 'string', 'max' => 7],
-            [['code', 'item_code', 'urutan'], 'unique', 'targetAttribute' => ['code', 'item_code', 'urutan']],
-            [['status'], 'default', 'value' => 1],
+            [['code', 'item_code', 'supplier_code', 'urutan'], 'unique', 'targetAttribute' => ['code', 'item_code', 'supplier_code', 'urutan']],
         ];
     }
 
@@ -65,7 +64,7 @@ class SalesOrderPotong extends \yii\db\ActiveRecord
             'panjang' => 'Panjang',
             'lebar' => 'Lebar',
             'objek' => 'Objek',
-            'total_objek' => 'Total Objek',
+            'qty_sisa' => 'Qty Sisa',
             'status' => 'Status',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',

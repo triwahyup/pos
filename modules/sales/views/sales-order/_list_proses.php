@@ -6,7 +6,6 @@
                 <th class="text-center"></th>
                 <th class="text-center">No.</th>
                 <th class="text-center">Nama</th>
-                <th class="text-center">Type</th>
                 <th class="text-center">Keterangan</th>
             </tr>
         </thead>
@@ -24,7 +23,6 @@
                         </td>
                         <td class="text-center"><?=$no++ ?></td>
                         <td><label class="font-thin margin-bottom-0" for="<?=$val['proses_code'] ?>"><?=$val['name'] ?></label></td>
-                        <td class="text-center"><?=$val['type'] ?></td>
                         <td>
                             <?php if(isset($val['id'])): ?>
                                 <textarea class="form-control" name="TempSalesOrderProses[keterangan][<?=$val['proses_code']?>]" rows="2"><?=$val['keterangan'] ?></textarea>

@@ -2,13 +2,14 @@
 
 namespace app\modules\produksi\controllers;
 
+use app\models\DataList;
 use app\models\Logs;
 use app\models\User;
 use app\modules\master\models\MasterMesin;
 use app\modules\master\models\MasterProses;
-use app\modules\produksi\models\Spk;
-use app\modules\produksi\models\SpkSearch;
-use app\modules\produksi\models\SpkDetail;
+use app\modules\produksi\models\SpkOrder;
+use app\modules\produksi\models\SpkOrderSearch;
+use app\modules\produksi\models\SpkOrderDetail;
 use app\modules\sales\models\SalesOrderPotong;
 use app\modules\sales\models\SalesOrderProses;
 use yii\web\Controller;
@@ -17,9 +18,9 @@ use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 
 /**
- * SpkController implements the CRUD actions for Spk model.
+ * SpkOrderController implements the CRUD actions for SpkOrder model.
  */
-class SpkController extends Controller
+class SpkOrderController extends Controller
 {
     /**
      * @inheritDoc
@@ -58,7 +59,7 @@ class SpkController extends Controller
      */
     public function actionIndex()
     {
-        $searchModel = new SpkSearch();
+        $searchModel = new SpkOrderSearch();
         $dataProvider = $searchModel->search($this->request->queryParams);
 
         return $this->render('index', [
@@ -68,7 +69,7 @@ class SpkController extends Controller
     }
 
     /**
-     * Displays a single Spk model.
+     * Displays a single SpkOrders model.
      * @param string $no_spk No Spk
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
@@ -81,7 +82,7 @@ class SpkController extends Controller
     }
 
     /**
-     * Updates an existing Spk model.
+     * Updates an existing SpkOrder model.
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param string $no_spk No Spk
      * @return mixed
@@ -92,8 +93,6 @@ class SpkController extends Controller
         $success = true;
         $message = '';
         $model = $this->findModel($no_spk);
-        $column = $model->setListColumn();
-        $spkDetail = new SpkDetail();
         if($this->request->isPost){
             if($spkDetail->load($this->request->post())){
                 $connection = \Yii::$app->db;
@@ -179,23 +178,37 @@ class SpkController extends Controller
                 Logs::addLog($logs);
                 \Yii::$app->session->setFlash('error', $message);
             }
+        }else{
+            $spkDetail = new SpkOrderDetail();
+            $dataList = DataList::setListColumn();
+            $dataItem = [];
+            $qty_order = 0;
+            foreach($model->soItemMaterials as $val){
+                $qty_order += $val->qty_order_1;
+                $dataItem = [
+                    'item_code' => $val->item_code,
+                    'item_name' => (isset($val->item)) ? $val->item->name : '',
+                    'qty_order' => number_format($qty_order) .' '. $val->um_1,
+                    'qty_order_lb' => number_format($val->inventoryStock->satuanTerkecil($val->item_code, [
+                        0 => $qty_order, 1 => 0])).' LEMBAR',
+                ];
+            }
         }
 
         return $this->render('update', [
             'model' => $model,
+            'dataList' => $dataList,
+            'dataItem' => $dataItem,
             'spkDetail' => $spkDetail,
-            'outsource' => $column['outsource'],
-            'operator' => $column['operator'],
-            'so_proses' => $column['so_proses'],
         ]);
     }
 
-    public function actionGetProses($no_spk, $item_code, $urutan, $potong_id)
+    public function actionGetProses($no_spk, $item_code, $urutan)
     {
         $success = true;
         $message = '';
         $model = SpkDetail::find()
-            ->where(['no_spk'=>$no_spk, 'item_code'=>$item_code, 'urutan'=>$urutan, 'potong_id'=>$potong_id])
+            ->where(['no_spk'=>$no_spk, 'item_code'=>$item_code, 'urutan'=>$urutan])
             ->asArray()
             ->one();
         if($model['status_produksi'] == 3 || $model['status_produksi'] == 5){
@@ -256,11 +269,11 @@ class SpkController extends Controller
         return $this->redirect(['update', 'no_spk' => $no_spk]);
     }
 
-    public function actionDeleteProses($no_spk, $item_code, $urutan, $potong_id)
+    public function actionDeleteProses($no_spk, $item_code, $urutan)
     {
         $success = true;
         $message = '';
-        $model = $this->findProduksi($no_spk, $item_code, $urutan, $potong_id);
+        $model = $this->findProduksi($no_spk, $item_code, $urutan);
         if($model->status_produksi == 1){
             if($model->delete()){
                 foreach($model->alls as $index=>$val){
@@ -375,24 +388,24 @@ class SpkController extends Controller
     }
 
     /**
-     * Finds the Spk model based on its primary key value.
+     * Finds the SpkOrder model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param string $no_spk No Spk
-     * @return Spk the loaded model
+     * @return SpkOrder the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($no_spk)
     {
-        if (($model = Spk::findOne($no_spk)) !== null) {
+        if (($model = SpkOrder::findOne($no_spk)) !== null) {
             return $model;
         }
 
         throw new NotFoundHttpException('The requested page does not exist.');
     }
 
-    protected function findProduksi($no_spk, $item_code, $urutan, $potong_id)
+    protected function findProduksi($no_spk, $item_code, $urutan)
     {
-        $model = SpkDetail::findOne(['no_spk'=>$no_spk, 'item_code'=>$item_code, 'urutan'=>$urutan, 'potong_id'=>$potong_id]);
+        $model = SpkOrderDetail::findOne(['no_spk'=>$no_spk, 'item_code'=>$item_code, 'urutan'=>$urutan]);
         if($model !=null){
             return $model;
         }
@@ -433,10 +446,10 @@ class SpkController extends Controller
         return json_encode($data);
     }
 
-    public function actionPrintPreview($no_spk, $item_code, $urutan, $potong_id)
+    public function actionPrintPreview($no_spk, $item_code, $urutan)
     {
         $model = $this->findModel($no_spk);
-        $spkDetail = $this->findProduksi($no_spk, $item_code, $urutan, $potong_id);
+        $spkDetail = $this->findProduksi($no_spk, $item_code, $urutan);
         $m_proses = MasterProses::findOne(['code'=>$spkDetail->proses_code]);
         $header = '';
         $type = '';

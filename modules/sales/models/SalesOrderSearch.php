@@ -75,7 +75,7 @@ class SalesOrderSearch extends SalesOrder
             ->andFilterWhere(['like', 'a.name', $this->name])
             ->andFilterWhere(['like', 'no_po', $this->no_po])
             ->andFilterWhere(['like', 'post', $this->post]);
-
+            
         return $dataProvider;
     }
 }

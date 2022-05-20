@@ -8,7 +8,6 @@
 			<th class="text-center">Nama Item</th>
 			<th class="text-center">Supplier</th>
 			<th class="text-center">Type</th>
-			<th class="text-center">UM</th>
 			<th class="text-center">Stock</th>
 		</tr>
 	</thead>
@@ -21,7 +20,6 @@
                     <td><?=$val['item_name'] ?></td>
                     <td><?=$val['supplier_name'] ?></td>
                     <td><?=$val['type_name'] ?></td>
-                    <td><?=$val['satuan_name'] ?></td>
                     <td><?=$val['stock'] ?></td>
                 </tr>
 			<?php endforeach; ?>

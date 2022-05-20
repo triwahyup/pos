@@ -26,9 +26,60 @@ $this->params['breadcrumbs'][] = $this->title;
                     'class' => 'text-center',
                 ],
             ],
-            'item_code',
-            'supplier_code',
-            'type_code',
+            [
+                'attribute' => 'date',
+                'contentOptions' => [
+                    'class' => 'text-center',
+                ],
+                'filter' => DatePicker::widget([
+                    'model' => $searchModel, 
+                    'name' => 'date', 
+                    'type' => DatePicker::TYPE_COMPONENT_APPEND,
+                    'pickerButton' => false,
+                    'attribute' => 'date',
+                    'pluginOptions' => [
+                        'format' => 'dd-mm-yyyy',
+                        'autoclose' => true,
+                    ],
+                ]),
+                'value' => function($model, $index, $key){
+                    return date('d-m-Y', strtotime($model->date));
+                }
+            ],
+            [
+                'attribute' => 'item_code',
+                'format' => 'raw',
+                'value' => function($model, $index, $key){
+                    return (isset($model->item)) ? 
+                        '<span class="font-size-10 text-muted">'.$model->item_code.'</span>
+                        <br />
+                        <span class="font-size-10">'.$model->item->name.'</span>' : '';
+                }
+            ],
+            [
+                'attribute' => 'supplier_code',
+                'value' => function($model, $index, $key){
+                    return (isset($model->supplier)) ? $model->supplier->name : '';
+                }
+            ],
+            [
+                'attribute' => 'material_code',
+                'contentOptions' => [
+                    'class' => 'text-center',
+                ],
+                'value' => function($model, $index, $key){
+                    return (isset($model->material)) ? $model->material->name : '';
+                }
+            ],
+            [
+                'attribute' => 'satuan_code',
+                'contentOptions' => [
+                    'class' => 'text-center',
+                ],
+                'value' => function($model, $index, $key){
+                    return (isset($model->satuan)) ? $model->satuan->name : '';
+                }
+            ],
             [
                 'attribute' => 'post',
                 'contentOptions' => [

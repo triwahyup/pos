@@ -14,6 +14,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <p class="text-right">
         <?= Html::a('<i class="fontello icon-plus"></i><span>Create Sales Order</span>', ['create'], ['class' => 'btn btn-success btn-flat btn-sm']) ?>
     </p>
+
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
@@ -111,6 +112,4 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
         ],
     ]); ?>
-
-
 </div>

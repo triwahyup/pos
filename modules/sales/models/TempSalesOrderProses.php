@@ -14,9 +14,11 @@ use app\modules\sales\models\TempSalesOrderItem;
  * @property string $code
  * @property string $item_code
  * @property string $proses_code
+ * @property int|null $urutan
  * @property int|null $type 1: Cetak; 2: Potong;
  * @property float|null $index
  * @property float|null $harga
+ * @property string|null $mesin_type
  * @property float|null $total_biaya
  * @property string|null $keterangan
  * @property int|null $user_id
@@ -38,12 +40,12 @@ class TempSalesOrderProses extends \yii\db\ActiveRecord
     {
         return [
             [['code', 'item_code', 'proses_code'], 'required'],
-            [['type', 'user_id'], 'integer'],
+            [['urutan', 'type', 'user_id'], 'integer'],
             [['index', 'harga', 'total_biaya'], 'number'],
             [['code'], 'string', 'max' => 12],
             [['item_code'], 'string', 'max' => 7],
-            [['proses_code', 'mesin_type', 'supplier_code'], 'string', 'max' => 3],
-            [['keterangan'], 'safe'],
+            [['proses_code', 'mesin_type'], 'string', 'max' => 3],
+            [['keterangan'], 'string', 'max' => 128],
         ];
     }
 
@@ -57,9 +59,11 @@ class TempSalesOrderProses extends \yii\db\ActiveRecord
             'code' => 'Code',
             'item_code' => 'Item Code',
             'proses_code' => 'Proses Code',
+            'urutan' => 'Urutan',
             'type' => 'Type',
             'index' => 'Index',
             'harga' => 'Harga',
+            'mesin_type' => 'Mesin Type',
             'total_biaya' => 'Total Biaya',
             'keterangan' => 'Keterangan',
             'user_id' => 'User ID',

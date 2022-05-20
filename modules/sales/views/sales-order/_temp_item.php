@@ -1,72 +1,55 @@
 <?php if(count($temps) > 0): ?>
-    <?php foreach($temps as $item): ?>
-        <div class="col-lg-12 col-md-12 col-xs-12 padding-right-0 text-right">
-            <a class="custom-btn" href="javascript:void(0)" data-button="create_proses_temp" data-id="<?=$item->id ?>">
-                <i class="fontello icon-plus"></i>
-                <span>Add Proses Produksi</span>
-            </a>
-            <a class="custom-btn" href="javascript:void(0)" data-button="update_temp" data-id="<?=$item->id ?>">
-                <i class="fontello icon-pencil"></i>
-                <span>Update</span>
-            </a>
-            <a class="custom-btn" href="javascript:void(0)" data-button="delete_temp" data-id="<?=$item->id ?>">
-                <i class="fontello icon-trash"></i>
-                <span>Hapus</span>
-            </a>
-            <div class="margin-bottom-20"></div>
-        </div>
-        <div class="col-lg-12 col-md-12 col-xs-12 padding-right-0">
-            <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                <label class="font-size-12">Material</label>
-            </div>
-            <div class="col-lg-5 col-md-5 col-sm-12 col-xs-12 padding-right-0">
-                <span><?=(isset($item->item->name)) ? $item->item->code.' - '.$item->item->name : '' ?></span>
-            </div>
-            <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                <label class="font-size-12">Total Potong</label>
-            </div>
-            <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-right-0">
-                <span><?=$item->total_potong.'<span class="text-muted font-size-10"> ('.number_format($item->jumlah_cetak).' cetak)</span>' ?></span>
-            </div>
-        </div>
-        <div class="col-lg-12 col-md-12 col-xs-12 padding-right-0">
-            <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                <label class="font-size-12">QTY Order</label>
-            </div>
-            <div class="col-lg-5 col-md-5 col-sm-12 col-xs-12 padding-right-0">
-                <strong class="font-size-12">
-                    <?php for($a=1;$a<3;$a++): ?>
-                        <?=(!empty($item['qty_order_'.$a])) ? number_format($item['qty_order_'.$a]).' '.$item['um_'.$a] : null ?>
-                    <?php endfor; ?>
+    <?php foreach($temps as $no=>$val): ?>
+        <tr>
+            <td class="text-center"><?=$no+1 ?></td>
+            <td class="text-center"><?=$val->item_code ?></td>
+            <td><?=(isset($val->item)) ? $val->item->name : '-' ?></td>
+            <td><?=(isset($val->supplier)) ? $val->supplier->name : '-' ?></td>
+            <td class="text-center"><?=$val->qty_order_1 .' '.$val->um_1 ?></td>
+            <td class="text-right">
+                <strong>
+                    <?=(!empty($val->lembar_ikat_1) ? number_format($val->lembar_ikat_1) .' '.$val->lembar_ikat_um_1 .' / ' : '') ?>
+                    <?=(!empty($val->lembar_ikat_2) ? number_format($val->lembar_ikat_2) .' '.$val->lembar_ikat_um_2 .' / ' : '') ?>
+                    <?=(!empty($val->lembar_ikat_3) ? number_format($val->lembar_ikat_3) .' '.$val->lembar_ikat_um_3 : '') ?>
                 </strong>
-                <span class="text-muted font-size-12">
-                    <?='('.number_format($item->inventoryStock->satuanTerkecil($item->item_code, [0=>$item->qty_order_1, 1=>$item->qty_order_2])).' LEMBAR)' ?>
-                </span>
-            </div>
-            <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                <label class="font-size-12">Total Warna</label>
-            </div>
-            <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-right-0">
-                <span><?=$item->total_warna ?></span>
-            </div>
-        </div>
-        <div class="col-lg-12 col-md-12 col-xs-12 padding-right-0">
-            <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                <label class="font-size-12">Supplier</label>
-            </div>
-            <div class="col-lg-5 col-md-5 col-sm-12 col-xs-12 padding-right-0">
-                <span><?=(isset($item->supplier)) ? $item->supplier->name : '-' ?></span>
-            </div>
-            <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                <label class="font-size-12">Lb. Ikat</label>
-            </div>
-            <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-right-0">
-                <span class="font-size-10">
-                    <?=(!empty($item->lembar_ikat_1) ? number_format($item->lembar_ikat_1) .' '.$item->lembar_ikat_um_1 .' / ' : '') ?>
-                    <?=(!empty($item->lembar_ikat_2) ? number_format($item->lembar_ikat_2) .' '.$item->lembar_ikat_um_2 .' / ' : '') ?>
-                    <?=(!empty($item->lembar_ikat_3) ? number_format($item->lembar_ikat_3) .' '.$item->lembar_ikat_um_3 : '') ?>
-                </span>
-            </div>
-        </div>
+            </td>
+            <td class="text-center"><?=$val->total_potong ?></td>
+            <td class="text-center"><?=$val->total_warna ?></td>
+            <td class="text-center">
+                <?php foreach($val->tempPotongs as $pt): ?>
+                    <div class="border-custom">
+                        <?='<span>'.$pt->panjang.'x'.$pt->lebar .'</span>' ?>
+                    </div>
+                <?php endforeach; ?>
+            </td>
+            <td class="text-center">
+                <?php foreach($val->tempPotongs as $pt): ?>
+                    <div class="border-custom">
+                        <?='<span>'.$pt->objek .'</span>' ?>
+                    </div>
+                <?php endforeach; ?>
+            </td>
+            <td class="text-center">
+                <?php foreach($val->tempPotongs as $pt): ?>
+                    <div class="border-custom">
+                        <a class="custom-btn" href="javascript:void(0)" data-button="delete_potong" data-id="<?=$pt->id ?>">
+                            <i class="fontello icon-trash"></i>
+                        </a>
+                    </div>
+                <?php endforeach; ?>
+            </td>
+            <td class="text-center">
+                <button class="btn btn-warning btn-xs btn-sm" data-button="update_temp" data-id="<?=$val->id ?>">
+                    <i class="fontello icon-pencil"></i>
+                </button>
+                <button class="btn btn-danger btn-xs btn-sm" data-button="delete_temp" data-id="<?=$val->id ?>">
+                    <i class="fontello icon-trash"></i>
+                </button>
+            </td>
+        </tr>
     <?php endforeach; ?>
+<?php else : ?>
+    <tr>
+        <td class="text-center text-danger" colspan="15"><i>Data is empty ...</i></td>
+    </tr>
 <?php endif; ?>
