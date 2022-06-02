@@ -2,6 +2,7 @@
 
 namespace app\modules\sales\controllers;
 
+use app\models\DataList;
 use app\models\Logs;
 use app\models\User;
 use app\modules\inventory\models\InventoryStockItem;
@@ -45,11 +46,11 @@ class SalesOrderController extends Controller
                         [
                             'actions' => [
                                 'index', 'view', 'create', 'update', 'delete', 
-                                'on-change-term-in', 'on-input-term-in', 
+                                'on-change-term-in', 'on-input-term-in', 'on-change-up', 
                                 'list-proses', 'type-order',
                                 'list-order', 'autocomplete-order', 'search-order', 'select-order', 
                                 'list-item', 'autocomplete-item', 'search-item', 'select-item', 
-                                'temp-item', 'temp-bahan', 'get-temp', 
+                                'temp-item', 'temp-bahan', 'get-temp',
                                 'create-temp', 'update-temp', 'delete-temp', 
                                 'temp-proses', 'create-proses', 'create-potong', 'delete-potong',
                                 'invoice', 'post',
@@ -111,25 +112,9 @@ class SalesOrderController extends Controller
      */
     public function actionCreate()
     {
-        $customer = MasterPerson::find()
-            ->select(['name'])
-            ->where(['type_user'=>\Yii::$app->params['TYPE_CUSTOMER'], 'status' => 1])
-            ->indexBy('code')
-            ->column();
-        $ekspedisi = MasterPerson::find()
-            ->select(['name'])
-            ->where(['type_user'=>\Yii::$app->params['TYPE_EKSPEDISI'], 'status' => 1])
-            ->indexBy('code')
-            ->column();
-        $typeSatuan = MasterSatuan::find()
-            ->select(['master_satuan.name'])
-            ->leftJoin('master_kode', 'master_kode.code = master_satuan.type_satuan')
-            ->where(['master_kode.value'=>\Yii::$app->params['TYPE_SATUAN_PRODUKSI'], 'master_satuan.status'=>1])
-            ->indexBy('master_satuan.code')
-            ->column();
-        
         $success = true;
         $message = '';
+        $dataList = DataList::setListColumn();
         $model = new SalesOrder();
         $tempItem = new TempSalesOrderItem();
         $tempPotong = new TempSalesOrderPotong();
@@ -140,71 +125,95 @@ class SalesOrderController extends Controller
                 try{
                     $model->attributes = $model->attributes;
                     $model->code = $model->generateCode();
-                    $totalOrder = $model->totalOrder;
-                    if($model->save()){
-                        if(count($model->itemTemps()) > 0){
-                            foreach($model->itemTemps() as $temp){
-                                $salesItem = new SalesOrderItem();
-                                $salesItem->attributes = $temp->attributes;
-                                $salesItem->code = $model->code;
-                                if(!$salesItem->save()){
-                                    $success = false;
-                                    $message = (count($salesItem->errors) > 0) ? 'ERROR CREATE SALES ORDER ITEM: ' : '';
-                                    foreach($salesItem->errors as $error => $value){
-                                        $message .= strtoupper($value[0].', ');
-                                    }
-                                    $message = substr($message, 0, -2);
+                    if(count($model->itemTemps()) > 0){
+                        foreach($model->itemTemps() as $temp){
+                            $salesItem = new SalesOrderItem();
+                            $salesItem->attributes = $temp->attributes;
+                            $salesItem->code = $model->code;
+                            $salesItem->qty_up = (!empty($model->up_produksi) || $model->up_produksi != 0) ? $temp->qty_up : null;
+                            if(!$salesItem->save()){
+                                $success = false;
+                                $message = (count($salesItem->errors) > 0) ? 'ERROR CREATE SALES ORDER ITEM: ' : '';
+                                foreach($salesItem->errors as $error => $value){
+                                    $message .= strtoupper($value[0].', ');
                                 }
+                                $message = substr($message, 0, -2);
                             }
-                        }else{
-                            $success = false;
-                            $message = 'ERROR CREATE SALES ORDER: ITEM IS EMPTY.';
                         }
 
-                        if(count($model->potongTemps()) > 0){
-                            foreach($model->potongTemps() as $temp){
-                                $tempPotong = TempSalesOrderPotong::findOne(['code'=>$temp->code, 'item_code'=>$temp->item_code, 'supplier_code'=>$temp->supplier_code]);
-                                if(isset($tempPotong)){
-                                    $salesPotong = new SalesOrderPotong();
-                                    $salesPotong->attributes = $temp->attributes;
-                                    $salesPotong->code = $model->code;
-                                    if(!$salesPotong->save()){
-                                        $success = false;
-                                        $message = (count($salesPotong->errors) > 0) ? 'ERROR CREATE SALES ORDER POTONG: ' : '';
-                                        foreach($salesPotong->errors as $error => $value){
-                                            $message .= strtoupper($value[0].', ');
-                                        }
-                                        $message = substr($message, 0, -2);
-                                    }
-                                }else{
-                                    $success = false;
-                                    $message = 'PROSES POTONG ITEM: '.$temp->item->name.', SUPPLIER: '.$temp->supplier->name.' MASIH KOSONG.';
-                                }
-                            }
-                        }else{
-                            $success = false;
-                            $message = 'ERROR CREATE SALES ORDER: POTONG IS EMPTY.';
+                        $qty = 0;
+                        $qty_up = 0;
+                        foreach($model->itemsMaterial() as $val){
+                            $qty += $val->qty_order_1;
+                            $qty_up += $val->qty_up;
                         }
-
-                        if(count($model->prosesTemps()) >0){
-                            foreach($model->prosesTemps() as $temp){
-                                $salesProses = new SalesOrderProses();
-                                $salesProses->attributes = $temp->attributes;
-                                $salesProses->code = $model->code;
-                                if(!$salesProses->save()){
+                        if(!empty($model->up_produksi) || $model->up_produksi != 0){
+                            if($qty_up > 0){
+                                $up_produksi = $tempItem->up_produksi($qty, $model->up_produksi);
+                                if($qty_up < $up_produksi['total_up']){
                                     $success = false;
-                                    $message = (count($salesProses->errors) > 0) ? 'ERROR CREATE SALES ORDER PROSES PRODUKSI: ' : '';
-                                    foreach($salesProses->errors as $error => $value){
-                                        $message .= strtoupper($value[0].', ');
-                                    }
-                                    $message = substr($message, 0, -2);
+                                    $message = 'QTY UP KURANG '.($up_produksi['total_up'] - $qty_up).' LEMBAR';
                                 }
+                                if($qty_up > $up_produksi['total_up']){
+                                    $success = false;
+                                    $message = 'QTY UP KELEBIHAN '.($qty_up - $up_produksi['total_up']).' LEMBAR';
+                                }
+                            }else{
+                                $success = false;
+                                $message = 'QTY UP PRODUKSI MASIH '.$qty_up;
                             }
-                        }else{
-                            $success = false;
-                            $message = 'ERROR CREATE SALES ORDER: PROSES PRODUKSI IS EMPTY.';
                         }
                     }else{
+                        $success = false;
+                        $message = 'ERROR CREATE SALES ORDER: ITEM IS EMPTY.';
+                    }
+                    
+                    if(count($model->potongTemps()) > 0){
+                        foreach($model->potongTemps() as $temp){
+                            $tempPotong = TempSalesOrderPotong::findOne(['code'=>$temp->code, 'item_code'=>$temp->item_code, 'supplier_code'=>$temp->supplier_code]);
+                            if(isset($tempPotong)){
+                                $salesPotong = new SalesOrderPotong();
+                                $salesPotong->attributes = $temp->attributes;
+                                $salesPotong->code = $model->code;
+                                if(!$salesPotong->save()){
+                                    $success = false;
+                                    $message = (count($salesPotong->errors) > 0) ? 'ERROR CREATE SALES ORDER POTONG: ' : '';
+                                    foreach($salesPotong->errors as $error => $value){
+                                        $message .= strtoupper($value[0].', ');
+                                    }
+                                    $message = substr($message, 0, -2);
+                                }
+                            }else{
+                                $success = false;
+                                $message = 'PROSES POTONG ITEM: '.$temp->item->name.', SUPPLIER: '.$temp->supplier->name.' MASIH KOSONG.';
+                            }
+                        }
+                    }else{
+                        $success = false;
+                        $message = 'ERROR CREATE SALES ORDER: POTONG IS EMPTY.';
+                    }
+
+                    if(count($model->prosesTemps()) >0){
+                        foreach($model->prosesTemps() as $temp){
+                            $salesProses = new SalesOrderProses();
+                            $salesProses->attributes = $temp->attributes;
+                            $salesProses->code = $model->code;
+                            if(!$salesProses->save()){
+                                $success = false;
+                                $message = (count($salesProses->errors) > 0) ? 'ERROR CREATE SALES ORDER PROSES PRODUKSI: ' : '';
+                                foreach($salesProses->errors as $error => $value){
+                                    $message .= strtoupper($value[0].', ');
+                                }
+                                $message = substr($message, 0, -2);
+                            }
+                        }
+                    }else{
+                        $success = false;
+                        $message = 'ERROR CREATE SALES ORDER: PROSES PRODUKSI IS EMPTY.';
+                    }
+
+                    $totalOrder = $model->totalOrder;
+                    if(!$model->save()){
                         $success = false;
                         $message = (count($model->errors) > 0) ? 'ERROR CREATE SALES ORDER: ' : '';
                         foreach($model->errors as $error => $value){
@@ -240,17 +249,18 @@ class SalesOrderController extends Controller
                 \Yii::$app->session->setFlash('error', $message);
             }
         }else{
-            $model->loadDefaultValues();
             $this->emptyTemp();
+            $model->loadDefaultValues();
         }
 
         return $this->render('create', [
             'model' => $model,
-            'customer' => $customer,
-            'ekspedisi' => $ekspedisi,
+            'customer' => $dataList['customer'],
+            'ekspedisi' => $dataList['ekspedisi'],
+            'sales' => $dataList['sales'],
+            'typeSatuan' => $dataList['satuan'],
             'tempItem' => $tempItem,
             'tempPotong' => $tempPotong,
-            'typeSatuan' => $typeSatuan,
         ]);
     }
 
@@ -263,25 +273,9 @@ class SalesOrderController extends Controller
      */
     public function actionUpdate($code)
     {
-        $customer = MasterPerson::find()
-            ->select(['name'])
-            ->where(['type_user'=>\Yii::$app->params['TYPE_CUSTOMER'], 'status' => 1])
-            ->indexBy('code')
-            ->column();
-        $ekspedisi = MasterPerson::find()
-            ->select(['name'])
-            ->where(['type_user'=>\Yii::$app->params['TYPE_EKSPEDISI'], 'status' => 1])
-            ->indexBy('code')
-            ->column();
-        $typeSatuan = MasterSatuan::find()
-            ->select(['master_satuan.name'])
-            ->leftJoin('master_kode', 'master_kode.code = master_satuan.type_satuan')
-            ->where(['master_kode.value'=>\Yii::$app->params['TYPE_SATUAN_PRODUKSI'], 'master_satuan.status'=>1])
-            ->indexBy('master_satuan.code')
-            ->column();
-        
         $success = true;
         $message = '';
+        $dataList = DataList::setListColumn();
         $model = $this->findModel($code);
         $tempItem = new TempSalesOrderItem();
         $tempPotong = new TempSalesOrderPotong();
@@ -298,6 +292,7 @@ class SalesOrderController extends Controller
                             $salesItem = new SalesOrderItem();
                             $salesItem->attributes = $temp->attributes;
                             $salesItem->total_order = $salesItem->totalOrder;
+                            $salesItem->qty_up = (!empty($model->up_produksi) || $model->up_produksi != 0) ? $temp->qty_up : null;
                             if(!$salesItem->save()){
                                 $success = false;
                                 $message = (count($salesItem->errors) > 0) ? 'ERROR UPDATE SALES ORDER ITEM: ' : '';
@@ -305,6 +300,29 @@ class SalesOrderController extends Controller
                                     $message .= strtoupper($value[0].', ');
                                 }
                                 $message = substr($message, 0, -2);
+                            }
+                        }
+                        
+                        $qty = 0;
+                        $qty_up = 0;
+                        foreach($model->itemsMaterial() as $val){
+                            $qty += $val->qty_order_1;
+                            $qty_up += $val->qty_up;
+                        }
+                        if(!empty($model->up_produksi) || $model->up_produksi != 0){
+                            if($qty_up > 0){
+                                $up_produksi = $tempItem->up_produksi($qty, $model->up_produksi);
+                                if($qty_up < $up_produksi['total_up']){
+                                    $success = false;
+                                    $message = 'QTY UP KURANG '.($up_produksi['total_up'] - $qty_up).' LEMBAR';
+                                }
+                                if($qty_up > $up_produksi['total_up']){
+                                    $success = false;
+                                    $message = 'QTY UP KELEBIHAN '.($qty_up - $up_produksi['total_up']).' LEMBAR';
+                                }
+                            }else{
+                                $success = false;
+                                $message = 'QTY UP PRODUKSI MASIH '.$qty_up;
                             }
                         }
                     }else{
@@ -445,19 +463,20 @@ class SalesOrderController extends Controller
                             \Yii::$app->session->setFlash('error', $message);
                         }
                     }
-                    $tempItem = TempSalesOrderItem::find()->orderBy(['id'=>SORT_ASC])->one();
-                    $tempItem->item_name = (isset($tempItem->item)) ? $tempItem->item->name : '';
+                    $tempItem->qty_order_1 = null;
+                    $tempItem->item_name = null;
                 }
             }
         }
         
         return $this->render('update', [
             'model' => $model,
-            'customer' => $customer,
-            'ekspedisi' => $ekspedisi,
+            'customer' => $dataList['customer'],
+            'ekspedisi' => $dataList['ekspedisi'],
+            'sales' => $dataList['sales'],
+            'typeSatuan' => $dataList['satuan'],
             'tempItem' => $tempItem,
             'tempPotong' => $tempPotong,
-            'typeSatuan' => $typeSatuan,
         ]);
     }
 
@@ -666,12 +685,32 @@ class SalesOrderController extends Controller
         return json_encode(['tgl_tempo'=>$tgl_tempo]);
     }
 
+    public function actionOnChangeUp($qty, $up)
+    {
+        $request = \Yii::$app->request;
+        $up_produksi = (new TempSalesOrderItem())->up_produksi($qty, $up);
+        $desc = '';
+        if($up_produksi['total_up'] > 0){
+            $desc .= 'Up Produksi '.number_format($up_produksi['total_up']).' Lembar ('.$up.'%).';
+            $desc .= 'Total Order '.$up_produksi['total'].' RIM.';
+        }
+        return json_encode(['desc'=>$desc, 'qty_up'=>$up_produksi['total_up']]);
+    }
+
     public function actionTypeOrder($type)
     {
-        $item = MasterMaterial::findOne(['material_code'=>\Yii::$app->params['TYPE_PRODUK_JASA']]);
-        $data = ['item_name' => null, 'item_code' => null, 'qty_order_1' => 20, 'qty_order_2' => 0];
-        if($type == 2){
-            $data = ['item_name' => $item->name, 'item_code' => $item->code, 'qty_order_1' => 0, 'qty_order_2' => 0];
+        if($type == 1){
+            $data = ['item_name' => null, 'item_code' => null, 'qty_order_1' => 20, 'qty_order_2' => 0];
+        }else{
+            if($type == 2){
+                $item = MasterMaterial::find()->alias('a')
+                    ->leftJoin('master_kode b', 'b.code = a.material_code')
+                    ->where(['value' => \Yii::$app->params['TYPE_PRODUK_JASA']])
+                    ->one();
+                $data = ['item_name' => $item->name, 'item_code' => $item->code, 'qty_order_1' => 0, 'qty_order_2' => 0];
+            }else{
+                $data = ['item_name' => null, 'item_code' => null, 'qty_order_1' => 0, 'qty_order_2' => 0];
+            }
         }
         return json_encode($data);
     }
@@ -1067,6 +1106,7 @@ class SalesOrderController extends Controller
                 if(isset($tempItem->itemBahan)){
                     $tempItem->item_code = $tempItem->bahan_item_code;
                     $tempItem->qty_order_1 = $tempItem->bahan_qty;
+                    $tempItem->qty_up = null;
                     $tempItem->total_potong = 0;
                     $tempItem->total_warna = 0;
                     $tempItem->satuan_ikat_code = '000';
@@ -1427,25 +1467,13 @@ class SalesOrderController extends Controller
                     foreach($model->itemsMaterial as $index=>$val){
                         $stockItem = $val->inventoryStock;
                         if(isset($stockItem)){
-                            $stock = $stockItem->satuanTerkecil($val->item_code, [
-                                0=>$val->qty_order_1,
-                                1=>$val->qty_order_2
-                            ]);
-                        }
-                        if(!empty($model->up_produksi) || $model->up_produksi != 0){
-                            $upproduksi = ($stock * ($model->up_produksi/100)) / count($model->itemsMaterial);
-                            if($index < count($model->itemsMaterial) -1)
-                                $upproduksi = ceil($upproduksi);
-                            else
-                                $upproduksi = floor($upproduksi);
-                            
-                            if($stockItem->onhand > $upproduksi){
+                            if($stockItem->onhand > $val->qty_up){
                                 $stockItem->attributes = $val->attributes;
-                                $stockItem->onhand = $stockItem->onhand - $upproduksi;
-                                $stockItem->onsales = $stockItem->onsales + $upproduksi;
+                                $stockItem->onhand = $stockItem->onhand - $val->qty_up;
+                                $stockItem->onsales = $stockItem->onsales + $val->qty_up;
                                 if(!$stockItem->save()){
                                     $success = false;
-                                    $message = (count($stockItem->errors) > 0) ? 'ERROR UPDATE STOCK ITEM (UP PRODUKSI): ' : '';
+                                    $message = (count($stockItem->errors) > 0) ? 'ERROR UPDATE STOCK ITEM: ' : '';
                                     foreach($stockItem->errors as $error => $value){
                                         $message .= strtoupper($value[0].', ');
                                     }
@@ -1458,10 +1486,10 @@ class SalesOrderController extends Controller
                                 $stockTransaction->tgl_document = $model->tgl_so;
                                 $stockTransaction->type_document = "SALES ORDER";
                                 $stockTransaction->status_document = "OUT (UP ".$model->up_produksi." %)";
-                                $stockTransaction->qty_out = $upproduksi;
+                                $stockTransaction->qty_out = $val->qty_up;
                                 if(!$stockTransaction->save()){
                                     $success = false;
-                                    $message = (count($stockTransaction->errors) > 0) ? 'ERROR UPDATE STOCK TRANSACTION (UP PRODUKSI): ' : '';
+                                    $message = (count($stockTransaction->errors) > 0) ? 'ERROR UPDATE STOCK TRANSACTION: ' : '';
                                     foreach($stockTransaction->errors as $error => $value){
                                         $message .= strtoupper($value[0].', ');
                                     }
@@ -1469,8 +1497,11 @@ class SalesOrderController extends Controller
                                 }
                             }else{
                                 $success = false;
-                                $message = 'SISA STOCK ITEM '.$stockItem->item_code.' TIDAK MENCUKUPI. SISA '.$stockItem->onhand;
+                                $message = 'SISA STOCK ITEM '.$val->item_code.' TIDAK MENCUKUPI. SISA '.$stockItem->onhand;
                             }
+                        }else{
+                            $success = false;
+                            $message = 'STOCK ITEM '.$val->item_code.' TIDAK DITEMUKAN.';
                         }
                     }
                     
@@ -1489,28 +1520,46 @@ class SalesOrderController extends Controller
                                 'uk_potong' => $uk_potong,
                             ];
                         }
+
+                        $dataItem = [];
+                        foreach($model->itemsMaterial as $val){
+                            $stock = $val->inventoryStock->satuanTerkecil($val->item_code, [
+                                0=>$val->qty_order_1,
+                                1=>$val->qty_order_2,
+                            ]);
+                            $qty = $stock + $val->qty_up;
+                            $dataItem[$val->item_code][] = ['qty' => $qty];
+                        }
+                        // JUMLAHKAN TOTAL MATERIAL DENGAN ITEM YANG SAMA
+                        $totalQty = 0;
+                        foreach($dataItem as $item=>$index){
+                            foreach($index as $val){
+                                $totalQty += $val['qty'];
+                            }
+                            $dataItem[$item] = $totalQty;
+                        }
                         
                         $uid = 1;
-                        foreach($model->proses as $index=>$val){
-                            print_r($dataPotong);die;
-                            $spkProses = new SpkOrderProses();
-                            $spkProses->attributes = $val->attributes;
-                            $spkProses->no_spk = $spkOrder->no_spk;
-                            $spkProses->proses_id = $uid++;
-                            $spkProses->proses_type = $val->type;
-                            $spkProses->urutan = $index+1;
-                            $spkProses->gram = (isset($val->item)) ? $val->item->gram : NULL;
-                            if($spkProses->save()){
-                                $success = false;
-                                $message = (count($spkProses->errors) > 0) ? 'ERROR CREATE SPK PROSES: ' : '';
-                                foreach($spkProses->errors as $error => $value){
-                                    $message .= strtoupper($value[0].', ');
+                        foreach($model->proses as $val){
+                            foreach($dataPotong[$val->item_code] as $_val){
+                                $spkProses = new SpkOrderProses();
+                                $spkProses->attributes = $val->attributes;
+                                $spkProses->attributes = (array)$_val;
+                                $spkProses->no_spk = $spkOrder->no_spk;
+                                $spkProses->proses_id = $uid++;
+                                $spkProses->proses_type = $val->type;
+                                $spkProses->gram = (isset($val->item)) ? $val->item->gram : NULL;
+                                $spkProses->qty_proses = $dataItem[$val->item_code];
+                                if(!$spkProses->save()){
+                                    $success = false;
+                                    $message = (count($spkProses->errors) > 0) ? 'ERROR CREATE SPK PROSES: ' : '';
+                                    foreach($spkProses->errors as $error => $value){
+                                        $message .= strtoupper($value[0].', ');
+                                    }
+                                    $message = substr($message, 0, -2);
                                 }
-                                $message = substr($message, 0, -2);
                             }
-                            print_r($spkProses->attributes);
                         }
-                        die;
                     }else{
                         $success = false;
                         $message = (count($spkOrder->errors) > 0) ? 'ERROR CREATE SPK: ' : '';

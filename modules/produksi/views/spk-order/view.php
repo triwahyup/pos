@@ -15,7 +15,7 @@ $this->params['breadcrumbs'][] = $this->title;
 </style>
 <div class="spk-view">
     <p class="text-right">
-        <?= Html::a('<i class="fontello icon-pencil"></i><span>Proses Produksi</span>', ['update', 'no_spk' => $model->no_spk], ['class' => 'btn btn-warning btn-flat btn-sm']) ?>
+        <?= Html::a('<i class="fontello icon-pencil"></i><span>Proses Produksi</span>', ['layar', 'no_spk' => $model->no_spk], ['class' => 'btn btn-warning btn-flat btn-sm']) ?>
     </p>
 
     <div class="form-container no-background" render="detail">
@@ -142,12 +142,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 <thead>
                     <tr>
                         <th class="text-center">No.</th>
-                        <th class="text-center">Tgl. SPK</th>
                         <th class="text-center">Proses</th>
+                        <th class="text-center">Urutan Proses</th>
                         <th class="text-center">Uk. Potong</th>
-                        <th class="text-center">Mesin</th>
-                        <th class="text-center">Operator</th>
-                        <th class="text-center">Outsource</th>
                         <th class="text-center">Qty Proses</th>
                         <th class="text-center">Qty Hasil</th>
                         <th class="text-center">Qty Rusak</th>
@@ -158,12 +155,9 @@ $this->params['breadcrumbs'][] = $this->title;
                     <?php foreach($model->produksiInAlls as $index=>$val): ?>
                         <tr>
                             <td class="text-center"><?=$index+1 ?></td>
-                            <td class="text-center"><?=(!empty($val->tgl_spk)) ? date('d-m-Y', strtotime($val->tgl_spk)) : '-' ?></td>
                             <td><?=(isset($val->proses)) ? $val->proses->name : '' ?></td>
+                            <td class="text-center"><?=$val->proses_id ?></td>
                             <td class="text-center"><?=(!empty($val->uk_potong)) ? $val->uk_potong : '-' ?></td>
-                            <td><?=(isset($val->mesin)) ? $val->mesin->name : '-' ?></td>
-                            <td><?=(isset($val->operator)) ? $val->operator->name : '-' ?></td>
-                            <td><?=(isset($val->outsource)) ? $val->outsource->name : '-' ?></td>
                             <td class="text-right"><?=number_format($val->qty_proses).' LB' ?></td>
                             <td class="text-right"><?=number_format($val->qty_hasil).' LB' ?></td>
                             <td class="text-right"><?=number_format($val->qty_rusak).' LB' ?></td>

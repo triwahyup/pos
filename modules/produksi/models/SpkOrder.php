@@ -6,6 +6,7 @@ use Yii;
 use app\modules\master\models\MasterMesin;
 use app\modules\master\models\MasterPerson;
 use app\modules\produksi\models\SpkOrderProses;
+use app\modules\produksi\models\SpkOrderHistory;
 use yii\behaviors\TimestampBehavior;
 
 /**
@@ -46,10 +47,11 @@ class SpkOrder extends \yii\db\ActiveRecord
         return [
             [['no_spk'], 'required'],
             [['tgl_spk', 'tgl_so', 'deadline', 'type_order', 'up_produksi'], 'safe'],
-            [['ekspedisi_flag', 'term_in', 'status', 'status_produksi', 'created_at', 'updated_at'], 'integer'],
-            [['customer_code'], 'string', 'max' => 3],
-            [['ekspedisi_code'], 'string', 'max' => 7],
+            [['sales_code', 'ekspedisi_flag', 'term_in', 'status', 'status_produksi', 'created_at', 'updated_at'], 'integer'],
+            [['customer_code', 'ekspedisi_code'], 'string', 'max' => 3],
+            [['nick_name'], 'string', 'max' => 4],
             [['no_spk', 'no_so'], 'string', 'max' => 12],
+            [['repeat_code'], 'string', 'max' => 16],
             [['name', 'keterangan'], 'string', 'max' => 128],
             [['no_spk'], 'unique'],
             [['status'], 'default', 'value' => 1],
@@ -86,6 +88,11 @@ class SpkOrder extends \yii\db\ActiveRecord
         return (string)date('Ymd').sprintf('%04s', ($total+1));
     }
 
+    public function getSales()
+    {
+        return $this->hasOne(Profile::className(), ['user_id' => 'sales_code']);
+    }
+
     public function getCustomer()
     {
         return $this->hasOne(MasterPerson::className(), ['code' => 'customer_code']);
@@ -96,25 +103,36 @@ class SpkOrder extends \yii\db\ActiveRecord
         return $this->hasOne(MasterPerson::className(), ['code' => 'ekspedisi_code']);
     }
 
-    // public function getProduksiInAlls()
-    // {
-    //     return $this->hasMany(SpkOrderDetail::className(), ['no_spk' => 'no_spk'])
-    //         ->orderBy(['no_spk'=>SORT_ASC, 'created_at' => SORT_ASC]);
-    // }
+    public function getHistorys()
+    {
+        return $this->hasMany(SpkOrderHistory::className(), ['no_spk' => 'no_spk']);
+    }
 
-    // public $onStart = 1;
-    // public function getProduksiOnStarts()
-    // {
-    //     return $this->hasMany(SpkOrderDetail::className(), ['no_spk' => 'no_spk', 'status_produksi' => 'onStart'])
-    //         ->orderBy(['no_spk'=>SORT_ASC, 'created_at' => SORT_ASC]);
-    // }
+    public function getProduksiInAlls()
+    {
+        return $this->hasMany(SpkOrderProses::className(), ['no_spk' => 'no_spk'])
+            ->orderBy(['no_spk'=>SORT_ASC, 'proses_id' => SORT_ASC]);
+    }
 
-    // public $inProgress = 2;
-    // public function getProduksiInProgress()
-    // {
-    //     return $this->hasMany(SpkOrderDetail::className(), ['no_spk' => 'no_spk', 'status_produksi' => 'inProgress'])
-    //         ->orderBy(['no_spk'=>SORT_ASC, 'created_at' => SORT_ASC]);
-    // }
+    public $onStart = 1;
+    public function getProduksiOnStarts()
+    {
+        return $this->hasMany(SpkOrderProses::className(), ['no_spk' => 'no_spk', 'status_produksi' => 'onStart'])
+            ->orderBy(['no_spk'=>SORT_ASC, 'created_at' => SORT_ASC]);
+    }
+
+    public $inProgress = 2;
+    public function getProduksiInProgress()
+    {
+        return $this->hasMany(SpkOrderProses::className(), ['no_spk' => 'no_spk', 'status_produksi' => 'inProgress'])
+            ->orderBy(['no_spk'=>SORT_ASC, 'created_at' => SORT_ASC]);
+    }
+
+    public function getHistoryOnStarts()
+    {
+        return $this->hasMany(SpkOrderHistory::className(), ['no_spk' => 'no_spk', 'status_produksi' => 'onStart'])
+            ->orderBy(['no_spk'=>SORT_ASC, 'created_at' => SORT_ASC]);
+    }
 
     public function getTypeOrder()
     {

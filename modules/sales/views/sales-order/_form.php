@@ -65,6 +65,15 @@ use yii\widgets\MaskedInput;
                         <?php endif; ?>
                     </div>
                 </div>
+                <!-- Nick Job -->
+                <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
+                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
+                        <label>Nick Job:</label>
+                    </div>
+                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
+                        <?= $form->field($model, 'nick_name')->textInput(['maxlength' => true])->label(false) ?>
+                    </div>
+                </div>
                 <!-- Term In -->
                 <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
                     <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
@@ -92,21 +101,6 @@ use yii\widgets\MaskedInput;
                                 'autoclose' => true,
                                 'format' => 'dd-mm-yyyy',
                             ]])->label(false) ?>
-                    </div>
-                </div>
-                <!-- Type Order -->
-                <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
-                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                        <label>Type Order:</label>
-                    </div>
-                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                        <?= $form->field($model, 'type_order')->widget(Select2::classname(), [
-                                'data' => [1=>'Produksi', 2=>'Jasa'],
-                                'options' => [
-                                    'placeholder' => 'Pilih Type Order',
-                                    'class' => 'select2',
-                                ],
-                            ])->label(false) ?>
                     </div>
                 </div>
                 <!-- No. PO -->
@@ -138,6 +132,21 @@ use yii\widgets\MaskedInput;
                 </div>
             </div>
             <div class="col-lg-6 col-md-6 col-xs-12">
+                <!-- Type Order -->
+                <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
+                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
+                        <label>Type Order:</label>
+                    </div>
+                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
+                        <?= $form->field($model, 'type_order')->widget(Select2::classname(), [
+                                'data' => [1=>'Produksi', 2=>'Jasa', 3=>'Sample'],
+                                'options' => [
+                                    'placeholder' => 'Pilih Type Order',
+                                    'class' => 'select2',
+                                ],
+                            ])->label(false) ?>
+                    </div>
+                </div>
                 <!-- Minimal Order -->
                 <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
                     <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
@@ -190,7 +199,11 @@ use yii\widgets\MaskedInput;
                         <label>Up Produksi:</label>
                     </div>
                     <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                        <?= $form->field($model, 'up_produksi')->dropDownList(['5' => '5%', '10' => '10%'], ['prompt'=>'Produksi Up (%)'])->label(false) ?>
+                        <?= $form->field($model, 'up_produksi', [
+                                'template' => '{input}
+                                    <span id="up_produksi" class="font-size-10 margin-bottom-10 text-danger"></span>
+                                    {error}{hint}'
+                            ])->dropDownList(['5' => '5%', '10' => '10%'], ['prompt'=>'Produksi Up (%)'])->label(false) ?>
                     </div>
                 </div>
                 <!-- PPN -->
@@ -200,6 +213,21 @@ use yii\widgets\MaskedInput;
                     </div>
                     <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
                         <?= $form->field($model, 'ppn')->textInput(['data-align'=>'text-right'])->label(false) ?>
+                    </div>
+                </div>
+                <!-- Sales Marketing -->
+                <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
+                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
+                        <label>Sales:</label>
+                    </div>
+                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
+                        <?= $form->field($model, 'sales_code')->widget(Select2::classname(), [
+                                'data' => $sales,
+                                'options' => [
+                                    'placeholder' => 'Pilih Sales Marketing',
+                                    'class' => 'select2',
+                                ],
+                            ])->label(false) ?>
                     </div>
                 </div>
                 <!-- Keterangan -->
@@ -228,7 +256,7 @@ use yii\widgets\MaskedInput;
                         <label>Material:</label>
                     </div>
                     <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                        <?= $form->field($tempItem, 'item_name')->textInput(['placeholder' => 'Pilih material tekan F4', 'data-type'=>'item'])->label(false) ?>
+                        <?= $form->field($tempItem, 'item_name')->textInput(['placeholder' => 'Pilih material tekan F4', 'data-type'=>'item', 'aria-required' => true])->label(false) ?>
                         <?= $form->field($tempItem, 'id')->hiddenInput()->label(false) ?>
                         <?= $form->field($tempItem, 'item_code')->hiddenInput()->label(false) ?>
                         <?= $form->field($tempItem, 'supplier_code')->hiddenInput()->label(false) ?>
@@ -240,7 +268,7 @@ use yii\widgets\MaskedInput;
                         <label>Lb.Ikat:</label>
                     </div>
                     <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                        <?= $form->field($tempItem, 'satuan_ikat_code')->dropDownList($typeSatuan, ['prompt'=>'Satuan Lb.Ikat'])->label(false) ?>
+                        <?= $form->field($tempItem, 'satuan_ikat_code')->dropDownList($typeSatuan, ['prompt'=>'Satuan Lb.Ikat', 'aria-required' => true])->label(false) ?>
                     </div>
                 </div>
                 <!-- Satuan Lb. Ikat -->
@@ -299,6 +327,18 @@ use yii\widgets\MaskedInput;
                 </div>
             </div>
             <div class="col-lg-6 col-md-6 col-xs-12">
+                <!-- Qty Up -->
+                <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
+                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
+                        <label>Qty Up:</label>
+                    </div>
+                    <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padding-right-0">
+                        <?= $form->field($tempItem, 'qty_up')->textInput(['data-align'=>'text-right'])->label(false) ?>
+                    </div>
+                    <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-left-0">
+                        <label class="font-size-14 margin-left-5 margin-top-5">LEMBAR</label>
+                    </div>
+                </div>
                 <!-- Warna -->
                 <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0  padding-right-0">
                     <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
@@ -314,6 +354,7 @@ use yii\widgets\MaskedInput;
                                 'options' => [
                                     'data-align' => 'text-right', 
                                     'placeholder' => 'Total Warna',
+                                    'aria-required' => true,
                                 ]
                             ])->label(false) ?>
                     </div>
@@ -332,6 +373,7 @@ use yii\widgets\MaskedInput;
                                 ],
                                 'options' => [
                                     'data-align' => 'text-right',
+                                    'aria-required' => true,
                                 ]
                             ])->label(false) ?>
                     </div>
@@ -581,6 +623,26 @@ function onInputTermIn(term_in, tgl_so)
         success: function(data){
             var o = $.parseJSON(data);
             $("#term_in").html(o.tgl_tempo);
+        },
+        complete: function(){}
+    });
+}
+
+function onChangeUp(qty, up)
+{
+    $.ajax({
+        url: "<?=Url::to(['sales-order/on-change-up'])?>",
+		type: "GET",
+        data: {
+            qty: qty,
+            up: up,
+        },
+        dataType: "text",
+        error: function(xhr, status, error) {},
+		beforeSend: function (data){},
+        success: function(data){
+            var o = $.parseJSON(data);
+            $("#up_produksi").html(o.desc);
         },
         complete: function(){}
     });
@@ -1018,6 +1080,7 @@ function init_temp_item()
         success: function(data){
             var o = $.parseJSON(data);
             $("[data-render=\"detail-item\"] table > tbody").html(o.model);
+            onChangeUp($("#tempsalesorderitem-qty_order_1").val(), $("#salesorder-up_produksi").val());
         },
         complete: function(){
             temp.destroy();
@@ -1077,6 +1140,18 @@ $(document).ready(function(){
         }
         $("#salesorder-ekspedisi_code").val(null).trigger("change");
     });
+
+    /** UP PRODUKSI */
+    $("body").off("input","#tempsalesorderitem-qty_order_1").on("input","#tempsalesorderitem-qty_order_1", function(e){
+        e.preventDefault();
+        onChangeUp($(this).val(), $("#salesorder-up_produksi").val());
+    });
+
+    $("body").off("change","#salesorder-up_produksi").on("change","#salesorder-up_produksi", function(e){
+        e.preventDefault();
+        onChangeUp($("#tempsalesorderitem-qty_order_1").val(), $(this).val());
+    });
+    /** END UP PRODUKSI */
 
     /**  TERM IN */
     $("body").off("change","#salesorder-customer_code").on("change","#salesorder-customer_code", function(e){
@@ -1258,6 +1333,7 @@ var isNotNewRecord = function() {
     }else{
         $("#salesorder-ekspedisi_code").attr("readonly", true);
     }
+    onChangeUp($("#tempsalesorderitem-qty_order_1").val(), $("#salesorder-up_produksi").val());
 }
 $(function(){
     <?php if(!$model->isNewRecord): ?>

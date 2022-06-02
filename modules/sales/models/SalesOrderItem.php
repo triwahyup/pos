@@ -74,7 +74,7 @@ class SalesOrderItem extends \yii\db\ActiveRecord
         return [
             [['code', 'urutan', 'item_code', 'supplier_code'], 'required'],
             [['urutan', 'lembar_ikat_1', 'lembar_ikat_2', 'lembar_ikat_3', 'total_potong', 'total_warna', 'status', 'created_at', 'updated_at'], 'integer'],
-            [['qty_order_1', 'qty_order_2', 'qty_order_3', 'konversi_1', 'konversi_2', 'konversi_3', 'harga_beli_1', 'harga_beli_2', 'harga_beli_3', 'harga_jual_1', 'harga_jual_2', 'harga_jual_3', 'total_order'], 'number'],
+            [['qty_order_1', 'qty_order_2', 'qty_order_3', 'qty_up', 'konversi_1', 'konversi_2', 'konversi_3', 'harga_beli_1', 'harga_beli_2', 'harga_beli_3', 'harga_jual_1', 'harga_jual_2', 'harga_jual_3', 'total_order'], 'number'],
             [['code'], 'string', 'max' => 12],
             [['item_code'], 'string', 'max' => 7],
             [['supplier_code', 'satuan_code', 'material_code', 'type_code', 'satuan_ikat_code'], 'string', 'max' => 3],

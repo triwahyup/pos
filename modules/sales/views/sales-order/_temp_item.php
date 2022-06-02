@@ -5,7 +5,11 @@
             <td class="text-center"><?=$val->item_code ?></td>
             <td><?=(isset($val->item)) ? $val->item->name : '-' ?></td>
             <td><?=(isset($val->supplier)) ? $val->supplier->name : '-' ?></td>
-            <td class="text-center"><?=$val->qty_order_1 .' '.$val->um_1 ?></td>
+            <td class="text-right">
+                <?=$val->qty_order_1 .' '. $val->um_1 ?>
+                <br />
+                <?=(!empty($val->qty_up)) ? '<i class="font-size-10 text-muted">Up '.$val->qty_up .' Lembar</i>': '' ?>
+            </td>
             <td class="text-right">
                 <strong>
                     <?=(!empty($val->lembar_ikat_1) ? number_format($val->lembar_ikat_1) .' '.$val->lembar_ikat_um_1 .' / ' : '') ?>
@@ -48,7 +52,7 @@
             </td>
         </tr>
     <?php endforeach; ?>
-<?php else : ?>
+<?php else: ?>
     <tr>
         <td class="text-center text-danger" colspan="15"><i>Data is empty ...</i></td>
     </tr>

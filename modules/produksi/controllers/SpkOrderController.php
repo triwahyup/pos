@@ -9,9 +9,8 @@ use app\modules\master\models\MasterMesin;
 use app\modules\master\models\MasterProses;
 use app\modules\produksi\models\SpkOrder;
 use app\modules\produksi\models\SpkOrderSearch;
-use app\modules\produksi\models\SpkOrderDetail;
-use app\modules\sales\models\SalesOrderPotong;
-use app\modules\sales\models\SalesOrderProses;
+use app\modules\produksi\models\SpkOrderProses;
+use app\modules\produksi\models\SpkOrderHistory;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\AccessControl;
@@ -35,8 +34,7 @@ class SpkOrderController extends Controller
                     'rules' => [
                         [
                             'actions' => [
-                                'index', 'view', 'update', 'list-mesin', 'list-uk_kertas', 'print-preview',
-                                'get-proses', 'change-proses', 'delete-proses', 'cancel-proses', 'post-proses',
+                                'index', 'view', 'layar', 'create', 'update', 'print', 'post', 'get-data', 'data-detail', 'popup-input',
                             ],
                             'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('surat-perintah-kerja')),
                             'roles' => ['@'],
@@ -88,225 +86,274 @@ class SpkOrderController extends Controller
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionUpdate($no_spk)
+    public function actionLayar($no_spk)
     {
         $success = true;
         $message = '';
+        $dataList = DataList::setListColumn();
         $model = $this->findModel($no_spk);
+        $spkHistory = new SpkOrderHistory();
         if($this->request->isPost){
-            if($spkDetail->load($this->request->post())){
-                $connection = \Yii::$app->db;
-			    $transaction = $connection->beginTransaction();
-                try{
-                    $spkDetail->attributes = $spkDetail->attributes;
-                    // KONVERSI STOCK ORDER
-                    $stock = 0;
-                    $soItem = $model->itemMaterial;
-                    $stockItem = $soItem->inventoryStock;
-                    if(isset($stockItem)){
-                        $stock = $stockItem->satuanTerkecil($soItem->item_code, [
-                            0=>$soItem->qty_order_1,
-                            1=>$soItem->qty_order_2
-                        ]);
-                    }
-                    if(!empty($model->up_produksi) || $model->up_produksi != 0){
-                        $stock += $stock * ($model->up_produksi/100);
-                    }
-                    // END KONVERSI STOCK ORDER
-                    
-                    $m_proses = $spkDetail->proses;
-                    if(strpos($m_proses->name, 'Potong') !== false){
-                        $spkDetail->uk_potong = $soItem->item->panjang.'x'.$soItem->item->lebar;
-                    }else{
-                        $soPotong = $model->itemPotong($model->no_so, $spkDetail->potong_id);
-                        $spkDetail->uk_potong = $soPotong->panjang.'x'.$soPotong->lebar;
-                    }
+            $connection = \Yii::$app->db;
+            $transaction = $connection->beginTransaction();
+            try{
+            }catch(\Exception $e){
+                $success = false;
+                $message = $e->getMessage();
+                $transaction->rollBack();
+            }
+            $logs =	[
+                'type' => Logs::TYPE_USER,
+                'description' => $message,
+            ];
+            Logs::addLog($logs);
+            \Yii::$app->session->setFlash('error', $message);
+        }
 
-                    $qty_proses = str_replace(',', '', $spkDetail->qty_proses);
-                    if($stock >= $qty_proses){
-                        $totalQTY = $spkDetail->qtyProses + $qty_proses;
-                        $sisaProses = $stock - $spkDetail->qtyProses;
-                        if($stock >= $totalQTY){
-                            if(!empty($spkDetail->outsource_code)){
-                                $spkDetail->mesin_code = '000';
-                                $spkDetail->user_id = '0';
-                            }
-                            $spkDetail->gram = $soItem->item->gram;
-                            $spkDetail->proses_type = $m_proses->type;
-                            $spkDetail->mesin_type = $m_proses->mesin_type;
-                            $spkDetail->urutan = $spkDetail->count +1;
-                            $spkDetail->status_produksi =1;
-                            if(!$spkDetail->save()){
+        return $this->render('layar', [
+            'model' => $model,
+            'dataList' => $dataList,
+            'spkHistory' => $spkHistory,
+        ]);
+    }
+
+    /**
+     * Finds the SpkOrder model based on its primary key value.
+     * If the model is not found, a 404 HTTP exception will be thrown.
+     * @param string $no_spk No Spk
+     * @return SpkOrder the loaded model
+     * @throws NotFoundHttpException if the model cannot be found
+     */
+    protected function findModel($no_spk)
+    {
+        if (($model = SpkOrder::findOne($no_spk)) !== null) {
+            return $model;
+        }
+
+        throw new NotFoundHttpException('The requested page does not exist.');
+    }
+
+    protected function findProses($no_spk, $item_code, $proses_id)
+    {
+        $model = SpkOrderProses::findOne($no_spk, $item_code, $proses_id);
+        if ($model !== null)
+            return $model;
+        throw new NotFoundHttpException('The requested page does not exist.');
+    }
+
+    protected function findHistory($no_spk, $item_code, $proses_id, $urutan)
+    {
+        $model = SpkOrderHistory::findOne($no_spk, $item_code, $proses_id, $urutan);
+        if ($model !== null)
+            return $model;
+        throw new NotFoundHttpException('The requested page does not exist.');
+    }
+
+    /** INPUT PROSES */
+    public function actionCreate()
+    {
+        $request = \Yii::$app->request;
+        $success = true;
+        $message = 'CREATE PROSES SPK SUCCESSFULLY';
+        if($request->isPost){
+            $connection = \Yii::$app->db;
+            $transaction = $connection->beginTransaction();
+            try{
+                $data = $request->post('SpkOrderHistory');
+                if(empty($data['tgl_spk'])){
+                    $success = false;
+                    $message = 'Tgl SPK wajib diisi.';
+                }
+                
+                if(empty($data['outsource_code'])){
+                    if(empty($data['mesin_code'])){
+                        $success = false;
+                        $message = 'Nama Mesin wajib diisi.';
+                    }
+                    else if(empty($data['user_id'])){
+                        $success = false;
+                        $message = 'Operator mesin wajib diisi.';
+                    }
+                }else{
+                    if(empty($data['nopol'])){
+                        $success = false;
+                        $message = 'No. Polisi wajib diisi.';
+                    }
+                    else if(empty($data['no_sj'])){
+                        $success = false;
+                        $message = 'No SJ wajib diisi.';
+                    }
+                }
+                
+                if($success){
+                    $spkProses = SpkOrderProses::find()
+                        ->where(['no_spk'=>$data['no_spk'], 'item_code'=>$data['item_code'], 'proses_id'=>$data['proses_id']])
+                        ->one();
+                    if(isset($spkProses)){
+                        $qty = str_replace(',', '', $data['qty_proses']);
+                        if($qty <= $spkProses->sisa){
+                            $spkProses->status_produksi = 1;
+                            if($spkProses->save()){
+                                $spkHistory = new SpkOrderHistory();
+                                $spkHistory->attributes = $spkProses->attributes;
+                                $spkHistory->attributes = (array)$data;
+                                $spkHistory->urutan = $spkHistory->count +1;
+                                $spkHistory->status_produksi = 1;
+                                if(!$spkHistory->save()){
+                                    $success = false;
+                                    foreach($spkHistory->errors as $error => $value){
+                                        $message = $value[0].', ';
+                                    }
+                                    $message = substr($message, 0, -2);
+                                }
+                            }else{
                                 $success = false;
-                                $message = (count($spkDetail->errors) > 0) ? 'ERROR CREATE SPK PRODUKSI: ' : '';
-                                foreach($spkDetail->errors as $error => $value){
-                                    $message .= strtoupper($value[0].', ');
+                                foreach($spkProses->errors as $error => $value){
+                                    $message = $value[0].', ';
                                 }
                                 $message = substr($message, 0, -2);
                             }
                         }else{
                             $success = false;
-                            $message = 'Sisa Qty yang belum di proses '.$sisaProses;
+                            $message = 'QTY Proses tidak boleh melebihi sisa QTY. Sisa QTY = '.$spkProses->sisa;
                         }
                     }else{
                         $success = false;
-                        $message = 'Qty tidak boleh lebih besar dari Order.';
+                        $message = 'Data Spk Order Proses tidak ditemukan.';
                     }
-
-                    if($success){
-                        $message = '['.$model->no_spk.'] SUCCESS CREATE SPK.';
-                        $transaction->commit();
-                        $logs =	[
-                            'type' => Logs::TYPE_USER,
-                            'description' => $message,
-                        ];
-                        Logs::addLog($logs);
-                        \Yii::$app->session->setFlash('success', $message);
-                        return $this->redirect(['update', 'no_spk' => $model->no_spk]);
-                    }else{
-                        $transaction->rollBack();
-                    }
-                }catch(\Exception $e){
-                    $success = false;
-                    $message = $e->getMessage();
-				    $transaction->rollBack();
                 }
-                $logs =	[
-                    'type' => Logs::TYPE_USER,
-                    'description' => $message,
-                ];
-                Logs::addLog($logs);
-                \Yii::$app->session->setFlash('error', $message);
+                
+                if($success){
+                    $transaction->commit();
+                }else{
+                    $transaction->rollBack();
+                }
+            }catch(\Exception $e){
+                $success = false;
+                $message = $e->getMessage();
+                $transaction->rollBack();
             }
         }else{
-            $spkDetail = new SpkOrderDetail();
-            $dataList = DataList::setListColumn();
-            $dataItem = [];
-            $qty_order = 0;
-            foreach($model->soItemMaterials as $val){
-                $qty_order += $val->qty_order_1;
-                $dataItem = [
-                    'item_code' => $val->item_code,
-                    'item_name' => (isset($val->item)) ? $val->item->name : '',
-                    'qty_order' => number_format($qty_order) .' '. $val->um_1,
-                    'qty_order_lb' => number_format($val->inventoryStock->satuanTerkecil($val->item_code, [
-                        0 => $qty_order, 1 => 0])).' LEMBAR',
-                ];
-            }
+            throw new NotFoundHttpException('The requested data does not exist.');
         }
+        return json_encode(['success'=>$success, 'message'=>$message]);
+    }
 
-        return $this->render('update', [
-            'model' => $model,
-            'dataList' => $dataList,
-            'dataItem' => $dataItem,
-            'spkDetail' => $spkDetail,
+    public function actionGetData($no_spk, $item_code, $proses_id, $mesin_type)
+    {
+        $success = true;
+        $message = '';
+        $model = $this->findProses($no_spk, $item_code, $proses_id);
+        $total = 0;
+        foreach($model->historys as $val){
+            if($val->status_produksi == 1) $total += $val->qty_proses;
+            if($val->status_produksi == 3) $total += $val->qty_hasil;
+        }
+        $sisa = $model->qty_proses - $total;
+        $mesin = [];
+        if($sisa > 0){
+            $model = [
+                'no_spk' => $no_spk, 'item_code' => $item_code, 'proses_id' => $proses_id,
+                'tgl_spk' => date('d-m-Y'), 'qty_proses' => $model->qty_proses - $total,
+            ];
+            $mesin = MasterMesin::find()
+                ->select(['code', 'name'])
+                ->where(['type_code'=>$mesin_type, 'status'=>1])
+                ->asArray()
+                ->all();
+        }else{
+            $success = false;
+            $message = 'Semua QTY telah diproses.';
+        }
+        return json_encode(['success'=>$success, 'message'=>$message, 'model'=>$model, 'mesin'=>$mesin]);
+    }
+
+    public function actionDataDetail()
+    {
+        $dataProses = SpkOrderProses::find()->all();
+        $historyNotOutsource = SpkOrderHistory::find()
+            ->where('outsource_code is null OR outsource_code=""')
+            ->all();
+        $historyWithOutsource = SpkOrderHistory::find()
+            ->where('outsource_code is not null OR outsource_code <> ""')
+            ->all();
+        $data = $this->renderAjax('_detail', [
+            'model' => (new SpkOrder()),
+            'dataProses' => $dataProses,
+            'historyNotOutsource' => $historyNotOutsource,
+            'historyWithOutsource' => $historyWithOutsource
+        ]);
+        return json_encode(['data'=>$data]);
+    }
+    /** /INPUT PROSES */
+
+    /** INPUT HASIL */
+    public function actionPopupInput($no_spk, $item_code, $proses_id, $urutan)
+    {
+        $model = $this->findHistory($no_spk, $item_code, $proses_id, $urutan);
+        return $this->renderAjax('_popup_hasil', [
+            'model' => $model
         ]);
     }
 
-    public function actionGetProses($no_spk, $item_code, $urutan)
+    public function actionUpdate()
     {
-        $success = true;
-        $message = '';
-        $model = SpkDetail::find()
-            ->where(['no_spk'=>$no_spk, 'item_code'=>$item_code, 'urutan'=>$urutan])
-            ->asArray()
-            ->one();
-        if($model['status_produksi'] == 3 || $model['status_produksi'] == 5){
-            $success = false;
-            $message = 'Tidak dapat melakukan perubahan pada data ini karena data ini sudah selesai di proses.';
-        }
-        if($model['status_produksi'] == 4){
-            $success = false;
-            $message = 'Update proses bisa dilakukan ketika status produksi '.\Yii::$app->params['IN_PROGRESS'];
-        }
-        return json_encode(['success'=>$success, 'message'=>$message, 'model'=>$model]);
-    }
-
-    public function actionChangeProses()
-    {
-        $success = true;
-        $message = '';
         $request = \Yii::$app->request;
+        $success = true;
+		$message = 'INPUT HASIL PRODUKSI SUCCESSFULLY';
         if($request->isPost){
-            $data = $request->post('SpkDetail');
-            $model = $this->findProduksi($data['no_spk'], $data['item_code'], $data['urutan'], $data['potong_id']);
-            $model->attributes = (array)$data;
-            $qty_hasil = str_replace(',', '', $model->qty_hasil);
-            if(!empty($qty_hasil)){
-                if($qty_hasil <= $model->qty_proses){
-                    if($model->qty_rusak !=0 || $model->qty_rusak != null){
-                        $model->status_produksi =  5; // RUSAK SEBAGIAN;
-                    }else{
-                        if($model->qty_hasil < $model->qty_proses){
-                            $model->status_produksi = 4; // DONE SEBAGIAN
-                        }else{
-                            $model->status_produksi = 3; // DONE
-                        }
-                    }
+            try{
+                $data = $request->post('SpkOrderHistory');
+                if($data['qty_proses'] >= $data['qty_hasil']){
+                    $model = $this->findHistory($no_spk, $item_code, $proses_id, $urutan);
                 }else{
                     $success = false;
-                    $message = 'Qty hasil tidak boleh lebih dari qty proses.';
+                    $message = 'Qty hasil tidak boleh lebih besar dari Qty yang diproses.';
                 }
-            }
-
-            if($model->save()){
-                $message = '['.$model->no_spk.'] SUCCESS UPDATE SPK.';
-            }else{
+            }catch(\Exception $e){
                 $success = false;
-                $message = (count($model->errors) > 0) ? 'ERROR UPDATE SPK PRODUKSI: ' : '';
-                foreach($model->errors as $error => $value){
-                    $message .= strtoupper($value[0].', ');
-                }
-                $message = substr($message, 0, -2);
-            }
-        }
-        \Yii::$app->session->setFlash(($success) ? 'success' : 'danger', $message);
-        return $this->redirect(['update', 'no_spk' => $model->no_spk]);
-    }
-
-    public function actionCancelProses($no_spk)
-    {
-        return $this->redirect(['update', 'no_spk' => $no_spk]);
-    }
-
-    public function actionDeleteProses($no_spk, $item_code, $urutan)
-    {
-        $success = true;
-        $message = '';
-        $model = $this->findProduksi($no_spk, $item_code, $urutan);
-        if($model->status_produksi == 1){
-            if($model->delete()){
-                foreach($model->alls as $index=>$val){
-                    $val->urutan = $index +1;
-                    if(!$val->save()){
-                        $success = false;
-                        foreach($val->errors as $error => $value){
-                            $message .= strtoupper($value[0].', ');
-                        }
-                        $message = substr($message, 0, -2);
-                    }
-                }
-                $message = 'DELETE DETAIL PROSES PRODUKSI SUCCESSFULLY';
-            }else{
-                $success = false;
-                foreach($model->errors as $error => $value){
-                    $message = $value[0].', ';
-                }
-                $message = substr($message, 0, -2);
+                $message = $e->getMessage();
             }
         }else{
-            $success = false;
-            if($model->status_produksi == 2){
-                $message = 'Data ini tidak bisa dihapus, proses produksi sedang berjalan.';
-            }else if($model->status_produksi == 3 || $model->status_produksi == 4){
-                $message = 'Data ini tidak bisa dihapus, data sudah selesai di proses.';
-            }
+            throw new NotFoundHttpException('The requested data does not exist.');
         }
-        \Yii::$app->session->setFlash(($success) ? 'success' : 'danger', $message);
-        return $this->redirect(['update', 'no_spk' => $model->no_spk]);
+        return json_encode(['success'=>$success, 'message'=>$message]);
+    }
+    /** /INPUT HASIL */
+
+    public function actionPrint($no_spk, $item_code, $proses_id, $urutan)
+    {
+        $type_proses = [
+            'Potong' => ['judul' => 'Spk. Potong', 'type' => 'potong'],
+            'Cetak' => ['judul' => 'Spk. Cetak', 'type' => 'cetak'],
+            'Water Base' => ['judul' => 'Spk. Water Base', 'type' => 'waterbase'],
+            'Laminasi' => ['judul' => 'Spk. Laminasi', 'type' => 'laminasi'],
+            'Laminating Glossy' => ['judul' => 'Spk. Laminating Glossy', 'type' => 'laminasi_glossy'],
+            'Laminating Doff' => ['judul' => 'Spk. Laminating Doff', 'type' => 'laminasi_doff'],
+            'Vernish' => ['judul' => 'Spk. Vernish', 'type' => 'vernish'],
+            'UV' => ['judul' => 'Spk. UV', 'type' => 'uv'],
+            'Hot Print' => ['judul' => 'Spk. Hot Print', 'type' => 'hot_print'],
+            'Embossing' => ['judul' => 'Spk. ', 'type' => 'embossing'],
+            'Plong / Pond' => ['judul' => 'Spk. Plong / Pond', 'type' => 'plong'],
+            'Pretel' => ['judul' => 'Spk. Pretel', 'type' => 'pretel'],
+            'Lem' => ['judul' => 'Spk. Lem', 'type' => 'lem'],
+            'Ikat' => ['judul' => 'Spk. Ikat', 'type' => 'ikat'],
+            'Bungkus' => ['judul' => 'Spk. Bungkus', 'type' => 'bungkus'],
+        ];
+        
+        $model = $this->findModel($no_spk);
+        $spkHistory = $this->findHistory($no_spk, $item_code, $proses_id, $urutan);
+        $mp = MasterProses::findOne(['code'=>$spkHistory->proses_code]);
+        $type_proses = $type_proses[$mp->name];
+        $data = $this->renderPartial('_preview', [
+            'model' => $model,
+            'spkHistory' => $spkHistory,
+            'type_proses' => $type_proses,
+        ]);
+        return json_encode(['data'=>$data]);
     }
 
-    public function actionPostProses($no_spk, $type)
+    public function actionPost($no_spk, $type)
     {
         $success = true;
 		$message = '';
@@ -337,7 +384,18 @@ class SpkOrderController extends Controller
                             $val->status_produksi = 2;
                             if(!$val->save()){
                                 $success = false;
-                                $message = (count($model->errors) > 0) ? 'ERROR UPDATE STATUS PRODUKSI SPK_PRODUKSI: ' : '';
+                                $message = (count($model->errors) > 0) ? 'ERROR UPDATE STATUS PRODUKSI: ' : '';
+                                foreach($model->errors as $error => $value){
+                                    $message .= strtoupper($value[0].', ');
+                                }
+                                $message = substr($message, 0, -2);
+                            }
+                        }
+                        foreach($model->historyOnStarts as $val){
+                            $val->status_produksi = 2;
+                            if(!$val->save()){
+                                $success = false;
+                                $message = (count($model->errors) > 0) ? 'ERROR UPDATE STATUS PRODUKSI: ' : '';
                                 foreach($model->errors as $error => $value){
                                     $message .= strtoupper($value[0].', ');
                                 }
@@ -385,96 +443,5 @@ class SpkOrderController extends Controller
             \Yii::$app->session->setFlash('error', $message);
         }
         return $this->redirect(['update', 'no_spk' => $model->no_spk]);
-    }
-
-    /**
-     * Finds the SpkOrder model based on its primary key value.
-     * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param string $no_spk No Spk
-     * @return SpkOrder the loaded model
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    protected function findModel($no_spk)
-    {
-        if (($model = SpkOrder::findOne($no_spk)) !== null) {
-            return $model;
-        }
-
-        throw new NotFoundHttpException('The requested page does not exist.');
-    }
-
-    protected function findProduksi($no_spk, $item_code, $urutan)
-    {
-        $model = SpkOrderDetail::findOne(['no_spk'=>$no_spk, 'item_code'=>$item_code, 'urutan'=>$urutan]);
-        if($model !=null){
-            return $model;
-        }
-        throw new NotFoundHttpException('The requested page does not exist.');
-    }
-
-    public function actionListMesin($code)
-    {
-        $m_proses = MasterProses::findOne(['code'=>$code]);
-        if(isset($m_proses)){
-            $model = MasterMesin::find()
-                ->select(['code', 'name'])
-                ->where(['type_code'=>$m_proses->mesin_type, 'status'=>1])
-                ->asArray()
-                ->all();
-        }
-        return json_encode($model);
-    }
-
-    public function actionListUk_kertas($code, $no_spk)
-    {
-        $model = $this->findModel($no_spk);
-        if(isset($model)){
-            $m_proses = MasterProses::findOne(['code'=>$code]);
-            $data = [];
-            if(strpos($m_proses->name, 'Potong') !== false){
-                $soItem = $model->itemMaterial;
-                $data[0]['name'] = $soItem->item->panjang.'x'.$soItem->item->lebar;
-                $data[0]['potong_id'] = 9;
-            }else{
-                $data = SalesOrderPotong::find()
-                    ->select(['concat(panjang, "x", lebar) as name', 'urutan as potong_id'])
-                    ->where(['code'=>$model->no_so])
-                    ->asArray()
-                    ->all();
-            }
-        }
-        return json_encode($data);
-    }
-
-    public function actionPrintPreview($no_spk, $item_code, $urutan)
-    {
-        $model = $this->findModel($no_spk);
-        $spkDetail = $this->findProduksi($no_spk, $item_code, $urutan);
-        $m_proses = MasterProses::findOne(['code'=>$spkDetail->proses_code]);
-        $header = '';
-        $type = '';
-        if(strpos($m_proses->name, 'Cetak') !== false){
-            $header = 'SPK. CETAK';
-            $type = 'cetak';
-        }else if(strpos($m_proses->name, 'Potong') !== false){
-            $header = 'SPK. POTONG';
-            $type = 'potong';
-        }else if(strpos($m_proses->name, 'Pond') !== false){
-            $header = 'SPK. POND';
-            $type = 'pond';
-        }else if(strpos($m_proses->name, 'Pretel') !== false){
-            $header = 'SPK. Pretel';
-            $type = 'pretel';
-        }else if(strpos($m_proses->name, 'Lem') !== false){
-            $header = 'SPK. LEM';
-            $type = 'lem';
-        }
-        $data = $this->renderPartial('_preview', [
-            'model'=>$model,
-            'header'=>$header,
-            'spkDetail'=>$spkDetail,
-            'type'=>$type
-        ]);
-        return json_encode(['data'=>$data]);
     }
 }

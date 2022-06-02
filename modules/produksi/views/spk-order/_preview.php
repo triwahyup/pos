@@ -1,16 +1,16 @@
 <div class="page-wrapper">
     <div class="page-layout">
         <div class="page-header">
-            <h3><?=$header ?></h3>
+            <h3><?=strtoupper($type_proses['judul']) ?></h3>
             <table>
                 <tr>
                     <th>No. SPK</th>
                     <td class="text-center" width="10">:</td>
-                    <td><?='SPK/'.$spkDetail->no_spk ?></td>
+                    <td><?='SPK/'.$spkHistory->no_spk ?></td>
                     <td width="350"></td>
                     <th>Tanggal</th>
                     <td class="text-center" width="10">:</td>
-                    <td><?=date('d/m/Y', strtotime($spkDetail->tgl_spk)) ?></td>
+                    <td><?=date('d/m/Y', strtotime($spkHistory->tgl_spk)) ?></td>
                 </tr>
             </table>
         </div>
@@ -25,17 +25,17 @@
                     <tr>
                         <th class="text-left" width="80">Uk. Kertas</th>
                         <th class="text-center" width="20">:</th>
-                        <td class="text-left"><?=$spkDetail->uk_potong ?></td>
+                        <td class="text-left"><?=$spkHistory->uk_potong ?></td>
                         <th width="120"></th>
                         <th class="text-left" width="80">Gram/C-NC</th>
                         <th class="text-center" width="20">:</th>
-                        <td class="text-left"><?=$spkDetail->gram.'/C' ?></td>
+                        <td class="text-left"><?=$spkHistory->gram.'/C' ?></td>
                     </tr>
                     <tr>
                         <th class="text-left" width="80">Jumlah</th>
                         <th class="text-center" width="20">:</th>
                         <td class="text-left">
-                            <?=number_format($spkDetail->qty_proses, 0, ',', '.').' Lembar' ?>
+                            <?=number_format($spkHistory->qty_proses, 0, ',', '.').' Lembar' ?>
                         </td>
                     </tr>
                     <tr>
@@ -43,7 +43,7 @@
                         <th class="text-center" width="20">:</th>
                         <td class="text-left"><?=$model->name ?></td>
                     </tr>
-                    <?php if($type == 'pond'): ?>
+                    <?php if($type_proses['type'] == 'pond'): ?>
                         <tr>
                             <th class="text-left" width="80">Lbr /Pond</th>
                             <th class="text-center" width="20">:</th>
@@ -55,40 +55,29 @@
                             <td class="text-left"><?=$model->itemMaterial->total_potong ?></td>
                         </tr>
                     <?php endif; ?>
-                    <?php if($type == 'potong'): ?>
+                    <?php if($type_proses['type'] == 'potong'): ?>
                         <tr>
                             <th class="text-left" width="80">Uk. Potong</th>
                             <th class="text-center" width="20">:</th>
-                            <td class="text-left">
-                                <table class="table">
-                                    <tbody>
-                                        <?php foreach($model->potongs as $index=>$val): ?>
-                                            <tr>
-                                                <td class="text-center" width="20"><?=$index+1 ?></td>
-                                                <td class="text-center" width="100"><?=$val->panjang.' x '.$val->lebar ?></td>
-                                            </tr>
-                                        <?php endforeach; ?>
-                                    </tbody>
-                                </table>
-                            </td>
+                            <td class="text-left"><?=$spkHistory->uk_potong ?></td>
                         </tr>
                     <?php endif; ?>
-                    <?php if(empty($spkDetail->outsource_code)): ?>
+                    <?php if(empty($spkHistory->outsource_code)): ?>
                         <tr>
                             <th class="text-left" width="80">Mesin</th>
                             <th class="text-center" width="20">:</th>
-                            <td class="text-left"><?=(!empty($spkDetail->mesin)) ? $spkDetail->mesin->name : '-' ?></td>
+                            <td class="text-left"><?=(!empty($spkHistory->mesin)) ? $spkHistory->mesin->name : '-' ?></td>
                         </tr>
                         <tr>
                             <th class="text-left" width="80">Operator</th>
                             <th class="text-center" width="20">:</th>
-                            <td class="text-left"><?=(!empty($spkDetail->operator)) ? $spkDetail->operator->name : '-' ?></td>
+                            <td class="text-left"><?=(!empty($spkHistory->operator)) ? $spkHistory->operator->name : '-' ?></td>
                         </tr>
                     <?php endif; ?>
                     <tr>
                         <th class="text-left" width="80">Keterangan</th>
                         <th class="text-center" width="20">:</th>
-                        <td class="text-left"><?=(!empty($spkDetail->keterangan)) ? $spkDetail->keterangan : '-' ?></td>
+                        <td class="text-left"><?=(!empty($spkHistory->keterangan)) ? $spkHistory->keterangan : '-' ?></td>
                     </tr>
                 </thead>
             </table>
@@ -114,7 +103,7 @@
     </div>
 </div>
 <!-- SJ Outsource -->
-<?php if(!empty($spkDetail->outsource_code)): ?>
+<?php if(!empty($spkHistory->outsource_code)): ?>
     <div class="page-wrapper">
         <div class="page-layout">
             <div class="page-header">
@@ -123,17 +112,17 @@
                     <tr>
                         <th class="text-left">No. SJ</th>
                         <td class="text-center" width="10">:</td>
-                        <td><?='OS/'.$spkDetail->no_sj ?></td>
+                        <td><?='OS/'.$spkHistory->no_sj ?></td>
                     </tr>
                     <tr>
                         <th class="text-left">Tanggal</th>
                         <td class="text-center" width="10">:</td>
-                        <td><?=$spkDetail->tgl_spk ?></td>
+                        <td><?=$spkHistory->tgl_spk ?></td>
                     </tr>
                     <tr>
                         <th class="text-left">No. Pol</th>
                         <td class="text-center" width="10">:</td>
-                        <td><?=$spkDetail->nopol ?></td>
+                        <td><?=$spkHistory->nopol ?></td>
                     </tr>
                 </table>
                 <table class="table-inline">
@@ -141,13 +130,13 @@
                         <th>Outsource Partner</th>
                         <td class="text-center" width="10">:</td>
                         <td>
-                            <?=$spkDetail->outsource->name ?>
+                            <?=$spkHistory->outsource->name ?>
                             <br />
-                            <?=(!empty($spkDetail->outsource->address)) ? $spkDetail->outsource->address : '-' ?>
+                            <?=(!empty($spkHistory->outsource->address)) ? $spkHistory->outsource->address : '-' ?>
                             <br />
-                            <?=(!empty($spkDetail->outsource->kabupaten)) ? str_replace('KABUPATEN', '', $spkDetail->outsource->kabupaten->name) : '-' ?>
+                            <?=(!empty($spkHistory->outsource->kabupaten)) ? str_replace('KABUPATEN', '', $spkHistory->outsource->kabupaten->name) : '-' ?>
                             <br />
-                            <?=(!empty($spkDetail->outsource->phone_1)) ? 'HP: '.$spkDetail->outsource->phone_1 : '-' ?>
+                            <?=(!empty($spkHistory->outsource->phone_1)) ? 'HP: '.$spkHistory->outsource->phone_1 : '-' ?>
                         </td>
                     </tr>
                 </table>
@@ -165,9 +154,9 @@
                     <tbody>
                         <tr>
                             <td class="padding-bottom-220"><?=$model->name ?></td>
-                            <td class="padding-bottom-220 text-center"><?=$spkDetail->proses->name ?></td>
-                            <td class="padding-bottom-220 text-center"><?=number_format($spkDetail->qty_proses, 0, ',', '.').' Lembar' ?></td>
-                            <td class="padding-bottom-220"><?=(!empty($spkDetail->keterangan)) ? $spkDetail->keterangan : '-' ?></td>
+                            <td class="padding-bottom-220 text-center"><?=$spkHistory->proses->name ?></td>
+                            <td class="padding-bottom-220 text-center"><?=number_format($spkHistory->qty_proses, 0, ',', '.').' Lembar' ?></td>
+                            <td class="padding-bottom-220"><?=(!empty($spkHistory->keterangan)) ? $spkHistory->keterangan : '-' ?></td>
                         </tr>
                     </tbody>
                 </table>

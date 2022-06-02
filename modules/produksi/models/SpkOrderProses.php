@@ -3,6 +3,9 @@
 namespace app\modules\produksi\models;
 
 use Yii;
+use app\modules\master\models\MasterMaterial;
+use app\modules\master\models\MasterProses;
+use app\modules\produksi\models\SpkOrderHistory;
 use yii\behaviors\TimestampBehavior;
 
 /**
@@ -12,21 +15,15 @@ use yii\behaviors\TimestampBehavior;
  * @property string $item_code
  * @property int $proses_id
  * @property int $urutan
- * @property string|null $tgl_spk
  * @property int|null $potong_id
  * @property string|null $uk_potong
  * @property string|null $proses_code
  * @property int|null $proses_type
- * @property string|null $outsource_code
- * @property string|null $mesin_code
  * @property string|null $mesin_type
- * @property string|null $no_sj
- * @property string|null $nopol
  * @property float|null $qty_proses
  * @property float|null $qty_hasil
  * @property float|null $qty_rusak
  * @property float|null $gram
- * @property int|null $user_id
  * @property string|null $keterangan
  * @property int|null $status_produksi
  * @property int|null $status
@@ -56,13 +53,13 @@ class SpkOrderProses extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['no_spk', 'item_code', 'proses_id', 'urutan'], 'required'],
-            [['proses_id', 'urutan', 'potong_id', 'proses_type', 'user_id', 'status_produksi', 'status', 'created_at', 'updated_at'], 'integer'],
-            [['tgl_spk'], 'safe'],
-            [['qty_proses', 'qty_hasil', 'qty_rusak', 'gram'], 'number'],
-            [['no_spk', 'uk_potong', 'no_sj', 'nopol'], 'string', 'max' => 12],
+            [['no_spk', 'item_code', 'proses_id'], 'required'],
+            [['proses_id', 'urutan', 'potong_id', 'proses_type', 'status_produksi', 'status', 'created_at', 'updated_at'], 'integer'],
+            [['qty_proses', 'qty_hasil'], 'safe'],
+            [['qty_rusak', 'gram'], 'number'],
+            [['no_spk', 'uk_potong'], 'string', 'max' => 12],
             [['item_code'], 'string', 'max' => 7],
-            [['proses_code', 'outsource_code', 'mesin_code', 'mesin_type'], 'string', 'max' => 3],
+            [['proses_code', 'mesin_type'], 'string', 'max' => 3],
             [['keterangan'], 'string', 'max' => 128],
             [['no_spk', 'item_code', 'proses_id'], 'unique', 'targetAttribute' => ['no_spk', 'item_code', 'proses_id']],
             [['status'], 'default', 'value' => 1],
@@ -79,26 +76,82 @@ class SpkOrderProses extends \yii\db\ActiveRecord
             'item_code' => 'Item Code',
             'proses_id' => 'Proses ID',
             'urutan' => 'Urutan',
-            'tgl_spk' => 'Tgl Spk',
             'potong_id' => 'Potong ID',
             'uk_potong' => 'Uk Potong',
             'proses_code' => 'Proses Code',
             'proses_type' => 'Proses Type',
-            'outsource_code' => 'Outsource Code',
-            'mesin_code' => 'Mesin Code',
             'mesin_type' => 'Mesin Type',
-            'no_sj' => 'No Sj',
-            'nopol' => 'Nopol',
             'qty_proses' => 'Qty Proses',
             'qty_hasil' => 'Qty Hasil',
             'qty_rusak' => 'Qty Rusak',
             'gram' => 'Gram',
-            'user_id' => 'User ID',
             'keterangan' => 'Keterangan',
             'status_produksi' => 'Status Produksi',
             'status' => 'Status',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
         ];
+    }
+
+    public function beforeSave($attribute)
+    {
+        $this->qty_proses = (!empty($this->qty_proses)) ? str_replace(',', '', $this->qty_proses) : null;
+        $this->qty_hasil = (!empty($this->qty_hasil)) ? str_replace(',', '', $this->qty_hasil) : null;
+        $this->qty_rusak = (!empty($this->qty_rusak)) ? str_replace(',', '', $this->qty_rusak) : null;
+        return parent::beforeSave($attribute);
+    }
+
+    public function getSisa()
+    {
+        $total = 0;
+        foreach($this->historys as $val){
+            if($val->status_produksi == 1) $total += $val->qty_proses;
+            if($val->status_produksi == 3) $total += $val->qty_hasil;
+        }
+        return $this->qty_proses - $total;
+    }
+
+    public function getCount()
+    {
+        return SpkOrderProses::find()->where(['no_spk'=>$this->no_spk, 'item_code'=>$this->item_code])->count();
+    }
+
+    public function getAlls()
+    {
+        return SpkOrderProses::find()->where(['no_spk'=>$this->no_spk, 'item_code'=>$this->item_code])->all();
+    }
+
+    public function getitem()
+    {
+        return $this->hasOne(MasterMaterial::className(), ['code' => 'item_code']);
+    }
+
+    public function getProses()
+    {
+        return $this->hasOne(MasterProses::className(), ['code' => 'proses_code']);
+    }
+
+    public function getHistorys()
+    {
+        return $this->hasMany(SpkOrderHistory::className(), ['no_spk' => 'no_spk', 'item_code' => 'item_code', 'proses_id' => 'proses_id']);
+    }
+
+    public function getStatusProduksi()
+    {
+        $message = '';
+        if($this->status_produksi==1){
+            $message = '<span class="text-label text-default">On Start</span>';
+        }else if($this->status_produksi==2){
+            $message = '<span class="text-label text-primary">In Progres</span>';
+        }else if($this->status_produksi==3){
+            $message = '<span class="text-label text-success">Done</span>';
+        }else if($this->status_produksi==4){
+            $message = '<span class="text-label text-warning">Done Sebagian</span>';
+        }else if($this->status_produksi==5){
+            $message = '<span class="text-label text-danger">Rusak Sebagian</span>';
+        }else{
+            $message = '<span class="text-label text-warning">Belum Proses</span>';
+        }
+        return $message;
     }
 }

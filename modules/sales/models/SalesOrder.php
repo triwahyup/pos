@@ -3,6 +3,7 @@
 namespace app\modules\sales\models;
 
 use Yii;
+use app\models\Profile;
 use app\modules\master\models\MasterPerson;
 use yii\behaviors\TimestampBehavior;
 
@@ -58,9 +59,11 @@ class SalesOrder extends \yii\db\ActiveRecord
         return [
             [['name', 'type_order', 'customer_code', 'no_po', 'ekspedisi_flag'], 'required'],
             [['tgl_so', 'tgl_po', 'deadline'], 'safe'],
-            [['ekspedisi_flag', 'term_in', 'type_order', 'up_produksi', 'post', 'status', 'created_at', 'updated_at'], 'integer'],
+            [['sales_code', 'ekspedisi_flag', 'term_in', 'type_order', 'up_produksi', 'post', 'status', 'created_at', 'updated_at'], 'integer'],
             [['ppn', 'total_order_material', 'total_order_bahan', 'total_biaya_produksi', 'total_ppn', 'grand_total'], 'number'],
+            [['nick_name'], 'string', 'max' => 4],
             [['code', 'no_po'], 'string', 'max' => 12],
+            [['repeat_code'], 'string', 'max' => 16],
             [['name', 'keterangan'], 'string', 'max' => 128],
             [['customer_code', 'ekspedisi_code'], 'string', 'max' => 3],
             [['code'], 'unique'],
@@ -117,6 +120,11 @@ class SalesOrder extends \yii\db\ActiveRecord
         $this->tgl_po = date('Y-m-d', strtotime($this->tgl_po));
         $this->deadline = date('Y-m-d', strtotime($this->deadline));
         return parent::beforeSave($attribute);
+    }
+
+    public function getSales()
+    {
+        return $this->hasOne(Profile::className(), ['user_id' => 'sales_code']);
     }
 
     public function getCustomer()
@@ -200,7 +208,7 @@ class SalesOrder extends \yii\db\ActiveRecord
         $model = TempSalesOrderItem::find()
             ->alias('a')
             ->leftJoin('master_kode b', 'b.code = a.type_code')
-            ->where(['a.code'=>$this->code, 'value'=>\Yii::$app->params['TYPE_KERTAS']])
+            ->where(['value'=>\Yii::$app->params['TYPE_KERTAS'], 'user_id' => \Yii::$app->user->id])
             ->all();
         return $model;
     }
@@ -210,7 +218,7 @@ class SalesOrder extends \yii\db\ActiveRecord
         $model = TempSalesOrderItem::find()
             ->alias('a')
             ->leftJoin('master_kode b', 'b.code = a.type_code')
-            ->where(['a.code'=>$this->code])
+            ->where(['user_id' => \Yii::$app->user->id])
             ->andWhere('value <> "'.\Yii::$app->params['TYPE_KERTAS'].'"')
             ->all();
         return $model;
@@ -221,8 +229,10 @@ class SalesOrder extends \yii\db\ActiveRecord
         $message = '';
         if($this->type_order == 1){
             $message = 'Produksi';
-        }else{
+        }else if($this->type_order == 2){
             $message = 'Jasa';
+        }else{
+            $message = 'Sample';
         }
         return $message;
     }

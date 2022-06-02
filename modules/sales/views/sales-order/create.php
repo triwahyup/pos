@@ -14,6 +14,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'model' => $model,
         'customer' => $customer,
         'ekspedisi' => $ekspedisi,
+        'sales' => $sales,
         'tempPotong' => $tempPotong,
         'tempItem' => $tempItem,
         'typeSatuan' => $typeSatuan,
