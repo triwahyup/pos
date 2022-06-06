@@ -228,7 +228,7 @@ function create(el)
         success: function(data){
             var o = $.parseJSON(data);
             if(o.success == true){
-                init_data();
+                init_data(no_spk);
                 notification.open("success", o.message, timeOut);
             }else{
                 notification.open("danger", o.message, timeOut);
@@ -240,11 +240,14 @@ function create(el)
     });
 }
 
-function init_data()
+function init_data(no_spk)
 {
     $.ajax({
         url: "<?= Url::to(['spk-order/data-detail']) ?>",
-        type: "POST",
+        type: "GET",
+        data: {
+            no_spk: no_spk
+        },
         dataType: "text",
         error: function(xhr, status, error) {},
         beforeSend: function() {
@@ -280,7 +283,8 @@ function get_data(data)
                 _init_get_data();
                 
                 $.each(o.model, function(index, value){
-                    $("#spkorderhistory-"+index).val(value);
+                    console.log(index, value);
+                    $("#spkorderhistory-"+index).val(value).trigger("change");
                 });
                 $("#spkorderhistory-mesin_code").empty();
                 $.each(o.mesin, function(index, value){
@@ -374,7 +378,7 @@ function update(el)
         success: function(data){
             var o = $.parseJSON(data);
             if(o.success == true){
-                init_data();
+                init_data(no_spk);
                 notification.open("success", o.message, timeOut);
             }else{
                 notification.open("danger", o.message, timeOut);
@@ -386,7 +390,8 @@ function update(el)
     });
 }
 
-var timeOut = 7000;
+var timeOut = 7000,
+    no_spk = "<?=$_GET['no_spk'] ?>";
 var _init_get_data = function(type=null){
     if(type == 'cancel'){
         $("[id^=\"spkorderhistory-\"]").attr("readonly", true);
@@ -431,6 +436,6 @@ $(document).ready(function(){
     });
 });
 $(function(){
-    init_data();
+    init_data(no_spk);
 });
 </script>

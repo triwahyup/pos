@@ -39,7 +39,7 @@ class PotongRollController extends Controller
                                 'temp', 'get-temp', 'create-temp', 'delete-temp',
                                 'list-item', 'search', 'item', 'autocomplete',
                             ],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('potong-material-roll')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('request-potong-material-roll')),
                             'roles' => ['@'],
                         ],
                     ],

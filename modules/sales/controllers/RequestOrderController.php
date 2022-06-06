@@ -42,7 +42,7 @@ class RequestOrderController extends Controller
                                 'create-temp', 'update-temp', 'delete-temp',
                                 'temp', 'get-temp', 'popup', 'approval', 'send-approval', 'post',
                             ],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('request-order')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('request-material-sales-order')),
                             'roles' => ['@'],
                         ],
                     ],

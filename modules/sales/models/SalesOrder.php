@@ -57,10 +57,10 @@ class SalesOrder extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['name', 'type_order', 'customer_code', 'no_po', 'ekspedisi_flag'], 'required'],
+            [['name', 'type_order', 'customer_code', 'no_po', 'ekspedisi_flag', 'total_qty'], 'required'],
             [['tgl_so', 'tgl_po', 'deadline'], 'safe'],
-            [['sales_code', 'ekspedisi_flag', 'term_in', 'type_order', 'up_produksi', 'post', 'status', 'created_at', 'updated_at'], 'integer'],
-            [['ppn', 'total_order_material', 'total_order_bahan', 'total_biaya_produksi', 'total_ppn', 'grand_total'], 'number'],
+            [['sales_code', 'ekspedisi_flag', 'term_in', 'type_order', 'up_produksi', 'post', 'status', 'created_at', 'updated_at', 'type_qty'], 'integer'],
+            [['ppn', 'total_order_material', 'total_order_bahan', 'total_biaya_produksi', 'total_ppn', 'grand_total', 'total_qty'], 'number'],
             [['nick_name'], 'string', 'max' => 4],
             [['code', 'no_po'], 'string', 'max' => 12],
             [['repeat_code'], 'string', 'max' => 16],

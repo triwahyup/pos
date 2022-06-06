@@ -36,7 +36,7 @@ class SpkOrderController extends Controller
                             'actions' => [
                                 'index', 'view', 'layar', 'create', 'update', 'print', 'post', 'get-data', 'data-detail', 'popup-input',
                             ],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('surat-perintah-kerja')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('proses-produksi-sales-order')),
                             'roles' => ['@'],
                         ],
                     ],
@@ -268,8 +268,9 @@ class SpkOrderController extends Controller
         return json_encode(['success'=>$success, 'message'=>$message, 'model'=>$model, 'mesin'=>$mesin]);
     }
 
-    public function actionDataDetail()
+    public function actionDataDetail($no_spk)
     {
+        $model = SpkOrder::findOne(['no_spk'=>$no_spk]);
         $dataProses = SpkOrderProses::find()->all();
         $historyNotOutsource = SpkOrderHistory::find()
             ->where('outsource_code is null OR outsource_code=""')
@@ -278,7 +279,7 @@ class SpkOrderController extends Controller
             ->where('outsource_code is not null OR outsource_code <> ""')
             ->all();
         $data = $this->renderAjax('_detail', [
-            'model' => (new SpkOrder()),
+            'model' => $model,
             'dataProses' => $dataProses,
             'historyNotOutsource' => $historyNotOutsource,
             'historyWithOutsource' => $historyWithOutsource
@@ -442,6 +443,6 @@ class SpkOrderController extends Controller
         if(!$success){
             \Yii::$app->session->setFlash('error', $message);
         }
-        return $this->redirect(['update', 'no_spk' => $model->no_spk]);
+        return $this->redirect(['layar', 'no_spk' => $model->no_spk]);
     }
 }

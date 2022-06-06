@@ -33,22 +33,22 @@ class ApprovalController extends Controller
 				    'rules' => [
                         [
                             'actions' => ['create', 'create-temp'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('approval')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('setup-approval')),
                             'roles' => ['@'],
                         ],
                         [
                             'actions' => ['index', 'view', 'temp', 'type-approval'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('approval')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('setup-approval')),
                             'roles' => ['@'],
                         ], 
                         [
                             'actions' => ['update'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('approval')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('setup-approval')),
                             'roles' => ['@'],
                         ], 
                         [
                             'actions' => ['delete', 'delete-temp'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('approval')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('setup-approval')),
                             'roles' => ['@'],
                         ],
                     ],

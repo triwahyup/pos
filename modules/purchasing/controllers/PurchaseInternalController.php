@@ -39,27 +39,27 @@ class PurchaseInternalController extends Controller
 				    'rules' => [
                         [
                             'actions' => ['create', 'create-temp', 'send-approval'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('po-internal')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('purchase-order-asset-dan-not-asset')),
                             'roles' => ['@'],
                         ],
                         [
                             'actions' => ['index', 'view', 'list-barang', 'temp', 'get-temp', 'popup', 'search', 'barang', 'autocomplete'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('po-internal')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('purchase-order-asset-dan-not-asset')),
                             'roles' => ['@'],
                         ], 
                         [
                             'actions' => ['update', 'update-temp', 'post'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('po-internal')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('purchase-order-asset-dan-not-asset')),
                             'roles' => ['@'],
                         ], 
                         [
                             'actions' => ['delete', 'delete-temp'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('po-internal')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('purchase-order-asset-dan-not-asset')),
                             'roles' => ['@'],
                         ],
                         [
                             'actions' => ['approval'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('po-internal')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('purchase-order-asset-dan-not-asset')),
                             'roles' => ['@'],
                         ],
                     ],

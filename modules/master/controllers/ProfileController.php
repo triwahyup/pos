@@ -36,22 +36,22 @@ class ProfileController extends Controller
 				    'rules' => [
                         [
                             'actions' => ['create'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-user')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('setup-user')),
                             'roles' => ['@'],
                         ],
                         [
                             'actions' => ['index', 'switch', 'view', 'list-kabupaten', 'list-kecamatan', 'list-kelurahan'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-user')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('setup-user')),
                             'roles' => ['@'],
                         ], 
                         [
                             'actions' => ['update'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-user')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('setup-user')),
                             'roles' => ['@'],
                         ], 
                         [
                             'actions' => ['delete'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-user')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('setup-user')),
                             'roles' => ['@'],
                         ],
                     ],

@@ -9,7 +9,7 @@ use app\modules\master\models\MasterSatuan;
 
 class DataList {
     
-    public function setListColumn()
+    public static function setListColumn()
     {
         $model['customer'] = MasterPerson::find()
             ->select(['name'])

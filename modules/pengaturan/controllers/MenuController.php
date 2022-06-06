@@ -30,22 +30,22 @@ class MenuController extends Controller
 				    'rules' => [
                         [
                             'actions' => ['create'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('menu-baru')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('setup-menu')),
                             'roles' => ['@'],
                         ],
                         [
                             'actions' => ['index', 'view', 'list'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('menu-baru')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('setup-menu')),
                             'roles' => ['@'],
                         ], 
                         [
                             'actions' => ['update'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('menu-baru')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('setup-menu')),
                             'roles' => ['@'],
                         ], 
                         [
                             'actions' => ['delete'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('menu-baru')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('setup-menu')),
                             'roles' => ['@'],
                         ],
                     ],

@@ -32,12 +32,12 @@ class RoleController extends Controller
 				    'rules' => [
                         [
                             'actions' => ['index'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('role-menu')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('setup-role-user')),
                             'roles' => ['@'],
                         ], 
                         [
                             'actions' => ['update'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('role-menu')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('setup-role-user')),
                             'roles' => ['@'],
                         ],
                     ],

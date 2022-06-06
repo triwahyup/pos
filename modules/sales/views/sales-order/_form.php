@@ -143,6 +143,23 @@ use yii\widgets\MaskedInput;
                                 'options' => [
                                     'placeholder' => 'Pilih Type Order',
                                     'class' => 'select2',
+                                    'value' => ($model->isNewRecord) ? 1 : $model->type_order,
+                                ],
+                            ])->label(false) ?>
+                    </div>
+                </div>
+                <!-- Type Order -->
+                <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
+                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
+                        <label>Type QTY:</label>
+                    </div>
+                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
+                        <?= $form->field($model, 'type_qty')->widget(Select2::classname(), [
+                                'data' => [1=>'RIM', 2=>'LEMBAR'],
+                                'options' => [
+                                    'placeholder' => 'Pilih Type QTY',
+                                    'class' => 'select2',
+                                    'value' => ($model->isNewRecord) ? 1 : $model->qty,
                                 ],
                             ])->label(false) ?>
                     </div>
@@ -150,10 +167,10 @@ use yii\widgets\MaskedInput;
                 <!-- Minimal Order -->
                 <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
                     <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                        <label>Qty Order (Plano):</label>
+                        <label>Total Qty:</label>
                     </div>
-                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-right-0">
-                        <?= $form->field($tempItem, 'qty_order_1')->widget(MaskedInput::className(), [
+                    <div class="col-lg-5 col-md-5 col-sm-12 col-xs-12 padding-right-0">
+                        <?= $form->field($model, 'total_qty')->widget(MaskedInput::className(), [
                                 'clientOptions' => [
                                     'alias' => 'decimal',
                                     'groupSeparator' => ',',
@@ -165,7 +182,7 @@ use yii\widgets\MaskedInput;
                             ])->label(false) ?>
                     </div>
                     <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-left-0">
-                        <label class="font-size-14 margin-left-5 margin-top-5">RIM</label>
+                        <label id="satuan_qty_total" class="font-size-14 margin-left-5 margin-top-5">RIM</label>
                     </div>
                 </div>
                 <!-- Ekspedisi Flag -->
@@ -327,16 +344,47 @@ use yii\widgets\MaskedInput;
                 </div>
             </div>
             <div class="col-lg-6 col-md-6 col-xs-12">
-                <!-- Qty Up -->
+                <!-- Qty Order / Up -->
                 <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
+                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
+                        <label>Qty Order:</label>
+                    </div>
+                    <div class="col-lg-5 col-md-5 col-sm-12 col-xs-12 padding-right-0">
+                        <?= $form->field($tempItem, 'qty_order_1')->widget(MaskedInput::className(), [
+                                'clientOptions' => [
+                                    'alias' => 'decimal',
+                                    'groupSeparator' => ',',
+                                    'autoGroup' => true
+                                ],
+                                'options' => [
+                                    'data-align' => 'text-right',
+                                    'aria-required' => true,
+                                ]
+                            ])->label(false) ?>
+                    </div>
+                    <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-left-0">
+                        <label id="satuan_qty_temp" class="font-size-14 margin-left-5 margin-top-5">RIM</label>
+                    </div>
+                </div>
+                <!-- Qty Up -->
+                <div id="qty_up" class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
                     <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
                         <label>Qty Up:</label>
                     </div>
-                    <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padding-right-0">
-                        <?= $form->field($tempItem, 'qty_up')->textInput(['data-align'=>'text-right'])->label(false) ?>
+                    <div class="col-lg-5 col-md-5 col-sm-12 col-xs-12 padding-right-0">
+                        <?= $form->field($tempItem, 'qty_up')->widget(MaskedInput::className(), [
+                                'clientOptions' => [
+                                    'alias' => 'decimal',
+                                    'groupSeparator' => ',',
+                                    'autoGroup' => true
+                                ],
+                                'options' => [
+                                    'data-align' => 'text-right',
+                                ]
+                            ])->label(false) ?>
                     </div>
                     <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-left-0">
-                        <label class="font-size-14 margin-left-5 margin-top-5">LEMBAR</label>
+                        <label id="satuan_qty_up" class="font-size-14 margin-left-5 margin-top-5">LEMBAR</label>
                     </div>
                 </div>
                 <!-- Warna -->
@@ -1080,7 +1128,6 @@ function init_temp_item()
         success: function(data){
             var o = $.parseJSON(data);
             $("[data-render=\"detail-item\"] table > tbody").html(o.model);
-            onChangeUp($("#tempsalesorderitem-qty_order_1").val(), $("#salesorder-up_produksi").val());
         },
         complete: function(){
             temp.destroy();
@@ -1131,6 +1178,28 @@ $(document).ready(function(){
         type_order($(this).val());
     });
 
+    $("body").off("change","#salesorder-type_qty").on("change","#salesorder-type_qty", function(e){
+        e.preventDefault();
+        $("#salesorder-total_qty").val(null);
+        $("#salesorder-up_produksi").val(null).trigger("change");
+        $("#tempsalesorderitem-qty_up").val(null);
+        $("#tempsalesorderitem-qty_order_1").val(null);
+        $("#tempsalesorderitem-qty_order_2").val(null);
+        if($(this).val() == 1){
+            $("#satuan_qty_total").text("RIM");
+            $("#satuan_qty_temp").text("RIM");
+            $("#salesorder-up_produksi").attr("readonly", false);
+            $("#qty_up").removeClass("hidden");
+            $("[name=\"TempSalesOrderItem[qty_order_2]\"]").attr("name", "TempSalesOrderItem[qty_order_1]");
+        }else{
+            $("#satuan_qty_total").text("LEMBAR");
+            $("#satuan_qty_temp").text("LEMBAR");
+            $("#salesorder-up_produksi").attr("readonly", true);
+            $("#qty_up").removeClass("hidden").addClass("hidden");
+            $("[name=\"TempSalesOrderItem[qty_order_1]\"]").attr("name", "TempSalesOrderItem[qty_order_2]");
+        }
+    });
+
     $("body").off("change","#salesorder-ekspedisi_flag").on("change","#salesorder-ekspedisi_flag", function(e){
         e.preventDefault();
         if($(this).val() == 1){
@@ -1142,14 +1211,14 @@ $(document).ready(function(){
     });
 
     /** UP PRODUKSI */
-    $("body").off("input","#tempsalesorderitem-qty_order_1").on("input","#tempsalesorderitem-qty_order_1", function(e){
+    $("body").off("input","#salesorder-total_qty").on("input","#salesorder-total_qty", function(e){
         e.preventDefault();
         onChangeUp($(this).val(), $("#salesorder-up_produksi").val());
     });
 
     $("body").off("change","#salesorder-up_produksi").on("change","#salesorder-up_produksi", function(e){
         e.preventDefault();
-        onChangeUp($("#tempsalesorderitem-qty_order_1").val(), $(this).val());
+        onChangeUp($("#salesorder-total_qty").val(), $(this).val());
     });
     /** END UP PRODUKSI */
 
@@ -1333,7 +1402,7 @@ var isNotNewRecord = function() {
     }else{
         $("#salesorder-ekspedisi_code").attr("readonly", true);
     }
-    onChangeUp($("#tempsalesorderitem-qty_order_1").val(), $("#salesorder-up_produksi").val());
+    onChangeUp($("#salesorder-total_qty").val(), $("#salesorder-up_produksi").val());
 }
 $(function(){
     <?php if(!$model->isNewRecord): ?>

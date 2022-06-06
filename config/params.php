@@ -13,6 +13,7 @@ $data = [
     'TYPE_USER' => 'USER',
     'TYPE_PERSON' => 'PERSON',
     'TYPE_BAST' => 'BAST',
+    
     // MASTER KODE VALUE
     'TYPE_MENU_LEFT' => 'NAVBAR LEFT',
     'TYPE_MENU_TOP' => 'NAVBAR TOP',
@@ -23,12 +24,14 @@ $data = [
     'TYPE_ROLL' => 'ROLL',
     'TYPE_BARANG' => 'BARANG',
     'TYPE_SUP' => 'ADMINISTRATOR',
+    
     // MASTER PERSON TYPE
     'TYPE_CUSTOMER' => 1,
     'TYPE_EKSPEDISI' => 2,
     'TYPE_OUTSOURCE' => 3,
     'TYPE_SUPPLIER' => 4,
     'TYPE_SUPPLIER_BARANG' => 5,
+    
     // MASTER SATUAN
     'TYPE_RIM_PLANO' => 'RIM-PLANO',
     
