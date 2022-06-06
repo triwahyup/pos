@@ -46,8 +46,8 @@ class SpkOrder extends \yii\db\ActiveRecord
     {
         return [
             [['no_spk'], 'required'],
-            [['tgl_spk', 'tgl_so', 'deadline', 'type_order', 'up_produksi'], 'safe'],
-            [['sales_code', 'ekspedisi_flag', 'term_in', 'status', 'status_produksi', 'created_at', 'updated_at'], 'integer'],
+            [['tgl_spk', 'tgl_so', 'deadline', 'type_order', 'up_produksi', 'total_qty', 'total_qty_up'], 'safe'],
+            [['sales_code', 'ekspedisi_flag', 'term_in', 'type_qty', 'status', 'status_produksi', 'created_at', 'updated_at'], 'integer'],
             [['customer_code', 'ekspedisi_code'], 'string', 'max' => 3],
             [['nick_name'], 'string', 'max' => 4],
             [['no_spk', 'no_so'], 'string', 'max' => 12],

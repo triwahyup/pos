@@ -55,6 +55,7 @@ class TempSalesOrderItem extends \yii\db\ActiveRecord
     public $item_name;
     public $bahan_item_name;
     public $bahan_item_code;
+    public $bahan_supplier_code;
     public $bahan_qty;
 
     /**
@@ -75,7 +76,7 @@ class TempSalesOrderItem extends \yii\db\ActiveRecord
             [['qty_order_1', 'qty_order_2', 'qty_order_3', 'qty_up', 'konversi_1', 'konversi_2', 'konversi_3', 'harga_beli_1', 'harga_beli_2', 'harga_beli_3', 'harga_jual_1', 'harga_jual_2', 'harga_jual_3', 'total_order', 'bahan_qty'], 'safe'],
             [['code'], 'string', 'max' => 12],
             [['item_code', 'bahan_item_code'], 'string', 'max' => 7],
-            [['supplier_code', 'satuan_code', 'material_code', 'type_code', 'satuan_ikat_code'], 'string', 'max' => 3],
+            [['supplier_code', 'satuan_code', 'material_code', 'type_code', 'satuan_ikat_code', 'bahan_supplier_code'], 'string', 'max' => 3],
             [['um_1', 'um_2', 'um_3', 'lembar_ikat_um_1', 'lembar_ikat_um_2', 'lembar_ikat_um_3'], 'string', 'max' => 5],
             [['keterangan', 'item_name'], 'string', 'max' => 128],
         ];
@@ -203,48 +204,6 @@ class TempSalesOrderItem extends \yii\db\ActiveRecord
     {
         $temp = TempSalesOrderProses::find()->where(['code'=>$this->code, 'item_code'=>$this->item_code, 'user_id'=> \Yii::$app->user->id])->all();
         return $temp;
-    }
-
-    public function totalQty($total_qty, $up_produksi)
-    {
-        $message = '';
-        $success = true;
-        $qty_order = 0;
-        if(!empty($this->qty_order_1)){
-            $qty_order = $this->inventoryStock->satuanTerkecil($this->item_code, [
-                0=>$this->qty_order_1,
-                1=>0,
-            ]);
-            $total_qty = $this->inventoryStock->satuanTerkecil($this->item_code, [
-                0=>$total_qty,
-                1=>0,
-            ]);
-        }else{
-            $qty_order = $this->qty_order_2;
-        }
-
-        if(count($this->temps) > 0){
-            foreach($this->temps as $val){
-                if(!empty($this->qty_order_1)){
-                    $konv = $val->qty_order_1 * 500;
-                    $qty_order += $konv;
-                    
-                }else{
-                    $qty_order += $val->qty_order_2;
-                }
-            }
-        }
-
-        $up_produksi = $this->up_produksi($total_qty, $up_produksi);
-        print_r($up_produksi);die;
-
-
-        if($qty_order > $total_qty){
-            $success = false;
-            $message = 'Qty Order tidak boleh lebih dari total Qty['.$total_qty.']';
-        }
-
-        return ['success'=>$success, 'message'=>$message];
     }
 
     public function getTotalOrder()

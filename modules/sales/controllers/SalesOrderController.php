@@ -52,8 +52,7 @@ class SalesOrderController extends Controller
                                 'list-item', 'autocomplete-item', 'search-item', 'select-item', 
                                 'temp-item', 'temp-bahan', 'temp-proses', 'get-temp',
                                 'create-temp', 'update-temp', 'delete-temp', 
-                                'create-potong', 'update-potong', 'delete-potong',
-                                'create-proses', 'invoice', 'post',
+                                'create-potong', 'delete-potong', 'create-proses', 'invoice', 'post',
                             ],
                             'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('sales-order')),
                             'roles' => ['@'],
@@ -130,7 +129,6 @@ class SalesOrderController extends Controller
                             $salesItem = new SalesOrderItem();
                             $salesItem->attributes = $temp->attributes;
                             $salesItem->code = $model->code;
-                            $salesItem->qty_up = (!empty($model->up_produksi) || $model->up_produksi != 0) ? $temp->qty_up : null;
                             if(!$salesItem->save()){
                                 $success = false;
                                 $message = (count($salesItem->errors) > 0) ? 'ERROR CREATE SALES ORDER ITEM: ' : '';
@@ -141,27 +139,28 @@ class SalesOrderController extends Controller
                             }
                         }
 
-                        $qty = 0;
-                        $qty_up = 0;
-                        foreach($model->itemsMaterial() as $val){
-                            $qty += $val->qty_order_1;
-                            $qty_up += $val->qty_up;
-                        }
-                        if(!empty($model->up_produksi) || $model->up_produksi != 0){
-                            if($qty_up > 0){
-                                $up_produksi = $tempItem->up_produksi($qty, $model->up_produksi);
-                                if($qty_up < $up_produksi['total_up']){
-                                    $success = false;
-                                    $message = 'QTY UP KURANG '.($up_produksi['total_up'] - $qty_up).' LEMBAR';
-                                }
-                                if($qty_up > $up_produksi['total_up']){
-                                    $success = false;
-                                    $message = 'QTY UP KELEBIHAN '.($qty_up - $up_produksi['total_up']).' LEMBAR';
-                                }
+                        $totalQtyUp = 0;
+                        $totalQtyOrder = 0;
+                        $totalQtyKonv = 0;
+                        foreach($model->itemsMaterial as $val){
+                            $totalQtyUp += $val->qty_up;
+                            if(!empty($val->qty_order_1)){
+                                $konv = $val->inventoryStock->satuanTerkecil($val->item_code, [
+                                    0=>$val->qty_order_1, 1=>0]);
+                                $totalQtyOrder += $konv;
                             }else{
-                                $success = false;
-                                $message = 'QTY UP PRODUKSI MASIH '.$qty_up;
+                                $totalQtyOrder += $val->qty_order_2;
                             }
+                            $totalQtyKonv = $val->inventoryStock->satuanTerkecil($val->item_code, [
+                                0=>$model->total_qty, 1=>0]);
+                        }
+                        if($totalQtyOrder > $totalQtyKonv){
+                            $success = false;
+                            $message = 'Total qty order tidak boleh lebih dari '.$model->total_qty;
+                        }
+                        if($totalQtyUp > $model->total_qty_up){
+                            $success = false;
+                            $message = 'Total up produksi tidak boleh lebih dari '.$model->total_qty_up;
                         }
                     }else{
                         $success = false;
@@ -303,27 +302,28 @@ class SalesOrderController extends Controller
                             }
                         }
                         
-                        $qty = 0;
-                        $qty_up = 0;
-                        foreach($model->itemsMaterial() as $val){
-                            $qty += $val->qty_order_1;
-                            $qty_up += $val->qty_up;
-                        }
-                        if(!empty($model->up_produksi) || $model->up_produksi != 0){
-                            if($qty_up > 0){
-                                $up_produksi = $tempItem->up_produksi($qty, $model->up_produksi);
-                                if($qty_up < $up_produksi['total_up']){
-                                    $success = false;
-                                    $message = 'QTY UP KURANG '.($up_produksi['total_up'] - $qty_up).' LEMBAR';
-                                }
-                                if($qty_up > $up_produksi['total_up']){
-                                    $success = false;
-                                    $message = 'QTY UP KELEBIHAN '.($qty_up - $up_produksi['total_up']).' LEMBAR';
-                                }
+                        $totalQtyUp = 0;
+                        $totalQtyOrder = 0;
+                        $totalQtyKonv = 0;
+                        foreach($model->itemsMaterial as $val){
+                            $totalQtyUp += $val->qty_up;
+                            if(!empty($val->qty_order_1)){
+                                $konv = $val->inventoryStock->satuanTerkecil($val->item_code, [
+                                    0=>$val->qty_order_1, 1=>0]);
+                                $totalQtyOrder += $konv;
                             }else{
-                                $success = false;
-                                $message = 'QTY UP PRODUKSI MASIH '.$qty_up;
+                                $totalQtyOrder += $val->qty_order_2;
                             }
+                            $totalQtyKonv = $val->inventoryStock->satuanTerkecil($val->item_code, [
+                                0=>$model->total_qty, 1=>0]);
+                        }
+                        if($totalQtyOrder > $totalQtyKonv){
+                            $success = false;
+                            $message = 'Total qty order tidak boleh lebih dari '.$model->total_qty;
+                        }
+                        if($totalQtyUp > $model->total_qty_up){
+                            $success = false;
+                            $message = 'Total up produksi tidak boleh lebih dari '.$model->total_qty_up;
                         }
                     }else{
                         $success = false;
@@ -689,12 +689,11 @@ class SalesOrderController extends Controller
     {
         $request = \Yii::$app->request;
         $up_produksi = (new TempSalesOrderItem())->up_produksi($qty, $up);
-        $desc = '';
+        $total_qty_up = 0;
         if($up_produksi['total_up'] > 0){
-            $desc .= 'Up Produksi '.number_format($up_produksi['total_up']).' Lembar ('.$up.'%).';
-            $desc .= 'Total Order '.$up_produksi['total'].' RIM.';
+            $total_qty_up = number_format($up_produksi['total_up']);
         }
-        return json_encode(['desc'=>$desc, 'qty_up'=>$up_produksi['total_up']]);
+        return json_encode(['total_qty_up'=>$total_qty_up]);
     }
 
     public function actionTypeOrder($type)
@@ -1132,10 +1131,9 @@ class SalesOrderController extends Controller
                 $dataItem = $request->post('TempSalesOrderItem');
                 $tempItem = new TempSalesOrderItem();
                 $tempItem->attributes = (array)$dataItem;
-                $totalQty = $tempItem->totalQty($dataHeader['total_qty'], $dataHeader['up_produksi']);
-                print_r($totalQty);die;
                 if(isset($tempItem->itemBahan)){
                     $tempItem->item_code = $tempItem->bahan_item_code;
+                    $tempItem->supplier_code = $tempItem->bahan_supplier_code;
                     $tempItem->qty_order_1 = $tempItem->bahan_qty;
                     $tempItem->qty_up = null;
                     $tempItem->total_potong = 0;
@@ -1154,14 +1152,16 @@ class SalesOrderController extends Controller
                     $tempItem->attributes = $tempItem->satuan->attributes;
                     $tempItem->attributes = $tempItem->item->attributes;
                     $tempItem->code = $code;
-                    $tempItem->supplier_code = $dataItem['supplier_code'];
                     $tempItem->urutan = $tempItem->countTemp +1;
                     $tempItem->total_order = $tempItem->totalOrder;
                     $tempItem->user_id = \Yii::$app->user->id;
                     if($tempItem->item->typeCode->value == \Yii::$app->params['TYPE_KERTAS']){
+                        $tempItem->supplier_code = $dataItem['supplier_code'];
                         if(!$tempItem->lembar_ikat_1) $tempItem->lembar_ikat_1 = 0;
                         if(!$tempItem->lembar_ikat_2) $tempItem->lembar_ikat_2 = 0;
                         if(!$tempItem->lembar_ikat_3) $tempItem->lembar_ikat_3 = 0;
+                    }else{
+                        $tempItem->supplier_code = $dataItem['bahan_supplier_code'];
                     }
                 }else{
                     $success = false;
@@ -1172,7 +1172,7 @@ class SalesOrderController extends Controller
                     }
                     $message = 'Pricelist untuk item '.$itemName.' belum di setting.';
                 }
-
+                
                 if($success){
                     if(empty($tempItem->itemTemp)){
                         if(!$tempItem->save()){
@@ -1214,16 +1214,19 @@ class SalesOrderController extends Controller
             $transaction = $connection->beginTransaction();
             try{
                 $dataHeader = $request->post('SalesOrder');
-                $code = (!empty($dataHeader['code'])) ? $dataHeader['code'] : 'tmp';
                 $dataItem = $request->post('TempSalesOrderItem');
                 $tempItem = TempSalesOrderItem::findOne(['id'=>$dataItem['id']]);
+                $code = $tempItem->code;
+                $urutan = $tempItem->urutan;
+
                 $tempItem->attributes = (array)$dataItem;
                 $tempItem->attributes = $tempItem->item->attributes;
                 if(isset($tempItem->itemPricelist)){
                     $tempItem->attributes = $tempItem->itemPricelist->attributes;
                     $tempItem->attributes = $tempItem->satuan->attributes;
+                    $tempItem->attributes = $tempItem->item->attributes;
                     $tempItem->code = $code;
-                    $tempItem->supplier_code = $dataItem['supplier_code'];
+                    $tempItem->urutan = $urutan;
                     $tempItem->total_order = $tempItem->totalOrder;
                     if($tempItem->item->typeCode->value == \Yii::$app->params['TYPE_KERTAS']){
                         if(!$tempItem->lembar_ikat_1) $tempItem->lembar_ikat_1 = 0;

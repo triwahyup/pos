@@ -159,7 +159,7 @@ use yii\widgets\MaskedInput;
                                 'options' => [
                                     'placeholder' => 'Pilih Type QTY',
                                     'class' => 'select2',
-                                    'value' => ($model->isNewRecord) ? 1 : $model->qty,
+                                    'value' => ($model->isNewRecord) ? 1 : $model->type_qty,
                                 ],
                             ])->label(false) ?>
                     </div>
@@ -215,12 +215,12 @@ use yii\widgets\MaskedInput;
                     <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
                         <label>Up Produksi:</label>
                     </div>
-                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                        <?= $form->field($model, 'up_produksi', [
-                                'template' => '{input}
-                                    <span id="up_produksi" class="font-size-10 margin-bottom-10 text-danger"></span>
-                                    {error}{hint}'
-                            ])->dropDownList(['5' => '5%', '10' => '10%'], ['prompt'=>'Produksi Up (%)'])->label(false) ?>
+                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-right-0">
+                        <?= $form->field($model, 'up_produksi')->dropDownList(['5' => '5%', '10' => '10%'], [
+                            'prompt'=>'Produksi Up (%)'])->label(false) ?>
+                    </div>
+                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-right-0">
+                        <?= $form->field($model, 'total_qty_up')->textInput(['data-align'=>'text-right', 'readonly'=>true])->label(false) ?>
                     </div>
                 </div>
                 <!-- PPN -->
@@ -568,6 +568,7 @@ use yii\widgets\MaskedInput;
                         <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-right-0">
                             <?= $form->field($tempItem, 'bahan_item_name')->textInput(['placeholder' => 'Pilih material tekan F4', 'data-type'=>'bahan', 'data-temp'=>true])->label(false) ?>
                             <?= $form->field($tempItem, 'bahan_item_code')->hiddenInput(['data-temp'=>true])->label(false) ?>
+                            <?= $form->field($tempItem, 'bahan_supplier_code')->hiddenInput(['data-temp'=>true])->label(false) ?>
                         </div>
                     </div>
                     <!-- QTY Bahan -->
@@ -690,7 +691,7 @@ function onChangeUp(qty, up)
 		beforeSend: function (data){},
         success: function(data){
             var o = $.parseJSON(data);
-            $("#up_produksi").html(o.desc);
+            $("#salesorder-total_qty_up").val(o.total_qty_up);
         },
         complete: function(){}
     });
@@ -865,7 +866,7 @@ function select_item(code, supplier, type)
         error: function(xhr, status, error) {},
 		beforeSend: function(){
             if(type == 'item'){
-                $("[id^=\"tempsalesorderitem-\"]:not(#tempsalesorderitem-qty_order_1)").val(null);
+                $("[id^=\"tempsalesorderitem-\"]").val(null);
             }else{
                 $("[id^=\"tempsalesorderitem-bahan_\"]").val(null);
             }
@@ -1402,7 +1403,6 @@ var isNotNewRecord = function() {
     }else{
         $("#salesorder-ekspedisi_code").attr("readonly", true);
     }
-    onChangeUp($("#salesorder-total_qty").val(), $("#salesorder-up_produksi").val());
 }
 $(function(){
     <?php if(!$model->isNewRecord): ?>
