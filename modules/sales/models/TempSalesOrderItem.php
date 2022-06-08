@@ -170,6 +170,16 @@ class TempSalesOrderItem extends \yii\db\ActiveRecord
         return $model;
     }
 
+    public function getItemsMaterial()
+    {
+        $model = TempSalesOrderItem::find()
+            ->alias('a')
+            ->leftJoin('master_kode b', 'b.code = a.type_code')
+            ->where(['a.code'=>$this->code, 'value'=>\Yii::$app->params['TYPE_KERTAS']])
+            ->all();
+        return $model;
+    }
+
     public function getItemPricelist()
     {
         return $this->hasOne(MasterMaterialPricelist::className(), ['item_code' => 'item_code']);
@@ -221,8 +231,8 @@ class TempSalesOrderItem extends \yii\db\ActiveRecord
 
     public static function up_produksi($qty, $up)
     {
-        $total = $qty;
-        $total_lb = $qty * 500;
+        $total = str_replace(',','', $qty);
+        $total_lb = $total * 500;
         $total_up = $total_lb * ($up / 100);
         
         return [

@@ -698,18 +698,14 @@ class SalesOrderController extends Controller
 
     public function actionTypeOrder($type)
     {
-        if($type == 1){
-            $data = ['item_name' => null, 'item_code' => null, 'qty_order_1' => 20, 'qty_order_2' => 0];
+        if($type == 2){
+            $item = MasterMaterial::find()->alias('a')
+                ->leftJoin('master_kode b', 'b.code = a.material_code')
+                ->where(['value' => \Yii::$app->params['TYPE_PRODUK_JASA']])
+                ->one();
+            $data = ['item_name' => $item->name, 'item_code' => $item->code];
         }else{
-            if($type == 2){
-                $item = MasterMaterial::find()->alias('a')
-                    ->leftJoin('master_kode b', 'b.code = a.material_code')
-                    ->where(['value' => \Yii::$app->params['TYPE_PRODUK_JASA']])
-                    ->one();
-                $data = ['item_name' => $item->name, 'item_code' => $item->code, 'qty_order_1' => 0, 'qty_order_2' => 0];
-            }else{
-                $data = ['item_name' => null, 'item_code' => null, 'qty_order_1' => 0, 'qty_order_2' => 0];
-            }
+            $data = ['item_name' => null, 'item_code' => null];
         }
         return json_encode($data);
     }
@@ -785,7 +781,6 @@ class SalesOrderController extends Controller
                 $message = substr($message, 0, -2);
                 \Yii::$app->session->setFlash('error', $message);
             }
-            $tempDetail = ['qty_order_1' => $tempItem->itemMaterial->qty_order_1];
         }
         foreach($salesOrder->potongs as $detail){
             $tempPotong = new TempSalesOrderPotong();
@@ -815,8 +810,6 @@ class SalesOrderController extends Controller
                 \Yii::$app->session->setFlash('error', $message);
             }
         }
-
-        $model['qty_order_1'] = $tempDetail['qty_order_1'];
         return json_encode($model);
     }
     
@@ -1131,21 +1124,29 @@ class SalesOrderController extends Controller
                 $dataItem = $request->post('TempSalesOrderItem');
                 $tempItem = new TempSalesOrderItem();
                 $tempItem->attributes = (array)$dataItem;
-                if(isset($tempItem->itemBahan)){
-                    $tempItem->item_code = $tempItem->bahan_item_code;
-                    $tempItem->supplier_code = $tempItem->bahan_supplier_code;
-                    $tempItem->qty_order_1 = $tempItem->bahan_qty;
-                    $tempItem->qty_up = null;
-                    $tempItem->total_potong = 0;
-                    $tempItem->total_warna = 0;
-                    $tempItem->satuan_ikat_code = '000';
-                    $tempItem->lembar_ikat_1 = null;
-                    $tempItem->lembar_ikat_2 = null;
-                    $tempItem->lembar_ikat_3 = null;
-                    $tempItem->lembar_ikat_um_1 = null;
-                    $tempItem->lembar_ikat_um_2 = null;
-                    $tempItem->lembar_ikat_um_3 = null;
+                if(count($tempItem->itemBahan) > 0){
+                    if(!empty($tempItem->bahan_qty)){
+                        $tempItem->item_code = $tempItem->bahan_item_code;
+                        $tempItem->supplier_code = $tempItem->bahan_supplier_code;
+                        $tempItem->qty_order_1 = $tempItem->bahan_qty;
+                        $tempItem->qty_up = null;
+                        $tempItem->total_potong = 0;
+                        $tempItem->total_warna = 0;
+                        $tempItem->satuan_ikat_code = '000';
+                        $tempItem->lembar_ikat_1 = null;
+                        $tempItem->lembar_ikat_2 = null;
+                        $tempItem->lembar_ikat_3 = null;
+                        $tempItem->lembar_ikat_um_1 = null;
+                        $tempItem->lembar_ikat_um_2 = null;
+                        $tempItem->lembar_ikat_um_3 = null;
+                    }else{
+                        $success = false;
+                        $message = 'Qty bahan pembantu tidak boleh kosong.';
+                        $tempItem->qty_up = null;
+                        $tempItem->qty_order_1 = null;
+                    }
                 }
+
                 $tempItem->attributes = $tempItem->item->attributes;
                 if(isset($tempItem->itemPricelist)){
                     $tempItem->attributes = $tempItem->itemPricelist->attributes;
@@ -1160,6 +1161,34 @@ class SalesOrderController extends Controller
                         if(!$tempItem->lembar_ikat_1) $tempItem->lembar_ikat_1 = 0;
                         if(!$tempItem->lembar_ikat_2) $tempItem->lembar_ikat_2 = 0;
                         if(!$tempItem->lembar_ikat_3) $tempItem->lembar_ikat_3 = 0;
+
+                        $totalQtyKonv = $tempItem->inventoryStock->satuanTerkecil($tempItem->item_code, [
+                            0=>$dataHeader['total_qty'], 1=>0]);
+                        $totalQtyOrder = (!empty($tempItem->qty_order_1))
+                            ? $tempItem->inventoryStock->satuanTerkecil($tempItem->item_code, [
+                                0=>$tempItem->qty_order_1, 1=>0])
+                            : $tempItem->inventoryStock->satuanTerkecil($tempItem->item_code, [
+                                0=>$tempItem->qty_order_2, 1=>0]);
+                        $totalQtyUp = $tempItem->qty_up;
+                        foreach($tempItem->itemsMaterial as $val){
+                            $totalQtyUp += $val->qty_up;
+                            if(!empty($val->qty_order_1)){
+                                $konv = $val->inventoryStock->satuanTerkecil($val->item_code, [
+                                    0=>$val->qty_order_1, 1=>0]);
+                                $totalQtyOrder += $konv;
+                            }else{
+                                $totalQtyOrder += $val->qty_order_2;
+                            }
+                        }
+
+                        if($totalQtyOrder > $totalQtyKonv){
+                            $success = false;
+                            $message = 'Total qty order tidak boleh lebih dari '.$dataHeader['total_qty'];
+                        }
+                        if($totalQtyUp > $dataHeader['total_qty_up']){
+                            $success = false;
+                            $message = 'Total up produksi tidak boleh lebih dari '.$dataHeader['total_qty_up'];
+                        }
                     }else{
                         $tempItem->supplier_code = $dataItem['bahan_supplier_code'];
                     }

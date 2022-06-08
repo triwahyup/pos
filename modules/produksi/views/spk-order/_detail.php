@@ -15,9 +15,7 @@
                 <th class="text-center">Qty Hasil</th>
                 <th class="text-center">Qty Rusak</th>
                 <th class="text-center">Status</th>
-                <?php if($model->status_produksi == 1): ?>
-                    <th class="text-center">Action</th>
-                <?php endif; ?>
+                <th class="text-center">Action</th>
             </tr>
         </thead>
         <tbody>
@@ -31,15 +29,13 @@
                     <td class="text-right"><?=number_format($val->qty_hasil).' LB' ?></td>
                     <td class="text-right"><?=number_format($val->qty_rusak).' LB' ?></td>
                     <td class="text-center"><?=$val->statusProduksi ?></td>
-                    <?php if($model->status_produksi == 1): ?>
-                        <td class="text-center">
-                            <button class="btn btn-default" data-button="get_data"
-                                data-spk="<?=$val->no_spk ?>" data-item="<?=$val->item_code ?>" data-id="<?=$val->proses_id ?>" data-mesin="<?=$val->mesin_type ?>">
-                                <i class="fontello icon-pencil"></i>
-                                <span>Atur Proses</span>
-                            </button>
-                        </td>
-                    <?php endif; ?>
+                    <td class="text-center">
+                        <button class="btn btn-default" data-button="get_data"
+                            data-spk="<?=$val->no_spk ?>" data-item="<?=$val->item_code ?>" data-id="<?=$val->proses_id ?>" data-mesin="<?=$val->mesin_type ?>">
+                            <i class="fontello icon-pencil"></i>
+                            <span>Atur Proses</span>
+                        </button>
+                    </td>
                 </tr>
             <?php endforeach; ?>
         </tbody>

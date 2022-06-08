@@ -147,42 +147,25 @@ class SpkOrder extends \yii\db\ActiveRecord
 
     public function getStatusProduksi()
     {
+        $hist = SpkOrderHistory::find()
+            ->alias('a')
+            ->select(['b.name'])
+            ->leftJoin('master_proses b', 'b.code = a.proses_code')
+            ->where(['status_produksi'=>2])
+            ->orderBy(['a.urutan'=>SORT_DESC])
+            ->asArray()
+            ->limit(1)
+            ->one();
         $message = '';
         if($this->status_produksi==1){
             $message = '<span class="text-label text-default">Belum Proses</span>';
         }else if($this->status_produksi==2){
-            $message = '<span class="text-label text-primary">In Progres</span>';
+            $message = '<span class="text-label text-primary">Proses '.$hist['name'].'</span>';
         }else if($this->status_produksi==3){
             $message = '<span class="text-label text-info">Sudah Proses</span>';
         }else if($this->status_produksi==4){
             $message = '<span class="text-label text-success">Finish</span>';
         }
         return $message;
-    }
-
-    public function getUpProduksi()
-    {
-        $str = '<strong class="font-size-12">';
-        $str .= (!empty($this->up_produksi || $this->up_produksi != 0)) ? $this->up_produksi.'%' : 0;
-        $str .= '</strong>';
-        $str .= '<span class="text-muted font-size-12">';
-        
-        if(!empty($this->up_produksi) || $this->up_produksi != 0){
-            $stock = 0;
-            foreach($this->soItemMaterials as $val){
-                $stockItem = $val->inventoryStock;
-                if(isset($stockItem)){
-                    $stock = $stockItem->satuanTerkecil($val->item_code, [
-                        0=>$val->qty_order_1,
-                        1=>$val->qty_order_2
-                    ]);
-                }
-            }
-            $upproduksi = $stock * ($this->up_produksi/100);
-    
-            $str .= ' ('.number_format($upproduksi).' Lembar)';
-            $str .= '</span>';
-        }
-        return $str;
     }
 }

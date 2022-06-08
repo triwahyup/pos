@@ -344,49 +344,6 @@ use yii\widgets\MaskedInput;
                 </div>
             </div>
             <div class="col-lg-6 col-md-6 col-xs-12">
-                <!-- Qty Order / Up -->
-                <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
-                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                        <label>Qty Order:</label>
-                    </div>
-                    <div class="col-lg-5 col-md-5 col-sm-12 col-xs-12 padding-right-0">
-                        <?= $form->field($tempItem, 'qty_order_1')->widget(MaskedInput::className(), [
-                                'clientOptions' => [
-                                    'alias' => 'decimal',
-                                    'groupSeparator' => ',',
-                                    'autoGroup' => true
-                                ],
-                                'options' => [
-                                    'data-align' => 'text-right',
-                                    'aria-required' => true,
-                                ]
-                            ])->label(false) ?>
-                    </div>
-                    <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-left-0">
-                        <label id="satuan_qty_temp" class="font-size-14 margin-left-5 margin-top-5">RIM</label>
-                    </div>
-                </div>
-                <!-- Qty Up -->
-                <div id="qty_up" class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
-                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                        <label>Qty Up:</label>
-                    </div>
-                    <div class="col-lg-5 col-md-5 col-sm-12 col-xs-12 padding-right-0">
-                        <?= $form->field($tempItem, 'qty_up')->widget(MaskedInput::className(), [
-                                'clientOptions' => [
-                                    'alias' => 'decimal',
-                                    'groupSeparator' => ',',
-                                    'autoGroup' => true
-                                ],
-                                'options' => [
-                                    'data-align' => 'text-right',
-                                ]
-                            ])->label(false) ?>
-                    </div>
-                    <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-left-0">
-                        <label id="satuan_qty_up" class="font-size-14 margin-left-5 margin-top-5">LEMBAR</label>
-                    </div>
-                </div>
                 <!-- Warna -->
                 <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0  padding-right-0">
                     <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
@@ -422,12 +379,56 @@ use yii\widgets\MaskedInput;
                                 'options' => [
                                     'data-align' => 'text-right',
                                     'aria-required' => true,
+                                    'placeholder' => 'Total Potong',
                                 ]
                             ])->label(false) ?>
                     </div>
                 </div>
+                <!-- Qty Order / Up -->
+                <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
+                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
+                        <label>Qty Order:</label>
+                    </div>
+                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
+                        <?= $form->field($tempItem, 'qty_order_1')->widget(MaskedInput::className(), [
+                                'clientOptions' => [
+                                    'alias' => 'decimal',
+                                    'groupSeparator' => ',',
+                                    'autoGroup' => true
+                                ],
+                                'options' => [
+                                    'data-align' => 'text-right',
+                                    'aria-required' => true,
+                                ]
+                            ])->label(false) ?>
+                    </div>
+                    <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-left-0">
+                        <label id="satuan_qty_temp" class="font-size-14 margin-left-5 margin-top-5">RIM</label>
+                    </div>
+                </div>
+                <!-- Qty Up -->
+                <div id="qty_up" class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
+                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
+                        <label>Qty Up:</label>
+                    </div>
+                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
+                        <?= $form->field($tempItem, 'qty_up')->widget(MaskedInput::className(), [
+                                'clientOptions' => [
+                                    'alias' => 'decimal',
+                                    'groupSeparator' => ',',
+                                    'autoGroup' => true
+                                ],
+                                'options' => [
+                                    'data-align' => 'text-right',
+                                ]
+                            ])->label(false) ?>
+                    </div>
+                    <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-left-0">
+                        <label id="satuan_qty_up" class="font-size-14 margin-left-5 margin-top-5">LEMBAR</label>
+                    </div>
+                </div>
                 <!-- Button Action -->
-                <div class="col-lg-12 col-md-12 col-xs-12 text-right padding-right-0">
+                <div class="col-lg-12 col-md-12 col-xs-12 text-right padding-right-0 margin-top-20">
                     <button class="btn btn-success margin-bottom-20" data-button="create_temp" data-type="item">
                         <i class="fontello icon-plus"></i>
                         <span>Tambah Data Detail</span>
@@ -593,7 +594,7 @@ use yii\widgets\MaskedInput;
                         </div>
                     </div>
                     <div class="col-lg-12 col-md-12 col-xs-12 text-right">
-                        <button class="btn btn-success" data-button="create_temp">
+                        <button class="btn btn-success" data-button="create_temp_bahan">
                             <i class="fontello icon-plus"></i>
                             <span>Tambah Data Bahan</span>
                         </button>
@@ -791,6 +792,9 @@ function select_order(code)
                     .not("#salesorder-deadline").val(value).trigger("change");
                 $("#tempsalesorderitem-"+index).val(value);
             });
+            init_temp_item();
+            init_temp_bahan();
+            init_temp_proses();
         },
         complete: function(){
             popup.close();
@@ -866,7 +870,9 @@ function select_item(code, supplier, type)
         error: function(xhr, status, error) {},
 		beforeSend: function(){
             if(type == 'item'){
-                $("[id^=\"tempsalesorderitem-\"]").val(null);
+                $("#tempsalesorderitem-qty_order_1").val(null);
+                $("#tempsalesorderitem-qty_order_2").val(null);
+                $("#tempsalesorderitem-qty_up").val(null);
             }else{
                 $("[id^=\"tempsalesorderitem-bahan_\"]").val(null);
             }
@@ -1350,7 +1356,7 @@ $(document).ready(function(){
             create_temp($(this));
         }
     });
-
+    
     $("body").off("click","[data-button=\"update_temp\"]").on("click","[data-button=\"update_temp\"]", function(e){
         e.preventDefault();
         var data = $(this).data();
@@ -1374,6 +1380,12 @@ $(document).ready(function(){
     $("body").off("click","#delete_temp").on("click","#delete_temp", function(e){
         e.preventDefault();
         delete_temp($(this).attr("data-target"));
+    });
+
+    $("body").off("click","[data-button=\"create_temp_bahan\"]");
+    $("body").on("click","[data-button=\"create_temp_bahan\"]", function(e){
+        e.preventDefault();
+        $("[data-button=\"create_temp\"]").trigger("click");
     });
     /** END ITEM TEMP */
 

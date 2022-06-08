@@ -115,73 +115,34 @@ use yii\widgets\MaskedInput;
                                 ])->label(false) ?>
                         </div>
                     </div>
-                    <?php if($model->status_produksi == 1): ?>
-                        <!-- QTY Proses -->
-                        <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
-                            <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                                <label>QTY Proses:</label>
-                            </div>
-                            <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                                <?= $form->field($spkHistory, 'qty_proses')->widget(MaskedInput::className(), [
-                                        'clientOptions' => [
-                                            'alias' => 'decimal',
-                                            'groupSeparator' => ',',
-                                            'autoGroup' => true
-                                        ],
-                                        'options' => [
-                                            'data-align' => 'text-right',
-                                            'readonly' => true
-                                        ]
-                                    ])->label(false) ?>
-                            </div>
+                    <!-- QTY Proses -->
+                    <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
+                        <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
+                            <label>QTY Proses:</label>
                         </div>
-                        <!-- Keterangan -->
-                        <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
-                            <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                                <label>Keterangan:</label>
-                            </div>
-                            <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                                <?= $form->field($spkHistory, 'keterangan')->textarea(['rows'=>3, 'readonly' => true])->label(false) ?>
-                            </div>
+                        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
+                            <?= $form->field($spkHistory, 'qty_proses')->widget(MaskedInput::className(), [
+                                    'clientOptions' => [
+                                        'alias' => 'decimal',
+                                        'groupSeparator' => ',',
+                                        'autoGroup' => true
+                                    ],
+                                    'options' => [
+                                        'data-align' => 'text-right',
+                                        'readonly' => true
+                                    ]
+                                ])->label(false) ?>
                         </div>
-                    <?php elseif($model->status_produksi == 2): ?>
-                        <!-- QTY Hasil -->
-                        <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
-                            <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                                <label>QTY Hasil:</label>
-                            </div>
-                            <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                                <?= $form->field($spkHistory, 'qty_hasil')->widget(MaskedInput::className(), [
-                                        'clientOptions' => [
-                                            'alias' => 'decimal',
-                                            'groupSeparator' => ',',
-                                            'autoGroup' => true
-                                        ],
-                                        'options' => [
-                                            'data-align' => 'text-right',
-                                        ]
-                                    ])->label(false) ?>
-                            </div>
+                    </div>
+                    <!-- Keterangan -->
+                    <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
+                        <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
+                            <label>Keterangan:</label>
                         </div>
-                        <!-- QTY Rusak -->
-                        <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
-                            <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                                <label>QTY Rusak:</label>
-                            </div>
-                            <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                                <?= $form->field($spkHistory, 'qty_rusak')->widget(MaskedInput::className(), [
-                                        'clientOptions' => [
-                                            'alias' => 'decimal',
-                                            'groupSeparator' => ',',
-                                            'autoGroup' => true
-                                        ],
-                                        'options' => [
-                                            'data-align' => 'text-right',
-                                        ]
-                                    ])->label(false) ?>
-                            </div>
+                        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
+                            <?= $form->field($spkHistory, 'keterangan')->textarea(['rows'=>3, 'readonly' => true])->label(false) ?>
                         </div>
-                    <?php endif; ?>
+                    </div>
                 </div>
             </div>
             <div class="col-lg-12 col-md-12 col-xs-12 text-right">
@@ -378,8 +339,8 @@ function update(el)
         success: function(data){
             var o = $.parseJSON(data);
             if(o.success == true){
-                init_data(no_spk);
                 notification.open("success", o.message, timeOut);
+                location.reload();
             }else{
                 notification.open("danger", o.message, timeOut);
             }

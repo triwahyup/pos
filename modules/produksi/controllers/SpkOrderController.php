@@ -135,16 +135,16 @@ class SpkOrderController extends Controller
 
     protected function findProses($no_spk, $item_code, $proses_id)
     {
-        $model = SpkOrderProses::findOne($no_spk, $item_code, $proses_id);
-        if ($model !== null)
+        $model = SpkOrderProses::findOne(['no_spk'=>$no_spk, 'item_code'=>$item_code, 'proses_id'=>$proses_id]);
+        if (isset($model))
             return $model;
         throw new NotFoundHttpException('The requested page does not exist.');
     }
 
     protected function findHistory($no_spk, $item_code, $proses_id, $urutan)
     {
-        $model = SpkOrderHistory::findOne($no_spk, $item_code, $proses_id, $urutan);
-        if ($model !== null)
+        $model = SpkOrderHistory::findOne(['no_spk'=>$no_spk, 'item_code'=>$item_code, 'proses_id'=>$proses_id, 'urutan'=>$urutan]);
+        if (isset($model))
             return $model;
         throw new NotFoundHttpException('The requested page does not exist.');
     }
@@ -247,6 +247,7 @@ class SpkOrderController extends Controller
         $total = 0;
         foreach($model->historys as $val){
             if($val->status_produksi == 1) $total += $val->qty_proses;
+            if($val->status_produksi == 2) $total += $val->qty_proses;
             if($val->status_produksi == 3) $total += $val->qty_hasil;
         }
         $sisa = $model->qty_proses - $total;
@@ -292,6 +293,8 @@ class SpkOrderController extends Controller
     public function actionPopupInput($no_spk, $item_code, $proses_id, $urutan)
     {
         $model = $this->findHistory($no_spk, $item_code, $proses_id, $urutan);
+        $model->qty_proses = number_format($model->qty_proses);
+        $model->qty_hasil = (!empty($model->qty_hasil)) ? $model->qty_hasil : $model->qty_proses;
         return $this->renderAjax('_popup_hasil', [
             'model' => $model
         ]);
@@ -306,7 +309,7 @@ class SpkOrderController extends Controller
             try{
                 $data = $request->post('SpkOrderHistory');
                 if($data['qty_proses'] >= $data['qty_hasil']){
-                    $model = $this->findHistory($no_spk, $item_code, $proses_id, $urutan);
+                    $model = $this->findHistory($data['no_spk'], $data['item_code'], $data['proses_id'], $data['urutan']);
                 }else{
                     $success = false;
                     $message = 'Qty hasil tidak boleh lebih besar dari Qty yang diproses.';

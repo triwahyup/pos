@@ -23,17 +23,7 @@ use yii\widgets\MaskedInput;
                     <label>QTY Proses:</label>
                 </div>
                 <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                    <?= $form->field($model, 'qty_proses')->widget(MaskedInput::className(), [
-                            'clientOptions' => [
-                                'alias' => 'decimal',
-                                'groupSeparator' => ',',
-                                'autoGroup' => true
-                            ],
-                            'options' => [
-                                'data-align' => 'text-right',
-                                'readonly' => true,
-                            ]
-                        ])->label(false) ?>
+                    <?= $form->field($model, 'qty_proses')->textInput(['data-align' => 'text-right', 'readonly'=>true])->label(false) ?>
                 </div>
             </div>
             <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
@@ -49,7 +39,23 @@ use yii\widgets\MaskedInput;
                             ],
                             'options' => [
                                 'data-align' => 'text-right',
-                                'value' => $model->qty_proses,
+                            ]
+                        ])->label(false) ?>
+                </div>
+            </div>
+            <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
+                <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
+                    <label>QTY Rusak:</label>
+                </div>
+                <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
+                    <?= $form->field($model, 'qty_rusak')->widget(MaskedInput::className(), [
+                            'clientOptions' => [
+                                'alias' => 'decimal',
+                                'groupSeparator' => ',',
+                                'autoGroup' => true
+                            ],
+                            'options' => [
+                                'data-align' => 'text-right',
                             ]
                         ])->label(false) ?>
                 </div>
