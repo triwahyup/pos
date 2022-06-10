@@ -12,8 +12,8 @@ $this->params['breadcrumbs'][] = 'Update';
 ?>
 <div class="spk-layar">
     <?= $this->render('_form', [
-        'model' => $model,
         'dataList' => $dataList,
+        'model' => $model,
         'spkHistory' => $spkHistory,
     ]) ?>
 </div>

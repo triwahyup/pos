@@ -159,14 +159,14 @@ use yii\widgets\MaskedInput;
             <?php if($model->status_produksi == 1): ?>
                 <div class="col-lg-12 col-md-12 col-xs-12 text-right margin-bottom-20">
                     <?= Html::a('<i class="fontello icon-info-4 font-size-18"></i>
-                        <span class="line-height-28 margin-left-30">Jika sudah input qty yang mau di proses, klik button ini untuk melanjutkan proses produksi.</span>', 
+                        <span class="line-height-28 margin-left-30">Jika sudah input qty yang mau di proses, silahkan untuk melanjutkan ke proses produksi.</span>', 
                         ['post', 'no_spk'=>$model->no_spk, 'type' => \Yii::$app->params['IN_PROGRESS']], ['class' => 'btn btn-success btn-flat btn-sm']) ?>
                 </div>
             <?php elseif($model->status_produksi == 2): ?>
                 <div class="col-lg-12 col-md-12 col-xs-12 text-right margin-bottom-20">
                     <?= Html::a('<i class="fontello icon-info-4 font-size-18"></i>
-                        <span class="line-height-28 margin-left-30">Jika sudah input hasil produksi, klik button ini untuk setting proses lainnya.</span>', 
-                        ['post', 'no_spk'=>$model->no_spk, 'type' => \Yii::$app->params['ON_START']], ['class' => 'btn btn-success btn-flat btn-sm']) ?>
+                        <span class="line-height-28 margin-left-30">Jika sudah selesai input hasil produksi, silahkan mereview kembali hasil produksi sebelum melanjutkan proses closing produksi.</span>', 
+                        ['post', 'no_spk'=>$model->no_spk, 'type' => \Yii::$app->params['IN_REVIEW']], ['class' => 'btn btn-success btn-flat btn-sm']) ?>
                 </div>
             <?php endif; ?>
         </div>

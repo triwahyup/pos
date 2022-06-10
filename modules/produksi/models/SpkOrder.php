@@ -134,6 +134,18 @@ class SpkOrder extends \yii\db\ActiveRecord
             ->orderBy(['no_spk'=>SORT_ASC, 'created_at' => SORT_ASC]);
     }
 
+    public function getHistoryInProgress()
+    {
+        return $this->hasMany(SpkOrderHistory::className(), ['no_spk' => 'no_spk', 'status_produksi' => 'inProgress'])
+            ->orderBy(['no_spk'=>SORT_ASC, 'created_at' => SORT_ASC]);
+    }
+
+    public function getProduksiIsNull()
+    {
+        $model = SpkOrderProses::find()->where(['no_spk'=>$this->no_spk])->andWhere('status_produksi is null')->count();
+        return $model;
+    }
+
     public function getTypeOrder()
     {
         $message = '';
@@ -162,8 +174,6 @@ class SpkOrder extends \yii\db\ActiveRecord
         }else if($this->status_produksi==2){
             $message = '<span class="text-label text-primary">Proses '.$hist['name'].'</span>';
         }else if($this->status_produksi==3){
-            $message = '<span class="text-label text-info">Sudah Proses</span>';
-        }else if($this->status_produksi==4){
             $message = '<span class="text-label text-success">Finish</span>';
         }
         return $message;

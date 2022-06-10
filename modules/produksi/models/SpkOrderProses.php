@@ -105,10 +105,15 @@ class SpkOrderProses extends \yii\db\ActiveRecord
     {
         $total = 0;
         foreach($this->historys as $val){
-            if($val->status_produksi == 1) $total += $val->qty_proses;
-            if($val->status_produksi == 3) $total += $val->qty_hasil;
+            $total += $val->qty_proses;
         }
-        return $this->qty_proses - $total;
+        $total = $this->qty_proses - $total;
+        
+        $desc = '';
+        if($total > 0 && ($this->status_produksi == 1 || $this->status_produksi == 2)){
+            $desc = '<span class="text-muted">Sisa: '.number_format($total).' LB</span>';
+        }
+        return ['sisa' => $total, 'desc' => $desc];
     }
 
     public function getCount()

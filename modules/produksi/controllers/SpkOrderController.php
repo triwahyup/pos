@@ -88,31 +88,12 @@ class SpkOrderController extends Controller
      */
     public function actionLayar($no_spk)
     {
-        $success = true;
-        $message = '';
-        $dataList = DataList::setListColumn();
         $model = $this->findModel($no_spk);
         $spkHistory = new SpkOrderHistory();
-        if($this->request->isPost){
-            $connection = \Yii::$app->db;
-            $transaction = $connection->beginTransaction();
-            try{
-            }catch(\Exception $e){
-                $success = false;
-                $message = $e->getMessage();
-                $transaction->rollBack();
-            }
-            $logs =	[
-                'type' => Logs::TYPE_USER,
-                'description' => $message,
-            ];
-            Logs::addLog($logs);
-            \Yii::$app->session->setFlash('error', $message);
-        }
-
+        $dataList = DataList::setListColumn();
         return $this->render('layar', [
-            'model' => $model,
             'dataList' => $dataList,
+            'model' => $model,
             'spkHistory' => $spkHistory,
         ]);
     }
@@ -191,14 +172,21 @@ class SpkOrderController extends Controller
                         ->one();
                     if(isset($spkProses)){
                         $qty = str_replace(',', '', $data['qty_proses']);
-                        if($qty <= $spkProses->sisa){
-                            $spkProses->status_produksi = 1;
+                        if($qty <= $spkProses->sisa['sisa']){
+                            $model = $this->findModel($data['no_spk']);
+                            if($model->status_produksi == 1){
+                                $spkProses->status_produksi = 1;
+                            }else{
+                                $spkProses->status_produksi = 2;
+                            }
                             if($spkProses->save()){
                                 $spkHistory = new SpkOrderHistory();
                                 $spkHistory->attributes = $spkProses->attributes;
                                 $spkHistory->attributes = (array)$data;
                                 $spkHistory->urutan = $spkHistory->count +1;
-                                $spkHistory->status_produksi = 1;
+                                $spkHistory->qty_hasil = 0;
+                                $spkHistory->qty_rusak = 0;
+                                $spkHistory->status_produksi = ($model->status_produksi == 1) ? 1: 2;
                                 if(!$spkHistory->save()){
                                     $success = false;
                                     foreach($spkHistory->errors as $error => $value){
@@ -215,7 +203,7 @@ class SpkOrderController extends Controller
                             }
                         }else{
                             $success = false;
-                            $message = 'QTY Proses tidak boleh melebihi sisa QTY. Sisa QTY = '.$spkProses->sisa;
+                            $message = 'QTY Proses tidak boleh melebihi sisa QTY. Sisa QTY = '.$spkProses->sisa['sisa'];
                         }
                     }else{
                         $success = false;
@@ -246,9 +234,12 @@ class SpkOrderController extends Controller
         $model = $this->findProses($no_spk, $item_code, $proses_id);
         $total = 0;
         foreach($model->historys as $val){
-            if($val->status_produksi == 1) $total += $val->qty_proses;
-            if($val->status_produksi == 2) $total += $val->qty_proses;
-            if($val->status_produksi == 3) $total += $val->qty_hasil;
+            if($val->status_produksi == 1 || $val->status_produksi == 2 || $val->status_produksi == 4) 
+                $total += $val->qty_proses;
+            else if($val->status_produksi == 3)
+                $total += $val->qty_hasil;
+            else if($val->status_produksi == 5)
+                $total += $val->qty_hasil + $val->qty_rusak;
         }
         $sisa = $model->qty_proses - $total;
         $mesin = [];
@@ -275,10 +266,13 @@ class SpkOrderController extends Controller
         $dataProses = SpkOrderProses::find()->all();
         $historyNotOutsource = SpkOrderHistory::find()
             ->where('outsource_code is null OR outsource_code=""')
+            ->orderBy(['no_spk'=>SORT_ASC, 'urutan'=>SORT_ASC])
             ->all();
         $historyWithOutsource = SpkOrderHistory::find()
             ->where('outsource_code is not null OR outsource_code <> ""')
+            ->orderBy(['no_spk'=>SORT_ASC, 'urutan'=>SORT_ASC])
             ->all();
+        
         $data = $this->renderAjax('_detail', [
             'model' => $model,
             'dataProses' => $dataProses,
@@ -304,15 +298,58 @@ class SpkOrderController extends Controller
     {
         $request = \Yii::$app->request;
         $success = true;
-		$message = 'INPUT HASIL PRODUKSI SUCCESSFULLY';
-        if($request->isPost){
+		if($request->isPost){
+            $connection = \Yii::$app->db;
+            $transaction = $connection->beginTransaction();
             try{
                 $data = $request->post('SpkOrderHistory');
-                if($data['qty_proses'] >= $data['qty_hasil']){
-                    $model = $this->findHistory($data['no_spk'], $data['item_code'], $data['proses_id'], $data['urutan']);
+                $spkHistory = $this->findHistory($data['no_spk'], $data['item_code'], $data['proses_id'], $data['urutan']);
+                $spkHistory->attributes = (array)$data;
+                $spkHistory->status_produksi = $spkHistory->set_status_produksi;
+                $totalResultNRusak = str_replace(',', '', $spkHistory->qty_hasil) + str_replace(',', '', $spkHistory->qty_rusak);
+                if($totalResultNRusak <= str_replace(',', '', $spkHistory->qty_proses)){
+                    if(!$spkHistory->save()){
+                        $success = false;
+                        $message = (count($spkHistory->errors) > 0) ? 'ERROR INPUT HASIL PRODUKSI: ' : '';
+                        foreach($spkHistory->errors as $error => $value){
+                            $message .= strtoupper($value[0].', ');
+                        }
+                        $message = substr($message, 0, -2);
+                    }
+
+                    $spkProses = $this->findProses($data['no_spk'], $data['item_code'], $data['proses_id']);
+                    $totalHasil = 0;
+                    $totalRusak = 0;
+                    foreach($spkProses->historys as $val){
+                        $totalHasil += $val->qty_hasil;
+                        $totalRusak += $val->qty_rusak;
+                    }
+                    $spkProses->qty_hasil = $totalHasil;
+                    $spkProses->qty_rusak = $totalRusak;
+                    if(!$spkProses->save()){
+                        $success = false;
+                        $message = (count($spkProses->errors) > 0) ? 'ERROR UPDATE SPK PROSES: ' : '';
+                        foreach($spkProses->errors as $error => $value){
+                            $message .= strtoupper($value[0].', ');
+                        }
+                        $message = substr($message, 0, -2);
+                    }
                 }else{
                     $success = false;
-                    $message = 'Qty hasil tidak boleh lebih besar dari Qty yang diproses.';
+                    $message = 'Jumlah QTY tidak boleh lebih besar dari Qty Proses.';
+                }
+
+                if($success){
+                    $message = '['.$spkHistory->no_spk.'] INPUT HASIL PRODUKSI SUCCESSFULLY';
+                    $transaction->commit();
+                    $logs =	[
+                        'type' => Logs::TYPE_USER,
+                        'description' => $message,
+                    ];
+                    Logs::addLog($logs);
+                    \Yii::$app->session->setFlash('success', $message);
+                }else{
+                    $transaction->rollBack();
                 }
             }catch(\Exception $e){
                 $success = false;
@@ -366,30 +403,43 @@ class SpkOrderController extends Controller
             $connection = \Yii::$app->db;
             $transaction = $connection->beginTransaction();
             try{
-                if($type == \Yii::$app->params['ON_START']){
-                    $model->status_produksi=3;
-                    foreach($model->produksiInProgress as $val){
-                        if(empty($val->qty_hasil) || $val->qty_hasil == null){
-                            $success = false;
-                            $message = 'Qty hasil masih ada yang belum di input.';
-                        }
-                    }
-                }else if($type == \Yii::$app->params['IN_PROGRESS']){
+                // PROSES AWAL2 PADA SAAT ATUR PROSES
+                if($type == \Yii::$app->params['IN_PROGRESS']){
                     $model->status_produksi=2;
                     if(!count($model->produksiOnStarts) > 0){
                         $success = false;
                         $message = 'Data yang akan di proses produksi masih kosong.';
                     }
                 }
+                // PROSES REVIEW INPUS HASIL PRODUKSI
+                else if($type == \Yii::$app->params['IN_REVIEW']){
+                    $model->status_produksi=3;
+                    if($model->produksiIsNull > 0){
+                        $success = false;
+                        $message = 'Masih ada proses yang belum dikerjakan. Selesaikan proses terlebih dahulu.';
+                    }else if(count($model->historyInProgress) > 0){
+                        $success = false;
+                        $message = 'Masih ada proses yang belum input hasil produksi.';
+                    }else{
+                        foreach($model->historys as $val){
+                            $sisa = $val->qty_proses - $val->qty_hasil - $val->qty_rusak;
+                            if($sisa > 0){
+                                $success = false;
+                                $message = 'Proses '.$val->proses->name.' urutan ke '.$val->urutan.' masih sisa '.$sisa.' yang belum di input sebagai hasil produksi.';
+                            }
+                        }
+                    }
+                }
 
                 if($model->save()){
+                    // PROSES AWAL2 PADA SAAT ATUR PROSES
                     if($type == \Yii::$app->params['IN_PROGRESS']){
                         foreach($model->produksiOnStarts as $val){
                             $val->status_produksi = 2;
                             if(!$val->save()){
                                 $success = false;
-                                $message = (count($model->errors) > 0) ? 'ERROR UPDATE STATUS PRODUKSI: ' : '';
-                                foreach($model->errors as $error => $value){
+                                $message = (count($val->errors) > 0) ? 'ERROR UPDATE STATUS PRODUKSI: ' : '';
+                                foreach($val->errors as $error => $value){
                                     $message .= strtoupper($value[0].', ');
                                 }
                                 $message = substr($message, 0, -2);
@@ -399,8 +449,22 @@ class SpkOrderController extends Controller
                             $val->status_produksi = 2;
                             if(!$val->save()){
                                 $success = false;
-                                $message = (count($model->errors) > 0) ? 'ERROR UPDATE STATUS PRODUKSI: ' : '';
-                                foreach($model->errors as $error => $value){
+                                $message = (count($val->errors) > 0) ? 'ERROR UPDATE STATUS PRODUKSI: ' : '';
+                                foreach($val->errors as $error => $value){
+                                    $message .= strtoupper($value[0].', ');
+                                }
+                                $message = substr($message, 0, -2);
+                            }
+                        }
+                    }
+                    // PROSES REVIEW INPUT HASIL PRODUKSI
+                    else if($type == \Yii::$app->params['IN_REVIEW']){
+                        foreach($model->produksiInProgress as $val){
+                            $val->status_produksi = (empty($val->qty_rusak)) ? 3 : 5;
+                            if(!$val->save()){
+                                $success = false;
+                                $message = (count($val->errors) > 0) ? 'ERROR UPDATE STATUS PRODUKSI: ' : '';
+                                foreach($val->errors as $error => $value){
                                     $message .= strtoupper($value[0].', ');
                                 }
                                 $message = substr($message, 0, -2);

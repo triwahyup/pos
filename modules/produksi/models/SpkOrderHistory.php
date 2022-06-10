@@ -159,4 +159,33 @@ class SpkOrderHistory extends \yii\db\ActiveRecord
         }
         return $message;
     }
+
+    public function getSet_status_produksi()
+    {
+        $result = str_replace(',', '', $this->qty_proses) - str_replace(',', '', $this->qty_hasil);
+        if($result == 0){
+            $this->status_produksi = 3;
+        }else{
+            if($this->qty_rusak > 0){
+                $this->status_produksi = 5;
+            }else{
+                if($this->qty_hasil > 0){
+                    $this->status_produksi = 4;
+                }else{
+                    $this->status_produksi = 2;
+                }
+            }
+        }
+        return $this->status_produksi;
+    }
+
+    public function getSisa()
+    {
+        $total = $this->qty_proses - $this->qty_hasil - $this->qty_rusak;
+        $desc = '';
+        if($total > 0 && $this->status_produksi != 1){
+            $desc = '<span class="font-size-10 text-muted">Sisa: '.number_format($total).' LB</span>';
+        }
+        return $desc;
+    }
 }

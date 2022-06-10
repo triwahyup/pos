@@ -1169,7 +1169,7 @@ class SalesOrderController extends Controller
                                 0=>$tempItem->qty_order_1, 1=>0])
                             : $tempItem->inventoryStock->satuanTerkecil($tempItem->item_code, [
                                 0=>$tempItem->qty_order_2, 1=>0]);
-                        $totalQtyUp = $tempItem->qty_up;
+                        $totalQtyUp = str_replace(',', '', $tempItem->qty_up);
                         foreach($tempItem->itemsMaterial as $val){
                             $totalQtyUp += $val->qty_up;
                             if(!empty($val->qty_order_1)){
@@ -1180,12 +1180,13 @@ class SalesOrderController extends Controller
                                 $totalQtyOrder += $val->qty_order_2;
                             }
                         }
-
+                        
                         if($totalQtyOrder > $totalQtyKonv){
                             $success = false;
                             $message = 'Total qty order tidak boleh lebih dari '.$dataHeader['total_qty'];
                         }
-                        if($totalQtyUp > $dataHeader['total_qty_up']){
+                        $totalQtyUpHeader = str_replace(',', '', $dataHeader['total_qty_up']);
+                        if($totalQtyUp > $totalQtyUpHeader){
                             $success = false;
                             $message = 'Total up produksi tidak boleh lebih dari '.$dataHeader['total_qty_up'];
                         }
