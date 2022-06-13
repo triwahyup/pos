@@ -269,7 +269,7 @@ class SpkOrderController extends Controller
             ->orderBy(['no_spk'=>SORT_ASC, 'urutan'=>SORT_ASC])
             ->all();
         $historyWithOutsource = SpkOrderHistory::find()
-            ->where('outsource_code is not null OR outsource_code <> ""')
+            ->where('outsource_code  <> ""')
             ->orderBy(['no_spk'=>SORT_ASC, 'urutan'=>SORT_ASC])
             ->all();
         
@@ -277,7 +277,7 @@ class SpkOrderController extends Controller
             'model' => $model,
             'dataProses' => $dataProses,
             'historyNotOutsource' => $historyNotOutsource,
-            'historyWithOutsource' => $historyWithOutsource
+            'historyWithOutsource' => $historyWithOutsource,
         ]);
         return json_encode(['data'=>$data]);
     }

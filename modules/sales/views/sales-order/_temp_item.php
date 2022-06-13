@@ -10,15 +10,7 @@
                 <br />
                 <?=(!empty($val->qty_up)) ? '<i class="font-size-10 text-muted">Up '.$val->qty_up .' Lembar</i>': '' ?>
             </td>
-            <td class="text-right">
-                <strong>
-                    <?=(!empty($val->lembar_ikat_1) ? number_format($val->lembar_ikat_1) .' '.$val->lembar_ikat_um_1 .' / ' : '') ?>
-                    <?=(!empty($val->lembar_ikat_2) ? number_format($val->lembar_ikat_2) .' '.$val->lembar_ikat_um_2 .' / ' : '') ?>
-                    <?=(!empty($val->lembar_ikat_3) ? number_format($val->lembar_ikat_3) .' '.$val->lembar_ikat_um_3 : '') ?>
-                </strong>
-            </td>
             <td class="text-center"><?=$val->total_potong ?></td>
-            <td class="text-center"><?=$val->total_warna ?></td>
             <td class="text-center">
                 <?php foreach($val->tempPotongs as $pt): ?>
                     <div class="border-custom">
@@ -54,6 +46,6 @@
     <?php endforeach; ?>
 <?php else: ?>
     <tr>
-        <td class="text-center text-danger" colspan="15"><i>Data is empty ...</i></td>
+        <td class="text-center text-danger" colspan="10"><i>Data is empty ...</i></td>
     </tr>
 <?php endif; ?>

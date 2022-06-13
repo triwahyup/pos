@@ -36,26 +36,10 @@ $this->params['breadcrumbs'][] = $this->title;
             </div>
             <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
                 <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                    <label>Type Order</label>
+                    <label>Nick Job</label>
                 </div>
                 <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                    <span><?=$model->typeOrder ?></span>
-                </div>
-            </div>
-            <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
-                <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                    <label>No. SPK</label>
-                </div>
-                <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                    <span><?=$model->no_spk ?></span>
-                </div>
-            </div>
-            <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
-                <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                    <label>Tgl. SPK</label>
-                </div>
-                <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                    <span><?=date('d-m-Y', strtotime($model->tgl_spk)) ?></span>
+                    <span><?=$model->nick_name ?></span>
                 </div>
             </div>
             <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
@@ -74,8 +58,14 @@ $this->params['breadcrumbs'][] = $this->title;
                     <span><?=date('d-m-Y', strtotime($model->tgl_so)) ?></span>
                 </div>
             </div>
-        </div>
-        <div class="col-lg-6 col-md-6 col-xs-12">
+            <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
+                <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
+                    <label>Kode Repeat</label>
+                </div>
+                <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
+                    <span><?=(!empty($model->repeat_code )) ? $model->repeat_code : '-' ?></span>
+                </div>
+            </div>
             <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
                 <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
                     <label>Customer</label>
@@ -105,12 +95,38 @@ $this->params['breadcrumbs'][] = $this->title;
                     </div>
                 </div>
             </div>
+        </div>
+        <div class="col-lg-6 col-md-6 col-xs-12">
+            <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
+                <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
+                    <label>Type Order</label>
+                </div>
+                <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
+                    <span><?=$model->typeOrder ?></span>
+                </div>
+            </div>
             <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
                 <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
                     <label>Ekspedisi</label>
                 </div>
                 <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
                     <span><?=(!empty($model->ekspedisi)) ? $model->ekspedisi->name : '-' ?></span>
+                </div>
+            </div>
+            <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
+                <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
+                    <label>Total Qty</label>
+                </div>
+                <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
+                    <span><?=$model->total_qty .(($model->type_qty == 1) ? ' RIM' : ' LEMBAR')  ?></span>
+                </div>
+            </div>
+            <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
+                <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
+                    <label>Total Qty Up</label>
+                </div>
+                <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
+                    <span><?=($model->type_qty == 1) ? $model->total_qty_up .' LEMBAR' : ''  ?></span>
                 </div>
             </div>
             <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
@@ -123,18 +139,30 @@ $this->params['breadcrumbs'][] = $this->title;
             </div>
             <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
                 <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                    <label>Total Qty</label>
+                    <label>Lb. Ikat</label>
                 </div>
                 <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                    <span><?=$model->total_qty .(($model->type_qty == 1) ? ' RIM' : ' LEMBAR') ?></span>
+                    <span>
+                        <?=(!empty($model->lembar_ikat_1) ? number_format($model->lembar_ikat_1) .' '.$model->lembar_ikat_um_1 .' / ' : '') ?>
+                        <?=(!empty($model->lembar_ikat_2) ? number_format($model->lembar_ikat_2) .' '.$model->lembar_ikat_um_2 .' / ' : '') ?>
+                        <?=(!empty($model->lembar_ikat_3) ? number_format($model->lembar_ikat_3) .' '.$model->lembar_ikat_um_3 : '') ?>
+                    </span>
                 </div>
             </div>
             <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
                 <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                    <label>Total Qty Up</label>
+                    <label>Total Warna</label>
                 </div>
                 <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                    <span><?=$model->total_qty_up .' LEMBAR'  ?></span>
+                    <span><?=$model->total_warna ?></span>
+                </div>
+            </div>
+            <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
+                <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
+                    <label>PPN</label>
+                </div>
+                <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
+                    <span><?=(!empty($model->ppn)) ? $model->ppn.'%' : '-' ?></span>
                 </div>
             </div>
             <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">

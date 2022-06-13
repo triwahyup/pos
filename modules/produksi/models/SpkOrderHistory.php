@@ -4,6 +4,7 @@ namespace app\modules\produksi\models;
 
 use Yii;
 use app\models\Profile;
+use app\modules\inventory\models\InventoryStockItem;
 use app\modules\master\models\MasterMesin;
 use app\modules\master\models\MasterPerson;
 use app\modules\master\models\MasterProses;
@@ -139,6 +140,12 @@ class SpkOrderHistory extends \yii\db\ActiveRecord
     public function getCount()
     {
         return SpkOrderHistory::find()->where(['no_spk' => $this->no_spk, 'item_code' => $this->item_code])->count();
+    }
+
+    public function getInventoryStock()
+    {
+        $model = InventoryStockItem::findOne(['item_code' => $this->item_code]);
+        return $model;
     }
 
     public function getStatusProduksi()

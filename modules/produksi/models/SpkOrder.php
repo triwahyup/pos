@@ -5,6 +5,7 @@ namespace app\modules\produksi\models;
 use Yii;
 use app\modules\master\models\MasterMesin;
 use app\modules\master\models\MasterPerson;
+use app\modules\master\models\MasterSatuan;
 use app\modules\produksi\models\SpkOrderProses;
 use app\modules\produksi\models\SpkOrderHistory;
 use yii\behaviors\TimestampBehavior;
@@ -47,9 +48,10 @@ class SpkOrder extends \yii\db\ActiveRecord
         return [
             [['no_spk'], 'required'],
             [['tgl_spk', 'tgl_so', 'deadline', 'type_order', 'up_produksi', 'total_qty', 'total_qty_up'], 'safe'],
-            [['sales_code', 'ekspedisi_flag', 'term_in', 'type_qty', 'status', 'status_produksi', 'created_at', 'updated_at'], 'integer'],
-            [['customer_code', 'ekspedisi_code'], 'string', 'max' => 3],
+            [['sales_code', 'ekspedisi_flag', 'term_in', 'type_qty', 'lembar_ikat_1', 'lembar_ikat_2', 'lembar_ikat_3', 'total_warna', 'status', 'status_produksi', 'created_at', 'updated_at'], 'integer'],
+            [['customer_code', 'ekspedisi_code', 'satuan_ikat_code'], 'string', 'max' => 3],
             [['nick_name'], 'string', 'max' => 4],
+            [['lembar_ikat_um_1', 'lembar_ikat_um_2', 'lembar_ikat_um_3'], 'string', 'max' => 5],
             [['no_spk', 'no_so'], 'string', 'max' => 12],
             [['repeat_code'], 'string', 'max' => 16],
             [['name', 'keterangan'], 'string', 'max' => 128],
@@ -101,6 +103,11 @@ class SpkOrder extends \yii\db\ActiveRecord
     public function getEkspedisi()
     {
         return $this->hasOne(MasterPerson::className(), ['code' => 'ekspedisi_code']);
+    }
+
+    public function getSatuan()
+    {
+        return $this->hasOne(MasterSatuan::className(), ['code' => 'satuan_code']);
     }
 
     public function getHistorys()
@@ -177,5 +184,24 @@ class SpkOrder extends \yii\db\ActiveRecord
             $message = '<span class="text-label text-success">Finish</span>';
         }
         return $message;
+    }
+
+    public function getDescRusak()
+    {
+        $desc = '';
+        $total_rusak = 0;
+        foreach($this->produksiInAlls as $index=>$val){
+            if($val->qty_rusak > 0){
+                $desc .= '<span class="font-size-12 text-muted">';
+                $desc .= 'Total Rusak proses '.$val->proses->name .' Uk.'.$val->uk_potong.': ';
+                $desc .= '<strong class="text-danger">'.number_format($val->qty_rusak, 0, ',', '.') .' LB</strong>';
+                $desc .= '</span><br />';
+
+                $total_rusak += $val->qty_rusak;
+            }
+        }
+        $desc .= '<strong class="font-size-14">Jumlah Qty Rusak: '.number_format($total_rusak, 0, ',', '.').' LB</strong>';
+        // print_r($desc);die;
+        return $desc;
     }
 }

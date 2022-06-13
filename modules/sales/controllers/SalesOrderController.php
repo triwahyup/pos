@@ -144,7 +144,7 @@ class SalesOrderController extends Controller
                         $totalQtyKonv = 0;
                         foreach($model->itemsMaterial as $val){
                             $totalQtyUp += $val->qty_up;
-                            if(!empty($val->qty_order_1)){
+                            if($model->type_qty == 1){
                                 $konv = $val->inventoryStock->satuanTerkecil($val->item_code, [
                                     0=>$val->qty_order_1, 1=>0]);
                                 $totalQtyOrder += $konv;
@@ -307,7 +307,7 @@ class SalesOrderController extends Controller
                         $totalQtyKonv = 0;
                         foreach($model->itemsMaterial as $val){
                             $totalQtyUp += $val->qty_up;
-                            if(!empty($val->qty_order_1)){
+                            if($model->type_qty == 1){
                                 $konv = $val->inventoryStock->satuanTerkecil($val->item_code, [
                                     0=>$val->qty_order_1, 1=>0]);
                                 $totalQtyOrder += $konv;
@@ -1120,6 +1120,7 @@ class SalesOrderController extends Controller
             try{
                 $dataHeader = $request->post('SalesOrder');
                 $code = (!empty($dataHeader['code'])) ? $dataHeader['code'] : 'tmp';
+                $isRIM = ($dataHeader['type_qty'] == 1) ? true : false;
                 // TEMP ITEM ATTRIBUTES
                 $dataItem = $request->post('TempSalesOrderItem');
                 $tempItem = new TempSalesOrderItem();
@@ -1131,14 +1132,6 @@ class SalesOrderController extends Controller
                         $tempItem->qty_order_1 = $tempItem->bahan_qty;
                         $tempItem->qty_up = null;
                         $tempItem->total_potong = 0;
-                        $tempItem->total_warna = 0;
-                        $tempItem->satuan_ikat_code = '000';
-                        $tempItem->lembar_ikat_1 = null;
-                        $tempItem->lembar_ikat_2 = null;
-                        $tempItem->lembar_ikat_3 = null;
-                        $tempItem->lembar_ikat_um_1 = null;
-                        $tempItem->lembar_ikat_um_2 = null;
-                        $tempItem->lembar_ikat_um_3 = null;
                     }else{
                         $success = false;
                         $message = 'Qty bahan pembantu tidak boleh kosong.';
@@ -1158,21 +1151,17 @@ class SalesOrderController extends Controller
                     $tempItem->user_id = \Yii::$app->user->id;
                     if($tempItem->item->typeCode->value == \Yii::$app->params['TYPE_KERTAS']){
                         $tempItem->supplier_code = $dataItem['supplier_code'];
-                        if(!$tempItem->lembar_ikat_1) $tempItem->lembar_ikat_1 = 0;
-                        if(!$tempItem->lembar_ikat_2) $tempItem->lembar_ikat_2 = 0;
-                        if(!$tempItem->lembar_ikat_3) $tempItem->lembar_ikat_3 = 0;
-
+                        
                         $totalQtyKonv = $tempItem->inventoryStock->satuanTerkecil($tempItem->item_code, [
                             0=>$dataHeader['total_qty'], 1=>0]);
-                        $totalQtyOrder = (!empty($tempItem->qty_order_1))
+                        $totalQtyOrder = ($isRIM)
                             ? $tempItem->inventoryStock->satuanTerkecil($tempItem->item_code, [
                                 0=>$tempItem->qty_order_1, 1=>0])
-                            : $tempItem->inventoryStock->satuanTerkecil($tempItem->item_code, [
-                                0=>$tempItem->qty_order_2, 1=>0]);
+                            : $tempItem->qty_order_2;
                         $totalQtyUp = str_replace(',', '', $tempItem->qty_up);
                         foreach($tempItem->itemsMaterial as $val){
                             $totalQtyUp += $val->qty_up;
-                            if(!empty($val->qty_order_1)){
+                            if($isRIM){
                                 $konv = $val->inventoryStock->satuanTerkecil($val->item_code, [
                                     0=>$val->qty_order_1, 1=>0]);
                                 $totalQtyOrder += $konv;
@@ -1181,6 +1170,17 @@ class SalesOrderController extends Controller
                             }
                         }
                         
+                        if($isRIM){
+                            if(empty($tempItem->qty_order_1)){
+                                $success = false;
+                                $message = 'Qty order tidak boleh kosong (wajib di isi).';
+                            }
+                        }else{
+                            if(empty($tempItem->qty_order_2)){
+                                $success = false;
+                                $message = 'Qty order tidak boleh kosong (wajib di isi).';
+                            }
+                        }
                         if($totalQtyOrder > $totalQtyKonv){
                             $success = false;
                             $message = 'Total qty order tidak boleh lebih dari '.$dataHeader['total_qty'];
@@ -1246,8 +1246,14 @@ class SalesOrderController extends Controller
                 $dataHeader = $request->post('SalesOrder');
                 $dataItem = $request->post('TempSalesOrderItem');
                 $tempItem = TempSalesOrderItem::findOne(['id'=>$dataItem['id']]);
+                $isRIM = ($dataHeader['type_qty'] == 1) ? true : false;
                 $code = $tempItem->code;
                 $urutan = $tempItem->urutan;
+                $qtyOrder = ($isRIM) ? 
+                    $tempItem->inventoryStock->satuanTerkecil($tempItem->item_code, [
+                        0=>$tempItem->qty_order_1, 1=>0])
+                    : $tempItem->qty_order_2;
+                $qtyUp = $tempItem->qty_up;
 
                 $tempItem->attributes = (array)$dataItem;
                 $tempItem->attributes = $tempItem->item->attributes;
@@ -1259,9 +1265,46 @@ class SalesOrderController extends Controller
                     $tempItem->urutan = $urutan;
                     $tempItem->total_order = $tempItem->totalOrder;
                     if($tempItem->item->typeCode->value == \Yii::$app->params['TYPE_KERTAS']){
-                        if(!$tempItem->lembar_ikat_1) $tempItem->lembar_ikat_1 = 0;
-                        if(!$tempItem->lembar_ikat_2) $tempItem->lembar_ikat_2 = 0;
-                        if(!$tempItem->lembar_ikat_3) $tempItem->lembar_ikat_3 = 0;
+                        $totalQtyKonv = $tempItem->inventoryStock->satuanTerkecil($tempItem->item_code, [
+                            0=>$dataHeader['total_qty'], 1=>0]);
+                        $totalQtyOrder = ($isRIM) ? 
+                            $tempItem->inventoryStock->satuanTerkecil($tempItem->item_code, [
+                                0=>$tempItem->qty_order_1, 1=>0])
+                            : $tempItem->qty_order_2;
+                        $totalQtyUp = str_replace(',', '', $tempItem->qty_up);
+                        foreach($tempItem->itemsMaterial as $val){
+                            $totalQtyUp += $val->qty_up;
+                            if($isRIM){
+                                $konv = $val->inventoryStock->satuanTerkecil($val->item_code, [
+                                    0=>$val->qty_order_1, 1=>0]);
+                                $totalQtyOrder += $konv;
+                            }else{
+                                $totalQtyOrder += $val->qty_order_2;
+                            }
+                        }
+                        
+                        if($isRIM){
+                            if(empty($tempItem->qty_order_1)){
+                                $success = false;
+                                $message = 'Qty order tidak boleh kosong (wajib di isi).';
+                            }
+                        }else{
+                            if(empty($tempItem->qty_order_2)){
+                                $success = false;
+                                $message = 'Qty order tidak boleh kosong (wajib di isi).';
+                            }
+                        }
+                        $totalQtyOrder = $totalQtyOrder - $qtyOrder;
+                        if($totalQtyOrder > $totalQtyKonv){
+                            $success = false;
+                            $message = 'Total qty order tidak boleh lebih dari '.$dataHeader['total_qty'];
+                        }
+                        $totalQtyUpHeader = str_replace(',', '', $dataHeader['total_qty_up']);
+                        $totalQtyUp = $totalQtyUp - $qtyUp;
+                        if($totalQtyUp > $totalQtyUpHeader){
+                            $success = false;
+                            $message = 'Total up produksi tidak boleh lebih dari '.$dataHeader['total_qty_up'];
+                        }
                     }
                 }else{
                     $success = false;

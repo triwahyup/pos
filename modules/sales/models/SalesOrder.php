@@ -5,6 +5,7 @@ namespace app\modules\sales\models;
 use Yii;
 use app\models\Profile;
 use app\modules\master\models\MasterPerson;
+use app\modules\master\models\MasterSatuan;
 use yii\behaviors\TimestampBehavior;
 
 /**
@@ -57,15 +58,16 @@ class SalesOrder extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['name', 'type_order', 'customer_code', 'no_po', 'ekspedisi_flag', 'total_qty'], 'required'],
+            [['name', 'type_order', 'customer_code', 'no_po', 'ekspedisi_flag', 'total_qty', 'satuan_ikat_code', 'total_warna'], 'required'],
             [['tgl_so', 'tgl_po', 'deadline', 'total_qty', 'total_qty_up'], 'safe'],
-            [['sales_code', 'ekspedisi_flag', 'term_in', 'type_order', 'up_produksi', 'post', 'status', 'created_at', 'updated_at', 'type_qty'], 'integer'],
+            [['sales_code', 'ekspedisi_flag', 'term_in', 'type_order', 'type_qty', 'lembar_ikat_1', 'lembar_ikat_2', 'lembar_ikat_3', 'up_produksi', 'total_warna', 'post', 'status', 'created_at', 'updated_at'], 'integer'],
             [['ppn', 'total_order_material', 'total_order_bahan', 'total_biaya_produksi', 'total_ppn', 'grand_total'], 'number'],
             [['nick_name'], 'string', 'max' => 4],
+            [['lembar_ikat_um_1', 'lembar_ikat_um_2', 'lembar_ikat_um_3'], 'string', 'max' => 5],
             [['code', 'no_po'], 'string', 'max' => 12],
             [['repeat_code'], 'string', 'max' => 16],
             [['name', 'keterangan'], 'string', 'max' => 128],
-            [['customer_code', 'ekspedisi_code'], 'string', 'max' => 3],
+            [['customer_code', 'ekspedisi_code', 'satuan_ikat_code'], 'string', 'max' => 3],
             [['code'], 'unique'],
             [['status'], 'default', 'value' => 1],
         ];
@@ -119,6 +121,10 @@ class SalesOrder extends \yii\db\ActiveRecord
         $this->tgl_so = date('Y-m-d', strtotime($this->tgl_so));
         $this->tgl_po = date('Y-m-d', strtotime($this->tgl_po));
         $this->deadline = date('Y-m-d', strtotime($this->deadline));
+        $this->total_warna = str_replace(',', '', $this->total_warna);
+        $this->lembar_ikat_1 = str_replace(',', '', $this->lembar_ikat_1);
+        $this->lembar_ikat_2 = str_replace(',', '', $this->lembar_ikat_2);
+        $this->lembar_ikat_3 = str_replace(',', '', $this->lembar_ikat_3);
         return parent::beforeSave($attribute);
     }
 
@@ -135,6 +141,11 @@ class SalesOrder extends \yii\db\ActiveRecord
     public function getEkspedisi()
     {
         return $this->hasOne(MasterPerson::className(), ['code' => 'ekspedisi_code']);
+    }
+
+    public function getSatuan()
+    {
+        return $this->hasOne(MasterSatuan::className(), ['code' => 'satuan_code']);
     }
 
     public function getItems()

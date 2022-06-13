@@ -37,15 +37,7 @@ use app\modules\sales\models\TempSalesOrderProses;
  * @property float|null $harga_jual_1
  * @property float|null $harga_jual_2
  * @property float|null $harga_jual_3
- * @property string|null $satuan_ikat_code
- * @property int|null $lembar_ikat_1
- * @property int|null $lembar_ikat_2
- * @property int|null $lembar_ikat_3
- * @property string|null $lembar_ikat_um_1
- * @property string|null $lembar_ikat_um_2
- * @property string|null $lembar_ikat_um_3
  * @property int|null $total_potong
- * @property int|null $total_warna
  * @property float|null $total_order
  * @property string|null $keterangan
  * @property int|null $user_id
@@ -72,12 +64,12 @@ class TempSalesOrderItem extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['urutan', 'lembar_ikat_1', 'lembar_ikat_2', 'lembar_ikat_3', 'total_potong', 'total_warna', 'user_id'], 'integer'],
+            [['urutan', 'total_potong', 'user_id'], 'integer'],
             [['qty_order_1', 'qty_order_2', 'qty_order_3', 'qty_up', 'konversi_1', 'konversi_2', 'konversi_3', 'harga_beli_1', 'harga_beli_2', 'harga_beli_3', 'harga_jual_1', 'harga_jual_2', 'harga_jual_3', 'total_order', 'bahan_qty'], 'safe'],
             [['code'], 'string', 'max' => 12],
             [['item_code', 'bahan_item_code'], 'string', 'max' => 7],
-            [['supplier_code', 'satuan_code', 'material_code', 'type_code', 'satuan_ikat_code', 'bahan_supplier_code'], 'string', 'max' => 3],
-            [['um_1', 'um_2', 'um_3', 'lembar_ikat_um_1', 'lembar_ikat_um_2', 'lembar_ikat_um_3'], 'string', 'max' => 5],
+            [['supplier_code', 'satuan_code', 'material_code', 'type_code', 'bahan_supplier_code'], 'string', 'max' => 3],
+            [['um_1', 'um_2', 'um_3'], 'string', 'max' => 5],
             [['keterangan', 'item_name'], 'string', 'max' => 128],
         ];
     }
@@ -111,15 +103,7 @@ class TempSalesOrderItem extends \yii\db\ActiveRecord
             'harga_jual_1' => 'Harga Jual 1',
             'harga_jual_2' => 'Harga Jual 2',
             'harga_jual_3' => 'Harga Jual 3',
-            'satuan_ikat_code' => 'Satuan Ikat Code',
-            'lembar_ikat_1' => 'Lembar Ikat 1',
-            'lembar_ikat_2' => 'Lembar Ikat 2',
-            'lembar_ikat_3' => 'Lembar Ikat 3',
-            'lembar_ikat_um_1' => 'Lembar Ikat Um 1',
-            'lembar_ikat_um_2' => 'Lembar Ikat Um 2',
-            'lembar_ikat_um_3' => 'Lembar Ikat Um 3',
             'total_potong' => 'Total Potong',
-            'total_warna' => 'Total Warna',
             'total_order' => 'Total Order',
             'keterangan' => 'Keterangan',
             'user_id' => 'User ID',
@@ -133,10 +117,6 @@ class TempSalesOrderItem extends \yii\db\ActiveRecord
         $this->qty_order_3 = str_replace(',', '', $this->qty_order_3);
         $this->qty_up = str_replace(',', '', $this->qty_up);
         $this->total_potong = str_replace(',', '', $this->total_potong);
-        $this->total_warna = str_replace(',', '', $this->total_warna);
-        $this->lembar_ikat_1 = str_replace(',', '', $this->lembar_ikat_1);
-        $this->lembar_ikat_2 = str_replace(',', '', $this->lembar_ikat_2);
-        $this->lembar_ikat_3 = str_replace(',', '', $this->lembar_ikat_3);
         return parent::beforeSave($attribute);
     }
 
