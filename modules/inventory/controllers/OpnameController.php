@@ -38,13 +38,28 @@ class OpnameController extends Controller
                     'class' => AccessControl::className(),
                     'rules' => [
                         [
-                            'actions' => [
-                                'index', 'view', 'create', 'update', 'delete',
-                                'list-item', 'search', 'autocomplete', 'item', 'popup',
-                                'create-temp', 'update-temp', 'delete-temp', 'temp', 'get-temp',
-                                'send-approval', 'approval', 'post'
-                            ],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('stock-opname')),
+                            'actions' => ['create', 'create-temp'],
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('stock-opname[C]')),
+                            'roles' => ['@'],
+                        ],
+                        [
+                            'actions' => ['index', 'view', 'list-item', 'search', 'autocomplete', 'item', 'popup', 'temp', 'get-temp'],
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('stock-opname[R]')),
+                            'roles' => ['@'],
+                        ], 
+                        [
+                            'actions' => ['update', 'post', 'update-temp', 'send-approval'],
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('stock-opname[U]')),
+                            'roles' => ['@'],
+                        ], 
+                        [
+                            'actions' => ['delete', 'delete-temp'],
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('stock-opname[D]')),
+                            'roles' => ['@'],
+                        ],
+                        [
+                            'actions' => ['approval'],
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('stock-opname[A]')),
                             'roles' => ['@'],
                         ],
                     ],

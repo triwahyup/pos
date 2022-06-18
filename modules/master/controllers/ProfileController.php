@@ -36,22 +36,22 @@ class ProfileController extends Controller
 				    'rules' => [
                         [
                             'actions' => ['create'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('setup-user')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('setup-user[C]')),
                             'roles' => ['@'],
                         ],
                         [
-                            'actions' => ['index', 'switch', 'view', 'list-kabupaten', 'list-kecamatan', 'list-kelurahan'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('setup-user')),
+                            'actions' => ['index', 'view', 'list-kabupaten', 'list-kecamatan', 'list-kelurahan'],
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('setup-user[R]')),
                             'roles' => ['@'],
                         ], 
                         [
-                            'actions' => ['update'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('setup-user')),
+                            'actions' => ['update', 'switch'],
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('setup-user[U]')),
                             'roles' => ['@'],
                         ], 
                         [
                             'actions' => ['delete'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('setup-user')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('setup-user[D]')),
                             'roles' => ['@'],
                         ],
                     ],

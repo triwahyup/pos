@@ -30,22 +30,22 @@ class ProsesController extends Controller
 				    'rules' => [
                         [
                             'actions' => ['create'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-proses')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-proses[C]')),
                             'roles' => ['@'],
                         ],
                         [
                             'actions' => ['index', 'view'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-proses')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-proses[R]')),
                             'roles' => ['@'],
                         ], 
                         [
                             'actions' => ['update'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-proses')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-proses[U]')),
                             'roles' => ['@'],
                         ], 
                         [
                             'actions' => ['delete'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-proses')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-proses[D]')),
                             'roles' => ['@'],
                         ],
                     ],

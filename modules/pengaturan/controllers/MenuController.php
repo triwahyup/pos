@@ -30,22 +30,22 @@ class MenuController extends Controller
 				    'rules' => [
                         [
                             'actions' => ['create'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('setup-menu')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('setup-menu[C]')),
                             'roles' => ['@'],
                         ],
                         [
                             'actions' => ['index', 'view', 'list'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('setup-menu')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('setup-menu[R]')),
                             'roles' => ['@'],
                         ], 
                         [
                             'actions' => ['update'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('setup-menu')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('setup-menu[U]')),
                             'roles' => ['@'],
                         ], 
                         [
                             'actions' => ['delete'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('setup-menu')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('setup-menu[D]')),
                             'roles' => ['@'],
                         ],
                     ],
@@ -127,8 +127,16 @@ class MenuController extends Controller
 
                     if($model->save()){
                         $auth = \Yii::$app->authManager;
-                        $author = $auth->createRole($model->slug);
-					    $auth->add($author);
+                        if($model->link != "#"){
+                            $accessRoles = ['C', 'R', 'U', 'D', 'A'];
+                            foreach($accessRoles as $accessRole){
+                                $author = $auth->createRole($model->slug.'['.$accessRole.']');
+                                $auth->add($author);
+                            }
+                        }else{
+                            $author = $auth->createRole($model->slug);
+                            $auth->add($author);
+                        }
                     }else{
                         $success = false;
                         $message = (count($model->errors) > 0) ? 'ERROR CREATE MENU : ' : '';

@@ -34,12 +34,23 @@ class BastController extends Controller
                     'class' => AccessControl::className(),
                     'rules' => [
                         [
-                            'actions' => [
-                                'index', 'view', 'create', 'update', 'delete', 'post',
-                                'list-barang', 'search', 'autocomplete', 'barang', 'popup',
-                                'create-temp', 'update-temp', 'delete-temp', 'temp', 'get-temp',
-                            ],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('bast-barang')),
+                            'actions' => ['create', 'create-temp'],
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('bast-barang[C]')),
+                            'roles' => ['@'],
+                        ],
+                        [
+                            'actions' => ['index', 'view', 'list-barang', 'search', 'autocomplete', 'barang', 'popup', 'temp', 'get-temp'],
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('bast-barang[R]')),
+                            'roles' => ['@'],
+                        ], 
+                        [
+                            'actions' => ['update', 'post', 'update-temp'],
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('bast-barang[U]')),
+                            'roles' => ['@'],
+                        ], 
+                        [
+                            'actions' => ['delete', 'delete-temp'],
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('bast-barang[D]')),
                             'roles' => ['@'],
                         ],
                     ],

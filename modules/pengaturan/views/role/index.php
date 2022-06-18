@@ -1,4 +1,5 @@
 <?php
+use app\models\User;
 use yii\helpers\Html;
 use yii\grid\GridView;
 
@@ -30,9 +31,12 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'buttons' => [
                     'update' => function ($url, $model) {
-                        return Html::a('<i class="fontello icon-pencil-3"></i>',
-                                ['update', 'code'=>$model->code],
-                                ['title'=>'Update', 'aria-label'=>'Update', 'data-pjax'=>true]);
+                        if(((new User)->getIsDeveloper()) || \Yii::$app->user->can('setup-role-user[U]'))
+                            return Html::a('<i class="fontello icon-pencil-3"></i>',
+                                [ 'update', 'code'=>$model->code ],
+                                [ 'title'=>'Update', 'aria-label'=>'Update', 'data-pjax'=>true ]
+                            );
+                        else return "";
                     },
                 ],
                 'class' => 'yii\grid\ActionColumn',

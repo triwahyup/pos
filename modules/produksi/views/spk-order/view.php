@@ -1,4 +1,5 @@
 <?php
+use app\models\User;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
@@ -14,9 +15,12 @@ $this->params['breadcrumbs'][] = $this->title;
     .in-block { display: inline-block; }
 </style>
 <div class="spk-view">
-    <p class="text-right">
-        <?= Html::a('<i class="fontello icon-pencil"></i><span>Proses Produksi</span>', ['layar', 'no_spk' => $model->no_spk], ['class' => 'btn btn-warning btn-flat btn-sm']) ?>
-    </p>
+    <?php if(((new User)->getIsDeveloper()) || \Yii::$app->user->can('proses-produksi-sales-order[U]')): ?>
+        <p class="text-right">
+            <?= Html::a('<i class="fontello icon-pencil"></i><span>Proses Produksi</span>', ['layar', 'no_spk' => $model->no_spk], [
+                'class' => 'btn btn-warning btn-flat btn-sm']) ?>
+        </p>
+    <?php endif; ?>
 
     <div class="form-container no-background" render="detail">
         <!-- Detail Job --->

@@ -44,17 +44,29 @@ class SalesOrderController extends Controller
                     'class' => AccessControl::className(),
                     'rules' => [
                         [
+                            'actions' => ['create', 'create-temp', 'create-potong', 'create-proses'],
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('sales-order[C]')),
+                            'roles' => ['@'],
+                        ],
+                        [
                             'actions' => [
-                                'index', 'view', 'create', 'update', 'delete', 
+                                'index', 'view', 'invoice', 'list-proses', 'type-order',
                                 'on-change-term-in', 'on-input-term-in', 'on-change-up', 
-                                'list-proses', 'type-order',
-                                'list-order', 'autocomplete-order', 'search-order', 'select-order', 
-                                'list-item', 'autocomplete-item', 'search-item', 'select-item', 
                                 'temp-item', 'temp-bahan', 'temp-proses', 'get-temp',
-                                'create-temp', 'update-temp', 'delete-temp', 
-                                'create-potong', 'delete-potong', 'create-proses', 'invoice', 'post',
+                                'list-item', 'autocomplete-item', 'search-item', 'select-item', 
+                                'list-order', 'autocomplete-order', 'search-order', 'select-order'
                             ],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('sales-order')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('sales-order[R]')),
+                            'roles' => ['@'],
+                        ], 
+                        [
+                            'actions' => ['update', 'post', 'update-temp', 'send-approval'],
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('sales-order[U]')),
+                            'roles' => ['@'],
+                        ], 
+                        [
+                            'actions' => ['delete', 'delete-temp', 'delete-potong'],
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('sales-order[D]')),
                             'roles' => ['@'],
                         ],
                     ],
@@ -154,10 +166,12 @@ class SalesOrderController extends Controller
                             $totalQtyKonv = $val->inventoryStock->satuanTerkecil($val->item_code, [
                                 0=>$model->total_qty, 1=>0]);
                         }
+                        
                         if($totalQtyOrder > $totalQtyKonv){
                             $success = false;
                             $message = 'Total qty order tidak boleh lebih dari '.$model->total_qty;
                         }
+                        $model->total_qty_up = str_replace(',', '', $model->total_qty_up);
                         if($totalQtyUp > $model->total_qty_up){
                             $success = false;
                             $message = 'Total up produksi tidak boleh lebih dari '.$model->total_qty_up;
@@ -317,13 +331,22 @@ class SalesOrderController extends Controller
                             $totalQtyKonv = $val->inventoryStock->satuanTerkecil($val->item_code, [
                                 0=>$model->total_qty, 1=>0]);
                         }
+                        
                         if($totalQtyOrder > $totalQtyKonv){
                             $success = false;
                             $message = 'Total qty order tidak boleh lebih dari '.$model->total_qty;
+                        }else if($totalQtyOrder < $totalQtyKonv){
+                            $success = false;
+                            $message = 'Total qty order masih kurang.';
                         }
+                        
+                        $model->total_qty_up = str_replace(',', '', $model->total_qty_up);
                         if($totalQtyUp > $model->total_qty_up){
                             $success = false;
                             $message = 'Total up produksi tidak boleh lebih dari '.$model->total_qty_up;
+                        }else if($totalQtyUp < $model->total_qty_up){
+                            $success = false;
+                            $message = 'Total qty up produksi masih kurang.';
                         }
                     }else{
                         $success = false;
@@ -1249,6 +1272,7 @@ class SalesOrderController extends Controller
                 $isRIM = ($dataHeader['type_qty'] == 1) ? true : false;
                 $code = $tempItem->code;
                 $urutan = $tempItem->urutan;
+                $supplierCode = $dataItem['supplier_code'];
                 $qtyOrder = ($isRIM) ? 
                     $tempItem->inventoryStock->satuanTerkecil($tempItem->item_code, [
                         0=>$tempItem->qty_order_1, 1=>0])
@@ -1263,6 +1287,7 @@ class SalesOrderController extends Controller
                     $tempItem->attributes = $tempItem->item->attributes;
                     $tempItem->code = $code;
                     $tempItem->urutan = $urutan;
+                    $tempItem->supplier_code = $supplierCode;
                     $tempItem->total_order = $tempItem->totalOrder;
                     if($tempItem->item->typeCode->value == \Yii::$app->params['TYPE_KERTAS']){
                         $totalQtyKonv = $tempItem->inventoryStock->satuanTerkecil($tempItem->item_code, [

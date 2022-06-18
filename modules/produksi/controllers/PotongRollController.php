@@ -34,12 +34,23 @@ class PotongRollController extends Controller
                     'class' => AccessControl::className(),
 				    'rules' => [
                         [
-                            'actions' => [
-                                'index', 'view', 'create', 'update', 'delete', 'post',
-                                'temp', 'get-temp', 'create-temp', 'delete-temp',
-                                'list-item', 'search', 'item', 'autocomplete',
-                            ],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('request-potong-material-roll')),
+                            'actions' => ['create', 'create-temp'],
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('request-potong-material-roll[C]')),
+                            'roles' => ['@'],
+                        ],
+                        [
+                            'actions' => ['index', 'view', 'list-item', 'search', 'autocomplete', 'item', 'temp', 'get-temp'],
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('request-potong-material-roll[R]')),
+                            'roles' => ['@'],
+                        ], 
+                        [
+                            'actions' => ['update', 'post'],
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('request-potong-material-roll[U]')),
+                            'roles' => ['@'],
+                        ], 
+                        [
+                            'actions' => ['delete', 'delete-temp'],
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('request-potong-material-roll[D]')),
                             'roles' => ['@'],
                         ],
                     ],

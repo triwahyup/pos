@@ -1,4 +1,5 @@
 <?php
+use app\models\User;
 use kartik\date\DatePicker;
 use yii\helpers\Html;
 use yii\grid\GridView;
@@ -11,9 +12,11 @@ $this->title = 'Sales Order';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="sales-order-index">
-    <p class="text-right">
-        <?= Html::a('<i class="fontello icon-plus"></i><span>Create Sales Order</span>', ['create'], ['class' => 'btn btn-success btn-flat btn-sm']) ?>
-    </p>
+    <?php if(((new User)->getIsDeveloper()) || \Yii::$app->user->can('sales-order[C]')):?>
+        <p class="text-right">
+            <?= Html::a('<i class="fontello icon-plus"></i><span>Create Sales Order</span>', ['create'], ['class' => 'btn btn-success btn-flat btn-sm']) ?>
+        </p>
+    <?php endif;?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
@@ -94,14 +97,20 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'buttons' => [
                     'view' => function ($url, $model) {
-                        return Html::a('<i class="fontello icon-eye-1"></i>',
-                            ['view', 'code'=>$model->code],
-                            ['title'=>'View', 'aria-label'=>'View', 'data-pjax'=>true]);
+                        if(((new User)->getIsDeveloper()) || \Yii::$app->user->can('sales-order[R]'))
+                            return Html::a('<i class="fontello icon-eye-1"></i>',
+                                [ 'view', 'code'=>$model->code ],
+                                [ 'title'=>'View', 'aria-label'=>'View', 'data-pjax'=>true ]
+                            );
+                        else return "";
                     },
                     'update' => function ($url, $model) {
-                        return Html::a('<i class="fontello icon-pencil-3"></i>',
-                                ['update', 'code'=>$model->code],
-                                ['title'=>'Update', 'aria-label'=>'Update', 'data-pjax'=>true]);
+                        if(((new User)->getIsDeveloper()) || \Yii::$app->user->can('sales-order[U]'))
+                            return Html::a('<i class="fontello icon-pencil-3"></i>',
+                                [ 'update', 'code'=>$model->code ],
+                                [ 'title'=>'Update', 'aria-label'=>'Update', 'data-pjax'=>true ]
+                            );
+                        else return "";
                     },
                 ],
                 'class' => 'yii\grid\ActionColumn',

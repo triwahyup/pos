@@ -34,22 +34,22 @@ class PersonController extends Controller
 				    'rules' => [
                         [
                             'actions' => ['create'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-person')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-person[C]')),
                             'roles' => ['@'],
                         ],
                         [
                             'actions' => ['index', 'view', 'list-kabupaten', 'list-kecamatan', 'list-kelurahan'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-person')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-person[R]')),
                             'roles' => ['@'],
                         ], 
                         [
                             'actions' => ['update'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-person')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-person[U]')),
                             'roles' => ['@'],
                         ], 
                         [
                             'actions' => ['delete'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-person')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-person[D]')),
                             'roles' => ['@'],
                         ],
                     ],

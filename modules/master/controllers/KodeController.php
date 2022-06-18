@@ -29,22 +29,22 @@ class KodeController extends Controller
 				    'rules' => [
                         [
                             'actions' => ['create'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-kode')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-kode[C]')),
                             'roles' => ['@'],
                         ],
                         [
                             'actions' => ['index', 'view'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-kode')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-kode[R]')),
                             'roles' => ['@'],
                         ], 
                         [
                             'actions' => ['update'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-kode')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-kode[U]')),
                             'roles' => ['@'],
                         ], 
                         [
                             'actions' => ['delete'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-kode')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-kode[D]')),
                             'roles' => ['@'],
                         ],
                     ],

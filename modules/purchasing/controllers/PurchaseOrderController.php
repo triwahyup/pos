@@ -38,28 +38,28 @@ class PurchaseOrderController extends Controller
                     'class' => AccessControl::className(),
 				    'rules' => [
                         [
-                            'actions' => ['create', 'create-temp', 'send-approval'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('purchase-order-material')),
+                            'actions' => ['create', 'create-temp'],
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('purchase-order-material[C]')),
                             'roles' => ['@'],
                         ],
                         [
                             'actions' => ['index', 'view', 'list-item', 'temp', 'get-temp', 'popup', 'search', 'item', 'autocomplete'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('purchase-order-material')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('purchase-order-material[R]')),
                             'roles' => ['@'],
                         ], 
                         [
-                            'actions' => ['update', 'update-temp', 'post'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('purchase-order-material')),
+                            'actions' => ['update', 'update-temp', 'post', 'send-approval'],
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('purchase-order-material[U]')),
                             'roles' => ['@'],
                         ], 
                         [
                             'actions' => ['delete', 'delete-temp'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('purchase-order-material')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('purchase-order-material[D]')),
                             'roles' => ['@'],
                         ],
                         [
                             'actions' => ['approval'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('purchase-order-material')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('purchase-order-material[A]')),
                             'roles' => ['@'],
                         ],
                     ],

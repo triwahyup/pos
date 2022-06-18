@@ -30,22 +30,22 @@ class MesinController extends Controller
 				    'rules' => [
                         [
                             'actions' => ['create'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-mesin')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-mesin[C]')),
                             'roles' => ['@'],
                         ],
                         [
                             'actions' => ['index', 'view'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-mesin')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-mesin[R]')),
                             'roles' => ['@'],
                         ], 
                         [
                             'actions' => ['update'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-mesin')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-mesin[U]')),
                             'roles' => ['@'],
                         ], 
                         [
                             'actions' => ['delete'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-mesin')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-mesin[D]')),
                             'roles' => ['@'],
                         ],
                     ],

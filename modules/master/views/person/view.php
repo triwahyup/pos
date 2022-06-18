@@ -1,5 +1,5 @@
 <?php
-
+use app\models\User;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
@@ -13,15 +13,22 @@ $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="master-person-view">
     <p class="text-right">
-        <?= Html::a('<i class="fontello icon-plus"></i><span>Create</span>', ['create'], ['class' => 'btn btn-success btn-flat btn-sm']) ?>
-        <?= Html::a('<i class="fontello icon-pencil"></i><span>Update</span>', ['update', 'code' => $model->code], ['class' => 'btn btn-warning btn-flat btn-sm']) ?>
-        <?= Html::a('<i class="fontello icon-trash"></i><span>Delete</span>', ['delete', 'code' => $model->code], [
-            'class' => 'btn btn-danger btn-flat btn-sm',
-            'data' => [
-                'confirm' => 'Are you sure you want to delete this item?',
-                'method' => 'post',
-            ],
-        ]) ?>
+        <?php if(((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-person[C]')): ?>
+            <?= Html::a('<i class="fontello icon-plus"></i><span>Create</span>', ['create'], [
+                'class' => 'btn btn-success btn-flat btn-sm']) ?>
+        <?php endif; ?>
+        <?php if(((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-person[U]')): ?>
+            <?= Html::a('<i class="fontello icon-pencil"></i><span>Update</span>', ['update', 'code' => $model->code], [
+                'class' => 'btn btn-warning btn-flat btn-sm']) ?>
+        <?php endif; ?>
+        <?php if(((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-person[D]')): ?>
+            <?= Html::a('<i class="fontello icon-trash"></i><span>Delete</span>', ['delete', 'code' => $model->code], [
+                'class' => 'btn btn-danger btn-flat btn-sm', 'data' => [
+                    'confirm' => 'Are you sure you want to delete this item?',
+                    'method' => 'post',
+                ],
+            ]) ?>
+        <?php endif; ?>
     </p>
 
     <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 pading-right-0">

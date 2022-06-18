@@ -33,12 +33,12 @@ class InvoiceInternalController extends Controller
 				    'rules' => [
                         [
                             'actions' => ['index', 'view', 'temp', 'get-temp'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('invoice-asset-dan-not-asset')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('invoice-asset-dan-not-asset[R]')),
                             'roles' => ['@'],
                         ], 
                         [
                             'actions' => ['update', 'terima', 'close', 'update-temp'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('invoice-asset-dan-not-asset')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('invoice-asset-dan-not-asset[U]')),
                             'roles' => ['@'],
                         ], 
                     ],

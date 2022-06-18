@@ -33,23 +33,23 @@ class MaterialController extends Controller
                     'class' => AccessControl::className(),
 				    'rules' => [
                         [
-                            'actions' => ['create', 'create-temp'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-material')),
+                            'actions' => ['create', 'create-temp', 'generate-code'],
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-material[C]')),
                             'roles' => ['@'],
                         ],
                         [
-                            'actions' => ['index', 'view', 'generate-code', 'um', 'get-temp', 'temp'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-material')),
+                            'actions' => ['index', 'view', 'um', 'get-temp', 'temp'],
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-material[R]')),
                             'roles' => ['@'],
                         ], 
                         [
                             'actions' => ['update', 'update-temp', 'status-active'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-material')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-material[U]')),
                             'roles' => ['@'],
                         ], 
                         [
                             'actions' => ['delete', 'delete-temp'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-material')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-material[D]')),
                             'roles' => ['@'],
                         ],
                     ],

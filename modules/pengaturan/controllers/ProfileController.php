@@ -32,12 +32,12 @@ class ProfileController extends Controller
 				    'rules' => [
                         [
                             'actions' => ['list-kabupaten', 'list-kecamatan', 'list-kelurahan'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('setup-profile')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('setup-profile[R]')),
                             'roles' => ['@'],
                         ], 
                         [
                             'actions' => ['update'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('setup-profile')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('setup-profile[U]')),
                             'roles' => ['@'],
                         ],
                     ],

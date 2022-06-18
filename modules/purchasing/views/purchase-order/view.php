@@ -1,4 +1,5 @@
 <?php
+use app\models\User;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\DetailView;
@@ -13,16 +14,21 @@ $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="purchase-order-view">
     <p class="text-right">
-        <?php if($typeuser == 'ADMINISTRATOR' || $typeuser == 'ADMIN'): ?>
-            <?= Html::a('<i class="fontello icon-plus"></i><span>Create</span>', ['create'], ['class' => 'btn btn-success btn-flat btn-sm']) ?>
-            <?= Html::a('<i class="fontello icon-pencil"></i><span>Update</span>', ['update', 'no_po' => $model->no_po], ['class' => 'btn btn-warning btn-flat btn-sm']) ?>
+        <?php if(((new User)->getIsDeveloper()) || \Yii::$app->user->can('purchase-order-material[C]')): ?>
+            <?= Html::a('<i class="fontello icon-plus"></i><span>Create</span>', ['create'], [
+                'class' => 'btn btn-success btn-flat btn-sm']) ?>
+        <?php endif; ?>
+        <?php if(((new User)->getIsDeveloper()) || \Yii::$app->user->can('purchase-order-material[U]')): ?>
+            <?= Html::a('<i class="fontello icon-pencil"></i><span>Update</span>', ['update', 'no_po' => $model->no_po], [
+                'class' => 'btn btn-warning btn-flat btn-sm']) ?>
+        <?php endif; ?>
+        <?php if(((new User)->getIsDeveloper()) || \Yii::$app->user->can('purchase-order-material[D]')): ?>
             <?= Html::a('<i class="fontello icon-trash"></i><span>Delete</span>', ['delete', 'no_po' => $model->no_po], [
-                    'class' => 'btn btn-danger btn-flat btn-sm',
-                    'data' => [
-                        'confirm' => 'Are you sure you want to delete this item?',
-                        'method' => 'post',
-                    ],
-                ]) ?>
+                'class' => 'btn btn-danger btn-flat btn-sm', 'data' => [
+                    'confirm' => 'Are you sure you want to delete this item?',
+                    'method' => 'post',
+                ],
+            ]) ?>
         <?php endif; ?>
     </p>
     
@@ -209,28 +215,32 @@ $this->params['breadcrumbs'][] = $this->title;
                         </table>
                     </div>
                 <?php endif; ?>
-                <?php if($sendApproval): ?>
-                    <div class="text-right">
-                        <?= Html::a('<i class="fontello icon-paper-plane-1"></i><span>Send Approval</span>', ['send-approval', 'no_po'=>$model->no_po], ['class' => 'btn btn-primary btn-flat btn-sm']) ?>
-                    </div>
+                <?php if(((new User)->getIsDeveloper()) || \Yii::$app->user->can('purchase-order-material[U]')): ?>
+                    <?php if($sendApproval): ?>
+                        <div class="text-right">
+                            <?= Html::a('<i class="fontello icon-paper-plane-1"></i><span>Send Approval</span>', ['send-approval', 'no_po'=>$model->no_po], ['class' => 'btn btn-primary btn-flat btn-sm']) ?>
+                        </div>
+                    <?php endif; ?>
+                    <?php if($postInvoice): ?>
+                        <div class="text-right">
+                            <?= Html::a('<i class="fontello icon-ok"></i><span>Post to Invoice</span>', ['post', 'no_po'=>$model->no_po], ['class' => 'btn btn-primary btn-flat btn-sm']) ?>
+                        </div>
+                    <?php endif; ?>
                 <?php endif; ?>
-                <?php if($postInvoice): ?>
-                    <div class="text-right">
-                        <?= Html::a('<i class="fontello icon-ok"></i><span>Post to Invoice</span>', ['post', 'no_po'=>$model->no_po], ['class' => 'btn btn-primary btn-flat btn-sm']) ?>
-                    </div>
-                <?php endif; ?>
-                <?php if($typeApproval): ?>
-                    <div class="text-right">
-                        <button data-button="popup_approval" class="btn btn-success" data-code="<?=$model->no_po ?>" data-type="APPROVE">
-                            <i class="fontello icon-ok"></i>
-                            <span>Approve</span>
-                        </button>
-                        <button data-button="popup_reject" class="btn btn-danger" data-code="<?=$model->no_po ?>" data-type="REJECT">
-                            <i class="fontello icon-reply"></i>
-                            <span>Reject</span>
-                        </button>
-                    </div>
-                    <div data-form="approval"></div>
+                <?php if(((new User)->getIsDeveloper()) || \Yii::$app->user->can('purchase-order-material[A]')): ?>
+                    <?php if($typeApproval): ?>
+                        <div class="text-right">
+                            <button data-button="popup_approval" class="btn btn-success" data-code="<?=$model->no_po ?>" data-type="APPROVE">
+                                <i class="fontello icon-ok"></i>
+                                <span>Approve</span>
+                            </button>
+                            <button data-button="popup_reject" class="btn btn-danger" data-code="<?=$model->no_po ?>" data-type="REJECT">
+                                <i class="fontello icon-reply"></i>
+                                <span>Reject</span>
+                            </button>
+                        </div>
+                        <div data-form="approval"></div>
+                    <?php endif; ?>
                 <?php endif; ?>
             </div>
         </div>

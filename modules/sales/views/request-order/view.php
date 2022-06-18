@@ -1,4 +1,5 @@
 <?php
+use app\models\User;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\DetailView;
@@ -13,15 +14,22 @@ $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="request-order-view">
     <p class="text-right">
-        <?= Html::a('<i class="fontello icon-plus"></i><span>Create</span>', ['create'], ['class' => 'btn btn-success btn-flat btn-sm']) ?>
-        <?= Html::a('<i class="fontello icon-pencil"></i><span>Update</span>', ['update', 'no_request' => $model->no_request], ['class' => 'btn btn-warning btn-flat btn-sm']) ?>
-        <?= Html::a('<i class="fontello icon-trash"></i><span>Delete</span>', ['delete', 'no_request' => $model->no_request], [
-            'class' => 'btn btn-danger btn-flat btn-sm',
-            'data' => [
-                'confirm' => 'Are you sure you want to delete this item?',
-                'method' => 'post',
-            ],
-        ]) ?>
+        <?php if(((new User)->getIsDeveloper()) || \Yii::$app->user->can('request-material-sales-order[C]')): ?>
+            <?= Html::a('<i class="fontello icon-plus"></i><span>Create</span>', ['create'], [
+                'class' => 'btn btn-success btn-flat btn-sm']) ?>
+        <?php endif; ?>
+        <?php if(((new User)->getIsDeveloper()) || \Yii::$app->user->can('request-material-sales-order[U]')): ?>
+            <?= Html::a('<i class="fontello icon-pencil"></i><span>Update</span>', ['update', 'no_request' => $model->no_request], [
+                'class' => 'btn btn-warning btn-flat btn-sm']) ?>
+        <?php endif; ?>
+        <?php if(((new User)->getIsDeveloper()) || \Yii::$app->user->can('request-material-sales-order[D]')): ?>
+            <?= Html::a('<i class="fontello icon-trash"></i><span>Delete</span>', ['delete', 'no_request' => $model->no_request], [
+                'class' => 'btn btn-danger btn-flat btn-sm', 'data' => [
+                    'confirm' => 'Are you sure you want to delete this item?',
+                    'method' => 'post',
+                ],
+            ]) ?>
+        <?php endif; ?>
     </p>
 
     <div class="col-lg-12 col-md-12 col-xs-12">
@@ -160,28 +168,32 @@ $this->params['breadcrumbs'][] = $this->title;
             </table>
         </div>
     <?php endif; ?>
-    <?php if($sendApproval): ?>
-        <div class="text-right">
-            <?= Html::a('<i class="fontello icon-paper-plane-1"></i><span>Send Approval</span>', ['send-approval', 'no_request'=>$model->no_request], ['class' => 'btn btn-primary btn-flat btn-sm']) ?>
-        </div>
+    <?php if(((new User)->getIsDeveloper()) || \Yii::$app->user->can('request-material-sales-order[U]')): ?>
+        <?php if($sendApproval): ?>
+            <div class="text-right">
+                <?= Html::a('<i class="fontello icon-paper-plane-1"></i><span>Send Approval</span>', ['send-approval', 'no_request'=>$model->no_request], ['class' => 'btn btn-primary btn-flat btn-sm']) ?>
+            </div>
+        <?php endif; ?>
     <?php endif; ?>
     <?php if($postSpk): ?>
         <div class="text-right">
             <?= Html::a('<i class="fontello icon-ok"></i><span>Post to SPK</span>', ['post', 'no_request'=>$model->no_request], ['class' => 'btn btn-primary btn-flat btn-sm']) ?>
         </div>
     <?php endif; ?>
-    <?php if($typeApproval): ?>
-        <div class="text-right">
-            <button data-button="popup_approval" class="btn btn-success" data-request="<?=$model->no_request ?>" data-type="APPROVE">
-                <i class="fontello icon-ok"></i>
-                <span>Approve</span>
-            </button>
-            <button data-button="popup_reject" class="btn btn-danger" data-request="<?=$model->no_request ?>" data-type="REJECT">
-                <i class="fontello icon-reply"></i>
-                <span>Reject</span>
-            </button>
-        </div>
-        <div data-form="approval"></div>
+    <?php if(((new User)->getIsDeveloper()) || \Yii::$app->user->can('request-material-sales-order[A]')): ?>
+        <?php if($typeApproval): ?>
+            <div class="text-right">
+                <button data-button="popup_approval" class="btn btn-success" data-request="<?=$model->no_request ?>" data-type="APPROVE">
+                    <i class="fontello icon-ok"></i>
+                    <span>Approve</span>
+                </button>
+                <button data-button="popup_reject" class="btn btn-danger" data-request="<?=$model->no_request ?>" data-type="REJECT">
+                    <i class="fontello icon-reply"></i>
+                    <span>Reject</span>
+                </button>
+            </div>
+            <div data-form="approval"></div>
+        <?php endif; ?>
     <?php endif; ?>
 </div>
 <script>

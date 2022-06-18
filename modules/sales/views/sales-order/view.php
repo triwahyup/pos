@@ -1,4 +1,5 @@
 <?php
+use app\models\User;
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
@@ -11,8 +12,14 @@ $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="sales-order-view">
     <p class="text-right">
-        <?= Html::a('<i class="fontello icon-plus"></i><span>Create</span>', ['create'], ['class' => 'btn btn-success btn-flat btn-sm']) ?>
-        <?= Html::a('<i class="fontello icon-pencil"></i><span>Update</span>', ['update', 'code' => $model->code], ['class' => 'btn btn-warning btn-flat btn-sm']) ?>
+        <?php if(((new User)->getIsDeveloper()) || \Yii::$app->user->can('sales-order[C]')): ?>
+            <?= Html::a('<i class="fontello icon-plus"></i><span>Create</span>', ['create'], [
+                'class' => 'btn btn-success btn-flat btn-sm']) ?>
+        <?php endif; ?>
+        <?php if(((new User)->getIsDeveloper()) || \Yii::$app->user->can('sales-order[U]')): ?>
+            <?= Html::a('<i class="fontello icon-pencil"></i><span>Update</span>', ['update', 'code' => $model->code], [
+                'class' => 'btn btn-warning btn-flat btn-sm']) ?>
+        <?php endif; ?>
     </p>
     <div class="form-container no-background" render="detail">
         <div class="col-lg-12 col-md-12 col-xs-12">
@@ -325,17 +332,23 @@ $this->params['breadcrumbs'][] = $this->title;
         <!-- /detail bahan pembantu -->
     </div>
     <div class="col-lg-12 col-md-12 col-xs-12 text-right padding-right-0">
-        <?php if($model->status == 1 && $cancelOrder): ?>
-            <?= Html::a('<i class="fontello icon-cancel"></i><span>Cancel Order</span>', ['delete', 'code' => $model->code], [
-                'class' => 'btn btn-danger btn-flat btn-sm',
-                'data' => ['confirm' => 'Are you sure you want to cancel order?', 'method' => 'post'],
-            ]) ?>
+        <?php if(((new User)->getIsDeveloper()) || \Yii::$app->user->can('sales-order[D]')): ?>
+            <?php if($model->status == 1 && $cancelOrder): ?>
+                <?= Html::a('<i class="fontello icon-cancel"></i><span>Cancel Order</span>', ['delete', 'code' => $model->code], [
+                    'class' => 'btn btn-danger btn-flat btn-sm',
+                    'data' => ['confirm' => 'Are you sure you want to cancel order?', 'method' => 'post'],
+                ]) ?>
+            <?php endif; ?>
         <?php endif; ?>
-        <?php if(\Yii::$app->user->identity->profile->typeUser->value == 'ADMINISTRATOR' || \Yii::$app->user->identity->profile->typeUser->value == 'OWNER'): ?>
-            <?= Html::a('<i class="fontello icon-list"></i><span>Invoice Sales Order</span>', ['invoice', 'code'=>$model->code], ['class' => 'btn btn-warning btn-flat btn-sm', 'target'=>'_blank']) ?>
+        <?php if(((new User)->getIsDeveloper()) || \Yii::$app->user->can('sales-order[R]')): ?>
+            <?php if(\Yii::$app->user->identity->profile->typeUser->value == 'ADMINISTRATOR' || \Yii::$app->user->identity->profile->typeUser->value == 'OWNER'): ?>
+                <?= Html::a('<i class="fontello icon-list"></i><span>Invoice Sales Order</span>', ['invoice', 'code'=>$model->code], ['class' => 'btn btn-warning btn-flat btn-sm', 'target'=>'_blank']) ?>
+            <?php endif; ?>
         <?php endif; ?>
-        <?php if($model->post==0 && $model->status == 1): ?>
-            <?= Html::a('<i class="fontello icon-ok"></i><span>Post to SPK</span>', ['post', 'code'=>$model->code], ['class' => 'btn btn-primary btn-flat btn-sm']) ?>
+        <?php if(((new User)->getIsDeveloper()) || \Yii::$app->user->can('sales-order[U]')): ?>
+            <?php if($model->post==0 && $model->status == 1): ?>
+                <?= Html::a('<i class="fontello icon-ok"></i><span>Post to SPK</span>', ['post', 'code'=>$model->code], ['class' => 'btn btn-primary btn-flat btn-sm']) ?>
+            <?php endif; ?>
         <?php endif; ?>
     </div>
 </div>

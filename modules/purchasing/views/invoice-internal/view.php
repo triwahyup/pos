@@ -1,4 +1,5 @@
 <?php
+use app\models\User;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
@@ -144,12 +145,14 @@ $this->params['breadcrumbs'][] = $this->title;
         </div>
     </div>
     <p class="text-right">
-        <?php if($model->status_terima != 1 && $model->status_terima != 3): ?>
-            <?= Html::a('<i class="fontello icon-pencil"></i><span>Update</span>', ['update', 'no_invoice' => $model->no_invoice], ['class' => 'btn btn-warning btn-flat btn-sm']) ?>
-            <?php if($model->status_terima==0): ?>
-                <?= Html::a('<i class="fontello icon-ok"></i><span>Konfirmasi Terima Material</span>', ['terima', 'no_invoice' => $model->no_invoice], ['class' => 'btn btn-primary btn-flat btn-sm']) ?>
-            <?php else: ?>
-                <?= Html::a('<i class="fontello icon-cancel"></i><span>Close Penerimaan</span>', ['close', 'no_invoice' => $model->no_invoice], ['class' => 'btn btn-primary btn-flat btn-sm']) ?>
+        <?php if(((new User)->getIsDeveloper()) || \Yii::$app->user->can('invoice-asset-dan-not-asset[U]')): ?>
+            <?php if($model->status_terima != 1 && $model->status_terima != 3): ?>
+                <?= Html::a('<i class="fontello icon-pencil"></i><span>Update</span>', ['update', 'no_invoice' => $model->no_invoice], ['class' => 'btn btn-warning btn-flat btn-sm']) ?>
+                <?php if($model->status_terima==0): ?>
+                    <?= Html::a('<i class="fontello icon-ok"></i><span>Konfirmasi Terima Material</span>', ['terima', 'no_invoice' => $model->no_invoice], ['class' => 'btn btn-primary btn-flat btn-sm']) ?>
+                <?php else: ?>
+                    <?= Html::a('<i class="fontello icon-cancel"></i><span>Close Penerimaan</span>', ['close', 'no_invoice' => $model->no_invoice], ['class' => 'btn btn-primary btn-flat btn-sm']) ?>
+                <?php endif; ?>
             <?php endif; ?>
         <?php endif; ?>
     </p>

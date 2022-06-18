@@ -38,28 +38,28 @@ class PurchaseInternalController extends Controller
                     'class' => AccessControl::className(),
 				    'rules' => [
                         [
-                            'actions' => ['create', 'create-temp', 'send-approval'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('purchase-order-asset-dan-not-asset')),
+                            'actions' => ['create', 'create-temp'],
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('purchase-order-asset-dan-not-asset[C]')),
                             'roles' => ['@'],
                         ],
                         [
                             'actions' => ['index', 'view', 'list-barang', 'temp', 'get-temp', 'popup', 'search', 'barang', 'autocomplete'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('purchase-order-asset-dan-not-asset')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('purchase-order-asset-dan-not-asset[R]')),
                             'roles' => ['@'],
                         ], 
                         [
-                            'actions' => ['update', 'update-temp', 'post'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('purchase-order-asset-dan-not-asset')),
+                            'actions' => ['update', 'update-temp', 'post', 'send-approval'],
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('purchase-order-asset-dan-not-asset[U]')),
                             'roles' => ['@'],
                         ], 
                         [
                             'actions' => ['delete', 'delete-temp'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('purchase-order-asset-dan-not-asset')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('purchase-order-asset-dan-not-asset[D]')),
                             'roles' => ['@'],
                         ],
                         [
                             'actions' => ['approval'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('purchase-order-asset-dan-not-asset')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('purchase-order-asset-dan-not-asset[A]')),
                             'roles' => ['@'],
                         ],
                     ],

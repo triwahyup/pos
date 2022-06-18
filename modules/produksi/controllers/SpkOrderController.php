@@ -33,10 +33,18 @@ class SpkOrderController extends Controller
                     'class' => AccessControl::className(),
                     'rules' => [
                         [
-                            'actions' => [
-                                'index', 'view', 'layar', 'create', 'update', 'print', 'post', 'get-data', 'data-detail', 'popup-input',
-                            ],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('proses-produksi-sales-order')),
+                            'actions' => ['create'],
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('proses-produksi-sales-order[C]')),
+                            'roles' => ['@'],
+                        ],
+                        [
+                            'actions' => ['index', 'view', 'layar', 'print', 'get-data', 'data-detail', 'popup-input'],
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('proses-produksi-sales-order[R]')),
+                            'roles' => ['@'],
+                        ],
+                        [
+                            'actions' => ['update', 'post'],
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('proses-produksi-sales-order[U]')),
                             'roles' => ['@'],
                         ],
                     ],
@@ -263,13 +271,15 @@ class SpkOrderController extends Controller
     public function actionDataDetail($no_spk)
     {
         $model = SpkOrder::findOne(['no_spk'=>$no_spk]);
-        $dataProses = SpkOrderProses::find()->all();
+        $dataProses = SpkOrderProses::findAll(['no_spk'=>$no_spk]);
         $historyNotOutsource = SpkOrderHistory::find()
-            ->where('outsource_code is null OR outsource_code=""')
+            ->where(['no_spk'=>$no_spk])
+            ->andWhere('outsource_code is null OR outsource_code=""')
             ->orderBy(['no_spk'=>SORT_ASC, 'urutan'=>SORT_ASC])
             ->all();
         $historyWithOutsource = SpkOrderHistory::find()
-            ->where('outsource_code  <> ""')
+            ->where(['no_spk'=>$no_spk])
+            ->andWhere('outsource_code  <> ""')
             ->orderBy(['no_spk'=>SORT_ASC, 'urutan'=>SORT_ASC])
             ->all();
         

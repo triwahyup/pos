@@ -26,7 +26,7 @@ class StockBarangController extends Controller
 				    'rules' => [
                         [
                             'actions' => ['index', 'view'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('stock-barang')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('stock-barang[R]')),
                             'roles' => ['@'],
                         ],
                     ],

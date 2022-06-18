@@ -33,12 +33,12 @@ class InvoiceOrderController extends Controller
 				    'rules' => [
                         [
                             'actions' => ['index', 'view', 'temp', 'get-temp'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('invoice-material')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('invoice-material[R]')),
                             'roles' => ['@'],
                         ], 
                         [
                             'actions' => ['update', 'terima', 'close', 'update-temp'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('invoice-material')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('invoice-material[U]')),
                             'roles' => ['@'],
                         ], 
                     ],

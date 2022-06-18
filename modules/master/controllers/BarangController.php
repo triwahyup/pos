@@ -30,22 +30,22 @@ class BarangController extends Controller
 				    'rules' => [
                         [
                             'actions' => ['create'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-barang')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-barang[C]')),
                             'roles' => ['@'],
                         ],
                         [
                             'actions' => ['index', 'view'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-barang')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-barang[R]')),
                             'roles' => ['@'],
                         ], 
                         [
                             'actions' => ['update'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-barang')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-barang[U]')),
                             'roles' => ['@'],
                         ], 
                         [
                             'actions' => ['delete'],
-                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-barang')),
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('data-barang[D]')),
                             'roles' => ['@'],
                         ],
                     ],
