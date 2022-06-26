@@ -204,6 +204,7 @@ class SalesOrderController extends Controller
                     }else{
                         $success = false;
                         $message = 'ERROR CREATE SALES ORDER: POTONG IS EMPTY.';
+                        $model->code = 'tmp';
                     }
 
                     if(count($model->prosesTemps()) >0){
