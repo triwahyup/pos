@@ -4,6 +4,7 @@ namespace app\models;
 
 use Yii;
 use app\models\Profile;
+use app\modules\master\models\MasterKode;
 use app\modules\master\models\MasterPerson;
 use app\modules\master\models\MasterSatuan;
 
@@ -46,6 +47,12 @@ class DataList {
             ->leftJoin('master_kode b', 'b.code = a.type_satuan')
             ->where(['b.value'=>\Yii::$app->params['TYPE_SATUAN_PRODUKSI'], 'a.status'=>1])
             ->indexBy('a.code')
+            ->column();
+
+        $model['kendaraan'] = MasterKode::find()
+            ->select(['name'])
+            ->where(['type'=>\Yii::$app->params['TYPE_KENDARAAN'], 'status' => 1])
+            ->indexBy('code')
             ->column();
         return $model;
     }

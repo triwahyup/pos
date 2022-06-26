@@ -60,7 +60,7 @@ use yii\widgets\MaskedInput;
                         'data' => [],
                         'options' => [
                             'placeholder' => 'Kabupaten',
-                            'value' => (!$model->isNewRecord) ? $model->kabupaten->name : '',
+                            'value' => (!$model->isNewRecord) ? (!empty($model->kabupaten)) ? $model->kabupaten->name : '' : '',
                         ],
                         'pluginOptions' => [
                             'allowClear' => true,
@@ -72,7 +72,7 @@ use yii\widgets\MaskedInput;
                         'data' => [],
                         'options' => [
                             'placeholder' => 'Kecamatan',
-                            'value' => (!$model->isNewRecord) ? $model->kecamatan->name : '',
+                            'value' => (!$model->isNewRecord) ? (!empty($model->kecamatan)) ? $model->kecamatan->name : '' : '',
                         ],
                         'pluginOptions' => [
                             'allowClear' => true,
@@ -82,7 +82,7 @@ use yii\widgets\MaskedInput;
                         'data' => [],
                         'options' => [
                             'placeholder' => 'Kelurahan',
-                            'value' => (!$model->isNewRecord) ? $model->kelurahan->name : '',
+                            'value' => (!$model->isNewRecord) ? (!empty($model->kelurahan)) ? $model->kelurahan->name : '' : '',
                         ],
                         'pluginOptions' => [
                             'allowClear' => true,

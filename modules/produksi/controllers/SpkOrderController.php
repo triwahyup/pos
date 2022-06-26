@@ -6,6 +6,7 @@ use app\models\DataList;
 use app\models\Logs;
 use app\models\User;
 use app\modules\master\models\MasterMesin;
+use app\modules\master\models\MasterKendaraan;
 use app\modules\master\models\MasterProses;
 use app\modules\produksi\models\SpkOrder;
 use app\modules\produksi\models\SpkOrderSearch;
@@ -38,7 +39,7 @@ class SpkOrderController extends Controller
                             'roles' => ['@'],
                         ],
                         [
-                            'actions' => ['index', 'view', 'layar', 'print', 'get-data', 'data-detail', 'popup-input'],
+                            'actions' => ['index', 'view', 'layar', 'print', 'get-data', 'data-detail', 'popup-input', 'list-kendaraan'],
                             'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('proses-produksi-sales-order[R]')),
                             'roles' => ['@'],
                         ],
@@ -233,6 +234,16 @@ class SpkOrderController extends Controller
             throw new NotFoundHttpException('The requested data does not exist.');
         }
         return json_encode(['success'=>$success, 'message'=>$message]);
+    }
+
+    public function actionListKendaraan($outsource_code)
+    {
+        $model = MasterKendaraan::find()
+            ->select(['code as code', 'name as name'])
+            ->where(['outsource_code' => $outsource_code, 'status' => 1])
+            ->asArray()
+            ->all();
+        return json_encode($model);
     }
 
     public function actionGetData($no_spk, $item_code, $proses_id, $mesin_type)

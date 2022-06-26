@@ -4,12 +4,12 @@ namespace app\modules\master\models;
 
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use app\modules\master\models\MasterMesin;
+use app\modules\master\models\MasterKendaraan;
 
 /**
- * MasterMesinSearch represents the model behind the search form of `app\modules\master\models\MasterMesin`.
+ * MasterKendaraanSearch represents the model behind the search form of `app\modules\master\models\MasterKendaraan`.
  */
-class MasterMesinSearch extends MasterMesin
+class MasterKendaraanSearch extends MasterKendaraan
 {
     /**
      * {@inheritdoc}
@@ -17,7 +17,7 @@ class MasterMesinSearch extends MasterMesin
     public function rules()
     {
         return [
-            [['name', 'type_code', 'created_at', 'updated_at'], 'safe'],
+            [['name', 'outsource_code', 'type_code', 'nopol', 'no_handphone', 'no_sim', 'created_at', 'updated_at'], 'safe'],
         ];
     }
 
@@ -39,9 +39,10 @@ class MasterMesinSearch extends MasterMesin
      */
     public function search($params)
     {
-        $query = MasterMesin::find()
+        $query = MasterKendaraan::find()
             ->alias('a')
-            ->leftJoin('master_kode b', 'b.code = a.type_code');
+            ->leftJoin('master_kode b', 'b.code = a.type_code')
+            ->leftJoin('master_person c', 'c.code = a.outsource_code');
 
         // add conditions that should always apply here
 
@@ -72,7 +73,13 @@ class MasterMesinSearch extends MasterMesin
         if(!empty($this->type_code)){
             $query->andWhere('b.name LIKE "%'.$this->type_code.'%"');
         }
-        $query->andFilterWhere(['like', 'a.name', $this->name]);
+        if(!empty($this->outsource_code)){
+            $query->andWhere('c.name LIKE "%'.$this->outsource_code.'%"');
+        }
+        $query->andFilterWhere(['like', 'name', $this->name])
+            ->andFilterWhere(['like', 'nopol', $this->nopol])
+            ->andFilterWhere(['like', 'no_handphone', $this->no_handphone])
+            ->andFilterWhere(['like', 'no_sim', $this->no_sim]);
 
         return $dataProvider;
     }

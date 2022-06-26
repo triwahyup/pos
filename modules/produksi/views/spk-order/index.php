@@ -78,6 +78,26 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             'name',
             [
+                'attribute' => 'deadline',
+                'contentOptions' => [
+                    'class' => 'text-center',
+                ],
+                'filter' => DatePicker::widget([
+                    'model' => $searchModel, 
+                    'name' => 'deadline', 
+                    'type' => DatePicker::TYPE_COMPONENT_APPEND,
+                    'pickerButton' => false,
+                    'attribute' => 'deadline',
+                    'pluginOptions' => [
+                        'format' => 'dd-mm-yyyy',
+                        'autoclose' => true,
+                    ],
+                ]),
+                'value' => function($model, $index, $key){
+                    return date('d-m-Y', strtotime($model->deadline));
+                }
+            ],
+            [
                 'attribute' => 'status_produksi',
                 'format' => 'raw',
                 'contentOptions' => [

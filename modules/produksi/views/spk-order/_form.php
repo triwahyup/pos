@@ -25,26 +25,44 @@ use yii\widgets\MaskedInput;
                 <?= $form->field($spkHistory, 'proses_id')->hiddenInput()->label(false) ?>
             </div>
             <div class="col-lg-12 col-md-12 col-xs-12">
+                <!-- Pengerjaan -->
                 <div class="col-lg-6 col-md-6 col-xs-12">
-                    <!-- Tgl. SPK -->
                     <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
                         <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                            <label>Tgl SPK:</label>
+                            <label>Pengerjaan:</label>
                         </div>
                         <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                            <?= $form->field($spkHistory, 'tgl_spk')->widget(DatePicker::classname(), [
-                                    'type' => DatePicker::TYPE_INPUT,
+                            <?= $form->field($spkHistory, 'jenis_pengerjaan')->widget(Select2::classname(), [
+                                    'data' => [0 => 'Internal', 1 => 'Outsource'],
                                     'options' => [
-                                        'placeholder' => 'dd-mm-yyyy',
+                                        'placeholder' => 'Pilih Pengerjaan',
+                                        'class' => 'select2',
+                                        'readonly' => true
                                     ],
-                                    'pluginOptions' => [
-                                        'autoclose' => true,
-                                        'format' => 'dd-mm-yyyy',
-                                    ]
                                 ])->label(false) ?>
                         </div>
                     </div>
-                    <!-- Outsource -->
+                </div>
+                <!-- Mesin Name -->
+                <div class="col-lg-6 col-md-6 col-xs-12" data-type="internal">
+                    <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
+                        <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
+                            <label>Nama Mesin:</label>
+                        </div>
+                        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
+                            <?= $form->field($spkHistory, 'mesin_code')->widget(Select2::classname(), [
+                                    'data' => [],
+                                    'options' => [
+                                        'placeholder' => 'Pilih Nama Mesin',
+                                        'class' => 'select2',
+                                        'readonly' => true
+                                    ],
+                                ])->label(false) ?>
+                        </div>
+                    </div>
+                </div>
+                <!-- Outsource -->
+                <div class="col-lg-6 col-md-6 col-xs-12 hidden" data-type="outsource">
                     <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
                         <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
                             <label>Outsource:</label>
@@ -63,43 +81,31 @@ use yii\widgets\MaskedInput;
                                 ])->label(false) ?>
                         </div>
                     </div>
-                    <!-- NoPol -->
-                    <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
-                        <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                            <label>No. Polisi:</label>
-                        </div>
-                        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                            <?= $form->field($spkHistory, 'nopol')->textInput(['maxlength'=>true, 'readonly' => true])->label(false) ?>
-                        </div>
-                    </div>
-                    <!-- No. SJ -->
-                    <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
-                        <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                            <label>No. SJ:</label>
-                        </div>
-                        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                            <?= $form->field($spkHistory, 'no_sj')->textInput(['maxlength'=>true, 'readonly' => true])->label(false) ?>
-                        </div>
-                    </div>
                 </div>
+            </div>
+            <div class="col-lg-12 col-md-12 col-xs-12">
+                <!-- Tgl. SPK -->
                 <div class="col-lg-6 col-md-6 col-xs-12">
-                    <!-- Mesin Name -->
                     <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
                         <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                            <label>Nama Mesin:</label>
+                            <label>Tgl SPK:</label>
                         </div>
                         <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                            <?= $form->field($spkHistory, 'mesin_code')->widget(Select2::classname(), [
-                                    'data' => [],
+                            <?= $form->field($spkHistory, 'tgl_spk')->widget(DatePicker::classname(), [
+                                    'type' => DatePicker::TYPE_INPUT,
                                     'options' => [
-                                        'placeholder' => 'Pilih Nama Mesin',
-                                        'class' => 'select2',
-                                        'readonly' => true
+                                        'placeholder' => 'dd-mm-yyyy',
                                     ],
+                                    'pluginOptions' => [
+                                        'autoclose' => true,
+                                        'format' => 'dd-mm-yyyy',
+                                    ]
                                 ])->label(false) ?>
                         </div>
                     </div>
-                    <!-- Operator Mesin -->
+                </div>
+                <!-- Operator Mesin -->
+                <div class="col-lg-6 col-md-6 col-xs-12" data-type="internal">
                     <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
                         <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
                             <label>Operator Mesin:</label>
@@ -115,7 +121,49 @@ use yii\widgets\MaskedInput;
                                 ])->label(false) ?>
                         </div>
                     </div>
-                    <!-- QTY Proses -->
+                </div>
+                <!-- Kendaraan -->
+                <div class="col-lg-6 col-md-6 col-xs-12 hidden" data-type="outsource">
+                    <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
+                        <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
+                            <label>Kendaraan:</label>
+                        </div>
+                        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
+                            <?= $form->field($spkHistory, 'kendaraan_code')->widget(Select2::classname(), [
+                                    'data' => [],
+                                    'options' => [
+                                        'placeholder' => 'Pilih Kendaraan',
+                                        'class' => 'select2',
+                                        'readonly' => true
+                                    ],
+                                ])->label(false) ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-12 col-md-12 col-xs-12">
+                <!-- Keterangan -->
+                <div class="col-lg-6 col-md-6 col-xs-12">
+                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
+                        <label>Keterangan:</label>
+                    </div>
+                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
+                        <?= $form->field($spkHistory, 'keterangan')->textarea(['rows'=>3, 'readonly' => true])->label(false) ?>
+                    </div>
+                </div>
+                <!-- No. SJ -->
+                <div class="col-lg-6 col-md-6 col-xs-12 hidden" data-type="outsource">
+                    <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
+                        <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
+                            <label>No. SJ:</label>
+                        </div>
+                        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
+                            <?= $form->field($spkHistory, 'no_sj')->textInput(['maxlength'=>true, 'readonly' => true])->label(false) ?>
+                        </div>
+                    </div>
+                </div>
+                <!-- QTY Proses -->
+                <div class="col-lg-6 col-md-6 col-xs-12">
                     <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
                         <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
                             <label>QTY Proses:</label>
@@ -132,15 +180,6 @@ use yii\widgets\MaskedInput;
                                         'readonly' => true
                                     ]
                                 ])->label(false) ?>
-                        </div>
-                    </div>
-                    <!-- Keterangan -->
-                    <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
-                        <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                            <label>Keterangan:</label>
-                        </div>
-                        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                            <?= $form->field($spkHistory, 'keterangan')->textarea(['rows'=>3, 'readonly' => true])->label(false) ?>
                         </div>
                     </div>
                 </div>
@@ -244,7 +283,6 @@ function get_data(data)
                 _init_get_data();
                 
                 $.each(o.model, function(index, value){
-                    console.log(index, value);
                     $("#spkorderhistory-"+index).val(value).trigger("change");
                 });
                 $("#spkorderhistory-mesin_code").empty();
@@ -351,6 +389,31 @@ function update(el)
     });
 }
 
+function listKendaraan(outsource)
+{
+    $.ajax({
+        url: "<?=Url::to(['spk-order/list-kendaraan']) ?>",
+        type: "GET",
+        data: {
+            outsource_code: outsource
+        },
+        dataType: "text",
+        error: function(xhr, status, error) {},
+        beforeSend: function(){},
+        success: function(data){
+            var o = $.parseJSON(data);
+            $("#spkorderhistory-kendaraan_code").empty();
+            $.each(o, function(index, value){
+                var opt = new Option(value.name, value.code, false, false);
+                $("#spkorderhistory-kendaraan_code").append(opt);
+            });
+            $("#spkorderhistory-kendaraan_code").val(null);
+        },
+        error: function(XMLHttpRequest, textStatus, errorThrown){},
+        complete: function(){}
+    });
+}
+
 var timeOut = 7000,
     no_spk = "<?=$_GET['no_spk'] ?>";
 var _init_get_data = function(type=null){
@@ -394,6 +457,24 @@ $(document).ready(function(){
     $("body").off("click","[data-button=\"update\"]").on("click","[data-button=\"update\"]", function(e){
         e.preventDefault();
         update($(this));
+    });
+
+    $("body").off("change","#spkorderhistory-jenis_pengerjaan");
+    $("body").on("change","#spkorderhistory-jenis_pengerjaan", function(e){
+        e.preventDefault();
+        if($(this).val() == 1){
+            $("[data-type=\"internal\"]").removeClass("hidden").addClass("hidden");
+            $("[data-type=\"outsource\"]").removeClass("hidden");
+        }else{
+            $("[data-type=\"internal\"]").removeClass("hidden");
+            $("[data-type=\"outsource\"]").removeClass("hidden").addClass("hidden");
+        }
+    });
+    
+    $("body").off("change","#spkorderhistory-outsource_code");
+    $("body").on("change","#spkorderhistory-outsource_code", function(e){
+        e.preventDefault();
+        listKendaraan($(this).val());
     });
 });
 $(function(){

@@ -8,6 +8,7 @@
         <thead>
             <tr>
                 <th class="text-center">No.</th>
+                <th class="text-center">Supplier</th>
                 <th class="text-center">Proses</th>
                 <th class="text-center">Urutan</th>
                 <th class="text-center">Uk. Potong</th>
@@ -24,6 +25,7 @@
             <?php foreach($dataProses as $index=>$val): ?>
                 <tr>
                     <td class="text-center"><?=$index+1 ?></td>
+                    <td><?=(isset($val->supplier)) ? $val->supplier->name : '' ?></td>
                     <td><?=(isset($val->proses)) ? $val->proses->name : '' ?></td>
                     <td class="text-center"><?=$val->proses_id ?></td>
                     <td class="text-center"><?=(!empty($val->uk_potong)) ? $val->uk_potong : '-' ?></td>

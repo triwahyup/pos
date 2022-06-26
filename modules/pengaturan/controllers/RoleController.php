@@ -94,7 +94,7 @@ class RoleController extends Controller
 								$message = '{code: '.$typeCode->value.'}. Insert Auth Item Child not validate';
                             }
                         }
-                        
+
                         $profiles = Profile::findAll(['typeuser_code'=>$typeCode, 'status'=>1]);
                         foreach($profiles as $empty)
                             AuthAssignment::deleteAll('user_id=:user_id', [':user_id'=>$empty->user_id]);

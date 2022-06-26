@@ -17,7 +17,7 @@ class SalesOrderSearch extends SalesOrder
     public function rules()
     {
         return [
-            [['name', 'code', 'tgl_so', 'no_po', 'tgl_po', 'customer_code', 'post'], 'safe'],
+            [['name', 'code', 'tgl_so', 'no_po', 'tgl_po', 'customer_code', 'deadline', 'post'], 'safe'],
         ];
     }
 
@@ -69,6 +69,9 @@ class SalesOrderSearch extends SalesOrder
         }
         if(!empty($this->total_order)){
             $query->andWhere('total_order LIKE "%'.str_replace(',','', $this->total_order).'%"');
+        }
+        if(!empty($this->deadline)){
+            $query->andFilterWhere(['deadline' => date('Y-m-d', strtotime($this->deadline))]);
         }
 
         $query->andFilterWhere(['like', 'a.code', $this->code])

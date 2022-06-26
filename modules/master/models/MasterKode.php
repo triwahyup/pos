@@ -89,8 +89,10 @@ class MasterKode extends \yii\db\ActiveRecord
         $data = [];
         foreach($model as $val){
 			$menu = PengaturanMenu::findOne(['slug'=>$val->child]);
-            if($menu->link != "#"){
-                $data[] = $menu->name;
+            if(isset($menu->link)){
+                if($menu->link != "#"){
+                    $data[] = $menu->name;
+                }
             }
 		}
         return $data;

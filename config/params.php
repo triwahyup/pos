@@ -13,6 +13,7 @@ $data = [
     'TYPE_USER' => 'USER',
     'TYPE_PERSON' => 'PERSON',
     'TYPE_BAST' => 'BAST',
+    'TYPE_KENDARAAN' => 'KENDARAAN',
     
     // MASTER KODE VALUE
     'TYPE_MENU_LEFT' => 'NAVBAR LEFT',

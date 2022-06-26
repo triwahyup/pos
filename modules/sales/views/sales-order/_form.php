@@ -390,7 +390,7 @@ use yii\widgets\MaskedInput;
                 <!-- Qty Order -->
                 <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
                     <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                        <label>Qty Order:</label>
+                        <label>Qty:</label>
                     </div>
                     <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
                         <?= $form->field($tempItem, 'qty_order_1')->widget(MaskedInput::className(), [

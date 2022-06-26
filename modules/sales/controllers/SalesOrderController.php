@@ -1607,48 +1607,38 @@ class SalesOrderController extends Controller
                         $dataPotong = [];
                         foreach($model->potongs as $val){
                             $uk_potong = $val->lebar.'x'.$val->panjang;
-                            $dataPotong[$val->item_code][$uk_potong] = [
+                            $dataPotong[$val->item_code][$val->supplier_code][$uk_potong] = [
                                 'potong_id' => $val->urutan,
                                 'uk_potong' => $uk_potong,
                             ];
                         }
-
-                        $dataItem = [];
+                        
+                        $uid = 1;
                         foreach($model->itemsMaterial as $val){
                             $stock = $val->inventoryStock->satuanTerkecil($val->item_code, [
                                 0=>$val->qty_order_1,
                                 1=>$val->qty_order_2,
                             ]);
-                            $qty = $stock + $val->qty_up;
-                            $dataItem[$val->item_code][] = ['qty' => $qty];
-                        }
-                        // JUMLAHKAN TOTAL MATERIAL DENGAN ITEM YANG SAMA
-                        $totalQty = 0;
-                        foreach($dataItem as $item=>$index){
-                            foreach($index as $val){
-                                $totalQty += $val['qty'];
-                            }
-                            $dataItem[$item] = $totalQty;
-                        }
-                        
-                        $uid = 1;
-                        foreach($model->proses as $val){
-                            foreach($dataPotong[$val->item_code] as $_val){
-                                $spkProses = new SpkOrderProses();
-                                $spkProses->attributes = $val->attributes;
-                                $spkProses->attributes = (array)$_val;
-                                $spkProses->no_spk = $spkOrder->no_spk;
-                                $spkProses->proses_id = $uid++;
-                                $spkProses->proses_type = $val->type;
-                                $spkProses->gram = (isset($val->item)) ? $val->item->gram : NULL;
-                                $spkProses->qty_proses = $dataItem[$val->item_code];
-                                if(!$spkProses->save()){
-                                    $success = false;
-                                    $message = (count($spkProses->errors) > 0) ? 'ERROR CREATE SPK PROSES: ' : '';
-                                    foreach($spkProses->errors as $error => $value){
-                                        $message .= strtoupper($value[0].', ');
+                            foreach($model->proses as $val_proses){
+                                foreach($dataPotong[$val->item_code][$val->supplier_code] as $val_uk){
+                                    $spkProses = new SpkOrderProses();
+                                    $spkProses->attributes = $val->attributes;
+                                    $spkProses->attributes = (array)$val_uk;
+                                    $spkProses->no_spk = $spkOrder->no_spk;
+                                    $spkProses->proses_id = $uid++;
+                                    $spkProses->mesin_type = $val_proses->mesin_type;
+                                    $spkProses->proses_code = $val_proses->proses_code;
+                                    $spkProses->proses_type = $val_proses->type;
+                                    $spkProses->qty_proses = $stock + $val->qty_up;
+                                    $spkProses->gram = (isset($val->item)) ? $val->item->gram : NULL;
+                                    if(!$spkProses->save()){
+                                        $success = false;
+                                        $message = (count($spkProses->errors) > 0) ? 'ERROR CREATE SPK PROSES: ' : '';
+                                        foreach($spkProses->errors as $error => $value){
+                                            $message .= strtoupper($value[0].', ');
+                                        }
+                                        $message = substr($message, 0, -2);
                                     }
-                                    $message = substr($message, 0, -2);
                                 }
                             }
                         }

@@ -88,27 +88,14 @@ $this->params['breadcrumbs'][] = $this->title;
             </div>
             <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
                 <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                    <label>Term In</label>
-                </div>
-                <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                    <span><?=$model->term_in.' Hari' ?></span>
-                    <div>
-                        <i class="text-muted font-size-10">
-                            <?='Tgl. Jatuh Tempo Pembayaran: '.date('d-m-Y', strtotime('+'.$model->term_in.' days', strtotime($model->tgl_so)))?>
-                        </i>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-6 col-md-6 col-xs-12">
-            <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
-                <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
                     <label>Type Order</label>
                 </div>
                 <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
                     <span><?=$model->typeOrder ?></span>
                 </div>
             </div>
+        </div>
+        <div class="col-lg-6 col-md-6 col-xs-12">
             <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
                 <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
                     <label>Ekspedisi</label>
@@ -163,14 +150,6 @@ $this->params['breadcrumbs'][] = $this->title;
             </div>
             <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
                 <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                    <label>PPN</label>
-                </div>
-                <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                    <span><?=(!empty($model->ppn)) ? $model->ppn.'%' : '-' ?></span>
-                </div>
-            </div>
-            <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
-                <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
                     <label>Keterangan</label>
                 </div>
                 <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
@@ -190,6 +169,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 <thead>
                     <tr>
                         <th class="text-center">No.</th>
+                        <th class="text-center">Supplier</th>
                         <th class="text-center">Proses</th>
                         <th class="text-center">Urutan Proses</th>
                         <th class="text-center">Uk. Potong</th>
@@ -203,6 +183,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     <?php foreach($model->produksiInAlls as $index=>$val): ?>
                         <tr>
                             <td class="text-center"><?=$index+1 ?></td>
+                            <td><?=(isset($val->supplier)) ? $val->supplier->name : '' ?></td>
                             <td><?=(isset($val->proses)) ? $val->proses->name : '' ?></td>
                             <td class="text-center"><?=$val->proses_id ?></td>
                             <td class="text-center"><?=(!empty($val->uk_potong)) ? $val->uk_potong : '-' ?></td>

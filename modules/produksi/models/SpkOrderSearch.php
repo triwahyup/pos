@@ -17,7 +17,7 @@ class SpkOrderSearch extends SpkOrder
     public function rules()
     {
         return [
-            [['no_spk', 'tgl_spk', 'no_so', 'tgl_so', 'name', 'status_produksi'], 'safe'],
+            [['no_spk', 'tgl_spk', 'no_so', 'tgl_so', 'name', 'deadline', 'status_produksi'], 'safe'],
         ];
     }
 
@@ -39,7 +39,7 @@ class SpkOrderSearch extends SpkOrder
      */
     public function search($params)
     {
-        $query = SpkOrder::find();
+        $query = SpkOrder::find()->orderBy(['no_spk' => SORT_DESC]);
 
         // add conditions that should always apply here
 
@@ -62,6 +62,9 @@ class SpkOrderSearch extends SpkOrder
         }
         if(!empty($this->tgl_so)){
             $query->andFilterWhere(['tgl_so' => date('Y-m-d', strtotime($this->tgl_so))]);
+        }
+        if(!empty($this->deadline)){
+            $query->andFilterWhere(['deadline' => date('Y-m-d', strtotime($this->deadline))]);
         }
 
         $query->andFilterWhere(['like', 'no_spk', $this->no_spk])

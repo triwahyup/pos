@@ -65,8 +65,14 @@ $config = [
     ],
     'params' => $params,
     'modules' => [
+        'finance' => [
+            'class' => 'app\modules\finance\Module',
+        ],
         'inventory' => [
             'class' => 'app\modules\inventory\Module',
+        ],
+        'log' => [
+            'class' => 'app\modules\log\Module',
         ],
         'master' => [
             'class' => 'app\modules\master\Module',

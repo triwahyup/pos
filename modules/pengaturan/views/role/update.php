@@ -11,7 +11,20 @@ $this->params['breadcrumbs'][] = 'Update';
 
 <div class="menu-index">
     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-        <fieldset class="fieldset-box">
+        <p class="margin-bottom-0">
+            <strong>Keterangan:</strong>
+        </p>
+        <p class="margin-bottom-0">
+            <strong class="text-danger">C</strong>: Akses untuk Create (Membuat Data Baru).</p>
+        <p class="margin-bottom-0">
+            <strong class="text-danger">R</strong>: Akses untuk Read (Hanya Melihat Data).</p>
+        <p class="margin-bottom-0">
+            <strong class="text-danger">U</strong>: Akses untuk Update (Merubah Data).</p>
+        <p class="margin-bottom-0">
+            <strong class="text-danger">D</strong>: Akses untuk Delete (Hapus Data).</p>
+        <p class="margin-bottom-0">
+            <strong class="text-danger">A</strong>: Akses untuk Approval.</p>
+        <fieldset class="fieldset-box margin-top-30">
             <legend>Type: <?=$typeCode->type ?> || Name: <?=$typeCode->name ?></legend>
             <?php $form = ActiveForm::begin() ?>
                 <div class="hidden">
@@ -24,11 +37,13 @@ $this->params['breadcrumbs'][] = 'Update';
                             <?php foreach($menu->child as $child) : ?>
                                 <div class="form-group" data-parent="2">
                                     <input type="checkbox" name="RoleForm[menu][]" value="<?=$child->slug?>" id="<?=$child->slug ?>" data-type="pizza" data-title="<?=$child->name ?>">
-                                    <?php foreach($child->child as $child2) : ?>
-										<div class="form-group" data-parent="3">
-											<input type="checkbox" name="RoleForm[menu][]" value="<?=$child2->slug ?>" id="<?=$child2->slug ?>" data-type="pizza" data-title="<?=$child2->name ?>">
-										</div>
-									<?php endforeach; ?>
+                                    <div class="form-group" data-parent="3">
+                                        <input type="checkbox" name="RoleForm[menu][]" value="<?=$child->slug.'[C]'?>" id="<?=$child->slug.'-C' ?>" data-type="pizza" data-title="C">
+                                        <input type="checkbox" name="RoleForm[menu][]" value="<?=$child->slug.'[R]'?>" id="<?=$child->slug.'-R' ?>" data-type="pizza" data-title="R">
+                                        <input type="checkbox" name="RoleForm[menu][]" value="<?=$child->slug.'[U]'?>" id="<?=$child->slug.'-U' ?>" data-type="pizza" data-title="U">
+                                        <input type="checkbox" name="RoleForm[menu][]" value="<?=$child->slug.'[D]'?>" id="<?=$child->slug.'-D' ?>" data-type="pizza" data-title="D">
+                                        <input type="checkbox" name="RoleForm[menu][]" value="<?=$child->slug.'[A]'?>" id="<?=$child->slug.'-A' ?>" data-type="pizza" data-title="A">
+                                    </div>
                                 </div>
                             <?php endforeach; ?>
                         </div>
@@ -45,7 +60,9 @@ $this->params['breadcrumbs'][] = 'Update';
 $(document).ready(function(){
     <?php if(!empty($model)): ?>
         <?php if(isset($model->menu)):
-            foreach($model->menu as $menu): ?>
+            foreach($model->menu as $menu):
+                $menu = str_replace('[', '-', $menu);
+                $menu = str_replace(']', '', $menu); ?>
                 $("#<?=$menu?>").prop("checked", true);
                 $("#<?=$menu?>").parent().find("i").removeClass("icon-ok").addClass("icon-ok");
             <?php endforeach; 
@@ -59,20 +76,33 @@ $(document).ready(function(){
                 $parent = $this.parents("[data-parent]");
             if($prop == true){
                 if($parent.attr("data-parent") == 1){
-                    $this.parent().siblings("[data-parent=\"2\"]").find("input[type=\"checkbox\"]").prop("checked", 1);
-                    $this.parent().siblings("[data-parent=\"3\"]").find("input[type=\"checkbox\"]").prop("checked", 1);
-                    $this.parent().siblings("[data-parent=\"2\"]").find("i").removeClass("icon-ok").addClass("icon-ok");
-                    $this.parent().siblings("[data-parent=\"3\"]").find("i").removeClass("icon-ok").addClass("icon-ok");
-                }else if($parent.attr("data-parent") == 2){
-                    $this.parent().siblings("[data-parent=\"3\"]").find("input[type=\"checkbox\"]").prop("checked", 1);
-                    $this.parent().siblings("[data-parent=\"3\"]").find("i").removeClass("icon-ok").addClass("icon-ok");
-                    $this.parents("[data-parent=\"2\"]").siblings(".checkbox-container").find("input[type=\"checkbox\"]").prop("checked", 1);
-                    $this.parents("[data-parent=\"2\"]").siblings(".checkbox-container").find("i").removeClass("icon-ok").addClass("icon-ok");
-                }else if($parent.attr("data-parent") == 3){
-                    $this.parents("[data-parent=\"2\"]").siblings(".checkbox-container").find("input[type=\"checkbox\"]").prop("checked", 1);
-                    $this.parents("[data-parent=\"2\"]").siblings(".checkbox-container").find("i").removeClass("icon-ok").addClass("icon-ok");
-                    $this.parents("[data-parent=\"3\"]").siblings(".checkbox-container").find("input[type=\"checkbox\"]").prop("checked", 1);
-                    $this.parents("[data-parent=\"3\"]").siblings(".checkbox-container").find("i").removeClass("icon-ok").addClass("icon-ok");
+                    $this.parent().siblings("[data-parent=\"2\"]")
+                        .children(".checkbox-container").find("input[type=\"checkbox\"]").prop("checked", 1);
+                    $this.parent().siblings("[data-parent=\"2\"]")
+                        .children(".checkbox-container").find("i").removeClass("icon-ok").addClass("icon-ok");
+                    $this.parent().siblings("[data-parent=\"2\"]")
+                        .find("[data-parent=\"3\"]").find("[data-title=\"R\"]").prop("checked", 1);
+                    $this.parent().siblings("[data-parent=\"2\"]").find("[data-parent=\"3\"]").find("[data-title=\"R\"]")
+                        .siblings(".checkbox-wrapper").find("i").removeClass("icon-ok").addClass("icon-ok");
+                }
+                else if($parent.attr("data-parent") == 2){
+                    $this.parents("[data-parent=\"1\"]").children(".checkbox-container")
+                        .find("input[type=\"checkbox\"]").prop("checked", 1);
+                    $this.parents("[data-parent=\"1\"]").children(".checkbox-container")
+                        .find(".checkbox-wrapper").find("i").removeClass("icon-ok").addClass("icon-ok");
+                    $this.parent().siblings("[data-parent=\"3\"]").find("[data-title=\"R\"]").prop("checked", 1);
+                    $this.parent().siblings("[data-parent=\"3\"]").find("[data-title=\"R\"]")
+                        .siblings(".checkbox-wrapper").find("i").removeClass("icon-ok").addClass("icon-ok");
+                }
+                else if($parent.attr("data-parent") == 3){
+                    $this.parents("[data-parent=\"2\"]")
+                        .siblings(".checkbox-container").find("input[type=\"checkbox\"]").prop("checked", 1);
+                    $this.parents("[data-parent=\"2\"]")
+                        .siblings(".checkbox-container").find("i").removeClass("icon-ok").addClass("icon-ok");
+                    $this.parents("[data-parent=\"3\"]")
+                        .siblings(".checkbox-container").find("input[type=\"checkbox\"]").prop("checked", 1);
+                    $this.parents("[data-parent=\"3\"]")
+                        .siblings(".checkbox-container").find("i").removeClass("icon-ok").addClass("icon-ok");
                 }
             }else{
                 if($parent.attr("data-parent") == 1){

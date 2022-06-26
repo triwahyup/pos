@@ -18,7 +18,7 @@ class RequestOrderSearch extends RequestOrder
     {
         return [
             [['no_request', 'tgl_request', 'keterangan'], 'safe'],
-            [['user_id', 'post', 'status_approval', 'status', 'created_at', 'updated_at'], 'integer'],
+            [['post', 'status_approval', 'status', 'created_at', 'updated_at'], 'integer'],
         ];
     }
 
@@ -59,7 +59,6 @@ class RequestOrderSearch extends RequestOrder
         // grid filtering conditions
         $query->andFilterWhere([
             'tgl_request' => $this->tgl_request,
-            'user_id' => $this->user_id,
             'post' => $this->post,
             'status_approval' => $this->status_approval,
             'status' => 1,

@@ -4,6 +4,7 @@ namespace app\modules\produksi\models;
 
 use Yii;
 use app\modules\master\models\MasterMaterial;
+use app\modules\master\models\MasterPerson;
 use app\modules\master\models\MasterProses;
 use app\modules\produksi\models\SpkOrderHistory;
 use yii\behaviors\TimestampBehavior;
@@ -59,9 +60,9 @@ class SpkOrderProses extends \yii\db\ActiveRecord
             [['qty_rusak', 'gram'], 'number'],
             [['no_spk', 'uk_potong'], 'string', 'max' => 12],
             [['item_code'], 'string', 'max' => 7],
-            [['proses_code', 'mesin_type'], 'string', 'max' => 3],
+            [['proses_code', 'mesin_type', 'supplier_code'], 'string', 'max' => 3],
             [['keterangan'], 'string', 'max' => 128],
-            [['no_spk', 'item_code', 'proses_id'], 'unique', 'targetAttribute' => ['no_spk', 'item_code', 'proses_id']],
+            [['no_spk', 'item_code', 'supplier_code', 'proses_id'], 'unique', 'targetAttribute' => ['no_spk', 'item_code', 'supplier_code', 'proses_id']],
             [['status'], 'default', 'value' => 1],
         ];
     }
@@ -124,6 +125,11 @@ class SpkOrderProses extends \yii\db\ActiveRecord
     public function getAlls()
     {
         return SpkOrderProses::find()->where(['no_spk'=>$this->no_spk, 'item_code'=>$this->item_code])->all();
+    }
+
+    public function getSupplier()
+    {
+        return $this->hasOne(MasterPerson::className(), ['code' => 'supplier_code']);
     }
 
     public function getitem()

@@ -68,7 +68,7 @@ class Profile extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['user_id', 'name', 'nik', 'email', 'typeuser_code'], 'required'],
+            [['user_id', 'name', 'nik', 'nip', 'email', 'typeuser_code', 'tempat_lahir', 'alamat', 'kode_pos', 'phone_1', 'provinsi_id', 'kabupaten_id', 'kecamatan_id', 'kelurahan_id', 'tgl_lahir', 'tgl_masuk'], 'required'],
             [['user_id', 'status', 'created_at', 'updated_at'], 'integer'],
             [['tgl_lahir', 'tgl_masuk', 'tgl_keluar', 'username', 'password', 'current_password', 'new_password', 'retype_new_password'], 'safe'],
             [['name', 'tempat_lahir', 'alamat', 'keterangan', 'foto'], 'string', 'max' => 128],

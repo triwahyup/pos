@@ -23,7 +23,6 @@ use yii\widgets\MaskedInput;
                 <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
                 <?= $form->field($model, 'nik')->textInput(['maxlength' => true]) ?>
                 <?= $form->field($model, 'nip')->textInput(['maxlength' => true]) ?>
-                <?= $form->field($model, 'kode_pos')->textInput(['maxlength' => true]) ?>
             </div>
             <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0">
                 <?= $form->field($model, 'tgl_lahir')->widget(DatePicker::classname(), [
@@ -94,24 +93,36 @@ use yii\widgets\MaskedInput;
                         'options' => ['placeholder' => 'Provinisi'],
                     ]) ?>
                 <?= $form->field($model, 'kabupaten_id')->widget(Select2::classname(), [
-                        'data' => (!$model->isNewRecord) ? (isset($model->kabupaten)) ? [
-                            $model->kabupaten->id => $model->kabupaten->name
-                        ] : '' : [],
-                        'options' => ['placeholder' => 'Kabupaten'],
+                        'data' => [],
+                        'options' => [
+                            'placeholder' => 'Kabupaten',
+                            'value' => (!$model->isNewRecord) ? (!empty($model->kabupaten)) ? $model->kabupaten->name : '' : '',
+                        ],
+                        'pluginOptions' => [
+                            'allowClear' => true,
+                        ],
                     ]) ?>
             </div>
             <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0">
                 <?= $form->field($model, 'kecamatan_id')->widget(Select2::classname(), [
-                        'data' => (!$model->isNewRecord) ? (isset($model->kecamatan)) ? [
-                            $model->kecamatan->id => $model->kecamatan->name,
-                        ] : '' : [],
-                        'options' => ['placeholder' => 'Kecamatan'],
+                        'data' => [],
+                        'options' => [
+                            'placeholder' => 'Kecamatan',
+                            'value' => (!$model->isNewRecord) ? (!empty($model->kecamatan)) ? $model->kecamatan->name : '' : '',
+                        ],
+                        'pluginOptions' => [
+                            'allowClear' => true,
+                        ],
                     ]) ?>
                 <?= $form->field($model, 'kelurahan_id')->widget(Select2::classname(), [
-                        'data' => (!$model->isNewRecord) ? (isset($model->kelurahan)) ? [
-                            $model->kelurahan->id => $model->kelurahan->name,
-                        ] : '' : [],
-                        'options' => ['placeholder' => 'Kelurahan'],
+                        'data' => [],
+                        'options' => [
+                            'placeholder' => 'Kelurahan',
+                            'value' => (!$model->isNewRecord) ? (!empty($model->kelurahan)) ? $model->kelurahan->name : '' : '',
+                        ],
+                        'pluginOptions' => [
+                            'allowClear' => true,
+                        ],
                     ]) ?>
             </div>
         </div>
@@ -168,7 +179,7 @@ use yii\widgets\MaskedInput;
     <?php ActiveForm::end(); ?>
 </div>
 <script>
-function listKabupaten(provinsiId)
+function listKabupaten(provinsiId, isNewRecord=false)
 {
     $.ajax({
         url: "<?=Url::to(['profile/list-kabupaten']) ?>",
@@ -181,19 +192,26 @@ function listKabupaten(provinsiId)
         beforeSend: function(){},
         success: function(data){
             var o = $.parseJSON(data);
-            $("#profile-kabupaten_id").empty();
-            $.each(o, function(index, value){
-                var opt = new Option(value.name, value.id, false, false);
-                $("#profile-kabupaten_id").append(opt);
-            });
-            $("#profile-kabupaten_id").val(null);
+            if(isNewRecord){
+                $.each(o, function(index, value){
+                    var opt = new Option(value.name, value.id, false, false);
+                    $("#profile-kabupaten_id").append(opt);
+                });
+            }else{
+                $("#profile-kabupaten_id").empty();
+                $.each(o, function(index, value){
+                    var opt = new Option(value.name, value.id, false, false);
+                    $("#profile-kabupaten_id").append(opt);
+                });
+                $("#profile-kabupaten_id").val(null);
+            }
         },
         error: function(XMLHttpRequest, textStatus, errorThrown){},
         complete: function(){}
     });
 }
 
-function listKecamatan(kecamatanId)
+function listKecamatan(kecamatanId, isNewRecord=false)
 {
     $.ajax({
         url: "<?=Url::to(['profile/list-kecamatan']) ?>",
@@ -206,19 +224,26 @@ function listKecamatan(kecamatanId)
         beforeSend: function(){},
         success: function(data){
             var o = $.parseJSON(data);
-            $("#profile-kecamatan_id").empty();
-            $.each(o, function(index, value){
-                var opt = new Option(value.name, value.id, false, false);
-                $("#profile-kecamatan_id").append(opt);
-            });
-            $("#profile-kecamatan_id").val(null);
+            if(isNewRecord){
+                $.each(o, function(index, value){
+                    var opt = new Option(value.name, value.id, false, false);
+                    $("#profile-kecamatan_id").append(opt);
+                });
+            }else{
+                $("#profile-kecamatan_id").empty();
+                $.each(o, function(index, value){
+                    var opt = new Option(value.name, value.id, false, false);
+                    $("#profile-kecamatan_id").append(opt);
+                });
+                $("#profile-kecamatan_id").val(null);
+            }
         },
         error: function(XMLHttpRequest, textStatus, errorThrown){},
         complete: function(){}
     });
 }
 
-function listKelurahan(kelurahanId)
+function listKelurahan(kelurahanId, isNewRecord=false)
 {
     $.ajax({
         url: "<?=Url::to(['profile/list-kelurahan']) ?>",
@@ -231,12 +256,19 @@ function listKelurahan(kelurahanId)
         beforeSend: function(){},
         success: function(data){
             var o = $.parseJSON(data);
-            $("#profile-kelurahan_id").empty();
-            $.each(o, function(index, value){
-                var opt = new Option(value.name, value.id, false, false);
-                $("#profile-kelurahan_id").append(opt);
-            });
-            $("#profile-kelurahan_id").val(null);
+            if(isNewRecord){
+                $.each(o, function(index, value){
+                    var opt = new Option(value.name, value.id, false, false);
+                    $("#profile-kelurahan_id").append(opt);
+                });
+            }else{
+                $("#profile-kelurahan_id").empty();
+                $.each(o, function(index, value){
+                    var opt = new Option(value.name, value.id, false, false);
+                    $("#profile-kelurahan_id").append(opt);
+                });
+                $("#profile-kelurahan_id").val(null);
+            }
         },
         error: function(XMLHttpRequest, textStatus, errorThrown){},
         complete: function(){}
@@ -279,5 +311,10 @@ $(document).ready(function(){
 			$(this).find(".glyphicon-eye-close").removeClass("glyphicon-eye-close").addClass("glyphicon-eye-open");
 		}
 	});
+});
+$(function(){
+    listKabupaten("<?=$model->provinsi_id?>", true);
+    listKecamatan("<?=$model->kabupaten_id?>", true);
+    listKelurahan("<?=$model->kecamatan_id?>", true);
 });
 </script>

@@ -201,7 +201,6 @@ class SpkOrder extends \yii\db\ActiveRecord
             }
         }
         $desc .= '<strong class="font-size-14">Jumlah Qty Rusak: '.number_format($total_rusak, 0, ',', '.').' LB</strong>';
-        // print_r($desc);die;
         return $desc;
     }
 }

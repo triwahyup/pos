@@ -383,10 +383,11 @@ p, span {
             opacity: .8;
             padding: 20px;
             position: absolute;
-            right: 0;
-            top: 0;
+            left: 50%;
+            top: 50px;
             width: 420px;
             z-index: 1;
+            .transform(translate(-50%, 0));
             h3, h6, label {
                 color: @color_default;
             }
@@ -1055,6 +1056,7 @@ p, span {
         .borderRadius(50%);
         .boxShadow(0px 3px 8px rgb(0 0 0 / 10%));
         background-color: @color_btnPagination;
+        cursor: pointer;
         display: inline-block;
         height: 20px;
         margin-right: 1px;
@@ -1088,6 +1090,20 @@ p, span {
         }
         &:hover {
             background-color: @color_btnPagination_hover !important;
+        }
+        &.text-next, &.text-last, &.text-first, &.text-prev {
+            cursor: pointer;
+            padding: 0 10px;
+            width: 45px;
+            .borderRadius(50px);
+            span {
+                font-size: 12px;
+            }
+            &:hover {
+                span {
+                    color: @color_default !important;
+                }
+            }
         }
     }
 }

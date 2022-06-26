@@ -45,13 +45,18 @@ class ProfileController extends Controller
                             'roles' => ['@'],
                         ], 
                         [
-                            'actions' => ['update', 'switch'],
+                            'actions' => ['update'],
                             'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('setup-user[U]')),
                             'roles' => ['@'],
                         ], 
                         [
                             'actions' => ['delete'],
                             'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('setup-user[D]')),
+                            'roles' => ['@'],
+                        ],
+                        [
+                            'actions' => ['switch'],
+                            'allow' => (((new User)->getIsDeveloper())),
                             'roles' => ['@'],
                         ],
                     ],

@@ -27,7 +27,7 @@ use yii\behaviors\TimestampBehavior;
  * @property string|null $mesin_code
  * @property string|null $mesin_type
  * @property string|null $no_sj
- * @property string|null $nopol
+ * @property string|null $kendaraan_code
  * @property float|null $qty_proses
  * @property float|null $qty_hasil
  * @property float|null $qty_rusak
@@ -41,6 +41,8 @@ use yii\behaviors\TimestampBehavior;
  */
 class SpkOrderHistory extends \yii\db\ActiveRecord
 {
+    public $jenis_pengerjaan;
+    
     /**
      * {@inheritdoc}
      */
@@ -64,11 +66,11 @@ class SpkOrderHistory extends \yii\db\ActiveRecord
         return [
             [['proses_id', 'urutan', 'potong_id', 'proses_type', 'user_id', 'status_produksi', 'status', 'created_at', 'updated_at'], 'integer'],
             [['tgl_spk', 'tgl_history', 'qty_proses', 'qty_hasil', 'qty_rusak', 'gram'], 'safe'],
-            [['no_spk', 'uk_potong', 'no_sj', 'nopol'], 'string', 'max' => 12],
+            [['no_spk', 'uk_potong', 'no_sj'], 'string', 'max' => 12],
             [['item_code'], 'string', 'max' => 7],
-            [['proses_code', 'outsource_code', 'mesin_code', 'mesin_type'], 'string', 'max' => 3],
+            [['proses_code', 'outsource_code', 'mesin_code', 'mesin_type', 'supplier_code', 'kendaraan_code'], 'string', 'max' => 3],
             [['keterangan'], 'string', 'max' => 128],
-            [['no_spk', 'item_code', 'proses_id', 'urutan'], 'unique', 'targetAttribute' => ['no_spk', 'item_code', 'proses_id', 'urutan']],
+            [['no_spk', 'item_code', 'supplier_code', 'proses_id', 'urutan'], 'unique', 'targetAttribute' => ['no_spk', 'item_code', 'supplier_code', 'proses_id', 'urutan']],
             [['status'], 'default', 'value' => 1],
         ];
     }
@@ -93,7 +95,7 @@ class SpkOrderHistory extends \yii\db\ActiveRecord
             'mesin_code' => 'Mesin Code',
             'mesin_type' => 'Mesin Type',
             'no_sj' => 'No Sj',
-            'nopol' => 'Nopol',
+            'kendaraan_code' => 'Kendaraan',
             'qty_proses' => 'Qty Proses',
             'qty_hasil' => 'Qty Hasil',
             'qty_rusak' => 'Qty Rusak',
@@ -120,6 +122,11 @@ class SpkOrderHistory extends \yii\db\ActiveRecord
     public function getOutsource()
     {
         return $this->hasOne(MasterPerson::className(), ['code' => 'outsource_code']);
+    }
+
+    public function getSupplier()
+    {
+        return $this->hasOne(MasterPerson::className(), ['code' => 'supplier_code']);
     }
 
     public function getMesin()
