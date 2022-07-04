@@ -68,17 +68,16 @@ class Profile extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['user_id', 'name', 'nik', 'nip', 'email', 'typeuser_code', 'tempat_lahir', 'alamat', 'kode_pos', 'phone_1', 'provinsi_id', 'kabupaten_id', 'kecamatan_id', 'kelurahan_id', 'tgl_lahir', 'tgl_masuk'], 'required'],
-            [['user_id', 'status', 'created_at', 'updated_at'], 'integer'],
+            [['user_id', 'name', 'nik', 'nip', 'email', 'typeuser_code', 'tempat_lahir', 'alamat', 'kode_pos', 'phone_1', 'provinsi_id', 'kabupaten_id', 'kecamatan_id', 'kelurahan_id', 'tgl_lahir', 'tgl_masuk', 'npwp'], 'required'],
+            [['nik', 'nip', 'npwp', 'kode_pos', 'user_id', 'status', 'created_at', 'updated_at'], 'integer'],
             [['tgl_lahir', 'tgl_masuk', 'tgl_keluar', 'username', 'password', 'current_password', 'new_password', 'retype_new_password'], 'safe'],
             [['name', 'tempat_lahir', 'alamat', 'keterangan', 'foto'], 'string', 'max' => 128],
-            [['nik', 'nip', 'email'], 'string', 'max' => 32],
+            [['email'], 'string', 'max' => 32],
             [['provinsi_id'], 'string', 'max' => 2],
             [['kabupaten_id'], 'string', 'max' => 4],
             [['kecamatan_id'], 'string', 'max' => 7],
             [['kelurahan_id'], 'string', 'max' => 10],
-            [['kode_pos'], 'string', 'max' => 8],
-            [['phone_1', 'phone_2', 'npwp'], 'string', 'max' => 16],
+            [['phone_1', 'phone_2'], 'string', 'max' => 16],
             [['password', 'new_password', 'retype_new_password'], 'string', 'max' => 18],
             [['golongan'], 'string', 'max' => 5],
             [['typeuser_code'], 'string', 'max' => 3],

@@ -19,14 +19,6 @@ use yii\widgets\MaskedInput;
             </div>
             <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
                 <div class="col-lg-8 col-md-8 col-xs-12 padding-left-0">
-                    <?= $form->field($model, 'outsource_code')->widget(Select2::classname(), [
-                            'data' => $dataList['outsource'],
-                            'options' => ['placeholder' => 'Pilih Outsource'],
-                        ]) ?>
-                </div>
-            </div>
-            <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
-                <div class="col-lg-8 col-md-8 col-xs-12 padding-left-0">
                     <?= $form->field($model, 'type_code')->widget(Select2::classname(), [
                             'data' => $dataList['kendaraan'],
                             'options' => ['placeholder' => 'Type Kendaraan'],

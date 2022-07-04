@@ -58,7 +58,7 @@ class MasterPerson extends \yii\db\ActiveRecord
     {
         return [
             [['type_user', 'name', 'contact_person', 'kode_pos', 'address', 'phone_1', 'email', 'provinsi_id', 'kabupaten_id', 'kecamatan_id', 'kelurahan_id', 'term_in'], 'required'],
-            [['type_user', 'term_in', 'status', 'created_at', 'updated_at'], 'integer'],
+            [['type_user', 'term_in', 'npwp', 'kode_pos', 'status', 'created_at', 'updated_at'], 'integer'],
             [['keterangan'], 'string'],
             [['code'], 'string', 'max' => 3],
             [['name', 'address', 'contact_person'], 'string', 'max' => 128],
@@ -66,8 +66,7 @@ class MasterPerson extends \yii\db\ActiveRecord
             [['kabupaten_id'], 'string', 'max' => 4],
             [['kecamatan_id'], 'string', 'max' => 7],
             [['kelurahan_id'], 'string', 'max' => 10],
-            [['kode_pos'], 'string', 'max' => 8],
-            [['phone_1', 'phone_2', 'npwp'], 'string', 'max' => 16],
+            [['phone_1', 'phone_2'], 'string', 'max' => 16],
             [['email', 'fax'], 'string', 'max' => 32],
             [['code'], 'unique'],
             [['status'], 'default', 'value' => 1],
@@ -137,5 +136,11 @@ class MasterPerson extends \yii\db\ActiveRecord
     public function getTypePerson()
     {
         return $this->hasOne(MasterKode::className(), ['value' => 'type_user']);
+    }
+
+    public function validateData($name, $type_user)
+    {
+        $model = MasterPerson::findOne(['name' => $name, 'type_user' => $type_user]);
+        return $model;
     }
 }

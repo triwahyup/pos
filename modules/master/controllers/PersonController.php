@@ -4,7 +4,7 @@ namespace app\modules\master\controllers;
 
 use app\models\Logs;
 use app\models\User;
-use app\modules\master\models\MasterProvinsi;
+use app\models\DataList;
 use app\modules\master\models\MasterKabupaten;
 use app\modules\master\models\MasterKecamatan;
 use app\modules\master\models\MasterKelurahan;
@@ -99,51 +99,47 @@ class PersonController extends Controller
      */
     public function actionCreate()
     {
-        $dataProvinsi = MasterProvinsi::find()
-            ->select(['name'])
-            ->where(['status' => 1])
-            ->indexBy('id')
-            ->column();
-        $typePerson = MasterKode::find()
-            ->select(['name'])
-            ->where(['type' => \Yii::$app->params['TYPE_PERSON'], 'status' => 1])
-            ->indexBy('value')
-            ->column();
-        
         $success = true;
         $message = '';
         $model = new MasterPerson();
+        $dataList = DataList::setListColumn();
         if ($this->request->isPost) {
             if ($model->load($this->request->post())) {
                 $connection = \Yii::$app->db;
 			    $transaction = $connection->beginTransaction();
                 try {
-                    $model->code = $model->generateCode();
-                    $model->phone_1 = str_replace('-', '', $model->phone_1);
-                    if(!empty($model->phone_2)){
-                        $model->phone_2 = str_replace('-', '', $model->phone_2);
-                    }
-                    if(!$model->save()){
-                        $success = false;
-                        $message = (count($model->errors) > 0) ? 'ERROR CREATE PERSON: ' : '';
-                        foreach($model->errors as $error => $value){
-                            $message .= $value[0].', ';
+                    $validateData = $model->validateData($model->name, $model->type_user);
+                    if(empty($validateData)){
+                        $model->code = $model->generateCode();
+                        $model->phone_1 = str_replace('-', '', $model->phone_1);
+                        if(!empty($model->phone_2)){
+                            $model->phone_2 = str_replace('-', '', $model->phone_2);
                         }
-                        $message = substr($message, 0, -2);
-                    }
-                    if($success){
-                        $transaction->commit();
-                        $message = '['.$model->code.'] SUCCESS CREATE PERSON.';
-                        $logs =	[
-                            'type' => Logs::TYPE_USER,
-                            'description' => $message,
-                        ];
-                        Logs::addLog($logs);
-
-                        \Yii::$app->session->setFlash('success', $message);
-                        return $this->redirect(['view', 'code' => $model->code]);
+                        if(!$model->save()){
+                            $success = false;
+                            $message = (count($model->errors) > 0) ? 'ERROR CREATE PERSON: ' : '';
+                            foreach($model->errors as $error => $value){
+                                $message .= $value[0].', ';
+                            }
+                            $message = substr($message, 0, -2);
+                        }
+                        if($success){
+                            $transaction->commit();
+                            $message = '['.$model->code.'] SUCCESS CREATE PERSON.';
+                            $logs =	[
+                                'type' => Logs::TYPE_USER,
+                                'description' => $message,
+                            ];
+                            Logs::addLog($logs);
+    
+                            \Yii::$app->session->setFlash('success', $message);
+                            return $this->redirect(['view', 'code' => $model->code]);
+                        }else{
+                            $transaction->rollBack();
+                        }
                     }else{
-                        $transaction->rollBack();
+                        $success = false;
+                        $message = 'Nama Person '.$model->name .' sudah ada.';
                     }
                 }catch(\Exception $e) {
                     $success = false;
@@ -163,8 +159,7 @@ class PersonController extends Controller
 
         return $this->render('create', [
             'model' => $model,
-            'dataProvinsi' => $dataProvinsi,
-            'typePerson' => $typePerson,
+            'dataList' => $dataList,
         ]);
     }
 
@@ -177,20 +172,10 @@ class PersonController extends Controller
      */
     public function actionUpdate($code)
     {
-        $dataProvinsi = MasterProvinsi::find()
-            ->select(['name'])
-            ->where(['status' => 1])
-            ->indexBy('id')
-            ->column();
-        $typePerson = MasterKode::find()
-            ->select(['name'])
-            ->where(['type' => \Yii::$app->params['TYPE_PERSON'], 'status' => 1])
-            ->indexBy('value')
-            ->column();
-        
         $success = true;
         $message = '';
         $model = $this->findModel($code);
+        $dataList = DataList::setListColumn();
         if ($this->request->isPost && $model->load($this->request->post())) {
             $connection = \Yii::$app->db;
             $transaction = $connection->beginTransaction();
@@ -236,8 +221,7 @@ class PersonController extends Controller
 
         return $this->render('update', [
             'model' => $model,
-            'dataProvinsi' => $dataProvinsi,
-            'typePerson' => $typePerson,
+            'dataList' => $dataList,
         ]);
     }
 

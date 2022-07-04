@@ -37,12 +37,6 @@ $this->params['breadcrumbs'][] = $this->title;
             'attributes' => [
                 'name',
                 [
-                    'attribute' => 'outsource_code',
-                    'value' => function ($model, $index) { 
-                        return (isset($model->outsource)) ? $model->outsource->name : '';
-                    }
-                ],
-                [
                     'attribute' => 'type_code',
                     'value' => function ($model, $index) { 
                         return (isset($model->typeCode)) ? $model->typeCode->name : '';

@@ -14,6 +14,7 @@ $data = [
     'TYPE_PERSON' => 'PERSON',
     'TYPE_BAST' => 'BAST',
     'TYPE_KENDARAAN' => 'KENDARAAN',
+    'TYPE_PROSES' => 'PROSES',
     
     // MASTER KODE VALUE
     'TYPE_MENU_LEFT' => 'NAVBAR LEFT',

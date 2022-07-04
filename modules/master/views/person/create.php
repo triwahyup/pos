@@ -12,7 +12,6 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="master-person-create">
     <?= $this->render('_form', [
         'model' => $model,
-        'dataProvinsi' => $dataProvinsi,
-        'typePerson' => $typePerson,
+        'dataList' => $dataList,
     ]) ?>
 </div>

@@ -4,7 +4,7 @@ namespace app\modules\master\controllers;
 
 use app\models\Logs;
 use app\models\User;
-use app\modules\master\models\MasterKode;
+use app\models\DataList;
 use app\modules\master\models\MasterProses;
 use app\modules\master\models\MasterProsesSearch;
 use yii\web\Controller;
@@ -95,15 +95,10 @@ class ProsesController extends Controller
      */
     public function actionCreate()
     {
-        $typeMesin = MasterKode::find()
-            ->select(['name'])
-            ->where(['type'=>\Yii::$app->params['TYPE_MESIN'], 'status'=>1])
-            ->indexBy('code')
-            ->column();
-
         $success = true;
         $message = '';
         $model = new MasterProses();
+        $dataList = DataList::setListColumn();
         if ($this->request->isPost) {
             if ($model->load($this->request->post())) {
                 $connection = \Yii::$app->db;
@@ -151,7 +146,7 @@ class ProsesController extends Controller
 
         return $this->render('create', [
             'model' => $model,
-            'typeMesin' => $typeMesin
+            'dataList' => $dataList,
         ]);
     }
 
@@ -164,15 +159,10 @@ class ProsesController extends Controller
      */
     public function actionUpdate($code)
     {
-        $typeMesin = MasterKode::find()
-            ->select(['name'])
-            ->where(['type'=>\Yii::$app->params['TYPE_MESIN'], 'status'=>1])
-            ->indexBy('code')
-            ->column();
-
         $success = true;
         $message = '';
         $model = $this->findModel($code);
+        $dataList = DataList::setListColumn();
         if ($this->request->isPost && $model->load($this->request->post())) {
             $connection = \Yii::$app->db;
             $transaction = $connection->beginTransaction();
@@ -215,7 +205,7 @@ class ProsesController extends Controller
 
         return $this->render('update', [
             'model' => $model,
-            'typeMesin' => $typeMesin
+            'dataList' => $dataList,
         ]);
     }
 

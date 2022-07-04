@@ -41,8 +41,8 @@ class MasterProses extends \yii\db\ActiveRecord
         return [
             [['name', 'type', 'harga', 'urutan'], 'required'],
             [['harga', 'index'], 'safe'],
-            [['status', 'created_at', 'updated_at', 'type', 'urutan'], 'integer'],
-            [['code', 'mesin_type'], 'string', 'max' => 3],
+            [['status', 'created_at', 'updated_at', 'urutan'], 'integer'],
+            [['code', 'mesin_type', 'type'], 'string', 'max' => 3],
             [['name', 'keterangan'], 'string', 'max' => 128],
             [['code'], 'unique'],
             [['status'], 'default', 'value' => 1],
@@ -84,7 +84,7 @@ class MasterProses extends \yii\db\ActiveRecord
 
     public function getTypeOngkos()
     {
-        return ($this->type == 1) ? 'Cetak' : 'Pond';
+        return $this->hasOne(MasterKode::className(), ['code' => 'type']);
     }
 
     public function getTypeCode()

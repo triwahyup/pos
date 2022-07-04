@@ -39,7 +39,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     [
                         'attribute' => 'type',
                         'value'=> function ($model, $index) { 
-                            return $model->typeOngkos;
+                            return (isset($model->typeOngkos)) ? $model->typeOngkos->name : '-';
                         }
                     ],
                     'urutan',

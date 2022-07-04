@@ -17,7 +17,7 @@ class MasterKendaraanSearch extends MasterKendaraan
     public function rules()
     {
         return [
-            [['name', 'outsource_code', 'type_code', 'nopol', 'no_handphone', 'no_sim', 'created_at', 'updated_at'], 'safe'],
+            [['name', 'type_code', 'nopol', 'no_handphone', 'no_sim', 'created_at', 'updated_at'], 'safe'],
         ];
     }
 
@@ -41,8 +41,7 @@ class MasterKendaraanSearch extends MasterKendaraan
     {
         $query = MasterKendaraan::find()
             ->alias('a')
-            ->leftJoin('master_kode b', 'b.code = a.type_code')
-            ->leftJoin('master_person c', 'c.code = a.outsource_code');
+            ->leftJoin('master_kode b', 'b.code = a.type_code');
 
         // add conditions that should always apply here
 
@@ -72,9 +71,6 @@ class MasterKendaraanSearch extends MasterKendaraan
         }
         if(!empty($this->type_code)){
             $query->andWhere('b.name LIKE "%'.$this->type_code.'%"');
-        }
-        if(!empty($this->outsource_code)){
-            $query->andWhere('c.name LIKE "%'.$this->outsource_code.'%"');
         }
         $query->andFilterWhere(['like', 'name', $this->name])
             ->andFilterWhere(['like', 'nopol', $this->nopol])

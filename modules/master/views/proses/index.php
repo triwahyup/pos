@@ -30,7 +30,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     'class' => 'text-center',
                 ],
                 'value' => function ($model, $index) { 
-                    return $model->typeOngkos;
+                    return (isset($model->typeOngkos)) ? $model->typeOngkos->name : '-';
                 }
             ],
             [

@@ -43,7 +43,10 @@ class PurchaseOrderController extends Controller
                             'roles' => ['@'],
                         ],
                         [
-                            'actions' => ['index', 'view', 'list-item', 'temp', 'get-temp', 'popup', 'search', 'item', 'autocomplete'],
+                            'actions' => [
+                                'index', 'view', 'list-item', 'temp', 'get-temp', 'popup', 'search', 'item', 'autocomplete',
+                                'on-change-term-in', 'on-input-term-in'
+                            ],
                             'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('purchase-order-material[R]')),
                             'roles' => ['@'],
                         ], 
@@ -428,6 +431,23 @@ class PurchaseOrderController extends Controller
         }
 
         throw new NotFoundHttpException('The requested page does not exist.');
+    }
+
+    public function actionOnChangeTermIn($supplier_code, $tgl_so)
+    {
+        $model = MasterPerson::find()->where(['code'=>$supplier_code])->asArray()->one();
+        $termIn = (!empty($model['term_in'])) ? $model['term_in'] : 0;
+        $top = date('d-m-Y', strtotime('+'.$termIn.' days', strtotime($tgl_so)));
+        $tgl_tempo = '<i class="text-muted font-size-10">Tgl. Jatuh Tempo Pembayaran: '.$top.'</i>';
+        return json_encode(['term_in'=>$termIn, 'tgl_tempo'=>$tgl_tempo]);
+    }
+
+    public function actionOnInputTermIn($tgl_po, $term_in)
+    {
+        $termIn = (!empty($term_in)) ? $term_in : 0;
+        $top = date('d-m-Y', strtotime('+'.$termIn.' days', strtotime($tgl_po)));
+        $tgl_tempo = '<i class="text-muted font-size-10">Tgl. Jatuh Tempo Pembayaran: '.$top.'</i>';
+        return json_encode(['tgl_tempo'=>$tgl_tempo]);
     }
 
     public function actionListItem()

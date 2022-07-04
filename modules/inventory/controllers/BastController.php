@@ -588,7 +588,7 @@ class BastController extends Controller
                     foreach($model->details as $val){
                         $stockBarang = InventoryStockBarang::findOne(['barang_code'=>$val->barang_code, 'supplier_code'=>$val->supplier_code, 'status'=>1]);
                         if(isset($stockBarang)){
-                            if($stockBarang->stock > $val->qty){
+                            if($stockBarang->stock >= $val->qty){
                                 $stockBarang->stock = $stockBarang->stock-$val->qty;
                                 if(!$stockBarang->save()){
                                     $success = false;

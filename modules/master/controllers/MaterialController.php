@@ -213,7 +213,7 @@ class MaterialController extends Controller
             ->where(['code'=>$model->material_code, 'status'=>1])
             ->indexBy('code')
             ->column();
-        $satuan= MasterSatuan::find()
+        $satuan = MasterSatuan::find()
             ->select(['name'])
             ->where(['type_code'=>$model->type_code, 'status'=>1])
             ->indexBy('code')

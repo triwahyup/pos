@@ -43,7 +43,9 @@ use yii\widgets\MaskedInput;
                         ]) ?>
                 </div>
                 <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padding-left-0">
-                    <?= $form->field($model, 'term_in')->textInput() ?>
+                    <?= $form->field($model, 'term_in', [
+                            'template' => '{label}{input}<span id="term_in" class="margin-bottom-10"></span>{error}{hint}'
+                        ])->textInput(['data-align' => 'text-right']) ?>
                 </div>
             </div>
             <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
@@ -170,6 +172,47 @@ use yii\widgets\MaskedInput;
 </div>
 <div data-popup="popup"></div>
 <script>
+function onChangeTermIn(supplier_code, tgl_so)
+{
+    $.ajax({
+        url: "<?=Url::to(['purchase-internal/on-change-term-in'])?>",
+		type: "GET",
+        data: {
+            supplier_code: supplier_code,
+            tgl_so: tgl_so,
+        },
+        dataType: "text",
+        error: function(xhr, status, error) {},
+		beforeSend: function (data){},
+        success: function(data){
+            var o = $.parseJSON(data);
+            $("#purchaseinternal-term_in").val(o.term_in);
+            $("#term_in").html(o.tgl_tempo);
+        },
+        complete: function(){}
+    });
+}
+
+function onInputTermIn(term_in, tgl_po)
+{
+    $.ajax({
+        url: "<?=Url::to(['purchase-internal/on-input-term-in'])?>",
+		type: "GET",
+        data: {
+            term_in: term_in,
+            tgl_po: tgl_po,
+        },
+        dataType: "text",
+        error: function(xhr, status, error) {},
+		beforeSend: function (data){},
+        success: function(data){
+            var o = $.parseJSON(data);
+            $("#term_in").html(o.tgl_tempo);
+        },
+        complete: function(){}
+    });
+}
+
 function load_barang()
 {
     $.ajax({
@@ -369,6 +412,18 @@ function delete_temp(id)
 
 var timeOut = 6000;
 $(document).ready(function(){
+    /**  TERM IN */
+    $("body").off("change","#purchaseinternal-supplier_code").on("change","#purchaseinternal-supplier_code", function(e){
+        e.preventDefault();
+        onChangeTermIn($(this).val(), $("#purchaseinternal-tgl_po").val());
+    });
+
+    $("body").off("input","#purchaseinternal-term_in").on("input","#purchaseinternal-term_in", function(e){
+        e.preventDefault();
+        onInputTermIn($(this).val(), $("#purchaseinternal-tgl_po").val());
+    });
+    /** END TERM IN */
+
     $("body").off("keydown","#temppurchaseinternaldetail-name")
     $("body").on("keydown","#temppurchaseinternaldetail-name", function(e){
         var key = e.charCode ? e.charCode : e.keyCode ? e.keyCode : 0;

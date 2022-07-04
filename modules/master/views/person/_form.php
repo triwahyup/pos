@@ -21,7 +21,7 @@ use yii\widgets\MaskedInput;
         <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
             <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
                 <?= $form->field($model, 'type_user')->widget(Select2::classname(), [
-                        'data' => $typePerson,
+                        'data' => $dataList['person'],
                         'options' => ['placeholder' => 'Type Person'],
                     ]) ?>
             </div>
@@ -34,13 +34,13 @@ use yii\widgets\MaskedInput;
         </div>
         <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
             <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
-                <?= $form->field($model, 'npwp')->textInput(['maxlength' => true]) ?>
+                <?= $form->field($model, 'npwp')->textInput(['maxlength' => 16]) ?>
             </div>
             <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
                 <?= $form->field($model, 'term_in')->textInput(['maxlength' => true]) ?>
             </div>
             <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
-                <?= $form->field($model, 'kode_pos')->textInput(['maxlength' => true]) ?>
+                <?= $form->field($model, 'kode_pos')->textInput(['maxlength' => 8]) ?>
             </div>
         </div>
         <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
@@ -50,7 +50,7 @@ use yii\widgets\MaskedInput;
             </div>
             <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
                 <?= $form->field($model, 'provinsi_id')->widget(Select2::classname(), [
-                        'data' => $dataProvinsi,
+                        'data' => $dataList['provinsi'],
                         'options' => ['placeholder' => 'Provinisi'],
                         'pluginOptions' => [
                             'allowClear' => true,
@@ -139,6 +139,7 @@ function listKabupaten(provinsiId, isNewRecord=false)
                     var opt = new Option(value.name, value.id, false, false);
                     $("#masterperson-kabupaten_id").append(opt);
                 });
+                $("#masterperson-kabupaten_id").find("option[selected]").prop("value", "<?=$model->kabupaten_id ?>");
             }else{
                 $("#masterperson-kabupaten_id").empty();
                 $.each(o, function(index, value){
@@ -171,6 +172,7 @@ function listKecamatan(kecamatanId, isNewRecord=false)
                     var opt = new Option(value.name, value.id, false, false);
                     $("#masterperson-kecamatan_id").append(opt);
                 });
+                $("#masterperson-kecamatan_id").find("option[selected]").prop("value", "<?=$model->kecamatan_id ?>");
             }else{
                 $("#masterperson-kecamatan_id").empty();
                 $.each(o, function(index, value){
@@ -203,6 +205,7 @@ function listKelurahan(kelurahanId, isNewRecord=false)
                     var opt = new Option(value.name, value.id, false, false);
                     $("#masterperson-kelurahan_id").append(opt);
                 });
+                $("#masterperson-kelurahan_id").find("option[selected]").prop("value", "<?=$model->kelurahan_id ?>");
             }else{
                 $("#masterperson-kelurahan_id").empty();
                 $.each(o, function(index, value){

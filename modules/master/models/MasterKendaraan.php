@@ -4,7 +4,6 @@ namespace app\modules\master\models;
 
 use Yii;
 use app\modules\master\models\MasterKode;
-use app\modules\master\models\MasterPerson;
 use yii\behaviors\TimestampBehavior;
 
 /**
@@ -44,9 +43,9 @@ class MasterKendaraan extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['name', 'type_code', 'nopol', 'no_handphone', 'no_sim', 'outsource_code'], 'required'],
+            [['name', 'type_code', 'nopol', 'no_handphone', 'no_sim'], 'required'],
             [['status', 'created_at', 'updated_at'], 'integer'],
-            [['code', 'type_code', 'outsource_code'], 'string', 'max' => 3],
+            [['code', 'type_code'], 'string', 'max' => 3],
             [['name'], 'string', 'max' => 64],
             [['nopol', 'no_handphone', 'no_sim'], 'string', 'max' => 16],
             [['keterangan'], 'string', 'max' => 128],
@@ -63,7 +62,6 @@ class MasterKendaraan extends \yii\db\ActiveRecord
         return [
             'code' => 'Code',
             'name' => 'Name',
-            'outsource_code' => 'Outsource',
             'type_code' => 'Type',
             'nopol' => 'Nopol',
             'no_handphone' => 'No Handphone',
@@ -89,10 +87,5 @@ class MasterKendaraan extends \yii\db\ActiveRecord
     public function getTypeCode()
     {
         return $this->hasOne(MasterKode::className(), ['code' => 'type_code']);
-    }
-
-    public function getOutsource()
-    {
-        return $this->hasOne(MasterPerson::className(), ['code' => 'outsource_code']);
     }
 }

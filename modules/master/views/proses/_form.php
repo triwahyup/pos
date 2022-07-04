@@ -27,10 +27,7 @@ use yii\widgets\MaskedInput;
                 </div>
                 <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
                     <?= $form->field($model, 'type')->widget(Select2::classname(), [
-                            'data' => [
-                                1 => 'CETAK',
-                                2 => 'POND',
-                            ],
+                            'data' => $dataList['proses'],
                             'options' => [
                                 'placeholder' => 'Type Ongkos',
                                 'class' => 'select2',
@@ -79,7 +76,7 @@ use yii\widgets\MaskedInput;
                 </div>
                 <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
                     <?= $form->field($model, 'mesin_type')->widget(Select2::classname(), [
-                            'data' => $typeMesin,
+                            'data' => $dataList['mesin'],
                             'options' => [
                                 'placeholder' => 'Pilih Type Mesin',
                                 'class' => 'select2',
