@@ -2,6 +2,7 @@
 
 namespace app\modules\master\controllers;
 
+use app\models\DataList;
 use app\models\Logs;
 use app\models\User;
 use app\modules\master\models\MasterKode;
@@ -99,23 +100,13 @@ class MaterialController extends Controller
      */
     public function actionCreate()
     {
-        $type = MasterKode::find()
-            ->select(['name'])
-            ->where(['type'=>\Yii::$app->params['TYPE_MATERIAL'], 'status' => 1])
-            ->indexBy('code')
-            ->column();
-        $material = [];
-        $satuan = [];
-        $supplier = MasterPerson::find()
-            ->select(['name'])
-            ->where(['type_user'=>\Yii::$app->params['TYPE_SUPPLIER'], 'status' => 1])
-            ->indexBy('code')
-            ->column();
-
         $success = true;
         $message = '';
+        $material = [];
+        $satuan = [];
         $temp = new TempMasterMaterialPricelist();
         $model = new MasterMaterial();
+        $dataList = DataList::setListColumn();
         if ($this->request->isPost) {
             if ($model->load($this->request->post())) {
                 $connection = \Yii::$app->db;
@@ -181,12 +172,11 @@ class MaterialController extends Controller
         }
 
         return $this->render('create', [
+            'dataList' => $dataList,
             'temp' => $temp,
             'model' => $model,
-            'type' => $type,
             'material' => $material,
             'satuan' => $satuan,
-            'supplier' => $supplier,
         ]);
     }
 
@@ -203,14 +193,9 @@ class MaterialController extends Controller
         $message = '';
         $temp = new TempMasterMaterialPricelist();
         $model = $this->findModel($code);
-        $type = MasterKode::find()
-            ->select(['name'])
-            ->where(['type'=>\Yii::$app->params['TYPE_MATERIAL'], 'status' => 1])
-            ->indexBy('code')
-            ->column();
         $material = MasterKode::find()
             ->select(['name'])
-            ->where(['code'=>$model->material_code, 'status'=>1])
+            ->where(['type'=>\Yii::$app->params['TYPE_KERTAS'], 'status'=>1])
             ->indexBy('code')
             ->column();
         $satuan = MasterSatuan::find()
@@ -218,12 +203,7 @@ class MaterialController extends Controller
             ->where(['type_code'=>$model->type_code, 'status'=>1])
             ->indexBy('code')
             ->column();
-        $supplier = MasterPerson::find()
-            ->select(['name'])
-            ->where(['type_user'=>\Yii::$app->params['TYPE_SUPPLIER'], 'status' => 1])
-            ->indexBy('code')
-            ->column();
-        
+        $dataList = DataList::setListColumn();
         if($this->request->isPost){
             if($model->load($this->request->post())){
                 $connection = \Yii::$app->db;
@@ -303,12 +283,11 @@ class MaterialController extends Controller
         }
 
         return $this->render('update', [
+            'dataList' => $dataList,
             'temp' => $temp,
             'model' => $model,
-            'type' => $type,
             'material' => $material,
             'satuan' => $satuan,
-            'supplier' => $supplier,
         ]);
     }
 

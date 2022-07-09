@@ -2,6 +2,7 @@
 
 namespace app\modules\purchasing\controllers;
 
+use app\models\DataList;
 use app\models\Logs;
 use app\models\LogsMail;
 use app\models\User;
@@ -137,21 +138,11 @@ class PurchaseOrderController extends Controller
      */
     public function actionCreate()
     {
-        $supplier = MasterPerson::find()
-            ->select(['name'])
-            ->where(['type_user'=>\Yii::$app->params['TYPE_SUPPLIER'], 'status' => 1])
-            ->indexBy('code')
-            ->column();
-        $profile = Profile::find()
-            ->select(['name'])
-            ->where(['status' => 1])
-            ->indexBy('user_id')
-            ->column();
-        
         $success = true;
         $message = '';
         $temp = new TempPurchaseOrderDetail();
         $model = new PurchaseOrder();
+        $dataList = DataList::setListColumn();
         if ($this->request->isPost) {
             if ($model->load($this->request->post())) {
                 $connection = \Yii::$app->db;
@@ -220,9 +211,8 @@ class PurchaseOrderController extends Controller
         }
 
         return $this->render('create', [
+            'dataList' => $dataList,
             'model' => $model,
-            'supplier' => $supplier,
-            'profile' => $profile,
             'temp' => $temp,
         ]);
     }
@@ -236,21 +226,11 @@ class PurchaseOrderController extends Controller
      */
     public function actionUpdate($no_po)
     {
-        $supplier = MasterPerson::find()
-            ->select(['name'])
-            ->where(['type_user'=>\Yii::$app->params['TYPE_SUPPLIER'], 'status' => 1])
-            ->indexBy('code')
-            ->column();
-        $profile = Profile::find()
-            ->select(['name'])
-            ->where(['status' => 1])
-            ->indexBy('user_id')
-            ->column();
-
         $success = true;
         $message = '';
         $temp = new TempPurchaseOrderDetail();
         $model = $this->findModel($no_po);
+        $dataList = DataList::setListColumn();
         if ($this->request->isPost) {
             if ($model->load($this->request->post())){
                 $connection = \Yii::$app->db;
@@ -341,9 +321,8 @@ class PurchaseOrderController extends Controller
         }
 
         return $this->render('update', [
+            'dataList' => $dataList,
             'model' => $model,
-            'supplier' => $supplier,
-            'profile' => $profile,
             'temp' => $temp,
         ]);
     }

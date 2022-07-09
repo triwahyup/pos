@@ -11,8 +11,7 @@ $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="purchase-internal-create">
     <?= $this->render('_form', [
-        'supplier' => $supplier,
-        'profile' => $profile,
+        'dataList' => $dataList,
         'model' => $model,
         'temp' => $temp,
     ]) ?>

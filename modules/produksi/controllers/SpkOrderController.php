@@ -150,31 +150,33 @@ class SpkOrderController extends Controller
             $transaction = $connection->beginTransaction();
             try{
                 $data = $request->post('SpkOrderHistory');
+                if(empty($data['jenis_pengerjaan'])){
+                    $success = false;
+                    $message = 'Pengerjaan wajib diisi.';
+                }else{
+                    if($data['jenis_pengerjaan'] == 0){
+                        if(empty($data['mesin_code'])){
+                            $success = false;
+                            $message = 'Nama Mesin wajib diisi.';
+                        }else if(empty($data['user_id'])){
+                            $success = false;
+                            $message = 'Operator mesin wajib diisi.';
+                        }
+                    }else{
+                        if(empty($data['outsource_code'])){
+                            $success = false;
+                            $message = 'Outsource wajib diisi.';
+                        }else if(empty($data['kendaraan_code'])){
+                            $success = false;
+                            $message = 'Kendaraan wajib diisi.';
+                        }
+                    }
+                }
                 if(empty($data['tgl_spk'])){
                     $success = false;
                     $message = 'Tgl SPK wajib diisi.';
                 }
-                
-                if(empty($data['outsource_code'])){
-                    if(empty($data['mesin_code'])){
-                        $success = false;
-                        $message = 'Nama Mesin wajib diisi.';
-                    }
-                    else if(empty($data['user_id'])){
-                        $success = false;
-                        $message = 'Operator mesin wajib diisi.';
-                    }
-                }else{
-                    if(empty($data['nopol'])){
-                        $success = false;
-                        $message = 'No. Polisi wajib diisi.';
-                    }
-                    else if(empty($data['no_sj'])){
-                        $success = false;
-                        $message = 'No SJ wajib diisi.';
-                    }
-                }
-                
+
                 if($success){
                     $spkProses = SpkOrderProses::find()
                         ->where(['no_spk'=>$data['no_spk'], 'item_code'=>$data['item_code'], 'proses_id'=>$data['proses_id']])
@@ -236,11 +238,13 @@ class SpkOrderController extends Controller
         return json_encode(['success'=>$success, 'message'=>$message]);
     }
 
-    public function actionListKendaraan($outsource_code)
+    public function actionListKendaraan()
     {
         $model = MasterKendaraan::find()
-            ->select(['code as code', 'name as name'])
-            ->where(['outsource_code' => $outsource_code, 'status' => 1])
+            ->alias('a')
+            ->select(['a.code as code', 'concat(nopol, " - ", a.name, " - ", b.value) as name'])
+            ->leftJoin('master_kode b', 'b.code = a.type_code')
+            ->where(['a.status' => 1])
             ->asArray()
             ->all();
         return json_encode($model);
@@ -264,8 +268,12 @@ class SpkOrderController extends Controller
         $mesin = [];
         if($sisa > 0){
             $model = [
-                'no_spk' => $no_spk, 'item_code' => $item_code, 'proses_id' => $proses_id,
-                'tgl_spk' => date('d-m-Y'), 'qty_proses' => $model->qty_proses - $total,
+                'no_spk' => $no_spk,
+                'item_code' => $item_code,
+                'proses_id' => $proses_id,
+                'no_sj' => $no_spk,
+                'tgl_spk' => date('d-m-Y'),
+                'qty_proses' => $model->qty_proses - $total,
             ];
             $mesin = MasterMesin::find()
                 ->select(['code', 'name'])
@@ -282,21 +290,39 @@ class SpkOrderController extends Controller
     public function actionDataDetail($no_spk)
     {
         $model = SpkOrder::findOne(['no_spk'=>$no_spk]);
-        $dataProses = SpkOrderProses::findAll(['no_spk'=>$no_spk]);
-        $historyNotOutsource = SpkOrderHistory::find()
+        $historys = SpkOrderHistory::find()
             ->where(['no_spk'=>$no_spk])
             ->andWhere('outsource_code is null OR outsource_code=""')
             ->orderBy(['no_spk'=>SORT_ASC, 'urutan'=>SORT_ASC])
             ->all();
-        $historyWithOutsource = SpkOrderHistory::find()
-            ->where(['no_spk'=>$no_spk])
-            ->andWhere('outsource_code  <> ""')
-            ->orderBy(['no_spk'=>SORT_ASC, 'urutan'=>SORT_ASC])
-            ->all();
+        $historyNotOutsource = [];
+        $historyWithOutsource = [];
+        foreach($model->historys as $val){
+            if(empty($val->outsource_code) || $val->outsource_code == ""){
+                $historyNotOutsource[$val->supplier->name][] = [
+                    'attributes' => $val->attributes,
+                    'proses_name' => (isset($val->proses)) ? $val->proses->name : '-',
+                    'operator_name' => (isset($val->operator)) ? $val->operator->name : '-',
+                    'mesin_name' => (isset($val->mesin)) ? $val->mesin->name : '-',
+                    'status_produksi' => $val->statusProduksi,
+                    'sisa' => $val->sisa,
+                ];
+            }else{
+                $historyWithOutsource[$val->supplier->name][] = [
+                    'attributes' => $val->attributes,
+                    'proses_name' => (isset($val->proses)) ? $val->proses->name : '-',
+                    'outsource_name' => (isset($val->outsource)) ? $val->outsource->name : '',
+                    'mesin_name' => (isset($val->mesin)) ? $val->mesin->name : '-',
+                    'kendaraan' => (isset($val->kendaraan)) ? $val->kendaraan : '-',
+                    'status_produksi' => $val->statusProduksi,
+                    'sisa' => $val->sisa,
+                ];
+            }
+        }
         
         $data = $this->renderAjax('_detail', [
             'model' => $model,
-            'dataProses' => $dataProses,
+            'dataProses' => $model->produksiInAlls,
             'historyNotOutsource' => $historyNotOutsource,
             'historyWithOutsource' => $historyWithOutsource,
         ]);

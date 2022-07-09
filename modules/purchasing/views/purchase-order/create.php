@@ -11,9 +11,8 @@ $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="purchase-order-create">
     <?= $this->render('_form', [
+        'dataList' => $dataList,
         'model' => $model,
-        'supplier' => $supplier,
-        'profile' => $profile,
         'temp' => $temp,
     ]) ?>
 </div>

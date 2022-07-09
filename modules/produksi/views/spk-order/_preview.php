@@ -43,6 +43,15 @@
                         <th class="text-center" width="20">:</th>
                         <td class="text-left"><?=$model->name ?></td>
                     </tr>
+                    <tr>
+                        <th class="text-left" width="80">Lb. Ikat</th>
+                        <th class="text-center" width="20">:</th>
+                        <td class="text-left">
+                            <?=(!empty($model->lembar_ikat_1) ? number_format($model->lembar_ikat_1) .' '.$model->lembar_ikat_um_1 .' / ' : '') ?>
+                            <?=(!empty($model->lembar_ikat_2) ? number_format($model->lembar_ikat_2) .' '.$model->lembar_ikat_um_2 .' / ' : '') ?>
+                            <?=(!empty($model->lembar_ikat_3) ? number_format($model->lembar_ikat_3) .' '.$model->lembar_ikat_um_3 : '') ?>
+                        </td>
+                    </tr>
                     <?php if($type_proses['type'] == 'pond'): ?>
                         <tr>
                             <th class="text-left" width="80">Lbr /Pond</th>
@@ -112,17 +121,17 @@
                     <tr>
                         <th class="text-left">No. SJ</th>
                         <td class="text-center" width="10">:</td>
-                        <td><?='OS/'.$spkHistory->no_sj ?></td>
+                        <td><?='SJ/OS/'.$spkHistory->no_sj ?></td>
                     </tr>
                     <tr>
                         <th class="text-left">Tanggal</th>
                         <td class="text-center" width="10">:</td>
-                        <td><?=$spkHistory->tgl_spk ?></td>
+                        <td><?=date('d-m-Y', strtotime($spkHistory->tgl_spk)) ?></td>
                     </tr>
                     <tr>
                         <th class="text-left">No. Pol</th>
                         <td class="text-center" width="10">:</td>
-                        <td><?=$spkHistory->nopol ?></td>
+                        <td><?=($spkHistory->kendaraan) ? $spkHistory->kendaraan->nopol : '-' ?></td>
                     </tr>
                 </table>
                 <table class="table-inline">

@@ -165,36 +165,37 @@ $this->params['breadcrumbs'][] = $this->title;
             <hr />
         </div>
         <div class="col-lg-12 col-md-12 col-xs-12">
-            <table class="table table-bordered table-custom margin-top-10">
-                <thead>
-                    <tr>
-                        <th class="text-center">No.</th>
-                        <th class="text-center">Supplier</th>
-                        <th class="text-center">Proses</th>
-                        <th class="text-center">Urutan Proses</th>
-                        <th class="text-center">Uk. Potong</th>
-                        <th class="text-center">Qty Proses</th>
-                        <th class="text-center">Qty Hasil</th>
-                        <th class="text-center">Qty Rusak</th>
-                        <th class="text-center">Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach($model->produksiInAlls as $index=>$val): ?>
+            <?php foreach($model->produksiInAlls as $supplierName=>$listProses): ?>
+                <strong class="font-size-14"><?='Supplier: '.$supplierName ?></strong>
+                <table class="table table-bordered table-custom margin-top-10">
+                    <thead>
                         <tr>
-                            <td class="text-center"><?=$index+1 ?></td>
-                            <td><?=(isset($val->supplier)) ? $val->supplier->name : '' ?></td>
-                            <td><?=(isset($val->proses)) ? $val->proses->name : '' ?></td>
-                            <td class="text-center"><?=$val->proses_id ?></td>
-                            <td class="text-center"><?=(!empty($val->uk_potong)) ? $val->uk_potong : '-' ?></td>
-                            <td class="text-right"><?=number_format($val->qty_proses).' LB' ?></td>
-                            <td class="text-right"><?=number_format($val->qty_hasil).' LB' ?></td>
-                            <td class="text-right"><?=number_format($val->qty_rusak).' LB' ?></td>
-                            <td class="text-center"><?=$val->statusProduksi ?></td>
+                            <th class="text-center">No.</th>
+                            <th class="text-center">Proses</th>
+                            <th class="text-center">Urutan Proses</th>
+                            <th class="text-center">Uk. Potong</th>
+                            <th class="text-center">Qty Proses</th>
+                            <th class="text-center">Qty Hasil</th>
+                            <th class="text-center">Qty Rusak</th>
+                            <th class="text-center">Status</th>
                         </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        <?php foreach($listProses as $index=>$val): ?>
+                            <tr>
+                                <td class="text-center"><?=$index +1 ?></td>
+                                <td><?=$val['proses_name'] ?></td>
+                                <td class="text-center"><?=$val['attributes']['proses_id'] ?></td>
+                                <td class="text-center"><?=$val['attributes']['uk_potong'] ?></td>
+                                <td class="text-right"><?=number_format($val['attributes']['qty_proses']).' LB' ?></td>
+                                <td class="text-right"><?=number_format($val['attributes']['qty_hasil']).' LB' ?></td>
+                                <td class="text-right"><?=number_format($val['attributes']['qty_rusak']).' LB' ?></td>
+                                <td class="text-center"><?=$val['status_produksi'] ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            <?php endforeach; ?>
         </div>
         <!-- Detail list proses -->
     </div>

@@ -17,7 +17,7 @@ use yii\widgets\MaskedInput;
                 <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
                     <div class="col-lg-5 col-md-5 col-sm-12 col-xs-12 padding-left-0">
                         <?= $form->field($model, 'type_code')->widget(Select2::classname(), [
-                                'data' => $type,
+                                'data' => $dataList['material'],
                                 'options' => [
                                     'placeholder' => 'Type Barang',
                                     'readonly' => (!$model->isNewRecord) ? true : false,
@@ -29,7 +29,7 @@ use yii\widgets\MaskedInput;
                                 'data' => $material,
                                 'options' => [
                                     'placeholder' => 'Material Type',
-                                    'readonly' => (!$model->isNewRecord) ? true : false,
+                                    // 'readonly' => (!$model->isNewRecord) ? true : false,
                                 ],
                             ]) ?>
                     </div>
@@ -89,7 +89,7 @@ use yii\widgets\MaskedInput;
             </div>
             <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0">
                 <?= $form->field($temp, 'supplier_code')->widget(Select2::classname(), [
-                        'data' => $supplier,
+                        'data' => $dataList['supplier'],
                         'options' => [
                             'placeholder' => 'Pilih Supplier',
                             'class' => 'select2',

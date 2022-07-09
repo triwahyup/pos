@@ -24,7 +24,11 @@
                         <td><?=$val['cc'] ?></td>
                         <td><?=$val['bcc'] ?></td>
                         <td><?=$val['subject'] ?></td>
-                        <td><?=$val['body'] ?></td>
+                        <td>
+                            <a href="javascript:void(0)">
+                                <span>Show Body</span>
+                            </a>
+                        </td>
                         <td><?=$val['keterangan'] ?></td>
                         <td class="text-center"><?=$val['status'] ?></td>
                         <td class="text-center"><?=date('d-m-Y', $val['created_at']) ?></td>
@@ -57,7 +61,7 @@
                     elseif($paging['curr_page'] >= $max)
                         $sp = $paging['curr_page']  - floor($max/2);
                 ?>
-
+    
                 <?php for($i = $sp; $i <= ($sp + $max -1);$i++) : ?>
                     <?php if($i > $paging['pages']) continue; ?>
                     <?php if($paging['curr_page'] == $i) : ?>

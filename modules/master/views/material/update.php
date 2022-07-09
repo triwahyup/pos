@@ -12,11 +12,10 @@ $this->params['breadcrumbs'][] = 'Update';
 ?>
 <div class="master-material-update">
     <?= $this->render('_form', [
+        'dataList' => $dataList,
         'temp' => $temp,
         'model' => $model,
-        'type' => $type,
         'material' => $material,
         'satuan' => $satuan,
-        'supplier' => $supplier,
     ]) ?>
 </div>

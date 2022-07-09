@@ -11,11 +11,10 @@ $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="master-material-create">
     <?= $this->render('_form', [
+        'dataList' => $dataList,
         'temp' => $temp,
         'model' => $model,
-        'type' => $type,
         'material' => $material,
         'satuan' => $satuan,
-        'supplier' => $supplier,
     ]) ?>
 </div>

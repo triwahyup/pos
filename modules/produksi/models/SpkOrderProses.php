@@ -132,7 +132,7 @@ class SpkOrderProses extends \yii\db\ActiveRecord
         return $this->hasOne(MasterPerson::className(), ['code' => 'supplier_code']);
     }
 
-    public function getitem()
+    public function getItem()
     {
         return $this->hasOne(MasterMaterial::className(), ['code' => 'item_code']);
     }

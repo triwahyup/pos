@@ -16,7 +16,7 @@ use yii\widgets\MaskedInput;
             <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
                 <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-left-0">
                     <?= $form->field($model, 'supplier_code')->widget(Select2::classname(), [
-                        'data' => $supplier,
+                        'data' => $dataList['supplier'],
                         'options' => ['placeholder' => 'Supplier'],
                         ]) ?>
                     <?= $form->field($model, 'no_po')->hiddenInput(['maxlength' => true, 'readonly' => true])->label(false) ?>
@@ -37,7 +37,7 @@ use yii\widgets\MaskedInput;
             <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
                 <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-left-0">
                     <?= $form->field($model, 'user_request')->widget(Select2::classname(), [
-                            'data' => $profile,
+                            'data' => $dataList['user'],
                             'options' => ['placeholder' => 'Request By'],
                         ]) ?>
                 </div>

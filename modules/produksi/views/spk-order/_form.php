@@ -196,13 +196,13 @@ use yii\widgets\MaskedInput;
             <div data-render="detail"></div>
             <!-- /DETAIL -->
             <?php if($model->status_produksi == 1): ?>
-                <div class="col-lg-12 col-md-12 col-xs-12 text-right margin-bottom-20">
+                <div class="col-lg-12 col-md-12 col-xs-12 text-right margin-bottom-20 margin-top-20">
                     <?= Html::a('<i class="fontello icon-info-4 font-size-18"></i>
                         <span class="line-height-28 margin-left-30">Jika sudah input qty yang mau di proses, silahkan untuk melanjutkan ke proses produksi.</span>', 
                         ['post', 'no_spk'=>$model->no_spk, 'type' => \Yii::$app->params['IN_PROGRESS']], ['class' => 'btn btn-success btn-flat btn-sm']) ?>
                 </div>
             <?php elseif($model->status_produksi == 2): ?>
-                <div class="col-lg-12 col-md-12 col-xs-12 text-right margin-bottom-20">
+                <div class="col-lg-12 col-md-12 col-xs-12 text-right margin-bottom-20 margin-top-20">
                     <?= Html::a('<i class="fontello icon-info-4 font-size-18"></i>
                         <span class="line-height-28 margin-left-30">Jika sudah selesai input hasil produksi, silahkan mereview kembali hasil produksi sebelum melanjutkan proses closing produksi.</span>', 
                         ['post', 'no_spk'=>$model->no_spk, 'type' => \Yii::$app->params['IN_REVIEW']], ['class' => 'btn btn-success btn-flat btn-sm']) ?>
@@ -389,14 +389,11 @@ function update(el)
     });
 }
 
-function listKendaraan(outsource)
+function listKendaraan()
 {
     $.ajax({
         url: "<?=Url::to(['spk-order/list-kendaraan']) ?>",
         type: "GET",
-        data: {
-            outsource_code: outsource
-        },
         dataType: "text",
         error: function(xhr, status, error) {},
         beforeSend: function(){},
@@ -449,6 +446,11 @@ $(document).ready(function(){
         e.preventDefault();
         print($(this).data());
     });
+    
+    $("body").off("click","[data-button=\"print\"]").on("click","[data-button=\"print\"]", function(e){
+        e.preventDefault();
+        print($(this).data());
+    });
 
     $("body").off("click","[data-button=\"popup_input\"]").on("click","[data-button=\"popup_input\"]", function(e){
         e.preventDefault();
@@ -474,7 +476,7 @@ $(document).ready(function(){
     $("body").off("change","#spkorderhistory-outsource_code");
     $("body").on("change","#spkorderhistory-outsource_code", function(e){
         e.preventDefault();
-        listKendaraan($(this).val());
+        listKendaraan();
     });
 });
 $(function(){

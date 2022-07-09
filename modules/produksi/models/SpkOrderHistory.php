@@ -5,6 +5,7 @@ namespace app\modules\produksi\models;
 use Yii;
 use app\models\Profile;
 use app\modules\inventory\models\InventoryStockItem;
+use app\modules\master\models\MasterKendaraan;
 use app\modules\master\models\MasterMesin;
 use app\modules\master\models\MasterPerson;
 use app\modules\master\models\MasterProses;
@@ -117,6 +118,11 @@ class SpkOrderHistory extends \yii\db\ActiveRecord
         $this->qty_hasil = str_replace(',', '', $this->qty_hasil);
         $this->qty_rusak = str_replace(',', '', $this->qty_rusak);
         return parent::beforeSave($attribute);
+    }
+
+    public function getKendaraan()
+    {
+        return $this->hasOne(MasterKendaraan::className(), ['code' => 'kendaraan_code']);
     }
 
     public function getOutsource()

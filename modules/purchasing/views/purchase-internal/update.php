@@ -12,8 +12,7 @@ $this->params['breadcrumbs'][] = 'Update';
 ?>
 <div class="purchase-internal-update">
     <?= $this->render('_form', [
-        'supplier' => $supplier,
-        'profile' => $profile,
+        'dataList' => $dataList,
         'model' => $model,
         'temp' => $temp,
     ]) ?>

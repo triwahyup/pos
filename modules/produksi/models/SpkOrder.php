@@ -112,13 +112,26 @@ class SpkOrder extends \yii\db\ActiveRecord
 
     public function getHistorys()
     {
-        return $this->hasMany(SpkOrderHistory::className(), ['no_spk' => 'no_spk']);
+        return $this->hasMany(SpkOrderHistory::className(), ['no_spk' => 'no_spk'])
+            ->orderBy(['no_spk'=>SORT_ASC, 'urutan' => SORT_ASC]);
     }
 
     public function getProduksiInAlls()
     {
-        return $this->hasMany(SpkOrderProses::className(), ['no_spk' => 'no_spk'])
-            ->orderBy(['no_spk'=>SORT_ASC, 'proses_id' => SORT_ASC]);
+        $models = SpkOrderProses::find()
+            ->where(['no_spk' => $this->no_spk])
+            ->orderBy(['no_spk'=>SORT_ASC, 'proses_id' => SORT_ASC])
+            ->all();
+        $results = [];
+        foreach($models as $val){
+            $results[$val->supplier->name][] = [
+                'attributes' => $val->attributes,
+                'proses_name' => $val->proses->name,
+                'status_produksi' => $val->statusProduksi,
+                'sisa' => $val->sisa['desc'],
+            ];
+        }
+        return $results;
     }
 
     public $onStart = 1;
@@ -190,17 +203,18 @@ class SpkOrder extends \yii\db\ActiveRecord
     {
         $desc = '';
         $total_rusak = 0;
-        foreach($this->produksiInAlls as $index=>$val){
-            if($val->qty_rusak > 0){
-                $desc .= '<span class="font-size-12 text-muted">';
-                $desc .= 'Total Rusak proses '.$val->proses->name .' Uk.'.$val->uk_potong.': ';
-                $desc .= '<strong class="text-danger">'.number_format($val->qty_rusak, 0, ',', '.') .' LB</strong>';
-                $desc .= '</span><br />';
-
-                $total_rusak += $val->qty_rusak;
+        foreach($this->produksiInAlls as $supplierName=>$listRusak){
+            foreach($listRusak as $index=>$val){
+                if($val['attributes']['qty_rusak'] > 0){
+                    $desc .= '<span class="font-size-12 text-muted">';
+                    $desc .= 'Total Rusak proses '.$val['proses_name'] .' Uk.'.$val['attributes']['uk_potong'].': ';
+                    $desc .= '<strong class="text-danger">'.number_format($val['attributes']['qty_rusak'], 0, ',', '.') .' LB</strong>';
+                    $desc .= '</span><br />';
+                    $total_rusak += $val['attributes']['qty_rusak'];
+                }
             }
         }
-        $desc .= '<strong class="font-size-14">Jumlah Qty Rusak: '.number_format($total_rusak, 0, ',', '.').' LB</strong>';
+        $desc .= '<strong class="text-muted">Jumlah Qty Rusak: '.number_format($total_rusak, 0, ',', '.').' LB</strong>';
         return $desc;
     }
 }

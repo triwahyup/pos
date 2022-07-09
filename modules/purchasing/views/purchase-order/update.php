@@ -12,9 +12,8 @@ $this->params['breadcrumbs'][] = 'Update';
 ?>
 <div class="purchase-order-update">
     <?= $this->render('_form', [
+        'dataList' => $dataList,
         'model' => $model,
-        'supplier' => $supplier,
-        'profile' => $profile,
         'temp' => $temp,
     ]) ?>
 </div>
