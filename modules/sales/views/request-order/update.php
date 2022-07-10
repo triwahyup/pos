@@ -13,7 +13,7 @@ $this->params['breadcrumbs'][] = 'Update';
 <div class="request-order-update">
     <?= $this->render('_form', [
         'model' => $model,
+        'sorder' => $sorder,
         'temp' => $temp,
-        'spk' => $spk,
     ]) ?>
 </div>

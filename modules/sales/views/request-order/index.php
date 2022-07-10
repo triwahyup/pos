@@ -12,12 +12,6 @@ $this->title = 'Request Order';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="request-order-index">
-    <?php if(((new User)->getIsDeveloper()) || \Yii::$app->user->can('request-material-sales-order[C]')):?>
-        <p class="text-right">
-            <?= Html::a('<i class="fontello icon-plus"></i><span>Create Request Order</span>', ['create'], ['class' => 'btn btn-success btn-flat btn-sm']) ?>
-        </p>
-    <?php endif;?>
-    
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,

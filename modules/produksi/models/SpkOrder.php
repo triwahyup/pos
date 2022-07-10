@@ -192,29 +192,16 @@ class SpkOrder extends \yii\db\ActiveRecord
         if($this->status_produksi==1){
             $message = '<span class="text-label text-default">Belum Proses</span>';
         }else if($this->status_produksi==2){
-            $message = '<span class="text-label text-primary">Proses '.$hist['name'].'</span>';
+            if(!empty($hist['name'])){
+                $message = '<span class="text-label text-primary">Proses '.$hist['name'].'</span>';
+            }else{
+                $message = '<span class="text-label text-primary">Tidak ada proses</span>';
+            }
         }else if($this->status_produksi==3){
-            $message = '<span class="text-label text-success">Finish</span>';
+            $message = '<span class="text-label text-warning">Finish</span>';
+        }else if($this->status_produksi==3){
+            $message = '<span class="text-label text-success">Closing</span>';
         }
         return $message;
-    }
-
-    public function getDescRusak()
-    {
-        $desc = '';
-        $total_rusak = 0;
-        foreach($this->produksiInAlls as $supplierName=>$listRusak){
-            foreach($listRusak as $index=>$val){
-                if($val['attributes']['qty_rusak'] > 0){
-                    $desc .= '<span class="font-size-12 text-muted">';
-                    $desc .= 'Total Rusak proses '.$val['proses_name'] .' Uk.'.$val['attributes']['uk_potong'].': ';
-                    $desc .= '<strong class="text-danger">'.number_format($val['attributes']['qty_rusak'], 0, ',', '.') .' LB</strong>';
-                    $desc .= '</span><br />';
-                    $total_rusak += $val['attributes']['qty_rusak'];
-                }
-            }
-        }
-        $desc .= '<strong class="text-muted">Jumlah Qty Rusak: '.number_format($total_rusak, 0, ',', '.').' LB</strong>';
-        return $desc;
     }
 }

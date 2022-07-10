@@ -8,11 +8,12 @@ use app\models\User;
 use app\modules\inventory\models\InventoryStockTransaction;
 use app\modules\master\models\MasterMaterialItem;
 use app\modules\pengaturan\models\PengaturanApproval;
-use app\modules\produksi\models\Spk;
 use app\modules\sales\models\RequestOrder;
 use app\modules\sales\models\RequestOrderApproval;
 use app\modules\sales\models\RequestOrderItem;
 use app\modules\sales\models\RequestOrderSearch;
+use app\modules\sales\models\SalesOrder;
+use app\modules\produksi\models\SpkOrder;
 use app\modules\sales\models\TempRequestOrderItem;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -130,29 +131,32 @@ class RequestOrderController extends Controller
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
-    public function actionCreate()
+    public function actionCreate($no_so, $no_spk)
     {
         $success = true;
         $message = '';
         $model = new RequestOrder();
         $temp = new TempRequestOrderItem();
-        if ($this->request->isPost) {
-            if ($model->load($this->request->post())) {
+        $sorder = SalesOrder::findOne(['code' => $no_so]);
+        $model->no_request = $model->generateCode();
+        $model->no_so = $no_so;
+        $model->no_spk = $no_spk;
+        if($this->request->isPost){
+            if($model->load($this->request->post())){
                 $connection = \Yii::$app->db;
 			    $transaction = $connection->beginTransaction();
                 try{
-                    $model->no_request = $model->generateCode();
-                    $model->user_id = \Yii::$app->user->id;
+                    $totalOrder = $model->totalOrder;
                     if($model->save()){
                         if(count($model->temps()) > 0){
                             foreach($model->temps() as $temp){
-                                $item = new RequestOrderItem();
-                                $item->attributes = $temp->attributes;
-                                $item->no_request = $model->no_request;
-                                if(!$item->save()){
+                                $roItem = new RequestOrderItem();
+                                $roItem->attributes = $temp->attributes;
+                                $roItem->no_request = $model->no_request;
+                                if(!$roItem->save()){
                                     $success = false;
-                                    $message = (count($item->errors) > 0) ? 'ERROR CREATE REQUEST ORDER ITEM: ' : '';
-                                    foreach($item->errors as $error => $value){
+                                    $message = (count($roItem->errors) > 0) ? 'ERROR CREATE REQUEST ORDER ITEM: ' : '';
+                                    foreach($roItem->errors as $error => $value){
                                         $message .= strtoupper($value[0].', ');
                                     }
                                     $message = substr($message, 0, -2);
@@ -180,7 +184,6 @@ class RequestOrderController extends Controller
                             'description' => $message,
                         ];
                         Logs::addLog($logs);
-
                         \Yii::$app->session->setFlash('success', $message);
                         return $this->redirect(['view', 'no_request' => $model->no_request]);
                     }else{
@@ -198,19 +201,15 @@ class RequestOrderController extends Controller
                 Logs::addLog($logs);
                 \Yii::$app->session->setFlash('error', $message);
             }
-        } else {
+        }else{
             $model->loadDefaultValues();
             $this->emptyTemp();
         }
 
         return $this->render('create', [
             'model' => $model,
-            'temp' => $temp,
-            'spk' => Spk::find()
-                ->select(['no_spk'])
-                ->where(['status_produksi'=>[2,3]])
-                ->indexBy('no_spk')
-                ->column(),
+            'sorder' => $sorder,
+            'temp' => $temp
         ]);
     }
 
@@ -223,12 +222,12 @@ class RequestOrderController extends Controller
      */
     public function actionUpdate($no_request)
     {
-        $spk = Spk::find()->select(['no_spk'])->where(['status_produksi'=>[2,3]])->indexBy('no_spk')->column();
         $success = true;
         $message = '';
         $model = $this->findModel($no_request);
         $temp = new TempRequestOrderItem();
-        if ($this->request->isPost) {
+        $sorder = SalesOrder::findOne(['code' => $model->no_so]);
+        if($this->request->isPost){
             if ($model->load($this->request->post())){
                 $connection = \Yii::$app->db;
                 $transaction = $connection->beginTransaction();
@@ -319,12 +318,8 @@ class RequestOrderController extends Controller
 
         return $this->render('update', [
             'model' => $model,
+            'sorder' => $sorder,
             'temp' => $temp,
-            'spk' => Spk::find()
-                ->select(['no_spk'])
-                ->where(['status_produksi'=>[2,3]])
-                ->indexBy('no_spk')
-                ->column()
         ]);
     }
 

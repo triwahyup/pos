@@ -4,11 +4,13 @@ namespace app\modules\produksi\models;
 
 use Yii;
 use app\models\Profile;
+use app\models\User;
 use app\modules\inventory\models\InventoryStockItem;
 use app\modules\master\models\MasterKendaraan;
 use app\modules\master\models\MasterMesin;
 use app\modules\master\models\MasterPerson;
 use app\modules\master\models\MasterProses;
+use app\modules\produksi\models\SpkOrder;
 use yii\behaviors\TimestampBehavior;
 
 /**
@@ -208,4 +210,33 @@ class SpkOrderHistory extends \yii\db\ActiveRecord
         }
         return $desc;
     }
+
+    public function getDescRusak()
+    {
+        $desc = '';
+        $total_rusak = 0;
+        $models = SpkOrderHistory::findAll(['no_spk' => $this->no_spk, 'supplier_code' => $this->supplier_code]);
+        foreach($models as $val){
+            if($val->qty_rusak > 0){
+                $desc .= '<span class="font-size-12 text-muted">';
+                $desc .= 'Total Rusak proses '.$val->proses->name .' Uk.'.$val->uk_potong.': ';
+                $desc .= '<strong class="text-danger">'.number_format($val->qty_rusak, 0, ',', '.') .' LB</strong>';
+                $desc .= '</span><br />';
+                $total_rusak += $val->qty_rusak;
+            }
+        }
+        $desc .= '<strong class="font-size-10 text-muted">Jumlah Qty Rusak: '.number_format($total_rusak, 0, ',', '.').' LB</strong>';
+        if(((new User)->getIsDeveloper()) || \Yii::$app->user->can('request-material-sales-order[C]')){
+            $spkOrder = SpkOrder::findOne(['no_spk' => $this->no_spk]);
+            if($total_rusak > 0){
+                $desc .= '<br />';
+                $desc .= '<a target="_blank" href="'
+                    .\Yii::$app->params['URL'].'sales/request-order/create&no_spk='.$this->no_spk.'&no_so='.$spkOrder->no_so.'" 
+                    class="custom-btn padding-left-0 padding-right-0">';
+                $desc .= '<span class="font-size-12">Request Order Material?</span>';
+                $desc .= '</a>';
+            }
+        }
+        return $desc;
+    }                   
 }

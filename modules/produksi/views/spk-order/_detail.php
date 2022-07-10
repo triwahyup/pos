@@ -131,7 +131,7 @@
             </table>
             <div class="col-lg-12 col-md-12 col-xs-12 padding-right-0">
                 <div class="text-right">
-                    <?=$model->descRusak ?>
+                    <?=$val['desc_rusak'] ?>
                 </div>
             </div>
         <?php endforeach; ?>

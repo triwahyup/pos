@@ -39,7 +39,7 @@ class SpkOrderController extends Controller
                             'roles' => ['@'],
                         ],
                         [
-                            'actions' => ['index', 'view', 'layar', 'print', 'get-data', 'data-detail', 'popup-input', 'list-kendaraan'],
+                            'actions' => ['index', 'view', 'tab', 'print', 'get-data', 'data-detail', 'popup-input', 'list-kendaraan'],
                             'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('proses-produksi-sales-order[R]')),
                             'roles' => ['@'],
                         ],
@@ -83,8 +83,37 @@ class SpkOrderController extends Controller
      */
     public function actionView($no_spk)
     {
+        $model = $this->findModel($no_spk);
+        $historyNotOutsource = [];
+        $historyWithOutsource = [];
+        foreach($model->historys as $val){
+            if(empty($val->outsource_code) || $val->outsource_code == ""){
+                $historyNotOutsource[$val->supplier->name][] = [
+                    'attributes' => $val->attributes,
+                    'proses_name' => (isset($val->proses)) ? $val->proses->name : '-',
+                    'operator_name' => (isset($val->operator)) ? $val->operator->name : '-',
+                    'mesin_name' => (isset($val->mesin)) ? $val->mesin->name : '-',
+                    'status_produksi' => $val->statusProduksi,
+                    'sisa' => $val->sisa,
+                    'desc_rusak' => $val->descRusak,
+                ];
+            }else{
+                $historyWithOutsource[$val->supplier->name][] = [
+                    'attributes' => $val->attributes,
+                    'proses_name' => (isset($val->proses)) ? $val->proses->name : '-',
+                    'outsource_name' => (isset($val->outsource)) ? $val->outsource->name : '',
+                    'mesin_name' => (isset($val->mesin)) ? $val->mesin->name : '-',
+                    'kendaraan' => (isset($val->kendaraan)) ? $val->kendaraan : '-',
+                    'status_produksi' => $val->statusProduksi,
+                    'sisa' => $val->sisa,
+                ];
+            }
+        }
+
         return $this->render('view', [
-            'model' => $this->findModel($no_spk),
+            'model' => $model,
+            'historyNotOutsource' => $historyNotOutsource,
+            'historyWithOutsource' => $historyWithOutsource
         ]);
     }
 
@@ -95,12 +124,12 @@ class SpkOrderController extends Controller
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionLayar($no_spk)
+    public function actionTab($no_spk)
     {
         $model = $this->findModel($no_spk);
         $spkHistory = new SpkOrderHistory();
         $dataList = DataList::setListColumn();
-        return $this->render('layar', [
+        return $this->render('tab', [
             'dataList' => $dataList,
             'model' => $model,
             'spkHistory' => $spkHistory,
@@ -150,10 +179,7 @@ class SpkOrderController extends Controller
             $transaction = $connection->beginTransaction();
             try{
                 $data = $request->post('SpkOrderHistory');
-                if(empty($data['jenis_pengerjaan'])){
-                    $success = false;
-                    $message = 'Pengerjaan wajib diisi.';
-                }else{
+                if($data['jenis_pengerjaan'] != ''){
                     if($data['jenis_pengerjaan'] == 0){
                         if(empty($data['mesin_code'])){
                             $success = false;
@@ -171,6 +197,9 @@ class SpkOrderController extends Controller
                             $message = 'Kendaraan wajib diisi.';
                         }
                     }
+                }else{
+                    $success = false;
+                    $message = 'Pengerjaan wajib diisi.';
                 }
                 if(empty($data['tgl_spk'])){
                     $success = false;
@@ -306,6 +335,7 @@ class SpkOrderController extends Controller
                     'mesin_name' => (isset($val->mesin)) ? $val->mesin->name : '-',
                     'status_produksi' => $val->statusProduksi,
                     'sisa' => $val->sisa,
+                    'desc_rusak' => $val->descRusak,
                 ];
             }else{
                 $historyWithOutsource[$val->supplier->name][] = [
@@ -458,7 +488,7 @@ class SpkOrderController extends Controller
                         $message = 'Data yang akan di proses produksi masih kosong.';
                     }
                 }
-                // PROSES REVIEW INPUS HASIL PRODUKSI
+                // PROSES REVIEW INPUT HASIL PRODUKSI
                 else if($type == \Yii::$app->params['IN_REVIEW']){
                     $model->status_produksi=3;
                     if($model->produksiIsNull > 0){
@@ -476,6 +506,14 @@ class SpkOrderController extends Controller
                             }
                         }
                     }
+                }
+                // BACK TO PROSES PRODUKSI
+                else if($type == \Yii::$app->params['ON_FINISH']){
+                    $model->status_produksi=2;
+                }
+                // CLOSING
+                else if($type == \Yii::$app->params['IN_REVIEW']){
+                    // $model->status_produksi=4;
                 }
 
                 if($model->save()){
@@ -557,6 +595,6 @@ class SpkOrderController extends Controller
         if(!$success){
             \Yii::$app->session->setFlash('error', $message);
         }
-        return $this->redirect(['layar', 'no_spk' => $model->no_spk]);
+        return $this->redirect(['tab', 'no_spk' => $model->no_spk]);
     }
 }

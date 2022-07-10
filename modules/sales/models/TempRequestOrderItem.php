@@ -3,22 +3,30 @@
 namespace app\modules\sales\models;
 
 use Yii;
-use app\modules\master\models\MasterMaterialItem;
-use app\modules\master\models\MasterMaterialItemPricelist;
+use app\modules\inventory\models\InventoryStockItem;
+use app\modules\master\models\MasterMaterial;
+use app\modules\master\models\MasterMaterialPricelist;
+use app\modules\master\models\MasterPerson;
+use app\modules\master\models\MasterSatuan;
 
 /**
  * This is the model class for table "temp_request_order_item".
  *
- * @property string $no_request
- * @property int $urutan
- * @property string $no_spk
- * @property string $no_so
+ * @property int $id
+ * @property string|null $code
+ * @property int|null $urutan
  * @property string|null $item_code
+ * @property string|null $supplier_code
  * @property string|null $satuan_code
  * @property string|null $material_code
  * @property string|null $type_code
- * @property string|null $group_supplier_code
- * @property string|null $group_material_code
+ * @property float|null $qty_order_1
+ * @property float|null $qty_order_2
+ * @property float|null $qty_order_3
+ * @property float|null $qty_up
+ * @property float|null $konversi_1
+ * @property float|null $konversi_2
+ * @property float|null $konversi_3
  * @property string|null $um_1
  * @property string|null $um_2
  * @property string|null $um_3
@@ -28,14 +36,19 @@ use app\modules\master\models\MasterMaterialItemPricelist;
  * @property float|null $harga_jual_1
  * @property float|null $harga_jual_2
  * @property float|null $harga_jual_3
- * @property float|null $qty_order_1
- * @property float|null $qty_order_2
- * @property float|null $qty_order_3
  * @property float|null $total_order
+ * @property string|null $keterangan
  * @property int|null $user_id
  */
 class TempRequestOrderItem extends \yii\db\ActiveRecord
 {
+    public $item_name;
+    public $bahan_item_name;
+    public $bahan_item_code;
+    public $bahan_supplier_code;
+    public $bahan_qty;
+    public $type_qty;
+
     /**
      * {@inheritdoc}
      */
@@ -50,14 +63,13 @@ class TempRequestOrderItem extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['no_spk'], 'required'],
-            [['urutan', 'user_id'], 'integer'],
-            [['harga_beli_1', 'harga_beli_2', 'harga_beli_3', 'harga_jual_1', 'harga_jual_2', 'harga_jual_3', 'qty_order_1', 'qty_order_2', 'qty_order_3', 'total_order'], 'number'],
-            [['item_name'], 'string', 'max' => 128],
-            [['no_request', 'no_spk', 'no_so'], 'string', 'max' => 12],
-            [['item_code'], 'string', 'max' => 7],
-            [['satuan_code', 'material_code', 'type_code', 'group_supplier_code', 'group_material_code'], 'string', 'max' => 3],
+            [['urutan', 'user_id', 'type_qty'], 'integer'],
+            [['qty_order_1', 'qty_order_2', 'qty_order_3', 'qty_up', 'konversi_1', 'konversi_2', 'konversi_3', 'harga_beli_1', 'harga_beli_2', 'harga_beli_3', 'harga_jual_1', 'harga_jual_2', 'harga_jual_3', 'total_order', 'bahan_qty'], 'safe'],
+            [['code'], 'string', 'max' => 12],
+            [['item_code', 'bahan_item_code'], 'string', 'max' => 7],
+            [['supplier_code', 'satuan_code', 'material_code', 'type_code', 'bahan_supplier_code'], 'string', 'max' => 3],
             [['um_1', 'um_2', 'um_3'], 'string', 'max' => 5],
+            [['keterangan', 'item_name'], 'string', 'max' => 128],
         ];
     }
 
@@ -67,16 +79,21 @@ class TempRequestOrderItem extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'no_request' => 'No Request',
+            'id' => 'ID',
+            'code' => 'Code',
             'urutan' => 'Urutan',
-            'no_spk' => 'No Spk',
-            'no_so' => 'No So',
             'item_code' => 'Item Code',
+            'supplier_code' => 'Supplier Code',
             'satuan_code' => 'Satuan Code',
             'material_code' => 'Material Code',
             'type_code' => 'Type Code',
-            'group_supplier_code' => 'Group Supplier Code',
-            'group_material_code' => 'Group Material Code',
+            'qty_order_1' => 'Qty Order 1',
+            'qty_order_2' => 'Qty Order 2',
+            'qty_order_3' => 'Qty Order 3',
+            'qty_up' => 'Qty Up',
+            'konversi_1' => 'Konversi 1',
+            'konversi_2' => 'Konversi 2',
+            'konversi_3' => 'Konversi 3',
             'um_1' => 'Um 1',
             'um_2' => 'Um 2',
             'um_3' => 'Um 3',
@@ -86,32 +103,10 @@ class TempRequestOrderItem extends \yii\db\ActiveRecord
             'harga_jual_1' => 'Harga Jual 1',
             'harga_jual_2' => 'Harga Jual 2',
             'harga_jual_3' => 'Harga Jual 3',
-            'qty_order_1' => 'Qty Order 1',
-            'qty_order_2' => 'Qty Order 2',
-            'qty_order_3' => 'Qty Order 3',
             'total_order' => 'Total Order',
+            'keterangan' => 'Keterangan',
             'user_id' => 'User ID',
         ];
-    }
-
-    public function getCount()
-    {
-        return TempRequestOrderItem::find()->where(['user_id'=> \Yii::$app->user->id])->count();
-    }
-
-    public function getTmps()
-    {
-        return TempRequestOrderItem::find()->where(['user_id'=> \Yii::$app->user->id])->all();
-    }
-
-    public function getItem()
-    {
-        return $this->hasOne(MasterMaterialItem::className(), ['code' => 'item_code']);
-    }
-
-    public function getItemPricelist()
-    {
-        return $this->hasOne(MasterMaterialItemPricelist::className(), ['item_code' => 'item_code']);
     }
 
     public function beforeSave($attribute)
@@ -122,14 +117,80 @@ class TempRequestOrderItem extends \yii\db\ActiveRecord
         return parent::beforeSave($attribute);
     }
 
+    public function getItem()
+    {
+        return $this->hasOne(MasterMaterial::className(), ['code' => 'item_code']);
+    }
+
+    public function getItemBahan()
+    {
+        return $this->hasOne(MasterMaterial::className(), ['code' => 'bahan_item_code']);
+    }
+
+    public function getSupplier()
+    {
+        return $this->hasOne(MasterPerson::className(), ['code' => 'supplier_code']);
+    }
+
+    public function getSatuan()
+    {
+        return $this->hasOne(MasterSatuan::className(), ['code' => 'satuan_code']);
+    }
+
+    public function getItemMaterial()
+    {
+        $model = TempRequestOrderItem::find()
+            ->alias('a')
+            ->leftJoin('master_kode b', 'b.code = a.type_code')
+            ->where(['a.code'=>$this->code, 'supplier_code'=>$this->supplier_code, 'value'=>\Yii::$app->params['TYPE_KERTAS']])
+            ->one();
+        return $model;
+    }
+
+    public function getItemsMaterial()
+    {
+        $model = TempRequestOrderItem::find()
+            ->alias('a')
+            ->leftJoin('master_kode b', 'b.code = a.type_code')
+            ->where(['a.code'=>$this->code, 'value'=>\Yii::$app->params['TYPE_KERTAS']])
+            ->all();
+        return $model;
+    }
+
+    public function getItemPricelist()
+    {
+        return $this->hasOne(MasterMaterialPricelist::className(), ['item_code' => 'item_code']);
+    }
+
+    public function getInventoryStock()
+    {
+        return $this->hasOne(InventoryStockItem::className(), ['item_code' => 'item_code', 'supplier_code' => 'supplier_code']);
+    }
+
+    public function getItemTemp()
+    {
+        return $this->hasOne(TempRequestOrderItem::className(), ['code' => 'code', 'item_code' => 'item_code', 'supplier_code' => 'supplier_code']);
+    }
+
+    public function getTemps()
+    {
+        return TempRequestOrderItem::find()->where(['code'=>$this->code, 'user_id'=> \Yii::$app->user->id])->all();
+    }
+
+    public function getCountTemp()
+    {
+        return TempRequestOrderItem::find()->where(['user_id'=> \Yii::$app->user->id])->count();
+    }
+
     public function getTotalOrder()
     {
         $total_order=0;
+        $konversi_2 = (!empty($item->satuan->konversi_2)) ? $item->satuan->konversi_2 : 1;
         if(!empty($this->qty_order_1)){
             $total_order += $this->qty_order_1 * $this->harga_jual_1;
         }
         if(!empty($this->qty_order_2)){
-            $total_order += ($this->qty_order_2 / 1000) * $this->harga_jual_2;
+            $total_order += ($this->qty_order_2 / $konversi_2) * $this->harga_jual_2;
         }
         return $total_order;
     }

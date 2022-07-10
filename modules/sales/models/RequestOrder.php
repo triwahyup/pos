@@ -3,7 +3,6 @@
 namespace app\modules\sales\models;
 
 use Yii;
-use app\modules\master\models\Profile;
 use app\modules\sales\models\RequestOrderApproval;
 use app\modules\sales\models\RequestOrderItem;
 use app\modules\sales\models\TempRequestOrderItem;
@@ -14,8 +13,12 @@ use yii\behaviors\TimestampBehavior;
  *
  * @property string $no_request
  * @property string|null $tgl_request
+ * @property string $no_so
+ * @property string|null $no_spk
+ * @property float|null $total_order_material
+ * @property float|null $total_order_bahan
+ * @property float|null $grand_total
  * @property string|null $keterangan
- * @property int|null $user_id
  * @property int|null $post
  * @property int|null $status_approval
  * @property int|null $status
@@ -45,10 +48,11 @@ class RequestOrder extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['tgl_request'], 'required'],
+            [['no_request', 'no_so'], 'required'],
             [['tgl_request'], 'safe'],
-            [['user_id', 'post', 'status_approval', 'status', 'created_at', 'updated_at'], 'integer'],
-            [['no_request'], 'string', 'max' => 12],
+            [['total_order_material', 'total_order_bahan', 'grand_total'], 'number'],
+            [['post', 'status_approval', 'status', 'created_at', 'updated_at'], 'integer'],
+            [['no_request', 'no_so', 'no_spk'], 'string', 'max' => 12],
             [['keterangan'], 'string', 'max' => 128],
             [['no_request'], 'unique'],
             [['status'], 'default', 'value' => 1],
@@ -61,10 +65,14 @@ class RequestOrder extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'no_request' => 'No Request',
-            'tgl_request' => 'Tgl Request',
+            'no_request' => 'No. Request',
+            'tgl_request' => 'Tgl. Request',
+            'no_so' => 'No. So',
+            'no_spk' => 'No. Spk',
+            'total_order_material' => 'Total Order Material',
+            'total_order_bahan' => 'Total Order Bahan',
+            'grand_total' => 'Grand Total',
             'keterangan' => 'Keterangan',
-            'user_id' => 'User Request',
             'post' => 'Post',
             'status_approval' => 'Status Approval',
             'status' => 'Status',
@@ -88,11 +96,6 @@ class RequestOrder extends \yii\db\ActiveRecord
             $total = (int)substr($model->no_request, -4);
         }
         return (string)date('Ymd').sprintf('%04s', ($total+1));
-    }
-
-    public function getProfile()
-    {
-        return $this->hasOne(Profile::className(), ['user_id' => 'user_id']);
     }
 
     public function getItems()

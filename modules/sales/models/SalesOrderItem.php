@@ -73,6 +73,7 @@ class SalesOrderItem extends \yii\db\ActiveRecord
             [['um_1', 'um_2', 'um_3'], 'string', 'max' => 5],
             [['keterangan'], 'string', 'max' => 128],
             [['code', 'urutan', 'item_code', 'supplier_code'], 'unique', 'targetAttribute' => ['code', 'urutan', 'item_code', 'supplier_code']],
+            [['status'], 'default', 'value' => 1],
         ];
     }
 

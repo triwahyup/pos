@@ -42,8 +42,10 @@ $data = [
     'IN_REVIEW' => 'IN_REVIEW',
     'DONE' => 'DONE',
     'ON_START' => 'ON_START',
+    'ON_FINISH' => 'ON_FINISH',
+    'ON_CLOSING' => 'ON_CLOSING',
 
-    'URL' => ((getenv('APP_ENV') != 'production') ? (getenv('APP_ENV') != 'beta') ? 'http://localhost/pos/web/index.php?r=' : '' : ''),
+    'URL' => ((getenv('APP_ENV') != 'production') ? (getenv('APP_ENV') != 'beta') ? 'http://localhost:8080/pos/web/index.php?r=' : '' : ''),
 ];
 return $data;
 ?>
