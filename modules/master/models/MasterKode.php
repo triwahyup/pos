@@ -80,12 +80,14 @@ class MasterKode extends \yii\db\ActiveRecord
 
     public function getMenu()
     {
+        $this->value = str_replace(' ', '-', $this->value);
 		return AuthItemChild::find()->where(['parent'=>$this->value])->all();
     }
 
     public function getAuthItem()
     {
-        $model = AuthItemChild::findAll(['parent'=>str_replace(' ','-', $this->value)]);
+        $this->value = str_replace(' ', '-', $this->value);
+        $model = AuthItemChild::find()->where(['parent'=>$this->value])->all();
         $data = [];
         foreach($model as $val){
 			$menu = PengaturanMenu::findOne(['slug'=>$val->child]);

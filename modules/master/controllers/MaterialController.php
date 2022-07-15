@@ -193,9 +193,13 @@ class MaterialController extends Controller
         $message = '';
         $temp = new TempMasterMaterialPricelist();
         $model = $this->findModel($code);
+        $type = (isset($model->typeCode)) ? $model->typeCode->value : '';
+        $type = ($type == \Yii::$app->params['TYPE_KERTAS']) 
+            ? \Yii::$app->params['TYPE_KERTAS'] 
+            : \Yii::$app->params['TYPE_BAHAN_PB'];
         $material = MasterKode::find()
             ->select(['name'])
-            ->where(['type'=>\Yii::$app->params['TYPE_KERTAS'], 'status'=>1])
+            ->where(['type'=> $type, 'status'=>1])
             ->indexBy('code')
             ->column();
         $satuan = MasterSatuan::find()

@@ -23,7 +23,16 @@ class DataList {
         /** DATA MATERIAL */ 
         $model['material'] = MasterKode::find()
             ->select(['name'])
-            ->where(['type'=>\Yii::$app->params['TYPE_MATERIAL'], 'status' => 1])
+            ->where(['value'=>[
+                    \Yii::$app->params['TYPE_KERTAS'], 
+                    \Yii::$app->params['TYPE_BAHAN_PB']
+                ], 'status' => 1])
+            ->indexBy('code')
+            ->column();
+        /** DATA BAHAN PB */
+        $model['bahan_pembantu'] = MasterKode::find()
+            ->select(['name'])
+            ->where(['type'=>\Yii::$app->params['TYPE_BAHAN_PB'], 'status' => 1])
             ->indexBy('code')
             ->column();
         /** DATA MESIN */

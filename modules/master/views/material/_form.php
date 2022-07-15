@@ -29,7 +29,6 @@ use yii\widgets\MaskedInput;
                                 'data' => $material,
                                 'options' => [
                                     'placeholder' => 'Material Type',
-                                    // 'readonly' => (!$model->isNewRecord) ? true : false,
                                 ],
                             ]) ?>
                     </div>
