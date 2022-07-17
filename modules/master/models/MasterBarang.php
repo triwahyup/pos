@@ -73,7 +73,7 @@ class MasterBarang extends \yii\db\ActiveRecord
         $total=0;
         if($model > 0){
             $model = MasterBarang::find()->orderBy(['code'=>SORT_DESC])->one();
-            $total = (int)substr($model->code, 3);
+            $total = (int)substr($model->code, -5);
         }
         return 'BR'.(string)sprintf('%05s', ($total+1));
     }

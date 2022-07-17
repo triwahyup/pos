@@ -95,7 +95,7 @@ use yii\widgets\MaskedInput;
                             'data-name' => 'iconbox',
                             'data-icons' => 'rupiah',
                             'data-temp' => 1,
-                            'readonly' => true,
+                            // 'readonly' => true,
                         ]
                     ])->label(false) ?>
             </div>

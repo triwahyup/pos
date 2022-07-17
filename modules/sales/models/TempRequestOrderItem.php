@@ -13,7 +13,7 @@ use app\modules\master\models\MasterSatuan;
  * This is the model class for table "temp_request_order_item".
  *
  * @property int $id
- * @property string|null $code
+ * @property string|null $no_request
  * @property int|null $urutan
  * @property string|null $item_code
  * @property string|null $supplier_code
@@ -65,7 +65,7 @@ class TempRequestOrderItem extends \yii\db\ActiveRecord
         return [
             [['urutan', 'user_id', 'type_qty'], 'integer'],
             [['qty_order_1', 'qty_order_2', 'qty_order_3', 'qty_up', 'konversi_1', 'konversi_2', 'konversi_3', 'harga_beli_1', 'harga_beli_2', 'harga_beli_3', 'harga_jual_1', 'harga_jual_2', 'harga_jual_3', 'total_order', 'bahan_qty'], 'safe'],
-            [['code'], 'string', 'max' => 12],
+            [['no_request'], 'string', 'max' => 12],
             [['item_code', 'bahan_item_code'], 'string', 'max' => 7],
             [['supplier_code', 'satuan_code', 'material_code', 'type_code', 'bahan_supplier_code'], 'string', 'max' => 3],
             [['um_1', 'um_2', 'um_3'], 'string', 'max' => 5],
@@ -80,7 +80,7 @@ class TempRequestOrderItem extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
-            'code' => 'Code',
+            'no_request' => 'No. Request',
             'urutan' => 'Urutan',
             'item_code' => 'Item Code',
             'supplier_code' => 'Supplier Code',
@@ -142,7 +142,7 @@ class TempRequestOrderItem extends \yii\db\ActiveRecord
         $model = TempRequestOrderItem::find()
             ->alias('a')
             ->leftJoin('master_kode b', 'b.code = a.type_code')
-            ->where(['a.code'=>$this->code, 'supplier_code'=>$this->supplier_code, 'value'=>\Yii::$app->params['TYPE_KERTAS']])
+            ->where(['a.no_request'=>$this->no_request, 'supplier_code'=>$this->supplier_code, 'value'=>\Yii::$app->params['TYPE_KERTAS']])
             ->one();
         return $model;
     }
@@ -152,7 +152,7 @@ class TempRequestOrderItem extends \yii\db\ActiveRecord
         $model = TempRequestOrderItem::find()
             ->alias('a')
             ->leftJoin('master_kode b', 'b.code = a.type_code')
-            ->where(['a.code'=>$this->code, 'value'=>\Yii::$app->params['TYPE_KERTAS']])
+            ->where(['a.no_request'=>$this->no_request, 'value'=>\Yii::$app->params['TYPE_KERTAS']])
             ->all();
         return $model;
     }
@@ -169,12 +169,12 @@ class TempRequestOrderItem extends \yii\db\ActiveRecord
 
     public function getItemTemp()
     {
-        return $this->hasOne(TempRequestOrderItem::className(), ['code' => 'code', 'item_code' => 'item_code', 'supplier_code' => 'supplier_code']);
+        return $this->hasOne(TempRequestOrderItem::className(), ['no_request' => 'no_request', 'item_code' => 'item_code', 'supplier_code' => 'supplier_code']);
     }
 
     public function getTemps()
     {
-        return TempRequestOrderItem::find()->where(['code'=>$this->code, 'user_id'=> \Yii::$app->user->id])->all();
+        return TempRequestOrderItem::find()->where(['no_request'=>$this->no_request, 'user_id'=> \Yii::$app->user->id])->all();
     }
 
     public function getCountTemp()

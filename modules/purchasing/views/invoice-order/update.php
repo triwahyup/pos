@@ -12,6 +12,7 @@ $this->params['breadcrumbs'][] = 'Update';
 ?>
 <div class="purchase-order-invoice-update">
     <?= $this->render('_form', [
+        'dataList' => $dataList,
         'model' => $model,
     ]) ?>
 </div>

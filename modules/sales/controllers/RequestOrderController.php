@@ -5,8 +5,8 @@ namespace app\modules\sales\controllers;
 use app\models\Logs;
 use app\models\LogsMail;
 use app\models\User;
+use app\modules\inventory\models\InventoryStockItem;
 use app\modules\inventory\models\InventoryStockTransaction;
-use app\modules\master\models\MasterMaterialItem;
 use app\modules\pengaturan\models\PengaturanApproval;
 use app\modules\sales\models\RequestOrder;
 use app\modules\sales\models\RequestOrderApproval;
@@ -42,7 +42,10 @@ class RequestOrderController extends Controller
                             'roles' => ['@'],
                         ],
                         [
-                            'actions' => ['index', 'view', 'list-item', 'search', 'autocomplete', 'item', 'popup', 'temp', 'get-temp'],
+                            'actions' => [
+                                'index', 'view', 'invoice', 'popup', 'temp-item', 'temp-bahan', 'get-temp', 
+                                'list-item', 'search-item', 'autocomplete-item', 'select-item'
+                            ],
                             'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('request-material-sales-order[R]')),
                             'roles' => ['@'],
                         ], 
@@ -50,7 +53,7 @@ class RequestOrderController extends Controller
                             'actions' => ['update', 'post', 'update-temp', 'send-approval'],
                             'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('request-material-sales-order[U]')),
                             'roles' => ['@'],
-                        ], 
+                        ],
                         [
                             'actions' => ['delete', 'delete-temp'],
                             'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('request-material-sales-order[D]')),
@@ -97,16 +100,13 @@ class RequestOrderController extends Controller
     public function actionView($no_request)
     {
         $model = $this->findModel($no_request);
-        $typeuser = \Yii::$app->user->identity->profile->typeUser->value;
         $sendApproval = false;
         $postSpk = false;
-        if($typeuser == 'ADMINISTRATOR' || $typeuser == 'ADMIN'){
-            if($model->status_approval == 0 || $model->status_approval == 3){
-                $sendApproval = true;
-            }
-            if($model->status_approval == 2 && ($model->post == 0 || empty($model->post))){
-                $postSpk = true;
-            }
+        if($model->status_approval == 0 || $model->status_approval == 3){
+            $sendApproval = true;
+        }
+        if($model->status_approval == 2 && ($model->post == 0 || empty($model->post))){
+            $postSpk = true;
         }
 
         $typeApproval = false;
@@ -122,7 +122,13 @@ class RequestOrderController extends Controller
             'sendApproval' => $sendApproval,
             'postSpk' => $postSpk,
             'typeApproval' => $typeApproval,
-            'typeuser' => $typeuser,
+        ]);
+    }
+
+    public function actionInvoice($no_request)
+    {
+        return $this->render('_invoice', [
+            'model' => $this->findModel($no_request),
         ]);
     }
 
@@ -146,6 +152,7 @@ class RequestOrderController extends Controller
                 $connection = \Yii::$app->db;
 			    $transaction = $connection->beginTransaction();
                 try{
+                    $model = \Yii::$app->user->id;
                     $totalOrder = $model->totalOrder;
                     if($model->save()){
                         if(count($model->temps()) > 0){
@@ -299,9 +306,9 @@ class RequestOrderController extends Controller
                     return $this->redirect(['index']);
                 }else{
                     $this->emptyTemp();
-                    foreach($model->items as $item){
+                    foreach($model->items as $detail){
                         $temp = new TempRequestOrderItem();
-                        $temp->attributes = $item->attributes;
+                        $temp->attributes = $detail->attributes;
                         $temp->user_id = \Yii::$app->user->id;
                         if(!$temp->save()){
                             $message = (count($temp->errors) > 0) ? 'ERROR LOAD REQUEST ORDER ITEM: ' : '';
@@ -408,75 +415,150 @@ class RequestOrderController extends Controller
         throw new NotFoundHttpException('The requested page does not exist.');
     }
 
-    public function actionListItem()
+    public function actionListItem($type)
     {
-        $model = MasterMaterialItem::find()
+        $andWhere = '';
+        if($type == 'item')
+            $andWhere = 'value = "'.\Yii::$app->params['TYPE_KERTAS'].'" 
+                and um_1 <> "'.\Yii::$app->params['TYPE_ROLL'].'"';
+        if($type == 'bahan')
+            $andWhere = 'value <> "'.\Yii::$app->params['TYPE_KERTAS'].'"';
+
+        $model = InventoryStockItem::find()
             ->alias('a')
-            ->select(['a.*', 'b.composite'])
-            ->leftJoin('master_satuan b', 'b.code = a.satuan_code')
+            ->select(['item_code', 'onhand', 'b.code as supplier_code', 'b.name as supplier_name',
+                'c.name as item_name', 'd.name as type_name'])
+            ->leftJoin('master_person b', 'b.code = a.supplier_code')
+            ->leftJoin('master_material c', 'c.code = a.item_code')
+            ->leftJoin('master_kode d', 'd.code = c.type_code')
+            ->leftJoin('master_satuan e', 'e.code = c.satuan_code')
             ->where(['a.status'=>1])
-            ->orderBy(['a.code'=>SORT_ASC])
+            ->andWhere($andWhere)
+            ->orderBy(['item_code'=>SORT_ASC])
+            ->asArray()
             ->limit(10)
             ->all();
-        return json_encode(['data'=>$this->renderPartial('_list_item', ['model'=>$model])]);
+        foreach($model as $index=>$val){
+            $model[$index]['stock'] = InventoryStockItem::konversi($val['item_code'], $val['onhand']);
+        }
+        return json_encode(['data'=>$this->renderPartial('_list_item', [
+            'model'=>$model, 'type'=>$type])
+        ]);
     }
 
-    public function actionAutocomplete()
+    public function actionAutocompleteItem()
     {
         $model = [];
         if(isset($_POST['search'])){
-            $model = MasterMaterialItem::find()
-                ->select(['code', 'concat(code,"-",name) label', 'concat(code,"-",name) name'])
-                ->where(['status'=>1])
-                ->andWhere('concat(code,"-",name) LIKE "%'.$_POST['search'].'%"')
+            $andWhere = '';
+            if($_POST['type'] == 'item')
+                $andWhere = 'value = "'.\Yii::$app->params['TYPE_KERTAS'].'" 
+                    and um_1 <> "'.\Yii::$app->params['TYPE_ROLL'].'"';
+            if($_POST['type'] == 'bahan')
+                $andWhere = 'value <> "'.\Yii::$app->params['TYPE_KERTAS'].'"';
+
+            $model = InventoryStockItem::find()
+                ->alias('a')
+                ->select(['concat(c.code, "-", c.name, " (", b.name, ")") as label', 'item_code', 'onhand',
+                    'b.code as supplier_code', 'b.name as supplier_name', 'c.name as item_name', 'd.name as type_name'])
+                ->leftJoin('master_person b', 'b.code = a.supplier_code')
+                ->leftJoin('master_material c', 'c.code = a.item_code')
+                ->leftJoin('master_kode d', 'd.code = c.type_code')
+                ->leftJoin('master_satuan e', 'e.code = c.satuan_code')
+                ->where(['a.status'=>1])
+                ->andWhere('concat(c.code,"-", c.name, " (", b.name, ")") LIKE "%'.$_POST['search'].'%"')
+                ->andWhere($andWhere)
+                ->orderBy(['item_code'=>SORT_ASC])
                 ->asArray()
                 ->limit(10)
                 ->all();
+            foreach($model as $index=>$val){
+                $model[$index]['stock'] = InventoryStockItem::konversi($val['item_code'], $val['onhand']);
+            }
         }
         return  json_encode($model);
     }
 
-    public function actionSearch()
+    public function actionSearchItem()
     {
         $model = [];
         if(isset($_POST['code'])){
-            $model = MasterMaterialItem::find()
+            $andWhere = '';
+            if($_POST['type'] == 'item')
+                $andWhere = 'value = "'.\Yii::$app->params['TYPE_KERTAS'].'" 
+                    and um_1 <> "'.\Yii::$app->params['TYPE_ROLL'].'"';
+            if($_POST['type'] == 'bahan')
+                $andWhere = 'value <> "'.\Yii::$app->params['TYPE_KERTAS'].'"';
+
+            $model = InventoryStockItem::find()
                 ->alias('a')
-                ->select(['a.*', 'b.composite'])
-                ->leftJoin('master_satuan b', 'b.code = a.satuan_code')
-                ->leftJoin('master_kode c', 'c.code = a.type_code')
-                ->where(['a.code'=>$_POST['code'], 'a.status'=>1])
+                ->select(['item_code', 'onhand', 'b.code as supplier_code', 'b.name as supplier_name', 
+                    'c.name as item_name', 'd.name as type_name'])
+                ->leftJoin('master_person b', 'b.code = a.supplier_code')
+                ->leftJoin('master_material c', 'c.code = a.item_code')
+                ->leftJoin('master_kode d', 'd.code = c.type_code')
+                ->leftJoin('master_satuan e', 'e.code = c.satuan_code')
+                ->where(['item_code'=>$_POST['code'], 'b.code'=>$_POST['supplier'], 'a.status'=>1])
+                ->andWhere($andWhere)
+                ->orderBy(['item_code'=>SORT_ASC])
+                ->asArray()
+                ->limit(10)
                 ->all();
+            foreach($model as $index=>$val){
+                $model[$index]['stock'] = InventoryStockItem::konversi($val['item_code'], $val['onhand']);
+            }
         }
-        return json_encode(['data'=>$this->renderPartial('_list_item', ['model'=>$model])]);
+        return json_encode(['data'=>$this->renderPartial('_list_item', [
+            'model'=>$model, 'type'=>$_POST['type']])
+        ]);
     }
 
-    public function actionItem()
+    public function actionSelectItem()
     {
-        $model = MasterMaterialItem::find()
+        $model = InventoryStockItem::find()
             ->alias('a')
-            ->select(['a.*', 'b.*', 'a.name as item_name', 'c.composite'])
-            ->leftJoin('master_material_item_pricelist b', 'b.item_code = a.code')
-            ->leftJoin('master_satuan c', 'c.code = a.satuan_code')
-            ->where(['a.code'=>$_POST['code'], 'a.status'=>1, 'b.status_active' => 1])
+            ->select(['item_code', 'b.code as supplier_code', 'c.name as item_name'])
+            ->leftJoin('master_person b', 'b.code = a.supplier_code')
+            ->leftJoin('master_material c', 'c.code = a.item_code')
+            ->where(['item_code'=>$_POST['code'], 'supplier_code'=>$_POST['supplier'], 'a.status'=>1])
             ->asArray()
             ->one();
-        if(empty($model)){
-            $model = [];
-        }
         return json_encode($model);
     }
 
-    public function actionTemp()
+    public function actionTempItem()
     {
-        $temps = TempRequestOrderItem::findAll(['user_id'=> \Yii::$app->user->id]);
-        $model =  $this->renderAjax('_temp', ['temps'=>$temps]);
+        $temps = TempRequestOrderItem::find()
+            ->alias('a')
+            ->leftJoin('master_kode b', 'b.code = a.type_code')
+            ->where(['value'=>\Yii::$app->params['TYPE_KERTAS'], 'user_id'=> \Yii::$app->user->id])
+            ->all();
+        $model =  $this->renderAjax('_temp_item', ['temps'=>$temps]);
+        return json_encode(['model'=>$model]);
+    }
+
+    public function actionTempBahan()
+    {
+        $temps = TempRequestOrderItem::find()
+            ->alias('a')
+            ->leftJoin('master_kode b', 'b.code = a.type_code')
+            ->where(['user_id' => \Yii::$app->user->id])
+            ->andWhere('value <> "'.\Yii::$app->params['TYPE_KERTAS'].'"')
+            ->all();
+        $model = $this->renderAjax('_temp_bahan', [
+            'temps' => $temps]);
         return json_encode(['model'=>$model]);
     }
 
     public function actionGetTemp($id)
     {
-        $temp = TempRequestOrderItem::find()->where(['id'=>$id])->asArray()->one();
+        $temp = TempRequestOrderItem::find()
+            ->alias('a')
+            ->select(['a.*', 'b.name as item_name'])
+            ->leftJoin('master_material b', 'b.code = a.item_code')
+            ->where(['id'=>$id])
+            ->asArray()
+            ->one();
         return json_encode($temp);
     }
 
@@ -486,38 +568,75 @@ class RequestOrderController extends Controller
         $success = true;
         $message = 'CREATE TEMP SUCCESSFULLY';
         if($request->isPost){
-            $dataTemp = $request->post('TempRequestOrderItem');
-            $model = Spk::findOne(['no_spk'=>$dataTemp['no_spk']]);
-            if(isset($model)){
-                $temp = new TempRequestOrderItem();
-                $temp->attributes = (array)$dataTemp;
-                $temp->attributes = $model->attributes;
-                $temp->attributes = $temp->item->attributes;
-                if(!empty($temp->qty_order_1) || !empty($temp->qty_order_2)){
-                    if(isset($temp->itemPricelist)){
-                        $temp->attributes = $temp->itemPricelist->attributes;
-                        $temp->no_request = 'tmp';
-                        $temp->urutan = $temp->count +1;
-                        $temp->total_order = $temp->totalOrder;
-                        $temp->user_id = \Yii::$app->user->id;
-                        if(!$temp->save()){
+            $connection = \Yii::$app->db;
+            $transaction = $connection->beginTransaction();
+            try{
+                $dataHeader = $request->post('RequestOrder');
+                $no_request = (!empty($dataHeader['no_request'])) ? $dataHeader['no_request'] : 'tmp';
+                // TEMP ITEM ATTRIBUTES
+                $dataItem = $request->post('TempRequestOrderItem');
+                $tempItem = new TempRequestOrderItem();
+                $tempItem->attributes = (array)$dataItem;
+                if(count($tempItem->itemBahan) > 0){
+                    if(!empty($tempItem->bahan_qty)){
+                        $tempItem->item_code = $tempItem->bahan_item_code;
+                        $tempItem->supplier_code = $tempItem->bahan_supplier_code;
+                        $tempItem->qty_order_1 = $tempItem->bahan_qty;
+                    }else{
+                        $success = false;
+                        $message = 'Qty bahan pembantu tidak boleh kosong.';
+                        $tempItem->qty_order_1 = null;
+                    }
+                }
+
+                $tempItem->attributes = $tempItem->item->attributes;
+                if(isset($tempItem->itemPricelist)){
+                    $tempItem->attributes = $tempItem->itemPricelist->attributes;
+                    $tempItem->attributes = $tempItem->satuan->attributes;
+                    $tempItem->attributes = $tempItem->item->attributes;
+                    $tempItem->no_request = $no_request;
+                    $tempItem->urutan = $tempItem->countTemp +1;
+                    $tempItem->total_order = $tempItem->totalOrder;
+                    $tempItem->user_id = \Yii::$app->user->id;
+                    if($tempItem->item->typeCode->value == \Yii::$app->params['TYPE_KERTAS']){
+                        $tempItem->supplier_code = $dataItem['supplier_code'];
+                    }else{
+                        $tempItem->supplier_code = $dataItem['bahan_supplier_code'];
+                    }
+                }else{
+                    $success = false;
+                    if(isset($tempItem->itemBahan)){
+                        $itemName = $dataItem['bahan_item_name'];
+                    }else{
+                        $itemName = $dataItem['item_name'];
+                    }
+                    $message = 'Pricelist untuk item '.$itemName.' belum di setting.';
+                }
+
+                if($success){
+                    if(empty($tempItem->itemTemp)){
+                        if(!$tempItem->save()){
                             $success = false;
-                            foreach($temp->errors as $error => $value){
+                            foreach($tempItem->errors as $error => $value){
                                 $message = $value[0].', ';
                             }
                             $message = substr($message, 0, -2);
                         }
                     }else{
                         $success = false;
-                        $message = 'Pricelist untuk item '.$dataTemp['item_name'].' belum di setting.';
+                        $message = 'Item sudah disimpan.';
                     }
-                }else{
-                    $success = false;
-                    $message = 'Qty belum diisi. Silakan isi Qty terlebih dahulu.';
                 }
-            }else{
+
+                if($success){
+                    $transaction->commit();
+                }else{
+                    $transaction->rollBack();
+                }
+            }catch(\Exception $e){
                 $success = false;
-                $message = 'No. SPK tidak ditemukan di Surat Perintah Kerja.';
+                $message = $e->getMessage();
+                $transaction->rollBack();
             }
         }else{
             throw new NotFoundHttpException('The requested data does not exist.');
@@ -531,39 +650,40 @@ class RequestOrderController extends Controller
         $success = true;
         $message = 'UPDATE TEMP SUCCESSFULLY';
         if($request->isPost){
-            $dataTemp = $request->post('TempRequestOrderItem');
-            $model = Spk::findOne(['no_spk'=>$dataTemp['no_spk']]);
-            if(isset($model)){
-                $temp = $this->findTemp($dataTemp['id']);
-                $temp->attributes = (array)$dataTemp;
-                $temp->attributes = $model->attributes;
-                $temp->attributes = $temp->item->attributes;
-                if(!empty($temp->qty_order_1) || !empty($temp->qty_order_2)){
-                    if(isset($temp->itemPricelist)){
-                        $temp->attributes = $temp->itemPricelist->attributes;
-                        $dataHeader = $request->post('RequestOrder');
-                        $temp->no_request = (!empty($dataHeader['no_request'])) ? $dataHeader['no_request'] : 'tmp';
-                        $temp->urutan = $dataTemp['urutan'];
-                        $temp->total_order = $temp->totalOrder;
-                        $temp->user_id = \Yii::$app->user->id;
-                        if(!$temp->save()){
-                            $success = false;
-                            foreach($temp->errors as $error => $value){
-                                $message = $value[0].', ';
-                            }
-                            $message = substr($message, 0, -2);
-                        }
-                    }else{
-                        $success = false;
-                        $message = 'Pricelist untuk item '.$dataTemp['item_name'].' belum di setting.';
-                    }
-                }else{
-                    $success = false;
-                    $message = 'Qty belum diisi. Silakan isi Qty terlebih dahulu.';
-                }
+            $dataHeader = $request->post('RequestOrder');
+            $dataItem = $request->post('TempRequestOrderItem');
+            $tempItem = TempRequestOrderItem::findOne(['id'=>$dataItem['id']]);
+            $no_request = $tempItem->no_request;
+            $urutan = $tempItem->urutan;
+            $supplierCode = $dataItem['supplier_code'];
+            $tempItem->attributes = (array)$dataItem;
+            $tempItem->attributes = $tempItem->item->attributes;
+            if(isset($tempItem->itemPricelist)){
+                $tempItem->attributes = $tempItem->itemPricelist->attributes;
+                $tempItem->attributes = $tempItem->satuan->attributes;
+                $tempItem->attributes = $tempItem->item->attributes;
+                $tempItem->no_request = $no_request;
+                $tempItem->urutan = $urutan;
+                $tempItem->supplier_code = $supplierCode;
+                $tempItem->total_order = $tempItem->totalOrder;
             }else{
                 $success = false;
-                $message = 'No. SPK tidak ditemukan di Surat Perintah Kerja.';
+                if(isset($tempItem->itemBahan)){
+                    $itemName = $dataItem['bahan_item_name'];
+                }else{
+                    $itemName = $dataItem['item_name'];
+                }
+                $message = 'Pricelist untuk item '.$itemName.' belum di setting.';
+            }
+
+            if($success){
+                if(!$tempItem->save()){
+                    $success = false;
+                    foreach($tempItem->errors as $error => $value){
+                        $message = $value[0].', ';
+                    }
+                    $message = substr($message, 0, -2);
+                }
             }
         }else{
             throw new NotFoundHttpException('The requested data does not exist.');
@@ -575,10 +695,10 @@ class RequestOrderController extends Controller
     {
         $success = true;
         $message = 'DELETE TEMP SUCCESSFULLY';
-        $temp = $this->findTemp($id);
+        $temp = TempRequestOrderItem::findOne(['id'=>$id]);
         if(isset($temp)){
             if($temp->delete()){
-                foreach($temp->tmps as $index=>$val){
+                foreach($temp->temps as $index=>$val){
                     $val->urutan = $index +1;
                     if(!$val->save()){
                         $success = false;
@@ -597,15 +717,6 @@ class RequestOrderController extends Controller
             }
         }
         return json_encode(['success'=>$success, 'message'=>$message]);
-    }
-
-    protected function findTemp($id)
-    {
-        $temp = TempRequestOrderItem::findOne(['id'=>$id, 'user_id'=>\Yii::$app->user->id]);
-        if(isset($temp)){
-            return $temp;
-        }
-        throw new NotFoundHttpException('The requested page does not exist.');
     }
 
     protected function emptyTemp()

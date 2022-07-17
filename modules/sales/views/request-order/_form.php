@@ -94,10 +94,11 @@ use yii\widgets\MaskedInput;
                         <label>Material:</label>
                     </div>
                     <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                        <?= $form->field($temp, 'item_name')->textInput(['placeholder' => 'Pilih material tekan F4', 'data-type'=>'item', 'aria-required' => true])->label(false) ?>
-                        <?= $form->field($temp, 'id')->hiddenInput()->label(false) ?>
-                        <?= $form->field($temp, 'item_code')->hiddenInput()->label(false) ?>
-                        <?= $form->field($temp, 'supplier_code')->hiddenInput()->label(false) ?>
+                        <?= $form->field($temp, 'item_name')->textInput([
+                            'placeholder' => 'Pilih material tekan F4', 'data-type'=>'item', 'aria-required' => true, 'data-temp' => true])->label(false) ?>
+                        <?= $form->field($temp, 'id')->hiddenInput(['data-temp' => true])->label(false) ?>
+                        <?= $form->field($temp, 'item_code')->hiddenInput(['data-temp' => true])->label(false) ?>
+                        <?= $form->field($temp, 'supplier_code')->hiddenInput(['data-temp' => true])->label(false) ?>
                     </div>
                 </div>
                 <!-- Type Order -->
@@ -109,8 +110,10 @@ use yii\widgets\MaskedInput;
                         <?= $form->field($temp, 'type_qty')->widget(Select2::classname(), [
                                 'data' => [1=>'RIM', 2=>'LEMBAR'],
                                 'options' => [
+                                    'aria-required' => true,
                                     'placeholder' => 'Pilih Type QTY',
                                     'class' => 'select2',
+                                    'data-temp' => true,
                                 ],
                             ])->label(false) ?>
                     </div>
@@ -128,12 +131,14 @@ use yii\widgets\MaskedInput;
                                     'autoGroup' => true
                                 ],
                                 'options' => [
+                                    'aria-required' => true,
                                     'data-align' => 'text-right',
+                                    'data-temp' => true,
                                 ]
                             ])->label(false) ?>
                     </div>
                     <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-left-0">
-                        <label id="satuan_qty_temp" class="font-size-14 margin-left-5 margin-top-5">RIM</label>
+                        <label id="satuan_qty_temp" class="font-size-14 margin-left-5 margin-top-5 hidden">RIM</label>
                     </div>
                 </div>
             </div>
@@ -171,7 +176,7 @@ use yii\widgets\MaskedInput;
                                         <th class="text-center">Name</th>
                                         <th class="text-center">Supplier</th>
                                         <th class="text-center">Qty</th>
-                                        <th class="text-center" colspan="2">Action</th>
+                                        <th class="text-center">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -264,8 +269,373 @@ use yii\widgets\MaskedInput;
 </div>
 <div data-popup="popup"></div>
 <script>
+function load_item(type)
+{
+    $.ajax({
+        url: "<?=Url::to(['request-order/list-item'])?>",
+		type: "GET",
+        data: {
+            type: type,
+        },
+		dataType: "text",
+        error: function(xhr, status, error) {},
+		beforeSend: function (data){},
+        success: function(data){
+            var o = $.parseJSON(data);
+            $("[data-popup=\"popup\"]").html(o.data);
+            $("[data-popup=\"popup\"]").popup("open", {
+				container: "popup",
+				title: 'List Data Material',
+				styleOptions: {
+					width: 800
+				}
+			});
+        },
+        complete: function(){}
+    });
+}
+
+function search_item(code, supplier, type)
+{
+    $.ajax({
+        url: "<?=Url::to(['request-order/search-item'])?>",
+		type: "POST",
+        data: {
+            code: code,
+            supplier: supplier,
+            type: type,
+        },
+		dataType: "text",
+        error: function(xhr, status, error) {},
+		beforeSend: function(){},
+        success: function(data){
+            popup.close();
+            var o = $.parseJSON(data);
+            $("[data-popup=\"popup\"]").html(o.data);
+            $("[data-popup=\"popup\"]").popup("open", {
+				container: "popup",
+				title: 'List Data Material',
+				styleOptions: {
+					width: 800
+				}
+			});
+        },
+        complete: function(){}
+    });
+}
+
+function select_item(code, supplier, type)
+{
+    $.ajax({
+        url: "<?=Url::to(['request-order/select-item'])?>",
+		type: "POST",
+        data: {
+            code: code,
+            supplier: supplier,
+        },
+		dataType: "text",
+        error: function(xhr, status, error) {},
+		beforeSend: function(){
+            if(type != 'item'){
+                $("[id^=\"temprequestorderitem-bahan_\"]").val(null);
+            }
+        },
+        success: function(data){
+            var o = $.parseJSON(data);
+            $.each(o, function(index, value){
+                if(type == 'item'){
+                    $("#temprequestorderitem-"+index).val(value);
+                }else{
+                    $("#temprequestorderitem-bahan_"+index).val(value);
+                }
+            });
+            if(type == 'bahan'){
+                $("#temprequestorderitem-bahan_qty").attr("readonly", false);
+            }
+        },
+        complete: function(){
+            popup.close();
+        }
+    });
+}
+
+function create_temp(el)
+{
+    $.ajax({
+        url: "<?= Url::to(['request-order/create-temp']) ?>",
+        type: "POST",
+        data: $("#form").serialize(),
+        dataType: "text",
+        error: function(xhr, status, error) {},
+        beforeSend: function(){
+            el.loader("load");
+        },
+        success: function(data){
+            var o = $.parseJSON(data);
+            init_temp_item();
+            if(o.success == true){
+                notification.open("success", o.message, timeOut);
+            }else{
+                notification.open("danger", o.message, timeOut);
+            }
+        },
+        complete: function(){
+            el.loader("destroy");
+        }
+    });
+}
+
+function update_temp(el)
+{
+    $.ajax({
+        url: "<?= Url::to(['request-order/update-temp']) ?>",
+        type: "POST",
+        dataType: "text",
+        error: function(xhr, status, error) {},
+        beforeSend: function(){
+            el.loader("load");
+        },
+        data: $("#form").serialize(),
+        success: function(data){
+            var o = $.parseJSON(data);
+            init_temp_item();
+            if(o.success == true){
+                notification.open("success", o.message, timeOut);
+            }else{
+                notification.open("danger", o.message, timeOut);
+            }
+        },
+        complete: function(){
+            el.loader("destroy");
+        }
+    });
+}
+
+function delete_temp(id)
+{
+    $.ajax({
+        url: "<?= Url::to(['request-order/delete-temp']) ?>",
+        type: "GET",
+        dataType: "text",
+        error: function(xhr, status, error) {},
+        beforeSend: function(){
+            loading.open("loading bars");
+        },
+        data: {
+            id: id
+        },
+        success: function(data){
+            var o = $.parseJSON(data);
+            init_temp_item();
+            init_temp_bahan();
+            if(o.success == true){
+                notification.open("success", o.message, timeOut);
+            }else{
+                notification.open("danger", o.message, timeOut);
+            }
+            popup.close();
+        },
+        complete: function(){
+			loading.close();
+        }
+    });
+}
+
+function init_temp_item()
+{
+    $.ajax({
+        url: "<?= Url::to(['request-order/temp-item']) ?>",
+        type: "POST",
+        dataType: "text",
+        error: function(xhr, status, error) {},
+        beforeSend: function() {
+            temp.destroy();
+        },
+        success: function(data){
+            var o = $.parseJSON(data);
+            $("[data-render=\"detail-item\"] table > tbody").html(o.model);
+        },
+        complete: function(){
+            temp.destroy();
+        }
+    });
+}
+
+function get_temp(id)
+{
+    $.ajax({
+        url: "<?= Url::to(['request-order/get-temp']) ?>",
+        type: "GET",
+        dataType: "text",
+        data: {
+            id: id
+        },
+        error: function(xhr, status, error) {},
+        beforeSend: function(){},
+        success: function(data){
+            var o = $.parseJSON(data);
+            if(o.qty_order_1 !== null){
+                $("#temprequestorderitem-type_qty").val(1).trigger("change");
+            }
+            if(o.qty_order_2 !== null){
+                $("#temprequestorderitem-type_qty").val(2).trigger("change");
+            }
+            $.each(o, function(index, value){
+                $("#temprequestorderitem-"+index).val(value);
+            });
+        },
+        complete: function(){
+            temp.init();
+        }
+    });
+}
+
+function create_temp_bahan(el)
+{
+    $.ajax({
+        url: "<?= Url::to(['request-order/create-temp']) ?>",
+        type: "POST",
+        data: $("#form").serialize(),
+        dataType: "text",
+        error: function(xhr, status, error) {},
+        beforeSend: function(){
+            el.loader("load");
+        },
+        success: function(data){
+            var o = $.parseJSON(data);
+            init_temp_bahan();
+            if(o.success == true){
+                notification.open("success", o.message, timeOut);
+            }else{
+                notification.open("danger", o.message, timeOut);
+            }
+        },
+        complete: function(){
+            el.loader("destroy");
+        }
+    });
+}
+
+function init_temp_bahan()
+{
+    $.ajax({
+        url: "<?= Url::to(['request-order/temp-bahan']) ?>",
+        type: "POST",
+        dataType: "text",
+        error: function(xhr, status, error) {},
+        beforeSend: function() {
+            temp.destroy();
+        },
+        success: function(data){
+            var o = $.parseJSON(data);
+            $("[data-render=\"detail-bahan\"] table > tbody").html(o.model);
+        },
+        complete: function(){
+            temp.destroy();
+        }
+    });
+}
+
 var timeOut = 3000;
 $(document).ready(function(){
+    $("body").off("change","#temprequestorderitem-type_qty").on("change","#temprequestorderitem-type_qty", function(e){
+        e.preventDefault();
+        $("[id^=\"temprequestorderitem-qty_order_\"]").val(null);
+        $("#satuan_qty_temp").removeClass("hidden");
+        if($(this).val() == 1){
+            $("#satuan_qty_temp").text("RIM");
+            $("#temprequestorderitem-qty_order_2").attr("id", "temprequestorderitem-qty_order_1");
+            $("[name=\"TempRequestOrderItem[qty_order_2]\"]").attr("name", "TempRequestOrderItem[qty_order_1]");
+        }else if($(this).val() == 2){
+            $("#satuan_qty_temp").text("LEMBAR");
+            $("#temprequestorderitem-qty_order_1").attr("id", "temprequestorderitem-qty_order_2");
+            $("[name=\"TempRequestOrderItem[qty_order_1]\"]").attr("name", "TempRequestOrderItem[qty_order_2]");
+        }else{
+            $("#satuan_qty_temp").removeClass("hidden").addClass("hidden");
+        }
+    });
 
+    /** LOAD ITEM MATERIAL & BAHAN */
+    $("body").off("keydown","#temprequestorderitem-item_name")
+    $("body").on("keydown","#temprequestorderitem-item_name", function(e){
+        var key = e.charCode ? e.charCode : e.keyCode ? e.keyCode : 0;
+        if(key == KEY.F4){
+            load_item($(this).data().type);
+        }
+    });
+
+    $("body").off("keydown","#temprequestorderitem-bahan_item_name")
+    $("body").on("keydown","#temprequestorderitem-bahan_item_name", function(e){
+        var key = e.charCode ? e.charCode : e.keyCode ? e.keyCode : 0;
+        if(key == KEY.F4){
+            load_item($(this).data().type);
+        }
+    });
+
+    $("body").off("click","table[data-table=\"master_item_material\"] > tbody tr[data-code]");
+    $("body").on("click","table[data-table=\"master_item_material\"] > tbody tr[data-code]", function(e){
+        e.preventDefault();
+        var data = $(this).data();
+        select_item(data.code, data.supplier, data.type);
+    });
+    /** END LOAD ITEM MATERIAL & BAHAN */
+
+    $("body").off("click","[data-button=\"create_temp\"]").on("click","[data-button=\"create_temp\"]", function(e){
+        e.preventDefault();
+        success = true;
+        $.each($("[aria-required]:not([readonly])"), function(index, element){
+            var a = $(element).attr("id").split("-"),
+                b = a[1].replace("_", " ");
+            if(!$(element).val()){
+                success = false;
+                errorMsg = parsing.toUpper(b, 2) +' cannot be blank.';
+                if($(element).parent().hasClass("input-container")){
+                    $(element).parent(".input-container").parent().removeClass("has-error").addClass("has-error");
+                    $(element).parent(".input-container").siblings("[class=\"help-block\"]").text(errorMsg);
+                }else{
+                    $(element).parent().removeClass("has-error").addClass("has-error");
+                    $(element).siblings("[class=\"help-block\"]").text(errorMsg);
+                }
+            }
+        });
+        if(success){
+            create_temp($(this));
+        }
+    });
+    
+    $("body").off("click","[data-button=\"update_temp\"]").on("click","[data-button=\"update_temp\"]", function(e){
+        e.preventDefault();
+        var data = $(this).data();
+        get_temp(data.id);
+    });
+    $("body").off("click","[data-button=\"change_temp\"]").on("click","[data-button=\"change_temp\"]", function(e){
+        e.preventDefault();
+        update_temp($(this));
+    });
+    
+    $("body").off("click","[data-button=\"delete_temp\"]");
+    $("body").on("click","[data-button=\"delete_temp\"]", function(e){
+        e.preventDefault();
+        var data = $(this).data();
+        popup.open("confirm", {
+			message: "Apakah anda yakin ingin menghapus data ini ?",
+			selector: "delete_temp",
+			target: data.id,
+		});
+    });
+    $("body").off("click","#delete_temp").on("click","#delete_temp", function(e){
+        e.preventDefault();
+        delete_temp($(this).attr("data-target"));
+    });
+
+    $("body").off("click","[data-button=\"create_temp_bahan\"]");
+    $("body").on("click","[data-button=\"create_temp_bahan\"]", function(e){
+        e.preventDefault();
+        create_temp_bahan($(this));
+    });
+});
+$(function(){
+    init_temp_item();
+    init_temp_bahan();
 });
 </script>

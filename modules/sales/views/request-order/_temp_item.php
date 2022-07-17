@@ -4,10 +4,13 @@
             <td class="text-center"><?=$index+1?></td>
             <td class="text-center"><?=$val->item_code ?></td>
             <td><?=$val->item->name ?></td>
-            <?php for($a=1;$a<3;$a++): ?>
-                <td class="text-center"><?=(!empty($val['qty_order_'.$a])) ? number_format($val['qty_order_'.$a]).' '.$val['um_'.$a] : null ?></td>
-            <?php endfor; ?>
-            <td class="text-center"><?=$val->item->material->name ?></td>
+            <td><?=(isset($val->supplier)) ? $val->supplier->name : '' ?></td>
+            <td class="text-right">
+                <?=(!empty($val->qty_order_1)) 
+                    ? number_format($val->qty_order_1).' '.$val->um_1 
+                    : number_format($val->qty_order_2).' '.$val->um_2 
+                ?>
+            </td>
             <td class="text-center">
                 <button class="btn btn-warning btn-xs btn-sm" data-id="<?=$val->id ?>" data-button="update_temp">
                     <i class="fontello icon-pencil"></i>

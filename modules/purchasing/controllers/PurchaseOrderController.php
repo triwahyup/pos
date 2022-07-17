@@ -102,18 +102,15 @@ class PurchaseOrderController extends Controller
     public function actionView($no_po)
     {
         $model = $this->findModel($no_po);
-        $typeuser = \Yii::$app->user->identity->profile->typeUser->value;
         $sendApproval = false;
         $postInvoice = false;
-        if($typeuser == 'ADMINISTRATOR' || $typeuser == 'ADMIN'){
-            if($model->status_approval == 0 || $model->status_approval == 3){
-                $sendApproval = true;
-            }
-            if($model->status_approval == 2 && ($model->post == 0 || empty($model->post))){
-                $postInvoice = true;
-            }
-            
+        if($model->status_approval == 0 || $model->status_approval == 3){
+            $sendApproval = true;
         }
+        if($model->status_approval == 2 && ($model->post == 0 || empty($model->post))){
+            $postInvoice = true;
+        }
+        
         $typeApproval = false;
         $approval = PurchaseOrderApproval::findOne(['no_po'=>$no_po, 'status'=>2]);
         if(isset($approval)){
@@ -127,7 +124,6 @@ class PurchaseOrderController extends Controller
             'sendApproval' => $sendApproval,
             'postInvoice' => $postInvoice,
             'typeApproval' => $typeApproval,
-            'typeuser' => $typeuser,
         ]);
     }
 

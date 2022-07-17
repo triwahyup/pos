@@ -70,7 +70,7 @@ class MasterMesin extends \yii\db\ActiveRecord
         $total=0;
         if($model > 0){
             $model = MasterMesin::find()->orderBy(['code'=>SORT_DESC])->one();
-            $total = (int)substr($model->code, 1);
+            $total = (int)substr($model->code, -3);
         }
         return (string)sprintf('%03s', ($total+1));
     }

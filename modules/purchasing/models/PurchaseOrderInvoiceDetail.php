@@ -4,6 +4,7 @@ namespace app\modules\purchasing\models;
 
 use Yii;
 use app\modules\master\models\MasterMaterial;
+use app\modules\master\models\MasterSatuan;
 use yii\behaviors\TimestampBehavior;
 
 /**
@@ -48,11 +49,11 @@ class PurchaseOrderInvoiceDetail extends \yii\db\ActiveRecord
         return [
             [['no_invoice', 'urutan'], 'required'],
             [['urutan', 'status', 'created_at', 'updated_at'], 'integer'],
-            [['konversi_1', 'konversi_2', 'konversi_3', 'qty_order_1', 'qty_order_2', 'qty_order_3', 'qty_terima_1', 'qty_terima_2', 'qty_terima_3', 'qty_selisih', 'qty_susulan', 'harga_beli_1', 'harga_beli_2', 'harga_beli_3', 'ppn', 'total_order', 'total_invoice'], 'safe'],
+            [['konversi_1', 'konversi_2', 'konversi_3', 'qty_order_1', 'qty_order_2', 'qty_order_3', 'qty_terima_1', 'qty_terima_2', 'qty_terima_3', 'qty_selisih', 'qty_susulan', 'harga_beli_1', 'harga_beli_2', 'harga_beli_3', 'ppn', 'total_order', 'total_invoice', 'weight'], 'safe'],
             [['no_invoice'], 'string', 'max' => 12],
             [['item_code'], 'string', 'max' => 7],
             [['name'], 'string', 'max' => 128],
-            [['satuan_code', 'type_code', 'material_code', 'supplier_code'], 'string', 'max' => 3],
+            [['satuan_code', 'type_code', 'material_code', 'supplier_code', 'satuan_berat'], 'string', 'max' => 3],
             [['um_1', 'um_2', 'um_3'], 'string', 'max' => 5],
             [['no_invoice', 'urutan'], 'unique', 'targetAttribute' => ['no_invoice', 'urutan']],
             [['status'], 'default', 'value' => 1],
@@ -88,12 +89,18 @@ class PurchaseOrderInvoiceDetail extends \yii\db\ActiveRecord
             'status' => 'Status',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
+            'weight' => 'Berat'
         ];
     }
 
     public function getItem()
     {
         return $this->hasOne(MasterMaterial::className(), ['code' => 'item_code']);
+    }
+
+    public function getSatuanBerat()
+    {
+        return $this->hasOne(MasterSatuan::className(), ['code' => 'satuan_berat']);
     }
 
     public function beforeSave($attribute)

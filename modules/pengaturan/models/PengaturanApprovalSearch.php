@@ -58,7 +58,7 @@ class PengaturanApprovalSearch extends PengaturanApproval
 
         // grid filtering conditions
         $query->andFilterWhere([
-            'status' => $this->status,
+            'status' => 1,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ]);

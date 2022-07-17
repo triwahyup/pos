@@ -37,8 +37,10 @@ class PurchaseOrderInvoice extends \yii\db\ActiveRecord
     public $harga_beli_1;
     public $harga_beli_2;
     public $harga_beli_3;
+    public $weight;
     public $ppn;
     public $urutan;
+    public $satuan_berat;
 
     /**
      * {@inheritdoc}
@@ -61,13 +63,13 @@ class PurchaseOrderInvoice extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['tgl_invoice', 'tgl_po', 'tgl_kirim', 'total_invoice', 'qty_terima_1', 'qty_terima_2', 'qty_terima_3', 'harga_beli_1', 'harga_beli_2', 'harga_beli_3'], 'safe'],
+            [['tgl_invoice', 'tgl_po', 'tgl_kirim', 'total_invoice', 'qty_terima_1', 'qty_terima_2', 'qty_terima_3', 'harga_beli_1', 'harga_beli_2', 'harga_beli_3', 'weight'], 'safe'],
             [['term_in', 'user_id', 'post', 'status', 'created_at', 'updated_at', 'status_terima', 'urutan'], 'integer'],
             [['keterangan'], 'string'],
             [['total_ppn', 'total_order', 'ppn'], 'number'],
             [['no_invoice', 'no_po'], 'string', 'max' => 12],
             [['no_bukti'], 'string', 'max' => 32],
-            [['supplier_code'], 'string', 'max' => 3],
+            [['supplier_code', 'satuan_berat'], 'string', 'max' => 3],
             [['no_invoice'], 'unique'],
             [['status_terima'], 'default', 'value' => 0],
             [['status'], 'default', 'value' => 1],

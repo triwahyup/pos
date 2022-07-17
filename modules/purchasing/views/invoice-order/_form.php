@@ -81,6 +81,31 @@ use yii\widgets\MaskedInput;
         </div>
         <div class="col-lg-12 col-md-12 col-xs-12">
             <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
+                <label>Berat:</label>
+            </div>
+            <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
+                <?= $form->field($model, 'weight')->widget(MaskedInput::className(), [
+                        'clientOptions' => [
+                            'alias' =>  'decimal',
+                            'groupSeparator' => ',',
+                            'autoGroup' => true
+                        ],
+                        'options' => [
+                            'data-align' => 'text-right',
+                            'data-temp' => 1,
+                            // 'readonly' => true,
+                        ]
+                    ])->label(false) ?>
+            </div>
+            <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
+                <?= $form->field($model, 'satuan_berat')->widget(Select2::classname(), [
+                        'data' => $dataList['satuan_berat'],
+                        'options' => ['placeholder' => 'Satuan'],
+                    ])->label(false) ?>
+            </div>
+        </div>
+        <div class="col-lg-12 col-md-12 col-xs-12">
+            <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
                 <label>Harga Beli:</label>
             </div>
             <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padding-right-0">
@@ -95,7 +120,7 @@ use yii\widgets\MaskedInput;
                             'data-name' => 'iconbox',
                             'data-icons' => 'rupiah',
                             'data-temp' => 1,
-                            'readonly' => true,
+                            // 'readonly' => true,
                         ]
                     ])->label(false) ?>
             </div>
@@ -129,6 +154,7 @@ use yii\widgets\MaskedInput;
                             <th class="text-center">Item</th>
                             <th class="text-center">QTY Order</th>
                             <th class="text-center">QTY Terima</th>
+                            <th class="text-center">Weight</th>
                             <th class="text-center">Harga Beli</th>
                             <th class="text-center">Ppn (%)</th>
                             <th class="text-center">Total Order</th>

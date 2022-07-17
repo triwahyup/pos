@@ -98,18 +98,15 @@ class OpnameController extends Controller
     public function actionView($code)
     {
         $model = $this->findModel($code);
-        $typeuser = \Yii::$app->user->identity->profile->typeUser->value;
         $sendApproval = false;
         $post = false;
-        if($typeuser == 'ADMINISTRATOR' || $typeuser == 'ADMIN'){
-            if($model->status_approval == 0 || $model->status_approval == 3){
-                $sendApproval = true;
-            }
-            if($model->status_approval == 2 && ($model->post == 0 || empty($model->post))){
-                $post = true;
-            }
-            
+        if($model->status_approval == 0 || $model->status_approval == 3){
+            $sendApproval = true;
         }
+        if($model->status_approval == 2 && ($model->post == 0 || empty($model->post))){
+            $post = true;
+        }
+        
         $typeApproval = false;
         $approval = InventoryOpnameApproval::findOne(['code'=>$code, 'status'=>2]);
         if(isset($approval)){
@@ -122,7 +119,6 @@ class OpnameController extends Controller
             'sendApproval' => $sendApproval,
             'post' => $post,
             'typeApproval' => $typeApproval,
-            'typeuser' => $typeuser,
         ]);
     }
 

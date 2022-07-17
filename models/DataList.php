@@ -130,6 +130,13 @@ class DataList {
             ->where(['b.value'=>\Yii::$app->params['TYPE_SATUAN_PRODUKSI'], 'a.status'=>1])
             ->indexBy('a.code')
             ->column();
+        $model['satuan_berat'] = MasterSatuan::find()
+            ->alias('a')
+            ->select(['a.name'])
+            ->leftJoin('master_kode b', 'b.code = a.type_satuan')
+            ->where(['b.value'=>\Yii::$app->params['TYPE_SATUAN_BERAT'], 'a.status'=>1])
+            ->indexBy('a.code')
+            ->column();
         
         return $model;
     }

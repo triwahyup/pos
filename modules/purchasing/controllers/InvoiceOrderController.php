@@ -2,6 +2,7 @@
 
 namespace app\modules\purchasing\controllers;
 
+use app\models\DataList;
 use app\models\Logs;
 use app\models\User;
 use app\modules\inventory\models\InventoryStockItem;
@@ -93,6 +94,7 @@ class InvoiceOrderController extends Controller
         $success = true;
         $message = '';
         $model = $this->findModel($no_invoice);
+        $dataList = DataList::setListColumn();
         if ($this->request->isPost ) {
             if ($model->load($this->request->post())) {
                 $connection = \Yii::$app->db;
@@ -155,6 +157,7 @@ class InvoiceOrderController extends Controller
         }
 
         return $this->render('update', [
+            'dataList' => $dataList,
             'model' => $model,
         ]);
     }

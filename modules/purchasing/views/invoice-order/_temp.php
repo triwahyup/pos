@@ -19,6 +19,7 @@
                     <?=number_format($val->qty_terima_1).'<br /><span class="text-muted font-size-10">'.$val->um_1.'</span>' ?>
                 <?php endif; ?>
             </td>
+            <td class="text-right"><?=number_format($val->weight).' <br /><span class="text-muted font-size-10">'.$val->satuanBerat->name.'</span>' ?></td>
             <td class="text-right"><?=number_format($val->harga_beli_1).'.- <br /><span class="text-muted font-size-10">Per '.$val->um_1.'</span>' ?></td>
             <td class="text-right"><?=(!empty($val->ppn)) ? $val->ppn.'%' : '' ?></td>
             <td class="text-right"><?=number_format($val->total_order).'.-' ?></td>
@@ -31,7 +32,7 @@
         </tr>
 <?php endforeach; ?>
 <tr>
-    <td class="text-right summary" colspan="6"></td>
+    <td class="text-right summary" colspan="7"></td>
     <td class="text-right summary"><strong><?='Total Order: '.number_format($totalOrder).'.-' ?></strong></td>
     <td class="text-right summary"><strong><?='Total Invoice: '.number_format($totalInvoice).'.-' ?></strong></td>
     <td class="last-row"></td>

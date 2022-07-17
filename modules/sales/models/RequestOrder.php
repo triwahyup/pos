@@ -3,6 +3,7 @@
 namespace app\modules\sales\models;
 
 use Yii;
+use app\models\Profile;
 use app\modules\sales\models\RequestOrderApproval;
 use app\modules\sales\models\RequestOrderItem;
 use app\modules\sales\models\TempRequestOrderItem;
@@ -98,6 +99,11 @@ class RequestOrder extends \yii\db\ActiveRecord
         return (string)date('Ymd').sprintf('%04s', ($total+1));
     }
 
+    public function getProfile()
+    {
+        return $this->hasOne(Profile::className(), ['user_id' => 'user_id']);
+    }
+
     public function getItems()
     {
         return $this->hasMany(RequestOrderItem::className(), ['no_request' => 'no_request']);
@@ -142,5 +148,63 @@ class RequestOrder extends \yii\db\ActiveRecord
             $message = '<span class="text-label text-default">Not Send</span>';
         }
         return $message;
+    }
+
+    public function getItemsMaterial()
+    {
+        $model = RequestOrderItem::find()
+            ->alias('a')
+            ->leftJoin('master_kode b', 'b.code = a.type_code')
+            ->where(['a.no_request'=>$this->no_request, 'value'=>\Yii::$app->params['TYPE_KERTAS']])
+            ->all();
+        return $model;
+    }
+
+    public function getItemsNonMaterial()
+    {
+        $model = RequestOrderItem::find()
+            ->alias('a')
+            ->leftJoin('master_kode b', 'b.code = a.type_code')
+            ->where(['a.no_request'=>$this->no_request])
+            ->andWhere('value <> "'.\Yii::$app->params['TYPE_KERTAS'].'"')
+            ->all();
+        return $model;
+    }
+
+    public function itemsMaterial()
+    {
+        $model = TempRequestOrderItem::find()
+            ->alias('a')
+            ->leftJoin('master_kode b', 'b.code = a.type_code')
+            ->where(['value'=>\Yii::$app->params['TYPE_KERTAS'], 'user_id' => \Yii::$app->user->id])
+            ->all();
+        return $model;
+    }
+
+    public function itemsNonMaterial()
+    {
+        $model = TempRequestOrderItem::find()
+            ->alias('a')
+            ->leftJoin('master_kode b', 'b.code = a.type_code')
+            ->where(['user_id' => \Yii::$app->user->id])
+            ->andWhere('value <> "'.\Yii::$app->params['TYPE_KERTAS'].'"')
+            ->all();
+        return $model;
+    }
+
+    public function getTotalOrder()
+    {
+        $total_order_material=0;
+        foreach($this->itemsMaterial() as $val){
+            $total_order_material += $val->total_order;
+        }
+        $this->total_order_material = $total_order_material;
+        $total_order_bahan=0;
+        foreach($this->itemsNonMaterial() as $val){
+            $total_order_bahan += $val->total_order;
+        }
+        $this->total_order_bahan = $total_order_bahan;
+        $this->grand_total = $total_order_material + $total_order_bahan;
+        return true;
     }
 }
