@@ -19,7 +19,7 @@
                 <?php foreach($model as $val): ?>
                     <tr>
                         <td class="text-center"><?=$no++ ?></td>
-                        <td class="text-center"><?=$val['type'] ?></td>
+                        <td><?=$val['type'] ?></td>
                         <td><?=$val['email'] ?></td>
                         <td><?=$val['cc'] ?></td>
                         <td><?=$val['bcc'] ?></td>

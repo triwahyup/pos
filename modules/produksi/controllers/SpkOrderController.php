@@ -12,6 +12,7 @@ use app\modules\produksi\models\SpkOrder;
 use app\modules\produksi\models\SpkOrderSearch;
 use app\modules\produksi\models\SpkOrderProses;
 use app\modules\produksi\models\SpkOrderHistory;
+use app\modules\sales\models\RequestOrder;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\AccessControl;
@@ -512,8 +513,8 @@ class SpkOrderController extends Controller
                     $model->status_produksi=2;
                 }
                 // CLOSING
-                else if($type == \Yii::$app->params['IN_REVIEW']){
-                    // $model->status_produksi=4;
+                else if($type == \Yii::$app->params['ON_CLOSING']){
+                    $model->status_produksi=4;
                 }
 
                 if($model->save()){

@@ -1518,7 +1518,7 @@ class SalesOrderController extends Controller
                                 0=>$val->qty_order_1,
                                 1=>$val->qty_order_2
                             ]);
-                            if($stockItem->onhand > $stock){
+                            if($stockItem->onhand >= $stock){
                                 $stockItem->attributes = $val->attributes;
                                 $stockItem->onhand = $stockItem->onhand - $stock;
                                 $stockItem->onsales = $stockItem->onsales + $stock;
@@ -1560,7 +1560,7 @@ class SalesOrderController extends Controller
                     foreach($model->itemsMaterial as $index=>$val){
                         $stockItem = $val->inventoryStock;
                         if(isset($stockItem)){
-                            if($stockItem->onhand > $val->qty_up){
+                            if($stockItem->onhand >= $val->qty_up){
                                 $stockItem->attributes = $val->attributes;
                                 $stockItem->onhand = $stockItem->onhand - $val->qty_up;
                                 $stockItem->onsales = $stockItem->onsales + $val->qty_up;

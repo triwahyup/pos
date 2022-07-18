@@ -446,11 +446,6 @@ $(document).ready(function(){
         e.preventDefault();
         print($(this).data());
     });
-    
-    $("body").off("click","[data-button=\"print\"]").on("click","[data-button=\"print\"]", function(e){
-        e.preventDefault();
-        print($(this).data());
-    });
 
     $("body").off("click","[data-button=\"popup_input\"]").on("click","[data-button=\"popup_input\"]", function(e){
         e.preventDefault();

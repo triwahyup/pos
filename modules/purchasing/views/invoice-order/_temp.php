@@ -19,7 +19,7 @@
                     <?=number_format($val->qty_terima_1).'<br /><span class="text-muted font-size-10">'.$val->um_1.'</span>' ?>
                 <?php endif; ?>
             </td>
-            <td class="text-right"><?=number_format($val->weight).' <br /><span class="text-muted font-size-10">'.$val->satuanBerat->name.'</span>' ?></td>
+            <td class="text-right"><?=(isset($val->satuanBerat)) ? number_format($val->weight).' <br /><span class="text-muted font-size-10">'.$val->satuanBerat->name.'</span>' : '' ?></td>
             <td class="text-right"><?=number_format($val->harga_beli_1).'.- <br /><span class="text-muted font-size-10">Per '.$val->um_1.'</span>' ?></td>
             <td class="text-right"><?=(!empty($val->ppn)) ? $val->ppn.'%' : '' ?></td>
             <td class="text-right"><?=number_format($val->total_order).'.-' ?></td>

@@ -14,10 +14,6 @@ $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="request-order-view">
     <p class="text-right">
-        <?php if(((new User)->getIsDeveloper()) || \Yii::$app->user->can('request-material-sales-order[C]')): ?>
-            <?= Html::a('<i class="fontello icon-plus"></i><span>Create</span>', ['create'], [
-                'class' => 'btn btn-success btn-flat btn-sm']) ?>
-        <?php endif; ?>
         <?php if(((new User)->getIsDeveloper()) || \Yii::$app->user->can('request-material-sales-order[U]')): ?>
             <?= Html::a('<i class="fontello icon-pencil"></i><span>Update</span>', ['update', 'no_request' => $model->no_request], [
                 'class' => 'btn btn-warning btn-flat btn-sm']) ?>

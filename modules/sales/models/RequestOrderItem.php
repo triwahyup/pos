@@ -4,6 +4,7 @@ namespace app\modules\sales\models;
 
 use Yii;
 use app\modules\inventory\models\InventoryStockItem;
+use app\modules\master\models\MasterKode;
 use app\modules\master\models\MasterMaterial;
 use app\modules\master\models\MasterPerson;
 use yii\behaviors\TimestampBehavior;
@@ -111,6 +112,11 @@ class RequestOrderItem extends \yii\db\ActiveRecord
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
         ];
+    }
+
+    public function getType()
+    {
+        return $this->hasOne(MasterKode::className(), ['code' => 'type_code']);
     }
 
     public function getItem()

@@ -1,6 +1,7 @@
 <?php
 use app\models\User;
 use yii\helpers\Html;
+use yii\helpers\Url;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
@@ -252,16 +253,6 @@ $this->params['breadcrumbs'][] = $this->title;
                                     <td class="text-right"><?=number_format($val['attributes']['qty_rusak']).' LB' ?></td>
                                     <td class="text-center"><?=$val['status_produksi'] ?></td>
                                     <td class="text-center">
-                                        <?php if($val['status_produksi'] != 1 && $model['status_produksi'] != 3): ?>
-                                            <button class="btn btn-warning btn-xs btn-sm"
-                                                data-button="popup_input"
-                                                data-spk="<?=$val['attributes']['no_spk'] ?>"
-                                                data-item="<?=$val['attributes']['item_code'] ?>"
-                                                data-id="<?=$val['attributes']['proses_id'] ?>"
-                                                data-urutan="<?=$val['attributes']['urutan'] ?>">
-                                                <i class="fontello icon-pencil"></i>
-                                            </button>
-                                        <?php endif; ?>
                                         <button class="btn btn-primary btn-xs btn-sm"
                                             data-button="print"
                                             data-spk="<?=$val['attributes']['no_spk'] ?>"
@@ -331,16 +322,6 @@ $this->params['breadcrumbs'][] = $this->title;
                                     <td class="text-right"><?=number_format($val['attributes']['qty_rusak']).' LB' ?></td>
                                     <td class="text-center"><?=$val['status_produksi'] ?></td>
                                     <td class="text-center">
-                                        <?php if($val['status_produksi'] != 1 && $model['status_produksi'] != 3): ?>
-                                            <button class="btn btn-warning btn-xs btn-sm"
-                                                data-button="popup_input"
-                                                data-spk="<?=$val['attributes']['no_spk'] ?>"
-                                                data-item="<?=$val['attributes']['item_code'] ?>"
-                                                data-id="<?=$val['attributes']['proses_id'] ?>"
-                                                data-urutan="<?=$val['attributes']['urutan'] ?>">
-                                                <i class="fontello icon-pencil"></i>
-                                            </button>
-                                        <?php endif; ?>
                                         <button class="btn btn-primary btn-xs btn-sm"
                                             data-button="print"
                                             data-spk="<?=$val['attributes']['no_spk'] ?>"
@@ -371,3 +352,53 @@ $this->params['breadcrumbs'][] = $this->title;
         <?php endif; ?>
     </div>
 </div>
+<div class="hidden" data-layout="print_layout"></div>
+<script>
+function print(data)
+{
+    $.ajax({
+        url: "<?=Url::to(['spk-order/print'])?>",
+		type: "GET",
+        data: {
+            no_spk: data.spk,
+            item_code: data.item,
+            proses_id: data.id,
+            urutan: data.urutan
+        },
+        dataType: "text",
+        error: function(xhr, status, error) {},
+		beforeSend: function (){},
+        success: function(data){
+            var o = $.parseJSON(data);
+            $("[data-layout=\"print_layout\"]").html(o.data)
+            var w = window.open(),
+                newstr = $("[data-layout=\"print_layout\"]").html();
+            $.get("css/print.min.css", function(css){
+                w.document.write("<html>");
+                    w.document.write("<head>");
+                        w.document.write("<style>");
+                            w.document.write(css);
+                        w.document.write("</style>");
+                    w.document.write("</head>");
+                    w.document.write("<body>");
+                        $(w.document.body).html(newstr);
+                    w.document.write("</body>");
+                w.document.write("</html>");
+                w.print();
+                w.close();
+            });
+        },
+        complete: function(){}
+    });
+}
+
+$(document).ready(function(){
+    $("body").off("click","[data-button=\"print\"]").on("click","[data-button=\"print\"]", function(e){
+        e.preventDefault();
+        print($(this).data());
+    });
+});
+$(function(){
+    $("a[target]").hide();
+});
+</script>

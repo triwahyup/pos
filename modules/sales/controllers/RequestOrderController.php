@@ -14,6 +14,7 @@ use app\modules\sales\models\RequestOrderItem;
 use app\modules\sales\models\RequestOrderSearch;
 use app\modules\sales\models\SalesOrder;
 use app\modules\produksi\models\SpkOrder;
+use app\modules\produksi\models\SpkOrderProses;
 use app\modules\sales\models\TempRequestOrderItem;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -1114,6 +1115,7 @@ class RequestOrderController extends Controller
                 if($model->save()){
                     // PROSES KURANG STOK
                     $stock = 0;
+                    $is_material = false;
                     foreach($model->items as $val){
                         $stockItem = $val->inventoryStock;
                         if(isset($stockItem)){
@@ -1121,7 +1123,14 @@ class RequestOrderController extends Controller
                                 0=>$val->qty_order_1,
                                 1=>$val->qty_order_2
                             ]);
-                            if($stockItem->onhand > $stock){
+                            if($stockItem->onhand >= $stock){
+                                if(isset($val->type)){
+                                    if($val->type->value == \Yii::$app->params['TYPE_KERTAS']){
+                                        $is_material = true;
+                                    }
+                                }
+
+                                $stockItem->attributes = $val->attributes;
                                 $stockItem->onhand = $stockItem->onhand - $stock;
                                 $stockItem->onsales = $stockItem->onsales + $stock;
                                 if(!$stockItem->save()){
@@ -1155,6 +1164,67 @@ class RequestOrderController extends Controller
                         }else{
                             $success = false;
                             $message = 'STOCK ITEM '.$val->item_code.' TIDAK DITEMUKAN.';
+                        }
+                    }
+                    // PROSES SIMPAN SPK ORDER
+                    if($is_material){
+                        $spkOrder = new SpkOrder();
+                        $spkOrder->attributes = $model->salesOrder->attributes;
+                        $spkOrder->attributes = $model->attributes;
+                        $spkOrder->no_spk = $spkOrder->generateCode();
+                        $spkOrder->tgl_spk = date('Y-m-d');
+                        $spkOrder->up_produksi = 0;
+                        $spkOrder->total_warna = 0;
+                        $spkOrder->total_qty = 0;
+                        $spkOrder->total_qty_up = 0;
+                        if($spkOrder->save()){
+                            $dataPotong = [];
+                            if($model->salesOrder){
+                                foreach($model->salesOrder->potongs as $val){
+                                    $uk_potong = $val->lebar.'x'.$val->panjang;
+                                    $dataPotong[$val->item_code][$val->supplier_code][$uk_potong] = [
+                                        'potong_id' => $val->urutan,
+                                        'uk_potong' => $uk_potong,
+                                    ];
+                                }
+                            }
+
+                            $uid = 1;
+                            foreach($model->itemsMaterial as $val){
+                                $stock = $val->inventoryStock->satuanTerkecil($val->item_code, [
+                                    0=>$val->qty_order_1,
+                                    1=>$val->qty_order_2,
+                                ]);
+                                foreach($model->salesOrder->proses as $val_proses){
+                                    foreach($dataPotong[$val->item_code][$val->supplier_code] as $val_uk){
+                                        $spkProses = new SpkOrderProses();
+                                        $spkProses->attributes = $val->attributes;
+                                        $spkProses->attributes = (array)$val_uk;
+                                        $spkProses->no_spk = $spkOrder->no_spk;
+                                        $spkProses->proses_id = $uid++;
+                                        $spkProses->mesin_type = $val_proses->mesin_type;
+                                        $spkProses->proses_code = $val_proses->proses_code;
+                                        $spkProses->proses_type = $val_proses->type;
+                                        $spkProses->qty_proses = $stock;
+                                        $spkProses->gram = (isset($val->item)) ? $val->item->gram : NULL;
+                                        if(!$spkProses->save()){
+                                            $success = false;
+                                            $message = (count($spkProses->errors) > 0) ? 'ERROR CREATE SPK PROSES: ' : '';
+                                            foreach($spkProses->errors as $error => $value){
+                                                $message .= strtoupper($value[0].', ');
+                                            }
+                                            $message = substr($message, 0, -2);
+                                        }
+                                    }
+                                }
+                            }
+                        }else{
+                            $success = false;
+                            $message = (count($spkOrder->errors) > 0) ? 'ERROR CREATE SPK: ' : '';
+                            foreach($spkOrder->errors as $error => $value){
+                                $message .= strtoupper($value[0].', ');
+                            }
+                            $message = substr($message, 0, -2);
                         }
                     }
                 }else{

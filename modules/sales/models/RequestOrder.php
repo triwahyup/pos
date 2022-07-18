@@ -6,6 +6,7 @@ use Yii;
 use app\models\Profile;
 use app\modules\sales\models\RequestOrderApproval;
 use app\modules\sales\models\RequestOrderItem;
+use app\modules\sales\models\SalesOrder;
 use app\modules\sales\models\TempRequestOrderItem;
 use yii\behaviors\TimestampBehavior;
 
@@ -102,6 +103,11 @@ class RequestOrder extends \yii\db\ActiveRecord
     public function getProfile()
     {
         return $this->hasOne(Profile::className(), ['user_id' => 'user_id']);
+    }
+
+    public function getSalesOrder()
+    {
+        return $this->hasOne(SalesOrder::className(), ['code' => 'no_so']);
     }
 
     public function getItems()

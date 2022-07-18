@@ -199,7 +199,7 @@ class SpkOrder extends \yii\db\ActiveRecord
             }
         }else if($this->status_produksi==3){
             $message = '<span class="text-label text-warning">Finish</span>';
-        }else if($this->status_produksi==3){
+        }else if($this->status_produksi==4){
             $message = '<span class="text-label text-success">Closing</span>';
         }
         return $message;
