@@ -711,7 +711,6 @@ class SalesOrderController extends Controller
 
     public function actionOnChangeUp($qty, $up)
     {
-        $request = \Yii::$app->request;
         $up_produksi = (new TempSalesOrderItem())->up_produksi($qty, $up);
         $total_qty_up = 0;
         if($up_produksi['total_up'] > 0){

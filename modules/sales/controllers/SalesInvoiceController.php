@@ -2,10 +2,15 @@
 
 namespace app\modules\sales\controllers;
 
+use app\models\Logs;
+use app\models\User;
+use app\modules\sales\models\RequestOrder;
 use app\modules\sales\models\SalesInvoice;
 use app\modules\sales\models\SalesInvoiceSearch;
+use app\modules\sales\models\SalesOrder;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
+use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 
 /**
@@ -21,6 +26,31 @@ class SalesInvoiceController extends Controller
         return array_merge(
             parent::behaviors(),
             [
+                'access' => [
+                    'class' => AccessControl::className(),
+                    'rules' => [
+                        [
+                            'actions' => ['create'],
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('sales-invoice[C]')),
+                            'roles' => ['@'],
+                        ],
+                        [
+                            'actions' => ['index', 'view', 'detail-sales-order', 'detail-request-order'],
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('sales-invoice[R]')),
+                            'roles' => ['@'],
+                        ],
+                        [
+                            'actions' => ['update'],
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('sales-invoice[U]')),
+                            'roles' => ['@'],
+                        ],
+                        [
+                            'actions' => ['delete'],
+                            'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('sales-invoice[D]')),
+                            'roles' => ['@'],
+                        ],
+                    ],
+                ],
                 'verbs' => [
                     'class' => VerbFilter::className(),
                     'actions' => [
@@ -66,11 +96,34 @@ class SalesInvoiceController extends Controller
      */
     public function actionCreate()
     {
+        $success = true;
+        $message = '';
+        $listSalesOrder = SalesOrder::find()
+            ->alias('a')
+            ->select(['concat(code, " - ", a.name)'])
+            ->leftJoin('spk_order b', 'b.no_so = a.code')
+            ->where(['post' => 1, 'status_produksi' => 4])
+            ->indexBy('code')
+            ->column();
         $model = new SalesInvoice();
-
         if ($this->request->isPost) {
-            if ($model->load($this->request->post()) && $model->save()) {
-                return $this->redirect(['view', 'no_invoice' => $model->no_invoice]);
+            if($model->load($this->request->post())){
+                $connection = \Yii::$app->db;
+			    $transaction = $connection->beginTransaction();
+                try{
+
+                    return $this->redirect(['view', 'no_invoice' => $model->no_invoice]);
+                }catch(\Exception $e){
+                    $success = false;
+                    $message = $e->getMessage();
+				    $transaction->rollBack();
+                }
+                $logs =	[
+                    'type' => Logs::TYPE_USER,
+                    'description' => $message,
+                ];
+                Logs::addLog($logs);
+                \Yii::$app->session->setFlash('error', $message);
             }
         } else {
             $model->loadDefaultValues();
@@ -78,6 +131,7 @@ class SalesInvoiceController extends Controller
 
         return $this->render('create', [
             'model' => $model,
+            'listSalesOrder' => $listSalesOrder,
         ]);
     }
 
@@ -90,14 +144,42 @@ class SalesInvoiceController extends Controller
      */
     public function actionUpdate($no_invoice)
     {
+        $success = true;
+        $message = '';
+        $listSalesOrder = SalesOrder::find()
+            ->alias('a')
+            ->select(['concat(code, " - ", a.name)'])
+            ->leftJoin('spk_order b', 'b.no_so = a.code')
+            ->where(['post' => 1, 'status_produksi' => 4])
+            ->indexBy('code')
+            ->column();
         $model = $this->findModel($no_invoice);
+        if($this->request->isPost){
+            if($model->load($this->request->post())){
+                $connection = \Yii::$app->db;
+			    $transaction = $connection->beginTransaction();
+                try{
 
-        if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'no_invoice' => $model->no_invoice]);
+                    return $this->redirect(['view', 'no_invoice' => $model->no_invoice]);
+                }catch(\Exception $e){
+                    $success = false;
+                    $message = $e->getMessage();
+				    $transaction->rollBack();
+                }
+                $logs =	[
+                    'type' => Logs::TYPE_USER,
+                    'description' => $message,
+                ];
+                Logs::addLog($logs);
+                \Yii::$app->session->setFlash('error', $message);
+            }
+        }else{
+
         }
 
         return $this->render('update', [
             'model' => $model,
+            'listSalesOrder' => $listSalesOrder,
         ]);
     }
 
@@ -110,8 +192,26 @@ class SalesInvoiceController extends Controller
      */
     public function actionDelete($no_invoice)
     {
-        $this->findModel($no_invoice)->delete();
+        $success = true;
+		$message = '';
+        $model = $this->findModel($no_invoice);
+        if(isset($model)){
+            $connection = \Yii::$app->db;
+			$transaction = $connection->beginTransaction();
+            try{
 
+            }catch(\Exception $e){
+				$success = false;
+				$message = $e->getMessage();
+				$transaction->rollBack();
+                \Yii::$app->session->setFlash('error', $message);
+            }
+            $logs =	[
+                'type' => Logs::TYPE_USER,
+                'description' => $message,
+            ];
+            Logs::addLog($logs);
+        }
         return $this->redirect(['index']);
     }
 
@@ -124,10 +224,40 @@ class SalesInvoiceController extends Controller
      */
     protected function findModel($no_invoice)
     {
-        if (($model = SalesInvoice::findOne($id)) !== null) {
+        if (($model = SalesInvoice::findOne($no_invoice)) !== null) {
             return $model;
         }
 
         throw new NotFoundHttpException('The requested page does not exist.');
+    }
+
+    public function actionDetailSalesOrder()
+    {
+        $data = [];
+        $post = $_POST['SalesInvoice'];
+        if(isset($post['no_so'])){
+            $model = SalesOrder::find()->where(['code'=>$post['no_so']])->all();
+            $data = $this->renderAjax('detail_sales_order', [
+                'model' => $model
+            ]);
+        }else{
+            throw new NotFoundHttpException('The requested data does not exist.');
+        }
+        return json_encode(['data'=>$data]);
+    }
+
+    public function actionDetailRequestOrder()
+    {
+        $data = [];
+        $post = $_POST['SalesInvoice'];
+        if(isset($post['no_so'])){
+            $model = RequestOrder::find()->where(['no_so'=>$post['no_so']])->all();
+            $data = $this->renderAjax('detail_request_order', [
+                'model' => $model
+            ]);
+        }else{
+            throw new NotFoundHttpException('The requested data does not exist.');
+        }
+        return json_encode(['data'=>$data]);
     }
 }

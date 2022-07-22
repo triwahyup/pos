@@ -27,6 +27,8 @@ use Yii;
  */
 class SalesInvoice extends \yii\db\ActiveRecord
 {
+    public $no_so;
+
     /**
      * {@inheritdoc}
      */
@@ -45,7 +47,7 @@ class SalesInvoice extends \yii\db\ActiveRecord
             [['tgl_invoice'], 'safe'],
             [['ppn', 'total_order_material', 'total_order_bahan', 'total_biaya_produksi', 'total_ppn', 'grand_total', 'new_total_order_material', 'new_total_order_bahan', 'new_total_biaya_produksi', 'new_total_ppn', 'new_grand_total'], 'number'],
             [['status', 'created_at', 'updated_at'], 'integer'],
-            [['no_invoice'], 'string', 'max' => 12],
+            [['no_invoice', 'no_so'], 'string', 'max' => 12],
             [['keterangan'], 'string', 'max' => 128],
             [['no_invoice'], 'unique'],
         ];

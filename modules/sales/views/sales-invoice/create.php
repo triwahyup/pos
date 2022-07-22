@@ -12,5 +12,6 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="sales-invoice-create">
     <?= $this->render('_form', [
         'model' => $model,
+        'listSalesOrder' => $listSalesOrder,
     ]) ?>
 </div>

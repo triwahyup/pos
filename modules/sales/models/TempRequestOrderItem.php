@@ -157,9 +157,10 @@ class TempRequestOrderItem extends \yii\db\ActiveRecord
         return $model;
     }
 
+    public $status_active=1;
     public function getItemPricelist()
     {
-        return $this->hasOne(MasterMaterialPricelist::className(), ['item_code' => 'item_code']);
+        return $this->hasOne(MasterMaterialPricelist::className(), ['item_code' => 'item_code', 'status_active' => 'status_active']);
     }
 
     public function getInventoryStock()

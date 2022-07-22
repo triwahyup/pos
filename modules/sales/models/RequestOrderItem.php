@@ -6,6 +6,7 @@ use Yii;
 use app\modules\inventory\models\InventoryStockItem;
 use app\modules\master\models\MasterKode;
 use app\modules\master\models\MasterMaterial;
+use app\modules\master\models\MasterMaterialPricelist;
 use app\modules\master\models\MasterPerson;
 use yii\behaviors\TimestampBehavior;
 
@@ -122,6 +123,12 @@ class RequestOrderItem extends \yii\db\ActiveRecord
     public function getItem()
     {
         return $this->hasOne(MasterMaterial::className(), ['code' => 'item_code']);
+    }
+
+    public $status_active=1;
+    public function getItemPricelist()
+    {
+        return $this->hasOne(MasterMaterialPricelist::className(), ['item_code' => 'item_code', 'status_active' => 'status_active']);
     }
 
     public function getSupplier()
