@@ -37,12 +37,12 @@ class SalesInvoiceController extends Controller
                             'roles' => ['@'],
                         ],
                         [
-                            'actions' => ['index', 'view', 'detail-sales-order', 'detail-request-order', 'popup-remark-harga'],
+                            'actions' => ['index', 'view', 'detail-sales-order', 'detail-request-order', 'popup-remark-harga', 'popup-biaya-lain'],
                             'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('sales-invoice[R]')),
                             'roles' => ['@'],
                         ],
                         [
-                            'actions' => ['update'],
+                            'actions' => ['update', 'update-harga'],
                             'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('sales-invoice[U]')),
                             'roles' => ['@'],
                         ],
@@ -136,6 +136,11 @@ class SalesInvoiceController extends Controller
                         $detail->no_sales = $model->no_so;
                         $detail->urutan = 1;
                         $detail->type_invoice = 1;
+                        $detail->new_total_order_material = $salesOrder->total_order_material;
+                        $detail->new_total_order_bahan = $salesOrder->total_order_bahan;
+                        $detail->new_total_biaya_produksi = $salesOrder->total_biaya_produksi;
+                        $detail->new_total_ppn = $salesOrder->total_ppn;
+                        $detail->new_grand_total = $salesOrder->grand_total;
                         $detail->keterangan = null;
                         if($detail->save()){
                             foreach($salesOrder->items as $val){
@@ -143,6 +148,9 @@ class SalesInvoiceController extends Controller
                                 $item->attributes = $detail->attributes;
                                 $item->attributes = $val->attributes;
                                 $item->urutan = $item->count +1;
+                                $item->new_harga_jual_1 = $val->harga_jual_1;
+                                $item->new_harga_jual_2 = $val->harga_jual_2;
+                                $item->new_total_order = $val->total_order;
                                 if(!$item->save()){
                                     $success = false;
                                     $message = (count($item->errors) > 0) ? 'ERROR CREATE SALES INVOICE ITEM (SO): ' : '';
@@ -156,9 +164,9 @@ class SalesInvoiceController extends Controller
                                 $item = new SalesInvoiceItem();
                                 $item->attributes = $detail->attributes;
                                 $item->attributes = $val->attributes;
-                                $item->harga_jual_1 = $val->harga;
-                                $item->total_order = $val->total_biaya;
                                 $item->urutan = $item->count +1;
+                                $item->harga_jual_1 = $item->new_harga_jual_1 = $val->harga;
+                                $item->total_order = $item->new_total_order = $val->total_biaya;
                                 if(!$item->save()){
                                     $success = false;
                                     $message = (count($item->errors) > 0) ? 'ERROR CREATE SALES INVOICE ITEM (SO): ' : '';
@@ -201,6 +209,9 @@ class SalesInvoiceController extends Controller
                         $detail->no_invoice = $model->no_invoice;
                         $detail->urutan = 2;
                         $detail->type_invoice = 2;
+                        $detail->new_total_order_material = $requestOrder->total_order_material;
+                        $detail->new_total_order_bahan = $requestOrder->total_order_bahan;
+                        $detail->new_grand_total = $requestOrder->grand_total;
                         $detail->keterangan = null;
                         if($detail->save()){
                             foreach($requestOrder->items as $val){
@@ -208,6 +219,9 @@ class SalesInvoiceController extends Controller
                                 $item->attributes = $detail->attributes;
                                 $item->attributes = $val->attributes;
                                 $item->urutan = $item->count +1;
+                                $item->new_harga_jual_1 = $val->harga_jual_1;
+                                $item->new_harga_jual_2 = $val->harga_jual_2;
+                                $item->new_total_order = $val->total_order;
                                 if(!$item->save()){
                                     $success = false;
                                     $message = (count($item->errors) > 0) ? 'ERROR CREATE SALES INVOICE ITEM (RO): ' : '';
@@ -228,11 +242,11 @@ class SalesInvoiceController extends Controller
                     }
                     /** +++++++++ END CREATE FROM REQUEST ORDER +++++++++ */
                     
-                    $model->total_order_material = $total_order_material;
-                    $model->total_order_bahan = $total_order_bahan;
-                    $model->total_biaya_produksi = $total_biaya_produksi;
-                    $model->total_ppn = $total_ppn;
-                    $model->grand_total = $grand_total;
+                    $model->total_order_material = $model->new_total_order_material = $total_order_material;
+                    $model->total_order_bahan = $model->new_total_order_bahan = $total_order_bahan;
+                    $model->total_biaya_produksi = $model->new_total_biaya_produksi = $total_biaya_produksi;
+                    $model->total_ppn = $model->new_total_ppn = $total_ppn;
+                    $model->grand_total = $model->new_grand_total = $grand_total;
                     if(!$model->save()){
                         $success = false;
                         $message = (count($model->errors) > 0) ? 'ERROR CREATE SALES INVOICE: ' : '';
@@ -441,5 +455,54 @@ class SalesInvoiceController extends Controller
         return json_encode(['data'=>$this->renderPartial('popup_remark_harga', [
             'item'=>$item])
         ]);
+    }
+
+    public function actionPopupBiayaLain($no_invoice, $type_invoice, $urutan)
+    {
+        if(!empty($type_invoice) && !empty($urutan)){
+            $item = SalesInvoiceItem::findOne(['no_invoice'=>$no_invoice, 'type_invoice'=>$type_invoice, 'urutan'=>$urutan]);
+        }else{
+            $item = SalesInvoiceItem::findOne(['no_invoice'=>$no_invoice]);
+        }
+        return json_encode(['data'=>$this->renderPartial('popup_biaya_lain', [
+            'item'=>$item])
+        ]);
+    }
+
+    public function actionUpdateHarga()
+    {
+        $request = \Yii::$app->request;
+        $success = true;
+        $message = 'UPDATE HARGA SUCCESSFULLY';
+        if($request->isPost){
+            $data = $request->post('SalesInvoiceItem');
+            $item = SalesInvoiceItem::findOne(['no_invoice'=>$data['no_invoice'], 'type_invoice'=>$data['type_invoice'], 'urutan'=>$data['urutan']]);
+            if(isset($item)){
+                if(!empty($data['new_harga_jual_1'])){
+                    $new_harga_jual_1 = str_replace(',', '', $data['new_harga_jual_1']);
+                    $item->new_harga_jual_1 = $new_harga_jual_1;
+                }
+                if(!empty($data['new_harga_jual_2'])){
+                    $new_harga_jual_2 = str_replace(',', '', $data['new_harga_jual_2']);
+                    $item->new_harga_jual_2 = $new_harga_jual_2;
+                }
+                $newTotalOrder = $item->newTotalOrder($item);
+                $item->new_total_order = $newTotalOrder;
+                if(!$item->save()){
+                    $success = false;
+                    foreach($item->errors as $error => $value){
+                        $message = $value[0].', ';
+                    }
+                    $message = substr($message, 0, -2);
+                }
+            }else{
+                $success = false;
+                $message = 'Data Item tidak ditemukan.';
+            }
+        }else{
+            $success = false;
+            $message = 'The requested data does not exist.';;
+        }
+        return \Yii::$app->session->setFlash(($success) ? 'success' : 'danger', $message);
     }
 }

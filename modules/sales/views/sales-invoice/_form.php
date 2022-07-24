@@ -11,7 +11,7 @@ use yii\widgets\ActiveForm;
 
 <div class="sales-invoice-form">
     <?php $form = ActiveForm::begin(['id'=>'form']); ?>
-        <div class="form-container no-background" render="detail">
+        <div class="form-container no-background" render="<?=(!$model->isNewRecord) ? 'detail' : '' ?>">
             <?php if($model->isNewRecord): ?>
                 <div class="col-lg-12 col-md-12 col-xs-12 margin-top-20">
                     <h4>Filter Sales Order</h4>
@@ -133,14 +133,14 @@ use yii\widgets\ActiveForm;
                                             $grand_total = 0;
                                             foreach($model->details as $val):
                                                 if($val->type_invoice == 1):
-                                                    $total_order_material = $val->total_order_material;
+                                                    $total_order_material = $val->new_total_order_material;
                                                     $total_order_all += $total_order_material;
-                                                    $total_order_bahan = $val->total_order_bahan;
+                                                    $total_order_bahan = $val->new_total_order_bahan;
                                                     $total_order_all += $total_order_bahan;
-                                                    $total_biaya_produksi = $val->total_biaya_produksi;
+                                                    $total_biaya_produksi = $val->new_total_biaya_produksi;
                                                     $total_order_all += $total_biaya_produksi;
-                                                    $total_ppn = $val->total_ppn;
-                                                    $grand_total = $val->grand_total;
+                                                    $total_ppn = $val->new_total_ppn;
+                                                    $grand_total = $val->new_grand_total;
                                                 endif;
                                             endforeach; ?>
                                             <?php foreach($model->itemsSo as $val):  ?>
@@ -155,23 +155,23 @@ use yii\widgets\ActiveForm;
                                                         </td>
                                                     <?php endif; ?>
                                                     <td class="font-size-10 text-right"><?=$val->qty_order_1 .' '. $val->um_1 ?></td>
-                                                    <td class="font-size-10 text-right"><?=number_format($val->harga_jual_1).'.-' ?></td>
-                                                    <td class="font-size-10 text-right"><?=number_format($val->harga_jual_2).'.-' ?></td>
+                                                    <td class="font-size-10 text-right"><?=number_format($val->new_harga_jual_1).'.-' ?></td>
+                                                    <td class="font-size-10 text-right"><?=number_format($val->new_harga_jual_2).'.-' ?></td>
                                                     <?php if($val->kode['name'] == \Yii::$app->params['TYPE_KERTAS']): ?>
-                                                        <td class="font-size-10 text-right"><?=number_format($val->total_order).'.-' ?></td>
+                                                        <td class="font-size-10 text-right"><?=number_format($val->new_total_order).'.-' ?></td>
                                                         <td></td><td></td>
                                                     <?php elseif($val->kode['name'] == \Yii::$app->params['TYPE_BAHAN_PB']): ?>
                                                         <td></td>
-                                                        <td class="font-size-10 text-right"><?=number_format($val->total_order).'.-' ?></td>
+                                                        <td class="font-size-10 text-right"><?=number_format($val->new_total_order).'.-' ?></td>
                                                         <td></td>
                                                     <?php else: ?>
                                                         <td></td><td></td>
-                                                        <td class="font-size-10 text-right"><?=number_format($val->total_order).'.-' ?></td>
+                                                        <td class="font-size-10 text-right"><?=number_format($val->new_total_order).'.-' ?></td>
                                                     <?php endif; ?>
                                                     <?php if(!$model->isNewRecord): ?>
                                                         <td class="text-center">
                                                             <button class="btn btn-warning btn-xs btn-sm"
-                                                                data-button="update" data-invoice="<?=$val->no_invoice ?>" data-type="<?=$val->type_invoice ?>" data-urutan="<?=$val->urutan ?>">
+                                                                data-button="popup" data-invoice="<?=$val->no_invoice ?>" data-type="<?=$val->type_invoice ?>" data-urutan="<?=$val->urutan ?>">
                                                                 <i class="fontello icon-pencil"></i>
                                                             </button>
                                                         </td>
@@ -179,22 +179,26 @@ use yii\widgets\ActiveForm;
                                                 </tr>
                                             <?php endforeach; ?>
                                             <tr>
-                                                <td class="text-right mark" colspan="5">TOTAL:</td>
+                                                <td class="text-right mark" colspan="4">TOTAL:</td>
                                                 <td class="text-right mark"><?=number_format($total_order_material).'.-' ?></td>
                                                 <td class="text-right mark"><?=number_format($total_order_bahan).'.-' ?></td>
                                                 <td class="text-right mark"><?=number_format($total_biaya_produksi).'.-' ?></td>
+                                                <td class="last-row"></td>
                                             </tr>
                                             <tr>
-                                                <td class="text-right mark-2" colspan="7">TOTAL ORDER:</td>
+                                                <td class="text-right mark-2" colspan="6">TOTAL ORDER:</td>
                                                 <td class="text-right mark-2"><?=number_format($total_order_all).'.-' ?></td>
+                                                <td class="last-row"></td>
                                             </tr>
                                             <tr>
-                                                <td class="text-right mark-2" colspan="7">TOTAL PPN:</td>
+                                                <td class="text-right mark-2" colspan="6">TOTAL PPN:</td>
                                                 <td class="text-right mark-2"><?=number_format($total_ppn).'.-' ?></td>
+                                                <td class="last-row"></td>
                                             </tr>
                                             <tr>
-                                                <td class="text-right mark-2" colspan="7"><strong>GRAND TOTAL:</strong></td>
+                                                <td class="text-right mark-2" colspan="6"><strong>GRAND TOTAL:</strong></td>
                                                 <td class="text-right mark-2"><strong><?=number_format($grand_total).'.-' ?></strong></td>
+                                                <td class="last-row"></td>
                                             </tr>
                                         <?php endif; ?>
                                     <?php else: ?>
@@ -245,11 +249,11 @@ use yii\widgets\ActiveForm;
                                             $grand_total = 0;
                                             foreach($model->details as $val):
                                                 if($val->type_invoice == 2):
-                                                    $total_order_material = $val->total_order_material;
+                                                    $total_order_material = $val->new_total_order_material;
                                                     $total_order_all += $total_order_material;
-                                                    $total_order_bahan = $val->total_order_bahan;
+                                                    $total_order_bahan = $val->new_total_order_bahan;
                                                     $total_order_all += $total_order_bahan;
-                                                    $grand_total = $val->grand_total;
+                                                    $grand_total = $val->new_grand_total;
                                                 endif;
                                             endforeach; ?>
                                             <?php foreach($model->itemsRo as $val):  ?>
@@ -259,20 +263,22 @@ use yii\widgets\ActiveForm;
                                                         <br />
                                                         <span class="font-size-10 text-muted"><?=(isset($val->supplier)) ? $val->supplier->name : '-' ?></span>
                                                     </td>
-                                                    <td class="font-size-10 text-right"><?=(!empty($val->qty_order_1)) ? $val->qty_order_1 .' '. $val->um_1 : $val->qty_order_2 .' '. $val->um_2 ?></td>
-                                                    <td class="font-size-10 text-right"><?=number_format($val->harga_jual_1).'.-' ?></td>
-                                                    <td class="font-size-10 text-right"><?=number_format($val->harga_jual_2).'.-' ?></td>
+                                                    <td class="font-size-10 text-right">
+                                                        <?=(!empty($val->qty_order_1)) ? $val->qty_order_1 .' '. $val->um_1 : $val->qty_order_2 .' '. $val->um_2 ?>
+                                                    </td>
+                                                    <td class="font-size-10 text-right"><?=number_format($val->new_harga_jual_1).'.-' ?></td>
+                                                    <td class="font-size-10 text-right"><?=number_format($val->new_harga_jual_2).'.-' ?></td>
                                                     <?php if($val->kode['name'] == \Yii::$app->params['TYPE_KERTAS']): ?>
-                                                        <td class="font-size-10 text-right"><?=number_format($val->total_order).'.-' ?></td>
+                                                        <td class="font-size-10 text-right"><?=number_format($val->new_total_order).'.-' ?></td>
                                                         <td></td>
                                                     <?php else: ?>
                                                         <td></td>
-                                                        <td class="font-size-10 text-right"><?=number_format($val->total_order).'.-' ?></td>
+                                                        <td class="font-size-10 text-right"><?=number_format($val->new_total_order).'.-' ?></td>
                                                     <?php endif; ?>
                                                     <?php if(!$model->isNewRecord): ?>
                                                         <td class="text-center">
                                                             <button class="btn btn-warning btn-xs btn-sm"
-                                                                data-button="update" data-invoice="<?=$val->no_invoice ?>" data-type="<?=$val->type_invoice ?>" data-urutan="<?=$val->urutan ?>">
+                                                                data-button="popup" data-invoice="<?=$val->no_invoice ?>" data-type="<?=$val->type_invoice ?>" data-urutan="<?=$val->urutan ?>">
                                                                 <i class="fontello icon-pencil"></i>
                                                             </button>
                                                         </td>
@@ -280,17 +286,20 @@ use yii\widgets\ActiveForm;
                                                 </tr>
                                             <?php endforeach; ?>
                                             <tr>
-                                                <td class="text-right mark" colspan="5">TOTAL:</td>
+                                                <td class="text-right mark" colspan="4">TOTAL:</td>
                                                 <td class="text-right mark"><?=number_format($total_order_material).'.-' ?></td>
                                                 <td class="text-right mark"><?=number_format($total_order_bahan).'.-' ?></td>
+                                                <td class="last-row"></td>
                                             </tr>
                                             <tr>
-                                                <td class="text-right mark-2" colspan="6">TOTAL ORDER:</td>
+                                                <td class="text-right mark-2" colspan="5">TOTAL ORDER:</td>
                                                 <td class="text-right mark-2"><?=number_format($total_order_all).'.-' ?></td>
+                                                <td class="last-row"></td>
                                             </tr>
                                             <tr>
-                                                <td class="text-right mark-2" colspan="6"><strong>GRAND TOTAL:</strong></td>
+                                                <td class="text-right mark-2" colspan="5"><strong>GRAND TOTAL:</strong></td>
                                                 <td class="text-right mark-2"><strong><?=number_format($grand_total).'.-' ?></strong></td>
+                                                <td class="last-row"></td>
                                             </tr>
                                         <?php endif; ?>
                                     <?php else: ?>
@@ -308,6 +317,12 @@ use yii\widgets\ActiveForm;
                         <div class="col-lg-12 col-md-12 col-xs-12">
                             <h6>Detail Biaya Lain2</h6>
                             <hr />
+                        </div>
+                        <div class="col-lg-12 col-md-12 col-xs-12 text-right">
+                            <button class="btn btn-success" data-button="popup_biaya_lain" data-invoice="<?=$model->no_invoice?>" data-type data-urutan>
+                                <i class="fontello icon-plus"></i>
+                                <span>Biaya Lain2</span>
+                            </button>
                         </div>
                         <div class="col-lg-12 col-md-12 col-xs-12">
                             <table class="table table-bordered table-custom margin-top-10">
@@ -416,7 +431,7 @@ function popup_update(el)
 function update_harga()
 {
     $.ajax({
-        url: "<?= Url::to(['sales-order/update-temp']) ?>",
+        url: "<?= Url::to(['sales-invoice/update-harga']) ?>",
         type: "POST",
         dataType: "text",
         error: function(xhr, status, error) {},
@@ -424,6 +439,35 @@ function update_harga()
         data: $("#form_remark").serialize(),
         success: function(data){
             location.reload();
+        },
+        complete: function(){}
+    });
+}
+
+function popup_biaya_lain(el)
+{
+    var data = el.data();
+    $.ajax({
+        url: "<?= Url::to(['sales-invoice/popup-biaya-lain']) ?>",
+        type: "GET",
+        data: {
+            no_invoice: data.invoice,
+            type_invoice: data.type,
+            urutan: data.urutan
+        },
+        dataType: "text",
+        error: function(xhr, status, error) {},
+        beforeSend: function(){},
+        success: function(data){
+            var o = $.parseJSON(data);
+            $("[data-popup=\"popup\"]").html(o.data);
+            $("[data-popup=\"popup\"]").popup("open", {
+				container: "popup",
+				title: 'Form Biaya Lain2',
+				styleOptions: {
+					width: 600
+				}
+			});
         },
         complete: function(){}
     });
@@ -437,9 +481,25 @@ $(document).ready(function(){
         detail_request_order();
     });
 
-    $("body").off("click","[data-button=\"update\"]").on("click","[data-button=\"update\"]", function(e){
+    $("body").off("click","[data-button=\"popup\"]").on("click","[data-button=\"popup\"]", function(e){
         e.preventDefault();
         popup_update($(this));
+    });
+
+    $("body").off("click","[data-button=\"update\"]").on("click","[data-button=\"update\"]", function(e){
+        e.preventDefault();
+        update_harga();
+    });
+
+    $("body").off("click","[data-button=\"popup_biaya_lain\"]").on("click","[data-button=\"popup_biaya_lain\"]", function(e){
+        e.preventDefault();
+        popup_biaya_lain($(this));
+    });
+
+    $("body").off("click","[data-button=\"create_biaya\"]").on("click","[data-button=\"create_biaya\"]", function(e){
+        e.preventDefault();
+        popup.close();
+        notification.open("danger", "Masih dalam perbaikan!", 8000);
     });
 });
 </script>

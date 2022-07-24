@@ -29,7 +29,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         <label>Total Order Material</label>
                     </div>
                     <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                        <span><?=number_format($model->total_order_material).'.-' ?></span>
+                        <span><?=number_format($model->new_total_order_material).'.-' ?></span>
                     </div>
                 </div>
                 <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0 text-right">
@@ -37,7 +37,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         <label>Total Order Bahan</label>
                     </div>
                     <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                        <span><?=number_format($model->total_order_bahan).'.-' ?></span>
+                        <span><?=number_format($model->new_total_order_bahan).'.-' ?></span>
                     </div>
                 </div>
                 <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0 text-right">
@@ -45,7 +45,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         <label>Total Biaya Produksi</label>
                     </div>
                     <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                        <span><?=number_format($model->total_biaya_produksi).'.-' ?></span>
+                        <span><?=number_format($model->new_total_biaya_produksi).'.-' ?></span>
                     </div>
                 </div>
                 <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0 text-right">
@@ -53,7 +53,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         <label>PPN (%)</label>
                     </div>
                     <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                        <span><?=number_format($model->total_ppn).'.-' ?></span>
+                        <span><?=number_format($model->new_total_ppn).'.-' ?></span>
                     </div>
                 </div>
                 <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0 text-right margin-top-10">
@@ -61,7 +61,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         <label class="font-size-16">Grand Total</label>
                     </div>
                     <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                        <strong class="font-size-16"><?=number_format($model->grand_total).'.-' ?></strong>
+                        <strong class="font-size-16"><?=number_format($model->new_grand_total).'.-' ?></strong>
                     </div>
                 </div>
             </div>
@@ -98,14 +98,14 @@ $this->params['breadcrumbs'][] = $this->title;
                         $grand_total = 0;
                         foreach($model->details as $val):
                             if($val->type_invoice == 1):
-                                $total_order_material = $val->total_order_material;
+                                $total_order_material = $val->new_total_order_material;
                                 $total_order_all += $total_order_material;
-                                $total_order_bahan = $val->total_order_bahan;
+                                $total_order_bahan = $val->new_total_order_bahan;
                                 $total_order_all += $total_order_bahan;
-                                $total_biaya_produksi = $val->total_biaya_produksi;
+                                $total_biaya_produksi = $val->new_total_biaya_produksi;
                                 $total_order_all += $total_biaya_produksi;
-                                $total_ppn = $val->total_ppn;
-                                $grand_total = $val->grand_total;
+                                $total_ppn = $val->new_total_ppn;
+                                $grand_total = $val->new_grand_total;
                             endif;
                         endforeach; ?>
                         <?php foreach($model->itemsSo as $val):  ?>
@@ -120,18 +120,18 @@ $this->params['breadcrumbs'][] = $this->title;
                                     </td>
                                 <?php endif; ?>
                                 <td class="font-size-10 text-right"><?=$val->qty_order_1 .' '. $val->um_1 ?></td>
-                                <td class="font-size-10 text-right"><?=number_format($val->harga_jual_1).'.-' ?></td>
-                                <td class="font-size-10 text-right"><?=number_format($val->harga_jual_2).'.-' ?></td>
+                                <td class="font-size-10 text-right"><?=number_format($val->new_harga_jual_1).'.-' ?></td>
+                                <td class="font-size-10 text-right"><?=number_format($val->new_harga_jual_2).'.-' ?></td>
                                 <?php if($val->kode['name'] == \Yii::$app->params['TYPE_KERTAS']): ?>
-                                    <td class="font-size-10 text-right"><?=number_format($val->total_order).'.-' ?></td>
+                                    <td class="font-size-10 text-right"><?=number_format($val->new_total_order).'.-' ?></td>
                                     <td></td><td></td>
                                 <?php elseif($val->kode['name'] == \Yii::$app->params['TYPE_BAHAN_PB']): ?>
                                     <td></td>
-                                    <td class="font-size-10 text-right"><?=number_format($val->total_order).'.-' ?></td>
+                                    <td class="font-size-10 text-right"><?=number_format($val->new_total_order).'.-' ?></td>
                                     <td></td>
                                 <?php else: ?>
                                     <td></td><td></td>
-                                    <td class="font-size-10 text-right"><?=number_format($val->total_order).'.-' ?></td>
+                                    <td class="font-size-10 text-right"><?=number_format($val->new_total_order).'.-' ?></td>
                                 <?php endif; ?>
                             </tr>
                         <?php endforeach; ?>
@@ -191,11 +191,11 @@ $this->params['breadcrumbs'][] = $this->title;
                         $grand_total = 0;
                         foreach($model->details as $val):
                             if($val->type_invoice == 2):
-                                $total_order_material = $val->total_order_material;
+                                $total_order_material = $val->new_total_order_material;
                                 $total_order_all += $total_order_material;
-                                $total_order_bahan = $val->total_order_bahan;
+                                $total_order_bahan = $val->new_total_order_bahan;
                                 $total_order_all += $total_order_bahan;
-                                $grand_total = $val->grand_total;
+                                $grand_total = $val->new_grand_total;
                             endif;
                         endforeach; ?>
                         <?php foreach($model->itemsRo as $val):  ?>
@@ -205,15 +205,17 @@ $this->params['breadcrumbs'][] = $this->title;
                                     <br />
                                     <span class="font-size-10 text-muted"><?=(isset($val->supplier)) ? $val->supplier->name : '-' ?></span>
                                 </td>
-                                <td class="font-size-10 text-right"><?=(!empty($val->qty_order_1)) ? $val->qty_order_1 .' '. $val->um_1 : $val->qty_order_2 .' '. $val->um_2 ?></td>
-                                <td class="font-size-10 text-right"><?=number_format($val->harga_jual_1).'.-' ?></td>
-                                <td class="font-size-10 text-right"><?=number_format($val->harga_jual_2).'.-' ?></td>
+                                <td class="font-size-10 text-right">
+                                    <?=(!empty($val->qty_order_1)) ? $val->qty_order_1 .' '. $val->um_1 : $val->qty_order_2 .' '. $val->um_2 ?>
+                                </td>
+                                <td class="font-size-10 text-right"><?=number_format($val->new_harga_jual_1).'.-' ?></td>
+                                <td class="font-size-10 text-right"><?=number_format($val->new_harga_jual_2).'.-' ?></td>
                                 <?php if($val->kode['name'] == \Yii::$app->params['TYPE_KERTAS']): ?>
-                                    <td class="font-size-10 text-right"><?=number_format($val->total_order).'.-' ?></td>
+                                    <td class="font-size-10 text-right"><?=number_format($val->new_total_order).'.-' ?></td>
                                     <td></td>
                                 <?php else: ?>
                                     <td></td>
-                                    <td class="font-size-10 text-right"><?=number_format($val->total_order).'.-' ?></td>
+                                    <td class="font-size-10 text-right"><?=number_format($val->new_total_order).'.-' ?></td>
                                 <?php endif; ?>
                             </tr>
                         <?php endforeach; ?>
