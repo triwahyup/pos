@@ -13,6 +13,5 @@ $this->params['breadcrumbs'][] = 'Update';
 <div class="sales-invoice-update">
     <?= $this->render('_form', [
         'model' => $model,
-        'listSalesOrder' => $listSalesOrder,
     ]) ?>
 </div>

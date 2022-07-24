@@ -34,8 +34,8 @@
                                 <span class="font-size-10 text-muted"><?=(isset($item->supplier)) ? $item->supplier->name : '-' ?></span>
                             </td>
                             <td class="font-size-10 text-right"><?=$item->qty_order_1 .' '. $item->um_1 ?></td>
-                            <td class="font-size-10 text-right"><?=(isset($item->itemPricelist)) ? number_format($item->itemPricelist->harga_jual_1).'.-' : '' ?></td>
-                            <td class="font-size-10 text-right"><?=(isset($item->itemPricelist)) ? number_format($item->itemPricelist->harga_jual_2).'.-' : '' ?></td>
+                            <td class="font-size-10 text-right"><?=number_format($item->harga_jual_1).'.-' ?></td>
+                            <td class="font-size-10 text-right"><?=number_format($item->harga_jual_2).'.-' ?></td>
                             <td class="font-size-10 text-right"><?=number_format($item->total_order).'.-' ?></td>
                             <td></td>
                             <td></td>
@@ -49,8 +49,8 @@
                                 <span class="font-size-10 text-muted"><?=(isset($item->supplier)) ? $item->supplier->name : '-' ?></span>
                             </td>
                             <td class="font-size-10 text-right"><?=$item->qty_order_1 .' '. $item->um_1 ?></td>
-                            <td class="font-size-10 text-right"><?=(isset($item->itemPricelist)) ? number_format($item->itemPricelist->harga_jual_1).'.-' : '' ?></td>
-                            <td class="font-size-10 text-right"><?=(isset($item->itemPricelist)) ? number_format($item->itemPricelist->harga_jual_2).'.-' : '' ?></td>
+                            <td class="font-size-10 text-right"><?=number_format($item->harga_jual_1).'.-' ?></td>
+                            <td class="font-size-10 text-right"><?=number_format($item->harga_jual_2).'.-' ?></td>
                             <td></td>
                             <td class="font-size-10 text-right"><?=number_format($item->total_order).'.-' ?></td>
                             <td></td>
@@ -68,22 +68,22 @@
                         </tr>
                     <?php endforeach; ?>
                     <tr>
-                        <td class="text-right mark" colspan="4">TOTAL</td>
+                        <td class="text-right mark" colspan="4">TOTAL:</td>
                         <td class="text-right mark"><?=number_format($val->total_order_material).'.-' ?></td>
                         <td class="text-right mark"><?=number_format($val->total_order_bahan).'.-' ?></td>
                         <td class="text-right mark"><?=number_format($val->total_biaya_produksi).'.-' ?></td>
                     </tr>
                 <?php endforeach; ?>
                 <tr>
-                    <td class="text-right mark-2" colspan="6">TOTAL ORDER</td>
+                    <td class="text-right mark-2" colspan="6">TOTAL ORDER:</td>
                     <td class="text-right mark-2"><?=number_format($totalOrder).'.-' ?></td>
                 </tr>
                 <tr>
-                    <td class="text-right mark-2" colspan="6">TOTAL PPN</td>
+                    <td class="text-right mark-2" colspan="6">TOTAL PPN:</td>
                     <td class="text-right mark-2"><?=number_format($totalPpn).'.-' ?></td>
                 </tr>
                 <tr>
-                    <td class="text-right mark-2" colspan="6"><strong>GRAND TOTAL</strong></td>
+                    <td class="text-right mark-2" colspan="6"><strong>GRAND TOTAL:</strong></td>
                     <td class="text-right mark-2"><strong><?=number_format($grandTotal).'.-' ?></strong></td>
                 </tr>
             <?php else: ?>

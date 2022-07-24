@@ -6,6 +6,8 @@ use app\models\Logs;
 use app\models\User;
 use app\modules\sales\models\RequestOrder;
 use app\modules\sales\models\SalesInvoice;
+use app\modules\sales\models\SalesInvoiceDetail;
+use app\modules\sales\models\SalesInvoiceItem;
 use app\modules\sales\models\SalesInvoiceSearch;
 use app\modules\sales\models\SalesOrder;
 use yii\web\Controller;
@@ -35,7 +37,7 @@ class SalesInvoiceController extends Controller
                             'roles' => ['@'],
                         ],
                         [
-                            'actions' => ['index', 'view', 'detail-sales-order', 'detail-request-order'],
+                            'actions' => ['index', 'view', 'detail-sales-order', 'detail-request-order', 'popup-remark-harga'],
                             'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('sales-invoice[R]')),
                             'roles' => ['@'],
                         ],
@@ -106,13 +108,153 @@ class SalesInvoiceController extends Controller
             ->indexBy('code')
             ->column();
         $model = new SalesInvoice();
-        if ($this->request->isPost) {
+        if($this->request->isPost){
             if($model->load($this->request->post())){
                 $connection = \Yii::$app->db;
 			    $transaction = $connection->beginTransaction();
                 try{
+                    $model->no_invoice = $model->generateCode();
+                    $model->tgl_invoice = date('Y-m-d');
 
-                    return $this->redirect(['view', 'no_invoice' => $model->no_invoice]);
+                    $total_order_material = 0;
+                    $total_order_bahan = 0;
+                    $total_biaya_produksi = 0;
+                    $total_ppn = 0;
+                    $grand_total = 0;
+                    /** +++++++++ CREATE FROM SALES ORDER +++++++++ */
+                    $salesOrder = SalesOrder::findOne(['code' => $model->no_so]);
+                    if(isset($salesOrder)){
+                        $total_order_material += $salesOrder->total_order_material;
+                        $total_order_bahan += $salesOrder->total_order_bahan;
+                        $total_biaya_produksi += $salesOrder->total_biaya_produksi;
+                        $total_ppn += $salesOrder->total_ppn;
+                        $grand_total += $salesOrder->grand_total;
+
+                        $detail = new SalesInvoiceDetail();
+                        $detail->attributes = $salesOrder->attributes;
+                        $detail->no_invoice = $model->no_invoice;
+                        $detail->no_sales = $model->no_so;
+                        $detail->urutan = 1;
+                        $detail->type_invoice = 1;
+                        $detail->keterangan = null;
+                        if($detail->save()){
+                            foreach($salesOrder->items as $val){
+                                $item = new SalesInvoiceItem();
+                                $item->attributes = $detail->attributes;
+                                $item->attributes = $val->attributes;
+                                $item->urutan = $item->count +1;
+                                if(!$item->save()){
+                                    $success = false;
+                                    $message = (count($item->errors) > 0) ? 'ERROR CREATE SALES INVOICE ITEM (SO): ' : '';
+                                    foreach($item->errors as $error => $value){
+                                        $message .= $value[0].', ';
+                                    }
+                                    $message = substr($message, 0, -2);
+                                }
+                            }
+                            foreach($salesOrder->proses as $val){
+                                $item = new SalesInvoiceItem();
+                                $item->attributes = $detail->attributes;
+                                $item->attributes = $val->attributes;
+                                $item->harga_jual_1 = $val->harga;
+                                $item->total_order = $val->total_biaya;
+                                $item->urutan = $item->count +1;
+                                if(!$item->save()){
+                                    $success = false;
+                                    $message = (count($item->errors) > 0) ? 'ERROR CREATE SALES INVOICE ITEM (SO): ' : '';
+                                    foreach($item->errors as $error => $value){
+                                        $message .= $value[0].', ';
+                                    }
+                                    $message = substr($message, 0, -2);
+                                }
+                            }
+
+                            $salesOrder->post = 3;
+                            if(!$salesOrder->save()){
+                                $success = false;
+                                $message = (count($salesOrder->errors) > 0) ? 'ERROR UPDATE SALES ORDER: ' : '';
+                                foreach($salesOrder->errors as $error => $value){
+                                    $message .= $value[0].', ';
+                                }
+                                $message = substr($message, 0, -2);
+                            }
+                        }else{
+                            $success = false;
+                            $message = (count($detail->errors) > 0) ? 'ERROR CREATE SALES INVOICE DETAIL (SO): ' : '';
+                            foreach($detail->errors as $error => $value){
+                                $message .= $value[0].', ';
+                            }
+                            $message = substr($message, 0, -2);
+                        }
+                    }
+                    /** +++++++++ END CREATE FROM SALES ORDER +++++++++ */
+                    
+                    /** +++++++++ CREATE FROM REQUEST ORDER +++++++++ */
+                    $requestOrder = RequestOrder::findOne(['no_so' => $model->no_so]);
+                    if(isset($requestOrder)){
+                        $total_order_material += $requestOrder->total_order_material;
+                        $total_order_bahan += $requestOrder->total_order_bahan;
+                        $grand_total += $requestOrder->grand_total;
+
+                        $detail = new SalesInvoiceDetail();
+                        $detail->attributes = $requestOrder->attributes;
+                        $detail->no_invoice = $model->no_invoice;
+                        $detail->urutan = 2;
+                        $detail->type_invoice = 2;
+                        $detail->keterangan = null;
+                        if($detail->save()){
+                            foreach($requestOrder->items as $val){
+                                $item = new SalesInvoiceItem();
+                                $item->attributes = $detail->attributes;
+                                $item->attributes = $val->attributes;
+                                $item->urutan = $item->count +1;
+                                if(!$item->save()){
+                                    $success = false;
+                                    $message = (count($item->errors) > 0) ? 'ERROR CREATE SALES INVOICE ITEM (RO): ' : '';
+                                    foreach($item->errors as $error => $value){
+                                        $message .= $value[0].', ';
+                                    }
+                                    $message = substr($message, 0, -2);
+                                }
+                            }
+                        }else{
+                            $success = false;
+                            $message = (count($detail->errors) > 0) ? 'ERROR CREATE SALES INVOICE DETAIL (RO): ' : '';
+                            foreach($detail->errors as $error => $value){
+                                $message .= $value[0].', ';
+                            }
+                            $message = substr($message, 0, -2);
+                        }
+                    }
+                    /** +++++++++ END CREATE FROM REQUEST ORDER +++++++++ */
+                    
+                    $model->total_order_material = $total_order_material;
+                    $model->total_order_bahan = $total_order_bahan;
+                    $model->total_biaya_produksi = $total_biaya_produksi;
+                    $model->total_ppn = $total_ppn;
+                    $model->grand_total = $grand_total;
+                    if(!$model->save()){
+                        $success = false;
+                        $message = (count($model->errors) > 0) ? 'ERROR CREATE SALES INVOICE: ' : '';
+                        foreach($model->errors as $error => $value){
+                            $message .= $value[0].', ';
+                        }
+                        $message = substr($message, 0, -2);
+                    }
+
+                    if($success){
+                        $transaction->commit();
+                        $message = '['.$model->no_invoice.'] SUCCESS CREATE SALES INVOICE.';
+                        $logs =	[
+                            'type' => Logs::TYPE_USER,
+                            'description' => $message,
+                        ];
+                        Logs::addLog($logs);
+                        \Yii::$app->session->setFlash('success', $message);
+                        return $this->redirect(['view', 'no_invoice' => $model->no_invoice]);
+                    }else{
+                        $transaction->rollBack();
+                    }
                 }catch(\Exception $e){
                     $success = false;
                     $message = $e->getMessage();
@@ -125,7 +267,7 @@ class SalesInvoiceController extends Controller
                 Logs::addLog($logs);
                 \Yii::$app->session->setFlash('error', $message);
             }
-        } else {
+        }else{
             $model->loadDefaultValues();
         }
 
@@ -146,13 +288,6 @@ class SalesInvoiceController extends Controller
     {
         $success = true;
         $message = '';
-        $listSalesOrder = SalesOrder::find()
-            ->alias('a')
-            ->select(['concat(code, " - ", a.name)'])
-            ->leftJoin('spk_order b', 'b.no_so = a.code')
-            ->where(['post' => 1, 'status_produksi' => 4])
-            ->indexBy('code')
-            ->column();
         $model = $this->findModel($no_invoice);
         if($this->request->isPost){
             if($model->load($this->request->post())){
@@ -179,7 +314,6 @@ class SalesInvoiceController extends Controller
 
         return $this->render('update', [
             'model' => $model,
-            'listSalesOrder' => $listSalesOrder,
         ]);
     }
 
@@ -199,7 +333,47 @@ class SalesInvoiceController extends Controller
             $connection = \Yii::$app->db;
 			$transaction = $connection->beginTransaction();
             try{
+                $model->status = 0;
+                if($model->save()){
+                    foreach($model->details as $val){
+                        $val->status = 0;
+                        if(!$val->save()){
+                            $success = false;
+                            $message = (count($val->errors) > 0) ? 'ERROR DELETE SALES INVOICE DETAIL: ' : '';
+                            foreach($val->errors as $error => $value){
+                                $message .= $value[0].', ';
+                            }
+                            $message = substr($message, 0, -2);
+                        }
+                    }
+                    foreach($model->items as $val){
+                        $val->status = 0;
+                        if(!$val->save()){
+                            $success = false;
+                            $message = (count($val->errors) > 0) ? 'ERROR DELETE SALES INVOICE ITEM: ' : '';
+                            foreach($val->errors as $error => $value){
+                                $message .= $value[0].', ';
+                            }
+                            $message = substr($message, 0, -2);
+                        }
+                    }
+                }else{
+                    $success = false;
+                    $message = (count($model->errors) > 0) ? 'ERROR DELETE SALES INVOICE: ' : '';
+                    foreach($model->errors as $error => $value){
+                        $message .= $value[0].', ';
+                    }
+                    $message = substr($message, 0, -2);
+                }
 
+                if($success){
+                    $transaction->commit();
+                    $message = '['.$model->no_invoice.'] SUCCESS DELETE SALES INVOICE.';
+                    \Yii::$app->session->setFlash('success', $message);
+                }else{
+                    $transaction->rollBack();
+                    \Yii::$app->session->setFlash('error', $message);
+                }
             }catch(\Exception $e){
 				$success = false;
 				$message = $e->getMessage();
@@ -259,5 +433,13 @@ class SalesInvoiceController extends Controller
             throw new NotFoundHttpException('The requested data does not exist.');
         }
         return json_encode(['data'=>$data]);
+    }
+
+    public function actionPopupRemarkHarga($no_invoice, $type_invoice, $urutan)
+    {
+        $item = SalesInvoiceItem::findOne(['no_invoice'=>$no_invoice, 'type_invoice'=>$type_invoice, 'urutan'=>$urutan]);
+        return json_encode(['data'=>$this->renderPartial('popup_remark_harga', [
+            'item'=>$item])
+        ]);
     }
 }

@@ -30,8 +30,8 @@
                                 <span class="font-size-10 text-muted"><?=(isset($item->supplier)) ? $item->supplier->name : '-' ?></span>
                             </td>
                             <td class="font-size-10 text-right"><?=(!empty($item->qty_order_1)) ? $item->qty_order_1 .' '. $item->um_1 : $item->qty_order_2 .' '. $item->um_2 ?></td>
-                            <td class="font-size-10 text-right"><?=(isset($item->itemPricelist)) ? number_format($item->itemPricelist->harga_jual_1).'.-' : '' ?></td>
-                            <td class="font-size-10 text-right"><?=(isset($item->itemPricelist)) ? number_format($item->itemPricelist->harga_jual_2).'.-' : '' ?></td>
+                            <td class="font-size-10 text-right"><?=number_format($item->harga_jual_1).'.-' ?></td>
+                            <td class="font-size-10 text-right"><?=number_format($item->harga_jual_2).'.-' ?></td>
                             <td class="font-size-10 text-right"><?=number_format($item->total_order).'.-' ?></td>
                             <td></td>
                         </tr>
@@ -44,19 +44,19 @@
                                 <span class="font-size-10 text-muted"><?=(isset($item->supplier)) ? $item->supplier->name : '-' ?></span>
                             </td>
                             <td class="font-size-10 text-right"><?=(!empty($item->qty_order_1)) ? $item->qty_order_1 .' '. $item->um_1 : $item->qty_order_2 .' '. $item->um_2 ?></td>
-                            <td class="font-size-10 text-right"><?=(isset($item->itemPricelist)) ? number_format($item->itemPricelist->harga_jual_1).'.-' : '' ?></td>
-                            <td class="font-size-10 text-right"><?=(isset($item->itemPricelist)) ? number_format($item->itemPricelist->harga_jual_2).'.-' : '' ?></td>
+                            <td class="font-size-10 text-right"><?=number_format($item->harga_jual_1).'.-' ?></td>
+                            <td class="font-size-10 text-right"><?=number_format($item->harga_jual_2).'.-' ?></td>
                             <td></td>
                             <td class="font-size-10 text-right"><?=number_format($item->total_order).'.-' ?></td>
                         </tr>
                     <?php endforeach; ?>
                     <tr>
-                        <td class="text-right mark" colspan="4">TOTAL</td>
+                        <td class="text-right mark" colspan="4">TOTAL:</td>
                         <td class="text-right mark"><?=number_format($val->total_order_material).'.-' ?></td>
                         <td class="text-right mark"><?=number_format($val->total_order_bahan).'.-' ?></td>
                     </tr>
                     <tr>
-                        <td class="text-right mark-2" colspan="5"><strong>GRAND TOTAL</strong></td>
+                        <td class="text-right mark-2" colspan="5"><strong>GRAND TOTAL:</strong></td>
                         <td class="text-right mark-2"><strong><?=number_format($grandTotal).'.-' ?></strong></td>
                     </tr>
                 <?php endforeach; ?>

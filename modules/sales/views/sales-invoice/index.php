@@ -41,7 +41,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     'pickerButton' => false,
                     'attribute' => 'tgl_invoice',
                     'pluginOptions' => [
-                        'format' => 'dd-mm-yyyy',
+                        'format' => 'yyyy-mm-dd',
                         'autoclose' => true,
                     ],
                 ]),
@@ -55,6 +55,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 'contentOptions' => [
                     'class' => 'text-right',
                 ],
+                'value' => function($model, $index, $key){
+                    return (!empty($model->new_total_order_material)) ? number_format($model->new_total_order_material).'.-' : number_format($model->total_order_material).'.-';
+                }
             ],
             [
                 'attribute' => 'new_total_order_bahan',
@@ -62,6 +65,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 'contentOptions' => [
                     'class' => 'text-right',
                 ],
+                'value' => function($model, $index, $key){
+                    return (!empty($model->new_total_order_bahan)) ? number_format($model->new_total_order_bahan).'.-' : number_format($model->total_order_bahan).'.-';
+                }
             ],
             [
                 'attribute' => 'new_total_biaya_produksi',
@@ -69,6 +75,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 'contentOptions' => [
                     'class' => 'text-right',
                 ],
+                'value' => function($model, $index, $key){
+                    return (!empty($model->new_total_biaya_produksi)) ? number_format($model->new_total_biaya_produksi).'.-' : number_format($model->total_biaya_produksi).'.-';
+                }
             ],
             [
                 'attribute' => 'new_total_ppn',
@@ -76,6 +85,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 'contentOptions' => [
                     'class' => 'text-right',
                 ],
+                'value' => function($model, $index, $key){
+                    return (!empty($model->new_total_ppn)) ? number_format($model->new_total_ppn).'.-' : number_format($model->total_ppn).'.-';
+                }
             ],
             [
                 'attribute' => 'new_grand_total',
@@ -83,13 +95,16 @@ $this->params['breadcrumbs'][] = $this->title;
                 'contentOptions' => [
                     'class' => 'text-right',
                 ],
+                'value' => function($model, $index, $key){
+                    return (!empty($model->new_grand_total)) ? number_format($model->new_grand_total).'.-' : number_format($model->grand_total).'.-';
+                }
             ],
             [
                 'buttons' => [
                     'view' => function ($url, $model) {
                         if(((new User)->getIsDeveloper()) || \Yii::$app->user->can('sales-invoice[R]'))
                             return Html::a('<i class="fontello icon-eye-1"></i>',
-                                [ 'view', 'code'=>$model->code ],
+                                [ 'view', 'no_invoice'=>$model->no_invoice ],
                                 [ 'title'=>'View', 'aria-label'=>'View', 'data-pjax'=>true ]
                             );
                         else return "";
@@ -97,8 +112,21 @@ $this->params['breadcrumbs'][] = $this->title;
                     'update' => function ($url, $model) {
                         if(((new User)->getIsDeveloper()) || \Yii::$app->user->can('sales-invoice[U]'))
                             return Html::a('<i class="fontello icon-pencil-3"></i>',
-                                [ 'update', 'code'=>$model->code ],
+                                [ 'update', 'no_invoice'=>$model->no_invoice ],
                                 [ 'title'=>'Update', 'aria-label'=>'Update', 'data-pjax'=>true ]
+                            );
+                        else return "";
+                    },
+                    'delete' => function ($url, $model) {
+                        if(((new User)->getIsDeveloper()) || \Yii::$app->user->can('sales-invoice[D]'))
+                            return Html::a('<i class="fontello icon-trash-4"></i>',
+                                [ 'delete', 'no_invoice'=>$model->no_invoice ],
+                                [ 'title'=>'Delete', 'aria-label'=>'Delete', 'data-pjax'=>true,
+                                    'data' => [
+                                        'confirm' => 'Are you sure you want to delete this item?',
+                                        'method' => 'post',
+                                    ],
+                                ]
                             );
                         else return "";
                     },
@@ -107,7 +135,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'contentOptions' => [
                     'class' => 'text-center column-action',
                 ],
-                'template' => '{view} {update}',
+                'template' => '{view} {update} {delete}',
             ],
         ],
     ]); ?>

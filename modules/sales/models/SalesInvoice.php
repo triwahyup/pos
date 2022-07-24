@@ -3,6 +3,7 @@
 namespace app\modules\sales\models;
 
 use Yii;
+use yii\behaviors\TimestampBehavior;
 
 /**
  * This is the model class for table "sales_invoice".
@@ -37,6 +38,13 @@ class SalesInvoice extends \yii\db\ActiveRecord
         return 'sales_invoice';
     }
 
+    public function behaviors()
+	{
+        return [
+            TimestampBehavior::className(),
+        ];
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -47,9 +55,11 @@ class SalesInvoice extends \yii\db\ActiveRecord
             [['tgl_invoice'], 'safe'],
             [['ppn', 'total_order_material', 'total_order_bahan', 'total_biaya_produksi', 'total_ppn', 'grand_total', 'new_total_order_material', 'new_total_order_bahan', 'new_total_biaya_produksi', 'new_total_ppn', 'new_grand_total'], 'number'],
             [['status', 'created_at', 'updated_at'], 'integer'],
-            [['no_invoice', 'no_so'], 'string', 'max' => 12],
+            [['no_so'], 'string', 'max' => 12],
+            [['no_invoice'], 'string', 'max' => 15],
             [['keterangan'], 'string', 'max' => 128],
             [['no_invoice'], 'unique'],
+            [['status'], 'default', 'value' => 1],
         ];
     }
 
@@ -77,5 +87,44 @@ class SalesInvoice extends \yii\db\ActiveRecord
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
         ];
+    }
+
+    public function generateCode()
+    {
+        $model = SalesInvoice::find()->count();
+        $total=0;
+        if($model > 0){
+            $model = SalesInvoice::find()->orderBy(['no_invoice'=>SORT_DESC])->one();
+            $total = (int)substr($model->no_invoice, -4);
+        }
+        return 'INV'.(string)date('Ymd').sprintf('%04s', ($total+1));
+    }
+
+    public function getDetails()
+    {
+        return $this->hasMany(SalesInvoiceDetail::className(), ['no_invoice' => 'no_invoice']);
+    }
+
+    public function getItems()
+    {
+        return $this->hasMany(SalesInvoiceItem::className(), ['no_invoice' => 'no_invoice']);
+    }
+
+    public $type_so=1;
+    public function getItemsSo()
+    {
+        return $this->hasMany(SalesInvoiceItem::className(), ['no_invoice' => 'no_invoice', 'type_invoice' => 'type_so']);
+    }
+
+    public $type_ro=2;
+    public function getItemsRo()
+    {
+        return $this->hasMany(SalesInvoiceItem::className(), ['no_invoice' => 'no_invoice', 'type_invoice' => 'type_ro']);
+    }
+    
+    public $type_dll=3;
+    public function getItemsDll()
+    {
+        return $this->hasMany(SalesInvoiceItem::className(), ['no_invoice' => 'no_invoice', 'type_invoice' => 'type_dll']);
     }
 }
