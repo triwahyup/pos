@@ -50,7 +50,7 @@ class SalesInvoiceDetail extends \yii\db\ActiveRecord
     {
         return [
             [['no_invoice'], 'required'],
-            [['total_order_material', 'total_order_bahan', 'total_biaya_produksi', 'total_ppn', 'grand_total', 'new_total_order_material', 'new_total_order_bahan', 'new_total_biaya_produksi', 'new_total_ppn', 'new_grand_total'], 'number'],
+            [['total_order_material', 'total_order_bahan', 'total_biaya_produksi', 'total_biaya_lain', 'total_ppn', 'grand_total', 'new_total_order_material', 'new_total_order_bahan', 'new_total_biaya_produksi', 'new_total_ppn', 'new_grand_total'], 'number'],
             [['urutan', 'type_invoice', 'status', 'created_at', 'updated_at'], 'integer'],
             [['no_sales', 'no_request'], 'string', 'max' => 12],
             [['no_invoice'], 'string', 'max' => 15],
@@ -84,5 +84,78 @@ class SalesInvoiceDetail extends \yii\db\ActiveRecord
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
         ];
+    }
+
+    public function itemsMaterial($no_invoice, $type_invoice)
+    {
+        $model = SalesInvoiceItem::find()
+            ->alias('a')
+            ->leftJoin('master_kode b', 'b.code = a.type_code')
+            ->where('no_invoice =:no_invoice and type_invoice =:type_invoice and value =:value', [
+                ':no_invoice'=>$no_invoice, ':type_invoice'=>$type_invoice, ':value' => \Yii::$app->params['TYPE_KERTAS']])
+            ->all();
+        return $model;
+    }
+
+    public function itemsNonMaterial($no_invoice, $type_invoice)
+    {
+        $model = SalesInvoiceItem::find()
+            ->alias('a')
+            ->leftJoin('master_kode b', 'b.code = a.type_code')
+            ->where('no_invoice =:no_invoice and type_invoice =:type_invoice and value <> :value', [
+                ':no_invoice'=>$no_invoice, ':type_invoice'=>$type_invoice, ':value' => \Yii::$app->params['TYPE_KERTAS']])
+            ->all();
+        return $model;
+    }
+
+    public function itemsProses($no_invoice, $type_invoice)
+    {
+        $model = SalesInvoiceItem::find()
+            ->where('no_invoice =:no_invoice and type_invoice =:type_invoice and proses_code is not null', [
+                ':no_invoice' => $no_invoice, ':type_invoice' => $type_invoice])
+            ->all();
+        return $model;
+    }
+
+    public function itemsLain2($no_invoice)
+    {
+        $model = SalesInvoiceItem::find()
+            ->where('no_invoice =:no_invoice and type_invoice = 3', [':no_invoice'=>$no_invoice])
+            ->all();
+        return $model;
+    }
+
+    public function newTotalOrder($param, $proses_code=null)
+    {
+        $total_order_material = 0;
+        $total_order_bahan = 0;
+        $total_biaya_produksi = 0;
+        $total_biaya_lain = 0;
+        $grand_total = 0;
+        if(!empty($proses_code)){
+            foreach($param->itemsProses($param->no_invoice, $param->type_invoice) as $val){
+                $total_biaya_produksi += $val->new_total_order;
+            }
+            $param->new_total_biaya_produksi = $total_biaya_produksi;
+            $grand_total += $total_biaya_produksi;
+        }else{
+            foreach($param->itemsMaterial($param->no_invoice, $param->type_invoice) as $val){
+                $total_order_material += $val->new_total_order;
+            }
+            $param->new_total_order_material = $total_order_material;
+            $grand_total += $total_order_material;
+            foreach($param->itemsNonMaterial($param->no_invoice, $param->type_invoice) as $val){
+                $total_order_bahan += $val->new_total_order;
+            }
+            $param->new_total_order_bahan = $total_order_bahan;
+            $grand_total += $total_order_bahan;
+            foreach($param->itemsLain2($param->no_invoice) as $val){
+                $total_biaya_lain += $val->total_biaya_lain;
+            }
+            $param->total_biaya_lain = $total_biaya_lain;
+            $grand_total += $total_biaya_lain;
+        }
+        $param->new_grand_total = $grand_total;
+        return true;
     }
 }

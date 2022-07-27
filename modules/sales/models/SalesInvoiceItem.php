@@ -70,7 +70,7 @@ class SalesInvoiceItem extends \yii\db\ActiveRecord
         return [
             [['no_invoice', 'type_invoice', 'urutan'], 'required'],
             [['new_harga_jual_1', 'new_harga_jual_2', 'new_total_order'], 'safe'],
-            [['type_invoice', 'urutan', 'status', 'created_at', 'updated_at', 'type_lain2'], 'integer'],
+            [['type_invoice', 'urutan', 'status', 'created_at', 'updated_at', 'type_ongkos'], 'integer'],
             [['qty_order_1', 'qty_order_2', 'qty_order_3', 'konversi_1', 'konversi_2', 'konversi_3', 'harga_beli_1', 'harga_beli_2', 'harga_beli_3', 'harga_jual_1', 'harga_jual_2', 'harga_jual_3', 'total_order'], 'number'],
             [['no_invoice'], 'string', 'max' => 15],
             [['unique_code'], 'string', 'max' => 16],
@@ -124,6 +124,12 @@ class SalesInvoiceItem extends \yii\db\ActiveRecord
         ];
     }
 
+    public function beforeSave($attribute)
+    {
+        $this->harga_jual_1 = str_replace(',', '', $this->harga_jual_1);
+        return parent::beforeSave($attribute);
+    }
+
     public function getCount()
     {
         return SalesInvoiceItem::find()->where(['no_invoice'=> $this->no_invoice])->count();
@@ -161,12 +167,11 @@ class SalesInvoiceItem extends \yii\db\ActiveRecord
         if(!empty($param->proses_code)){
             $total_order = $param->new_harga_jual_1;
         }else{
-            $konversi_2 = (!empty($param->item->satuan->konversi_2)) ? $param->item->satuan->konversi_2 : 1;
             if(!empty($param->qty_order_1)){
                 $total_order += $param->qty_order_1 * $param->new_harga_jual_1;
             }
             if(!empty($param->qty_order_2)){
-                $total_order += ($param->qty_order_2 / $konversi_2) * $param->new_harga_jual_2;
+                $total_order += $param->qty_order_2 * $param->new_harga_jual_2;
             }
         }
         return $total_order;

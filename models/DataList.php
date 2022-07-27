@@ -140,4 +140,13 @@ class DataList {
         
         return $model;
     }
+
+    public static function listTypeOngkos()
+    {
+        return [
+            1 => 'Ongkos Kirim',
+            2 => 'Penggunaan Plat',
+            3 => 'Penggunaan Film',
+        ];
+    }
 }

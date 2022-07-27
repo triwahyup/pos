@@ -68,23 +68,23 @@
                         </tr>
                     <?php endforeach; ?>
                     <tr>
-                        <td class="text-right mark" colspan="4">TOTAL:</td>
-                        <td class="text-right mark"><?=number_format($val->total_order_material).'.-' ?></td>
-                        <td class="text-right mark"><?=number_format($val->total_order_bahan).'.-' ?></td>
-                        <td class="text-right mark"><?=number_format($val->total_biaya_produksi).'.-' ?></td>
+                        <td class="text-right mark-2" colspan="4">TOTAL:</td>
+                        <td class="text-right mark-2"><?=number_format($val->total_order_material).'.-' ?></td>
+                        <td class="text-right mark-2"><?=number_format($val->total_order_bahan).'.-' ?></td>
+                        <td class="text-right mark-2"><?=number_format($val->total_biaya_produksi).'.-' ?></td>
                     </tr>
                 <?php endforeach; ?>
                 <tr>
-                    <td class="text-right mark-2" colspan="6">TOTAL ORDER:</td>
-                    <td class="text-right mark-2"><?=number_format($totalOrder).'.-' ?></td>
+                    <td class="text-right mark-3" colspan="6">TOTAL ORDER:</td>
+                    <td class="text-right mark-3"><?=number_format($totalOrder).'.-' ?></td>
                 </tr>
                 <tr>
-                    <td class="text-right mark-2" colspan="6">TOTAL PPN:</td>
-                    <td class="text-right mark-2"><?=number_format($totalPpn).'.-' ?></td>
+                    <td class="text-right mark-3" colspan="6">TOTAL PPN:</td>
+                    <td class="text-right mark-3"><?=number_format($totalPpn).'.-' ?></td>
                 </tr>
                 <tr>
-                    <td class="text-right mark-2" colspan="6"><strong>GRAND TOTAL:</strong></td>
-                    <td class="text-right mark-2"><strong><?=number_format($grandTotal).'.-' ?></strong></td>
+                    <td class="text-right mark-3" colspan="6"><strong>GRAND TOTAL:</strong></td>
+                    <td class="text-right mark-3"><strong><?=number_format($grandTotal).'.-' ?></strong></td>
                 </tr>
             <?php else: ?>
                 <tr>

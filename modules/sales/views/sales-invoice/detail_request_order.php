@@ -51,13 +51,13 @@
                         </tr>
                     <?php endforeach; ?>
                     <tr>
-                        <td class="text-right mark" colspan="4">TOTAL:</td>
-                        <td class="text-right mark"><?=number_format($val->total_order_material).'.-' ?></td>
-                        <td class="text-right mark"><?=number_format($val->total_order_bahan).'.-' ?></td>
+                        <td class="text-right mark-2" colspan="4">TOTAL:</td>
+                        <td class="text-right mark-2"><?=number_format($val->total_order_material).'.-' ?></td>
+                        <td class="text-right mark-2"><?=number_format($val->total_order_bahan).'.-' ?></td>
                     </tr>
                     <tr>
-                        <td class="text-right mark-2" colspan="5"><strong>GRAND TOTAL:</strong></td>
-                        <td class="text-right mark-2"><strong><?=number_format($grandTotal).'.-' ?></strong></td>
+                        <td class="text-right mark-3" colspan="5"><strong>GRAND TOTAL:</strong></td>
+                        <td class="text-right mark-3"><strong><?=number_format($grandTotal).'.-' ?></strong></td>
                     </tr>
                 <?php endforeach; ?>
             <?php else: ?>

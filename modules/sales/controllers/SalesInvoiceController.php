@@ -2,6 +2,7 @@
 
 namespace app\modules\sales\controllers;
 
+use app\models\DataList;
 use app\models\Logs;
 use app\models\User;
 use app\modules\sales\models\RequestOrder;
@@ -42,7 +43,7 @@ class SalesInvoiceController extends Controller
                             'roles' => ['@'],
                         ],
                         [
-                            'actions' => ['update', 'update-harga'],
+                            'actions' => ['update', 'update-harga', 'update-biaya-lain'],
                             'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('sales-invoice[U]')),
                             'roles' => ['@'],
                         ],
@@ -242,6 +243,7 @@ class SalesInvoiceController extends Controller
                     }
                     /** +++++++++ END CREATE FROM REQUEST ORDER +++++++++ */
                     
+                    $model->ppn = $salesOrder->ppn;
                     $model->total_order_material = $model->new_total_order_material = $total_order_material;
                     $model->total_order_bahan = $model->new_total_order_bahan = $total_order_bahan;
                     $model->total_biaya_produksi = $model->new_total_biaya_produksi = $total_biaya_produksi;
@@ -300,32 +302,10 @@ class SalesInvoiceController extends Controller
      */
     public function actionUpdate($no_invoice)
     {
-        $success = true;
-        $message = '';
         $model = $this->findModel($no_invoice);
         if($this->request->isPost){
-            if($model->load($this->request->post())){
-                $connection = \Yii::$app->db;
-			    $transaction = $connection->beginTransaction();
-                try{
-
-                    return $this->redirect(['view', 'no_invoice' => $model->no_invoice]);
-                }catch(\Exception $e){
-                    $success = false;
-                    $message = $e->getMessage();
-				    $transaction->rollBack();
-                }
-                $logs =	[
-                    'type' => Logs::TYPE_USER,
-                    'description' => $message,
-                ];
-                Logs::addLog($logs);
-                \Yii::$app->session->setFlash('error', $message);
-            }
-        }else{
-
+            return $this->redirect(['view', 'no_invoice' => $model->no_invoice]);
         }
-
         return $this->render('update', [
             'model' => $model,
         ]);
@@ -459,13 +439,16 @@ class SalesInvoiceController extends Controller
 
     public function actionPopupBiayaLain($no_invoice, $type_invoice, $urutan)
     {
+        $typeOngkos = DataList::listTypeOngkos();
+        $update = false;
         if(!empty($type_invoice) && !empty($urutan)){
+            $update = true;
             $item = SalesInvoiceItem::findOne(['no_invoice'=>$no_invoice, 'type_invoice'=>$type_invoice, 'urutan'=>$urutan]);
         }else{
             $item = SalesInvoiceItem::findOne(['no_invoice'=>$no_invoice]);
         }
         return json_encode(['data'=>$this->renderPartial('popup_biaya_lain', [
-            'item'=>$item])
+            'item'=>$item, 'typeOngkos'=>$typeOngkos, 'update'=>$update])
         ]);
     }
 
@@ -475,33 +458,203 @@ class SalesInvoiceController extends Controller
         $success = true;
         $message = 'UPDATE HARGA SUCCESSFULLY';
         if($request->isPost){
-            $data = $request->post('SalesInvoiceItem');
-            $item = SalesInvoiceItem::findOne(['no_invoice'=>$data['no_invoice'], 'type_invoice'=>$data['type_invoice'], 'urutan'=>$data['urutan']]);
-            if(isset($item)){
-                if(!empty($data['new_harga_jual_1'])){
-                    $new_harga_jual_1 = str_replace(',', '', $data['new_harga_jual_1']);
-                    $item->new_harga_jual_1 = $new_harga_jual_1;
-                }
-                if(!empty($data['new_harga_jual_2'])){
-                    $new_harga_jual_2 = str_replace(',', '', $data['new_harga_jual_2']);
-                    $item->new_harga_jual_2 = $new_harga_jual_2;
-                }
-                $newTotalOrder = $item->newTotalOrder($item);
-                $item->new_total_order = $newTotalOrder;
-                if(!$item->save()){
-                    $success = false;
-                    foreach($item->errors as $error => $value){
-                        $message = $value[0].', ';
+            $connection = \Yii::$app->db;
+            $transaction = $connection->beginTransaction();
+            try{
+                $data = $request->post('SalesInvoiceItem');
+                $salesInv = SalesInvoice::findOne(['no_invoice'=>$data['no_invoice']]);
+                if(isset($salesInv)){
+                    $salesDetail = SalesInvoiceDetail::findOne(['no_invoice'=>$data['no_invoice'], 'type_invoice'=>$data['type_invoice']]);
+                    if(isset($salesDetail)){
+                        $salesItem = SalesInvoiceItem::findOne(['no_invoice'=>$data['no_invoice'], 'type_invoice'=>$data['type_invoice'], 'urutan'=>$data['urutan']]);
+                        if(isset($salesItem)){
+                            if(!empty($data['new_harga_jual_1'])){
+                                $new_harga_jual_1 = str_replace(',', '', $data['new_harga_jual_1']);
+                                $salesItem->new_harga_jual_1 = $new_harga_jual_1;
+                            }
+                            if(!empty($data['new_harga_jual_2'])){
+                                $new_harga_jual_2 = str_replace(',', '', $data['new_harga_jual_2']);
+                                $salesItem->new_harga_jual_2 = $new_harga_jual_2;
+                            }
+                            $newTotalItem = $salesItem->newTotalOrder($salesItem);
+                            $salesItem->new_total_order = $newTotalItem;
+                            if($salesItem->save()){
+                                $newTotalDetail = $salesDetail->newTotalOrder($salesDetail, $salesItem->proses_code);
+                                if(!$salesDetail->save()){
+                                    $success = false;
+                                    foreach($salesDetail->errors as $error => $value){
+                                        $message = $value[0].', ';
+                                    }
+                                    $message = substr($message, 0, -2);
+                                }
+
+                                $newTotal = $salesInv->newTotalOrder($salesInv);
+                                if(!$salesInv->save()){
+                                    $success = false;
+                                    foreach($salesInv->errors as $error => $value){
+                                        $message = $value[0].', ';
+                                    }
+                                    $message = substr($message, 0, -2);
+                                }
+                            }else{
+                                $success = false;
+                                foreach($salesItem->errors as $error => $value){
+                                    $message = $value[0].', ';
+                                }
+                                $message = substr($message, 0, -2);
+                            }
+                        }else{
+                            $success = false;
+                            $message = 'Data Sales Invoice Item tidak ditemukan.';
+                        }
+                    }else{
+                        $success = false;
+                        $message = 'Data Sales Invoice Detail tidak ditemukan.';
                     }
-                    $message = substr($message, 0, -2);
+                }else{
+                    $success = false;
+                    $message = 'Data Sales Invoice tidak ditemukan.';
                 }
-            }else{
+
+                if($success){
+                    $transaction->commit();
+                }else{
+                    $transaction->rollBack();
+                }
+            }catch(\Exception $e){
                 $success = false;
-                $message = 'Data Item tidak ditemukan.';
+                $message = $e->getMessage();
+                $transaction->rollBack();
             }
         }else{
             $success = false;
-            $message = 'The requested data does not exist.';;
+            $message = 'The requested data does not exist.';
+        }
+        return \Yii::$app->session->setFlash(($success) ? 'success' : 'danger', $message);
+    }
+
+    public function actionUpdateBiayaLain()
+    {
+        $request = \Yii::$app->request;
+        $success = true;
+        $message = 'CREATE HARGA BIAYA LAIN SUCCESSFULLY';
+        if($request->isPost){
+            $connection = \Yii::$app->db;
+            $transaction = $connection->beginTransaction();
+            try{
+                $data = $request->post('SalesInvoiceItem');
+                $salesInv = SalesInvoice::findOne(['no_invoice'=>$data['no_invoice']]);
+                if(isset($salesInv)){
+                    $salesDetail = SalesInvoiceDetail::findOne(['no_invoice'=>$data['no_invoice'], 'type_invoice'=>3]);
+                    if(empty($salesDetail)){
+                        $salesDetail = new SalesInvoiceDetail();
+                        $salesDetail->attributes = (array)$data;
+                        $count = SalesInvoiceDetail::find()->where(['no_invoice'=>$data['no_invoice']])->count();
+                        $salesDetail->urutan = $count +1;
+                        // $salesDetail->total_biaya_lain = $salesDetail->grand_total = $salesDetail->new_grand_total = str_replace(',', '', $data['harga_jual_1']);
+                        $salesDetail->total_biaya_lain = $salesDetail->grand_total = $salesDetail->new_grand_total = $salesDetail->harga_jual_1;
+                        if($salesDetail->save()){
+                            $salesItem = SalesInvoiceItem::findOne(['no_invoice'=>$data['no_invoice'], 'type_invoice'=>3, 'type_ongkos'=>$data['type_ongkos']]);
+                            if(empty($salesItem)){
+                                $salesItem = new SalesInvoiceItem();
+                                $salesItem->attributes = (array)$data;
+                                $salesItem->urutan = $salesItem->count +1;
+                                $salesItem->harga_jual_1 = $salesItem->total_order = $salesItem->new_harga_jual_1 = $salesItem->new_total_order = $salesItem->harga_jual_1;
+                                if($salesItem->save()){
+                                    $salesInv->total_biaya_lain += $salesItem->total_order;
+                                    $salesInv->new_grand_total = $salesInv->new_grand_total + $salesInv->total_biaya_lain;
+                                    if(!$salesInv->save()){
+                                        $success = false;
+                                        foreach($salesInv->errors as $error => $value){
+                                            $message = $value[0].', ';
+                                        }
+                                        $message = substr($message, 0, -2);
+                                    }
+                                }else{
+                                    $success = false;
+                                    foreach($salesItem->errors as $error => $value){
+                                        $message = $value[0].', ';
+                                    }
+                                    $message = substr($message, 0, -2);
+                                }
+                            }else{
+                                $success = false;
+                                $message = 'Type Ongkos sudah ada.';
+                            }
+                        }else{
+                            $success = false;
+                            foreach($salesDetail->errors as $error => $value){
+                                $message = $value[0].', ';
+                            }
+                            $message = substr($message, 0, -2);
+                        }
+                    }else{
+                        if(!empty($data['urutan'])){
+                            $salesItem = SalesInvoiceItem::findOne(['no_invoice'=>$data['no_invoice'], 'type_invoice'=>3, 'urutan'=>$data['urutan']]);
+                            $oldTotalOrder = $salesItem->total_order;
+                        }else{
+                            $salesItem = new SalesInvoiceItem();
+                            $salesItem->attributes = (array)$data;
+                            $salesItem->urutan = $salesItem->count +1;
+                            $salesItem->harga_jual_1 = $salesItem->total_order = $salesItem->new_harga_jual_1 = $salesItem->new_total_order = $salesItem->harga_jual_1;
+                        }
+                        // $salesDetail->attributes = (array)$data;
+                        // $salesDetail->total_biaya_lain = $salesDetail->grand_total = $salesDetail->new_grand_total = str_replace(',', '', $data['harga_jual_1']);
+                        if($salesDetail->save()){
+                            print_r('A');die;
+                            if(isset($salesItem)){
+                                $oldTotalOrder = $salesItem->total_order;
+                                $salesItem->attributes = (array)$data;
+                                $salesItem->urutan = $salesItem->count +1;
+                                $salesItem->harga_jual_1 = $salesItem->total_order = $salesItem->new_harga_jual_1 = $salesItem->new_total_order = $salesItem->harga_jual_1;
+                                if($salesItem->save()){
+                                    $salesInv->total_biaya_lain -= $oldTotalOrder;
+                                    $salesInv->total_biaya_lain += $salesItem->total_order;
+                                    $salesInv->new_grand_total = $salesInv->new_grand_total + $salesInv->total_biaya_lain;
+                                    if(!$salesInv->save()){
+                                        $success = false;
+                                        foreach($salesInv->errors as $error => $value){
+                                            $message = $value[0].', ';
+                                        }
+                                        $message = substr($message, 0, -2);
+                                    }
+                                }else{
+                                    $success = false;
+                                    foreach($salesItem->errors as $error => $value){
+                                        $message = $value[0].', ';
+                                    }
+                                    $message = substr($message, 0, -2);
+                                }
+                            }else{
+                                $success = false;
+                                $message = 'Data Sales Item tidak ditemukan.';
+                            }
+                        }else{
+                            $success = false;
+                            foreach($salesDetail->errors as $error => $value){
+                                $message = $value[0].', ';
+                            }
+                            $message = substr($message, 0, -2);
+                        }
+                    }
+
+                    if($success){
+                        $transaction->commit();
+                    }else{
+                        $transaction->rollBack();
+                    }
+                }else{
+                    $success = false;
+                    $message = 'Data Sales Invoice tidak ditemukan.';
+                }
+            }catch(\Exception $e){
+                $success = false;
+                $message = $e->getMessage();
+                $transaction->rollBack();
+            }
+        }else{
+            $success = false;
+            $message = 'The requested data does not exist.';
         }
         return \Yii::$app->session->setFlash(($success) ? 'success' : 'danger', $message);
     }

@@ -186,12 +186,11 @@ class TempRequestOrderItem extends \yii\db\ActiveRecord
     public function getTotalOrder()
     {
         $total_order=0;
-        $konversi_2 = (!empty($item->satuan->konversi_2)) ? $item->satuan->konversi_2 : 1;
         if(!empty($this->qty_order_1)){
             $total_order += $this->qty_order_1 * $this->harga_jual_1;
         }
         if(!empty($this->qty_order_2)){
-            $total_order += ($this->qty_order_2 / $konversi_2) * $this->harga_jual_2;
+            $total_order += $this->qty_order_2 * $this->harga_jual_2;
         }
         return $total_order;
     }

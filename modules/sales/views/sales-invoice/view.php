@@ -50,6 +50,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 </div>
                 <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0 text-right">
                     <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0">
+                        <label>Total Biaya Lain2</label>
+                    </div>
+                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
+                        <span><?=number_format($model->total_biaya_lain).'.-' ?></span>
+                    </div>
+                </div>
+                <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0 text-right">
+                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0">
                         <label>PPN (%)</label>
                     </div>
                     <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
@@ -136,22 +144,22 @@ $this->params['breadcrumbs'][] = $this->title;
                             </tr>
                         <?php endforeach; ?>
                         <tr>
-                            <td class="text-right mark" colspan="4">TOTAL:</td>
-                            <td class="text-right mark"><?=number_format($total_order_material).'.-' ?></td>
-                            <td class="text-right mark"><?=number_format($total_order_bahan).'.-' ?></td>
-                            <td class="text-right mark"><?=number_format($total_biaya_produksi).'.-' ?></td>
+                            <td class="text-right mark-2" colspan="4">TOTAL:</td>
+                            <td class="text-right mark-2"><?=number_format($total_order_material).'.-' ?></td>
+                            <td class="text-right mark-2"><?=number_format($total_order_bahan).'.-' ?></td>
+                            <td class="text-right mark-2"><?=number_format($total_biaya_produksi).'.-' ?></td>
                         </tr>
                         <tr>
-                            <td class="text-right mark-2" colspan="6">TOTAL ORDER:</td>
-                            <td class="text-right mark-2"><?=number_format($total_order_all).'.-' ?></td>
+                            <td class="text-right mark-3" colspan="6">TOTAL ORDER:</td>
+                            <td class="text-right mark-3"><?=number_format($total_order_all).'.-' ?></td>
                         </tr>
                         <tr>
-                            <td class="text-right mark-2" colspan="6">TOTAL PPN:</td>
-                            <td class="text-right mark-2"><?=number_format($total_ppn).'.-' ?></td>
+                            <td class="text-right mark-3" colspan="6">TOTAL PPN:</td>
+                            <td class="text-right mark-3"><?=number_format($total_ppn).'.-' ?></td>
                         </tr>
                         <tr>
-                            <td class="text-right mark-2" colspan="6"><strong>GRAND TOTAL:</strong></td>
-                            <td class="text-right mark-2"><strong><?=number_format($grand_total).'.-' ?></strong></td>
+                            <td class="text-right mark-3" colspan="6"><strong>GRAND TOTAL:</strong></td>
+                            <td class="text-right mark-3"><strong><?=number_format($grand_total).'.-' ?></strong></td>
                         </tr>
                     <?php else: ?>
                         <tr>
@@ -220,17 +228,17 @@ $this->params['breadcrumbs'][] = $this->title;
                             </tr>
                         <?php endforeach; ?>
                         <tr>
-                            <td class="text-right mark" colspan="4">TOTAL:</td>
-                            <td class="text-right mark"><?=number_format($total_order_material).'.-' ?></td>
-                            <td class="text-right mark"><?=number_format($total_order_bahan).'.-' ?></td>
+                            <td class="text-right mark-2" colspan="4">TOTAL:</td>
+                            <td class="text-right mark-2"><?=number_format($total_order_material).'.-' ?></td>
+                            <td class="text-right mark-2"><?=number_format($total_order_bahan).'.-' ?></td>
                         </tr>
                         <tr>
-                            <td class="text-right mark-2" colspan="5">TOTAL ORDER:</td>
-                            <td class="text-right mark-2"><?=number_format($total_order_all).'.-' ?></td>
+                            <td class="text-right mark-3" colspan="5">TOTAL ORDER:</td>
+                            <td class="text-right mark-3"><?=number_format($total_order_all).'.-' ?></td>
                         </tr>
                         <tr>
-                            <td class="text-right mark-2" colspan="5"><strong>GRAND TOTAL:</strong></td>
-                            <td class="text-right mark-2"><strong><?=number_format($grand_total).'.-' ?></strong></td>
+                            <td class="text-right mark-3" colspan="5"><strong>GRAND TOTAL:</strong></td>
+                            <td class="text-right mark-3"><strong><?=number_format($grand_total).'.-' ?></strong></td>
                         </tr>
                     <?php else: ?>
                         <tr>

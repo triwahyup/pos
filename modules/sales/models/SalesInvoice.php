@@ -53,7 +53,7 @@ class SalesInvoice extends \yii\db\ActiveRecord
         return [
             [['no_invoice'], 'required'],
             [['tgl_invoice'], 'safe'],
-            [['ppn', 'total_order_material', 'total_order_bahan', 'total_biaya_produksi', 'total_ppn', 'grand_total', 'new_total_order_material', 'new_total_order_bahan', 'new_total_biaya_produksi', 'new_total_ppn', 'new_grand_total'], 'number'],
+            [['ppn', 'total_order_material', 'total_order_bahan', 'total_biaya_produksi', 'total_biaya_lain', 'total_ppn', 'grand_total', 'new_total_order_material', 'new_total_order_bahan', 'new_total_biaya_produksi', 'new_total_ppn', 'new_grand_total'], 'number'],
             [['status', 'created_at', 'updated_at'], 'integer'],
             [['no_so'], 'string', 'max' => 12],
             [['no_invoice'], 'string', 'max' => 15],
@@ -122,9 +122,34 @@ class SalesInvoice extends \yii\db\ActiveRecord
         return $this->hasMany(SalesInvoiceItem::className(), ['no_invoice' => 'no_invoice', 'type_invoice' => 'type_ro']);
     }
     
-    public $type_dll=3;
-    public function getItemsDll()
+    public $type_lain=3;
+    public function getItemsLain()
     {
-        return $this->hasMany(SalesInvoiceItem::className(), ['no_invoice' => 'no_invoice', 'type_invoice' => 'type_dll']);
+        return $this->hasMany(SalesInvoiceItem::className(), ['no_invoice' => 'no_invoice', 'type_invoice' => 'type_lain']);
+    }
+
+    public function newTotalOrder($param)
+    {
+        $total_order_material = 0;
+        $total_order_bahan = 0;
+        $total_biaya_produksi = 0;
+        $total_biaya_lain = 0;
+        $grand_total = 0;
+        foreach($param->details as $val){
+            $total_order_material += $val->new_total_order_material;
+            $total_order_bahan += $val->new_total_order_bahan;
+            $total_biaya_produksi += $val->new_total_biaya_produksi;
+            $total_biaya_lain += $val->total_biaya_lain;
+        }
+        $param->new_total_order_material = $total_order_material;
+        $grand_total += $total_order_material;
+        $param->new_total_order_bahan = $total_order_bahan;
+        $grand_total += $total_order_bahan;
+        $param->new_total_biaya_produksi = $total_biaya_produksi;
+        $grand_total += $total_biaya_produksi;
+        $param->total_biaya_lain = $total_biaya_lain;
+        $grand_total += $total_biaya_lain;
+        $param->new_grand_total = $grand_total;
+        return true;
     }
 }
