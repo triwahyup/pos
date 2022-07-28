@@ -21,6 +21,7 @@ class PengaturanApproval extends \yii\db\ActiveRecord
 {
     public $type;
     public $approval;
+    public $type_code;
     
     /**
      * {@inheritdoc}
@@ -44,7 +45,7 @@ class PengaturanApproval extends \yii\db\ActiveRecord
     {
         return [
             [['name'], 'required'],
-            [['type', 'approval'], 'safe'],
+            [['type', 'approval', 'type_code'], 'safe'],
             [['status', 'created_at', 'updated_at'], 'integer'],
             [['code'], 'string', 'max' => 3],
             [['name', 'slug'], 'string', 'max' => 64],
@@ -62,6 +63,8 @@ class PengaturanApproval extends \yii\db\ActiveRecord
             'code' => 'Code',
             'name' => 'Name',
             'slug' => 'Slug',
+            'type' => 'Type User',
+            'type_code' => 'Type Material',
             'status' => 'Status',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',

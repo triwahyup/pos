@@ -149,7 +149,7 @@ class SalesInvoice extends \yii\db\ActiveRecord
         $grand_total += $total_biaya_produksi;
         $param->total_biaya_lain = $total_biaya_lain;
         $grand_total += $total_biaya_lain;
-        $param->new_grand_total = $grand_total;
+        $param->new_grand_total = $grand_total + $param->new_total_ppn;
         return true;
     }
 }

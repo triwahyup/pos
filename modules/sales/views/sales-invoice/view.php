@@ -86,7 +86,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         <th class="font-size-10 text-center" rowspan="2">Item</th>
                         <th class="font-size-10 text-center" rowspan="2">Qty</th>
                         <th class="font-size-10 text-center" colspan="2">Harga (Rp)</th>
-                        <th class="font-size-10 text-center" colspan="3">Total Real Order (Rp)</th>
+                        <th class="font-size-10 text-center" colspan="3">Total Order (Rp)</th>
                     </tr>
                     <tr>
                         <th class="font-size-10 text-center">Per RIM</th>
@@ -182,7 +182,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         <th class="font-size-10 text-center" rowspan="2">Item</th>
                         <th class="font-size-10 text-center" rowspan="2">Qty</th>
                         <th class="font-size-10 text-center" colspan="2">Harga (Rp)</th>
-                        <th class="font-size-10 text-center" colspan="2">Total Real Order (Rp)</th>
+                        <th class="font-size-10 text-center" colspan="2">Total Order (Rp)</th>
                     </tr>
                     <tr>
                         <th class="font-size-10 text-center">Per RIM</th>
@@ -265,9 +265,26 @@ $this->params['breadcrumbs'][] = $this->title;
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td class="text-danger" colspan="6">Data masih kosong.</td>
-                    </tr>
+                    <?php if(count($model->itemsLain)): 
+                        $total_biaya_lain = 0; ?>
+                        <?php foreach($model->itemsLain as $val): 
+                            $total_biaya_lain += $val->total_order; ?>
+                            <tr>
+                                <td class="text-left"><?=$val->typeOngkos($val->type_ongkos) ?></td>
+                                <td class="text-center"><?=(!empty($val->unique_code)) ? $val->unique_code : '-' ?></td>
+                                <td class="text-right"><?=number_format($val->harga_jual_1).'.-' ?></td>
+                                <td class="text-right"><?=number_format($val->total_order).'.-' ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                        <tr>
+                            <td class="text-right mark-3" colspan="3">GRAND TOTAL:</td>
+                            <td class="text-right mark-3"><?=number_format($total_biaya_lain).'.-' ?></td>
+                        </tr>
+                    <?php else: ?>
+                        <tr>
+                            <td class="text-danger" colspan="6">Data masih kosong.</td>
+                        </tr>
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>

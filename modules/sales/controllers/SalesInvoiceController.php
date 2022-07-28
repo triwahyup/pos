@@ -48,7 +48,7 @@ class SalesInvoiceController extends Controller
                             'roles' => ['@'],
                         ],
                         [
-                            'actions' => ['delete'],
+                            'actions' => ['delete', 'delete-biaya-lain'],
                             'allow' => (((new User)->getIsDeveloper()) || \Yii::$app->user->can('sales-invoice[D]')),
                             'roles' => ['@'],
                         ],
@@ -551,35 +551,33 @@ class SalesInvoiceController extends Controller
                         $salesDetail->attributes = (array)$data;
                         $count = SalesInvoiceDetail::find()->where(['no_invoice'=>$data['no_invoice']])->count();
                         $salesDetail->urutan = $count +1;
-                        // $salesDetail->total_biaya_lain = $salesDetail->grand_total = $salesDetail->new_grand_total = str_replace(',', '', $data['harga_jual_1']);
-                        $salesDetail->total_biaya_lain = $salesDetail->grand_total = $salesDetail->new_grand_total = $salesDetail->harga_jual_1;
+                        $salesDetail->total_biaya_lain = str_replace(',', '', $data['harga_jual_1']);
+                        $salesDetail->grand_total = str_replace(',', '', $data['harga_jual_1']);
+                        $salesDetail->new_grand_total = str_replace(',', '', $data['harga_jual_1']);
                         if($salesDetail->save()){
-                            $salesItem = SalesInvoiceItem::findOne(['no_invoice'=>$data['no_invoice'], 'type_invoice'=>3, 'type_ongkos'=>$data['type_ongkos']]);
-                            if(empty($salesItem)){
-                                $salesItem = new SalesInvoiceItem();
-                                $salesItem->attributes = (array)$data;
-                                $salesItem->urutan = $salesItem->count +1;
-                                $salesItem->harga_jual_1 = $salesItem->total_order = $salesItem->new_harga_jual_1 = $salesItem->new_total_order = $salesItem->harga_jual_1;
-                                if($salesItem->save()){
-                                    $salesInv->total_biaya_lain += $salesItem->total_order;
-                                    $salesInv->new_grand_total = $salesInv->new_grand_total + $salesInv->total_biaya_lain;
-                                    if(!$salesInv->save()){
-                                        $success = false;
-                                        foreach($salesInv->errors as $error => $value){
-                                            $message = $value[0].', ';
-                                        }
-                                        $message = substr($message, 0, -2);
-                                    }
-                                }else{
+                            $salesItem = new SalesInvoiceItem();
+                            $salesItem->attributes = (array)$data;
+                            $salesItem->urutan = $salesItem->count +1;
+                            $salesItem->harga_jual_1 = str_replace(',', '', $data['harga_jual_1']);
+                            $salesItem->total_order = str_replace(',', '', $data['harga_jual_1']);
+                            $salesItem->new_harga_jual_1 = str_replace(',', '', $data['harga_jual_1']);
+                            $salesItem->new_total_order = str_replace(',', '', $data['harga_jual_1']);
+                            if($salesItem->save()){
+                                $salesInv->total_biaya_lain += $salesItem->total_order;
+                                $salesInv->new_grand_total += $salesItem->total_order;
+                                if(!$salesInv->save()){
                                     $success = false;
-                                    foreach($salesItem->errors as $error => $value){
+                                    foreach($salesInv->errors as $error => $value){
                                         $message = $value[0].', ';
                                     }
                                     $message = substr($message, 0, -2);
                                 }
                             }else{
                                 $success = false;
-                                $message = 'Type Ongkos sudah ada.';
+                                foreach($salesItem->errors as $error => $value){
+                                    $message = $value[0].', ';
+                                }
+                                $message = substr($message, 0, -2);
                             }
                         }else{
                             $success = false;
@@ -592,25 +590,29 @@ class SalesInvoiceController extends Controller
                         if(!empty($data['urutan'])){
                             $salesItem = SalesInvoiceItem::findOne(['no_invoice'=>$data['no_invoice'], 'type_invoice'=>3, 'urutan'=>$data['urutan']]);
                             $oldTotalOrder = $salesItem->total_order;
-                        }else{
-                            $salesItem = new SalesInvoiceItem();
-                            $salesItem->attributes = (array)$data;
-                            $salesItem->urutan = $salesItem->count +1;
-                            $salesItem->harga_jual_1 = $salesItem->total_order = $salesItem->new_harga_jual_1 = $salesItem->new_total_order = $salesItem->harga_jual_1;
-                        }
-                        // $salesDetail->attributes = (array)$data;
-                        // $salesDetail->total_biaya_lain = $salesDetail->grand_total = $salesDetail->new_grand_total = str_replace(',', '', $data['harga_jual_1']);
-                        if($salesDetail->save()){
-                            print_r('A');die;
                             if(isset($salesItem)){
-                                $oldTotalOrder = $salesItem->total_order;
-                                $salesItem->attributes = (array)$data;
-                                $salesItem->urutan = $salesItem->count +1;
-                                $salesItem->harga_jual_1 = $salesItem->total_order = $salesItem->new_harga_jual_1 = $salesItem->new_total_order = $salesItem->harga_jual_1;
+                                $salesItem->harga_jual_1 = $salesItem->new_harga_jual_1 = str_replace(',', '', $data['harga_jual_1']);
+                                $salesItem->total_order = $salesItem->new_total_order = $salesItem->harga_jual_1;
                                 if($salesItem->save()){
+                                    $salesDetail->total_biaya_lain -= $oldTotalOrder;
+                                    $salesDetail->grand_total -= $oldTotalOrder;
+                                    $salesDetail->new_grand_total -= $oldTotalOrder;
+                                    
+                                    $salesDetail->total_biaya_lain +=  $salesItem->harga_jual_1;
+                                    $salesDetail->grand_total +=  $salesItem->harga_jual_1;
+                                    $salesDetail->new_grand_total +=  $salesItem->harga_jual_1;
+                                    if(!$salesDetail->save()){
+                                        $success = false;
+                                        foreach($salesDetail->errors as $error => $value){
+                                            $message = $value[0].', ';
+                                        }
+                                        $message = substr($message, 0, -2);
+                                    }
+                                    
                                     $salesInv->total_biaya_lain -= $oldTotalOrder;
+                                    $salesInv->new_grand_total -= $oldTotalOrder;
                                     $salesInv->total_biaya_lain += $salesItem->total_order;
-                                    $salesInv->new_grand_total = $salesInv->new_grand_total + $salesInv->total_biaya_lain;
+                                    $salesInv->new_grand_total += $salesItem->total_order;
                                     if(!$salesInv->save()){
                                         $success = false;
                                         foreach($salesInv->errors as $error => $value){
@@ -630,14 +632,48 @@ class SalesInvoiceController extends Controller
                                 $message = 'Data Sales Item tidak ditemukan.';
                             }
                         }else{
-                            $success = false;
-                            foreach($salesDetail->errors as $error => $value){
-                                $message = $value[0].', ';
+                            $salesItem = SalesInvoiceItem::findOne(['no_invoice'=>$data['no_invoice'], 'type_invoice'=>3, 'type_ongkos'=>$data['type_ongkos']]);
+                            if(empty($salesItem)){
+                                $salesItem = new SalesInvoiceItem();
+                                $salesItem->attributes = (array)$data;
+                                $salesItem->urutan = $salesItem->count +1;
+                                $salesItem->harga_jual_1 = str_replace(',', '', $data['harga_jual_1']);
+                                $salesItem->total_order = str_replace(',', '', $data['harga_jual_1']);
+                                $salesItem->new_harga_jual_1 = str_replace(',', '', $data['harga_jual_1']);
+                                $salesItem->new_total_order = str_replace(',', '', $data['harga_jual_1']);
+                                if($salesItem->save()){
+                                    $salesDetail->total_biaya_lain = $salesDetail->grand_total = $salesDetail->new_grand_total +=  $salesItem->harga_jual_1;
+                                    if(!$salesDetail->save()){
+                                        $success = false;
+                                        foreach($salesDetail->errors as $error => $value){
+                                            $message = $value[0].', ';
+                                        }
+                                        $message = substr($message, 0, -2);
+                                    }
+                                    
+                                    $salesInv->total_biaya_lain += $salesItem->total_order;
+                                    $salesInv->new_grand_total += $salesItem->total_order;
+                                    if(!$salesInv->save()){
+                                        $success = false;
+                                        foreach($salesInv->errors as $error => $value){
+                                            $message = $value[0].', ';
+                                        }
+                                        $message = substr($message, 0, -2);
+                                    }
+                                }else{
+                                    $success = false;
+                                    foreach($salesItem->errors as $error => $value){
+                                        $message = $value[0].', ';
+                                    }
+                                    $message = substr($message, 0, -2);
+                                }
+                            }else{
+                                $success = false;
+                                $message = 'Type Ongkos sudah ada.';
                             }
-                            $message = substr($message, 0, -2);
                         }
                     }
-
+                    
                     if($success){
                         $transaction->commit();
                     }else{
@@ -655,6 +691,39 @@ class SalesInvoiceController extends Controller
         }else{
             $success = false;
             $message = 'The requested data does not exist.';
+        }
+        return \Yii::$app->session->setFlash(($success) ? 'success' : 'danger', $message);
+    }
+
+    public function actionDeleteBiayaLain($no_invoice, $urutan)
+    {
+        $success = true;
+        $message = 'DELETE HARGA BIAYA LAIN SUCCESSFULLY.';
+        $connection = \Yii::$app->db;
+        $transaction = $connection->beginTransaction();
+        try{
+            $salesItem = SalesInvoiceItem::findOne(['no_invoice'=>$no_invoice, 'type_invoice'=>3, 'urutan'=>$urutan]);
+            if(isset($salesItem)){
+                $salesDetail = SalesInvoiceDetail::findOne(['no_invoice'=>$no_invoice, 'type_invoice'=>3]);
+                $salesDetail->total_biaya_lain -= $salesItem->total_order;
+                $salesDetail->grand_total -= $salesItem->total_order;
+                $salesDetail->new_grand_total -= $salesItem->total_order;
+
+                $salesInv = SalesInvoice::findOne(['no_invoice'=>$no_invoice]);
+                print_r($salesDetail->attributes);die;
+            }else{
+                $success = false;
+                $message = 'Data Sales Item tidak ditemukan.';
+            }
+            if($success){
+                // $transaction->commit();
+            }else{
+                $transaction->rollBack();
+            }
+        }catch(\Exception $e){
+            $success = false;
+            $message = $e->getMessage();
+            $transaction->rollBack();
         }
         return \Yii::$app->session->setFlash(($success) ? 'success' : 'danger', $message);
     }

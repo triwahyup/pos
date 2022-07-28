@@ -427,8 +427,18 @@ class PurchaseOrderController extends Controller
 
     public function actionListItem()
     {
-        $model = MasterMaterial::find()->where(['status'=>1])->orderBy(['code'=>SORT_ASC])->limit(10)->all();
-        return json_encode(['data'=>$this->renderPartial('_list_item', ['model'=>$model])]);
+        if(!empty($_POST['supplier_code'])){
+            $model = MasterMaterial::find()
+                ->alias('a')
+                ->leftJoin('master_material_pricelist b', 'b.item_code = a.code')
+                ->where(['b.supplier_code' => $_POST['supplier_code'], 'a.status'=>1])
+                ->orderBy(['code'=>SORT_ASC])
+                ->limit(10)
+                ->all();
+            return json_encode(['success'=>true, 'data'=>$this->renderPartial('_list_item', ['model'=>$model])]);
+        }else{
+            return json_encode(['success'=>false, 'message'=>'Pilih Supplier dahulu.']);
+        }
     }
 
     public function actionAutocomplete()
@@ -436,9 +446,14 @@ class PurchaseOrderController extends Controller
         $model = [];
         if(isset($_POST['search'])){
             $model = MasterMaterial::find()
-                ->select(['code', 'concat(code,"-",name) label', 'concat(code,"-",name) name'])
-                ->where(['status'=>1])
-                ->andWhere('concat(code,"-",name) LIKE "%'.$_POST['search'].'%"')
+                ->select([
+                    'a.code',
+                    'concat(a.code,"-", a.name) label',
+                    'concat(a.code,"-", a.name) name'])
+                ->alias('a')
+                ->leftJoin('master_material_pricelist b', 'b.item_code = a.code')
+                ->where(['b.supplier_code' => $_POST['supplier_code'], 'a.status'=>1])
+                ->andWhere('concat(a.code,"-", a.name) LIKE "%'.$_POST['search'].'%"')
                 ->asArray()
                 ->limit(10)
                 ->all();

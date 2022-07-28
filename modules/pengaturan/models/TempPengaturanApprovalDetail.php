@@ -33,7 +33,7 @@ class TempPengaturanApprovalDetail extends \yii\db\ActiveRecord
     {
         return [
             [['user_create', 'urutan', 'user_id'], 'integer'],
-            [['code', 'typeuser_code'], 'string', 'max' => 3],
+            [['code', 'typeuser_code', 'type_code'], 'string', 'max' => 3],
         ];
     }
 
@@ -70,5 +70,10 @@ class TempPengaturanApprovalDetail extends \yii\db\ActiveRecord
     public function getTypeUser()
     {
         return $this->hasOne(MasterKode::className(), ['code' => 'typeuser_code']);
+    }
+
+    public function getTypeMaterial()
+    {
+        return $this->hasOne(MasterKode::className(), ['code' => 'type_code']);
     }
 }

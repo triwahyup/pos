@@ -30,6 +30,7 @@
 </table>
 <script>
 $(document).ready(function(){
+    var supplier_code = $("#purchaseorder-supplier_code").val();
 	$("#search").autocomplete({
         minLength: 1,
         select: function(event, value){
@@ -43,6 +44,7 @@ $(document).ready(function(){
                 error: function(xhr, status, error) {},
                 data: {
                     search: request.term,
+                    supplier_code: supplier_code,
                 },
                 beforeSend: function (data){
                     $("#search").loader("load");

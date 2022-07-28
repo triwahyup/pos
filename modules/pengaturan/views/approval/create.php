@@ -11,6 +11,7 @@ $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="pengaturan-approval-create">
     <?= $this->render('_form', [
+        'dataList' => $dataList,
         'model' => $model,
     ]) ?>
 </div>

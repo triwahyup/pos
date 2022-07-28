@@ -12,6 +12,7 @@ $this->params['breadcrumbs'][] = 'Update';
 ?>
 <div class="pengaturan-approval-update">
     <?= $this->render('_form', [
+        'dataList' => $dataList,
         'model' => $model,
     ]) ?>
 </div>

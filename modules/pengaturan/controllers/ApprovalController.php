@@ -2,6 +2,7 @@
 
 namespace app\modules\pengaturan\controllers;
 
+use app\models\DataList;
 use app\models\Logs;
 use app\models\User;
 use app\models\Profile;
@@ -100,6 +101,7 @@ class ApprovalController extends Controller
     {
         $success = true;
         $message = '';
+        $dataList = DataList::setListColumn();
         $model = new PengaturanApproval();
         if ($this->request->isPost) {
             if ($model->load($this->request->post())) {
@@ -169,6 +171,7 @@ class ApprovalController extends Controller
         }
 
         return $this->render('create', [
+            'dataList' => $dataList,
             'model' => $model,
         ]);
     }
@@ -184,6 +187,7 @@ class ApprovalController extends Controller
     {
         $success = true;
         $message = '';
+        $dataList = DataList::setListColumn();
         $model = $this->findModel($code);
         if ($this->request->isPost) {
             if ($model->load($this->request->post())) {
@@ -265,6 +269,7 @@ class ApprovalController extends Controller
         }
 
         return $this->render('update', [
+            'dataList' => $dataList,
             'model' => $model,
         ]);
     }

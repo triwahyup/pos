@@ -10,7 +10,8 @@
             <label class="font-size-12">Type Ongkos:</label>
         </div>
         <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padding-right-0">
-            <?= $form->field($item, 'type_ongkos')->dropDownList($typeOngkos, ['prompt'=>'Biaya Lainnya...'])->label(false) ?>
+            <?= $form->field($item, 'type_ongkos')->dropDownList($typeOngkos, [
+                'readonly' => ($update) ? true : false, 'prompt'=>'Biaya Lainnya...'])->label(false) ?>
         </div>
     </div>
     <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">

@@ -3,6 +3,7 @@
 namespace app\modules\sales\models;
 
 use Yii;
+use app\models\DataList;
 use app\modules\master\models\MasterKode;
 use app\modules\master\models\MasterMaterial;
 use app\modules\master\models\MasterMaterialPricelist;
@@ -159,6 +160,12 @@ class SalesInvoiceItem extends \yii\db\ActiveRecord
     public function getProses()
     {
         return $this->hasOne(MasterProses::className(), ['code' => 'proses_code']);
+    }
+
+    public function typeOngkos($type_ongkos)
+    {
+        $typeOngkos = DataList::listTypeOngkos();
+        return $typeOngkos[$type_ongkos];
     }
 
     public function newTotalOrder($param)

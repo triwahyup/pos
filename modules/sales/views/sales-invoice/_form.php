@@ -175,7 +175,14 @@ use yii\widgets\ActiveForm;
                                                     $new_grand_total = $val->new_grand_total;
                                                 endif;
                                             endforeach; ?>
-                                            <?php foreach($model->itemsSo as $val):  ?>
+                                            <?php foreach($model->itemsSo as $val): ?>
+                                                <?php 
+                                                    $remark_harga = (
+                                                        $val->harga_jual_1 != $val->new_harga_jual_1 || 
+                                                        $val->harga_jual_2 != $val->new_harga_jual_2
+                                                    ) ? true : false;
+                                                    $markingCss = $remark_harga ? 'mark-1' : '';
+                                                ?>
                                                 <tr>
                                                     <?php if(!empty($val->proses_code)): ?>
                                                         <td class="font-size-10 text-left"><?=(isset($val->proses)) ? $val->proses->name : '-' ?></td>
@@ -203,26 +210,26 @@ use yii\widgets\ActiveForm;
                                                     <?php endif; ?>
                                                     <!-- /REAL -->
                                                     <!-- REMARK -->
-                                                    <td class="font-size-10 text-right <?=($val->harga_jual_1 != $val->new_harga_jual_1) ? 'mark-1' : '' ?>">
+                                                    <td class="font-size-10 text-right <?=$markingCss ?>">
                                                         <?=number_format($val->new_harga_jual_1).'.-' ?>
                                                     </td>
-                                                    <td class="font-size-10 text-right <?=($val->harga_jual_2 != $val->new_harga_jual_2) ? 'mark-1' : '' ?>">
+                                                    <td class="font-size-10 text-right <?=$markingCss ?>">
                                                         <?=number_format($val->new_harga_jual_2).'.-' ?>
                                                     </td>
                                                     <?php if($val->kode['name'] == \Yii::$app->params['TYPE_KERTAS']): ?>
-                                                        <td class="font-size-10 text-right <?=($val->total_order != $val->new_total_order) ? 'mark-1' : '' ?>">
+                                                        <td class="font-size-10 text-right <?=$markingCss ?>">
                                                             <?=number_format($val->new_total_order).'.-' ?>
                                                         </td>
                                                         <td></td><td></td>
                                                     <?php elseif($val->kode['name'] == \Yii::$app->params['TYPE_BAHAN_PB']): ?>
                                                         <td></td>
-                                                        <td class="font-size-10 text-right <?=($val->total_order != $val->new_total_order) ? 'mark-1' : '' ?>">
+                                                        <td class="font-size-10 text-right <?=$markingCss ?>">
                                                             <?=number_format($val->new_total_order).'.-' ?>
                                                         </td>
                                                         <td></td>
                                                     <?php else: ?>
                                                         <td></td><td></td>
-                                                        <td class="font-size-10 text-right <?=($val->total_order != $val->new_total_order) ? 'mark-1' : '' ?>">
+                                                        <td class="font-size-10 text-right <?=$markingCss ?>">
                                                             <?=number_format($val->new_total_order).'.-' ?>
                                                         </td>
                                                     <?php endif; ?>
@@ -338,6 +345,13 @@ use yii\widgets\ActiveForm;
                                                 endif;
                                             endforeach; ?>
                                             <?php foreach($model->itemsRo as $val):  ?>
+                                                <?php
+                                                    $remark_harga = (
+                                                        $val->harga_jual_1 != $val->new_harga_jual_1 || 
+                                                        $val->harga_jual_2 != $val->new_harga_jual_2
+                                                    ) ? true : false;
+                                                    $markingCss = $remark_harga ? 'mark-1' : '';
+                                                ?>
                                                 <tr>
                                                     <td class="font-size-10 text-left">
                                                         <?=(isset($val->item)) ? $val->item_code .' - '. $val->item->name : '-' ?>
@@ -359,20 +373,20 @@ use yii\widgets\ActiveForm;
                                                     <?php endif; ?>
                                                     <!-- /REAL -->
                                                     <!-- REMARK -->
-                                                    <td class="font-size-10 text-right <?=($val->harga_jual_1 != $val->new_harga_jual_1) ? 'mark-1' : '' ?>">
+                                                    <td class="font-size-10 text-right <?=$markingCss ?>">
                                                         <?=number_format($val->new_harga_jual_1).'.-' ?>
                                                     </td>
-                                                    <td class="font-size-10 text-right <?=($val->harga_jual_2 != $val->new_harga_jual_2) ? 'mark-1' : '' ?>">
+                                                    <td class="font-size-10 text-right <?=$markingCss ?>">
                                                         <?=number_format($val->new_harga_jual_2).'.-' ?>
                                                     </td>
                                                     <?php if($val->kode['name'] == \Yii::$app->params['TYPE_KERTAS']): ?>
-                                                        <td class="font-size-10 text-right <?=($val->total_order != $val->new_total_order) ? 'mark-1' : '' ?>">
+                                                        <td class="font-size-10 text-right <?=$markingCss ?>">
                                                             <?=number_format($val->new_total_order).'.-' ?>
                                                         </td>
                                                         <td></td>
                                                     <?php elseif($val->kode['name'] == \Yii::$app->params['TYPE_BAHAN_PB']): ?>
                                                         <td></td>
-                                                        <td class="font-size-10 text-right <?=($val->total_order != $val->new_total_order) ? 'mark-1' : '' ?>">
+                                                        <td class="font-size-10 text-right <?=$markingCss ?>">
                                                             <?=number_format($val->new_total_order).'.-' ?>
                                                         </td>
                                                     <?php endif; ?>
@@ -439,25 +453,32 @@ use yii\widgets\ActiveForm;
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php if(count($model->itemsLain)): ?>
-                                        <?php foreach($model->itemsLain as $val): ?>
+                                    <?php if(count($model->itemsLain)): 
+                                        $total_biaya_lain = 0; ?>
+                                        <?php foreach($model->itemsLain as $val): 
+                                            $total_biaya_lain += $val->total_order; ?>
                                             <tr>
-                                                <td><?=$val->type_ongkos ?></td>
+                                                <td class="text-left"><?=$val->typeOngkos($val->type_ongkos) ?></td>
                                                 <td class="text-center"><?=(!empty($val->unique_code)) ? $val->unique_code : '-' ?></td>
                                                 <td class="text-right"><?=number_format($val->harga_jual_1).'.-' ?></td>
                                                 <td class="text-right"><?=number_format($val->total_order).'.-' ?></td>
                                                 <td class="text-center">
                                                     <button class="btn btn-warning btn-xs btn-sm"
-                                                        data-button="popup_biaya_lain" data-invoice="<?=$val->no_invoice ?>" data-type="3" data-urutan="<?=$val->urutan ?>">
+                                                        data-button="popup_biaya_lain" data-invoice="<?=$val->no_invoice ?>" data-urutan="<?=$val->urutan ?>">
                                                         <i class="fontello icon-pencil"></i>
                                                     </button>
                                                     <button class="btn btn-danger btn-xs btn-sm"
-                                                        data-button="delete" data-invoice="<?=$val->no_invoice ?>" data-type="3" data-urutan="<?=$val->urutan ?>">
+                                                        data-button="delete" data-invoice="<?=$val->no_invoice ?>" data-urutan="<?=$val->urutan ?>">
                                                         <i class="fontello icon-trash"></i>
                                                     </button>
                                                 </td>
                                             </tr>
                                         <?php endforeach; ?>
+                                        <tr>
+                                            <td class="text-right mark-3" colspan="3">GRAND TOTAL:</td>
+                                            <td class="text-right mark-3"><?=number_format($total_biaya_lain).'.-' ?></td>
+                                            <td class="last-row"></td>
+                                        </tr>
                                     <?php else: ?>
                                         <tr>
                                             <td class="text-danger" colspan="6">Data masih kosong.</td>
@@ -607,27 +628,26 @@ function update_biaya_lain()
         beforeSend: function(){},
         data: $("#form_biaya_lain").serialize(),
         success: function(data){
-            // location.reload();
+            location.reload();
         },
         complete: function(){}
     });
 }
 
-function delete_biaya_lain(no_invoice, type_invoice, urutan)
+function delete_biaya_lain(no_invoice, urutan)
 {
     $.ajax({
         url: "<?= Url::to(['sales-invoice/delete-biaya-lain']) ?>",
         type: "GET",
+        data: {
+            no_invoice: no_invoice,
+            urutan: urutan,
+        },
         dataType: "text",
         error: function(xhr, status, error) {},
         beforeSend: function(){},
-        data: {
-            no_invoice: no_invoice,
-            type_invoice: type_invoice,
-            urutan: urutan,
-        },
         success: function(data){
-            location.reload();
+            // location.reload();
         },
         complete: function(){}
     });
@@ -694,7 +714,7 @@ $(document).ready(function(){
     $("body").off("click","[data-button=\"delete\"]").on("click","[data-button=\"delete\"]", function(e){
         e.preventDefault();
         var data = $(this).data(),
-            target = data.invoice+'-'+data.type+'-'+data.urutan;
+            target = data.invoice+'-'+data.urutan;
         popup.open("confirm", {
 			message: "Apakah anda yakin ingin menghapus data ini ?",
 			selector: "delete",
@@ -705,7 +725,7 @@ $(document).ready(function(){
         e.preventDefault();
         var target = $(this).attr("data-target");
         target = target.split('-');
-        delete_biaya_lain(target[0], target[1], target[2]);
+        delete_biaya_lain(target[0], target[1]);
     });
 });
 </script>

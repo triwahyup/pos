@@ -43,7 +43,7 @@ class PengaturanApprovalDetail extends \yii\db\ActiveRecord
         return [
             [['code', 'urutan'], 'required'],
             [['urutan', 'user_id', 'status', 'created_at', 'updated_at'], 'integer'],
-            [['code', 'typeuser_code'], 'string', 'max' => 3],
+            [['code', 'typeuser_code', 'type_code'], 'string', 'max' => 3],
             [['code', 'urutan'], 'unique', 'targetAttribute' => ['code', 'urutan']],
         ];
     }
@@ -72,5 +72,10 @@ class PengaturanApprovalDetail extends \yii\db\ActiveRecord
     public function getTypeUser()
     {
         return $this->hasOne(MasterKode::className(), ['code' => 'typeuser_code']);
+    }
+
+    public function getTypeMaterial()
+    {
+        return $this->hasOne(MasterKode::className(), ['code' => 'type_code']);
     }
 }

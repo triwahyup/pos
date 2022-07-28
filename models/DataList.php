@@ -123,7 +123,7 @@ class DataList {
         /** /FROM PROFILE */
         
         /** DATA SATUAN */
-        $model['satuan'] = MasterSatuan::find()
+        $model['satuan_produksi'] = MasterSatuan::find()
             ->alias('a')
             ->select(['a.name'])
             ->leftJoin('master_kode b', 'b.code = a.type_satuan')

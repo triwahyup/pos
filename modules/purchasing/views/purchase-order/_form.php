@@ -229,24 +229,31 @@ function onInputTermIn(term_in, tgl_po)
     });
 }
 
-function load_item()
+function load_item(supplier_code)
 {
     $.ajax({
         url: "<?=Url::to(['purchase-order/list-item'])?>",
-		type: "GET",
+		type: "POST",
+        data: {
+            supplier_code: supplier_code  
+        },
 		dataType: "text",
         error: function(xhr, status, error) {},
 		beforeSend: function (data){},
         success: function(data){
             var o = $.parseJSON(data);
-            $("[data-popup=\"popup\"]").html(o.data);
-            $("[data-popup=\"popup\"]").popup("open", {
-				container: "popup",
-				title: 'List Data Material',
-				styleOptions: {
-					width: 600
-				}
-			});
+            if(o.success == true){
+                $("[data-popup=\"popup\"]").html(o.data);
+                $("[data-popup=\"popup\"]").popup("open", {
+                    container: "popup",
+                    title: 'List Data Material',
+                    styleOptions: {
+                        width: 600
+                    }
+                });
+            }else{
+                notification.open("danger", o.message, timeOut);
+            }
         },
         complete: function(){}
     });
@@ -452,7 +459,7 @@ $(document).ready(function(){
     $("body").on("keydown","#temppurchaseorderdetail-item_name", function(e){
         var key = e.charCode ? e.charCode : e.keyCode ? e.keyCode : 0;
         if(key == KEY.F4){
-            load_item();
+            load_item($("#purchaseorder-supplier_code").val());
         }
     });
     
