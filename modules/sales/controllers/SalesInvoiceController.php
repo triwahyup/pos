@@ -708,15 +708,47 @@ class SalesInvoiceController extends Controller
                 $salesDetail->total_biaya_lain -= $salesItem->total_order;
                 $salesDetail->grand_total -= $salesItem->total_order;
                 $salesDetail->new_grand_total -= $salesItem->total_order;
-
+                
                 $salesInv = SalesInvoice::findOne(['no_invoice'=>$no_invoice]);
-                print_r($salesDetail->attributes);die;
+                $salesInv->total_biaya_lain -= $salesItem->total_order;
+                $salesInv->new_grand_total -= $salesItem->total_order;
+                if($salesDetail->save() && $salesInv->save()){
+                    if($salesItem->delete()){
+                        foreach($salesInv->items as $index=>$val){
+                            $val->urutan = $index +1;
+                            if(!$val->save()){
+                                $success = false;
+                                foreach($val->errors as $error => $value){
+                                    $message .= strtoupper($value[0].', ');
+                                }
+                                $message = substr($message, 0, -2);
+                            }
+                        }
+                    }else{
+                        $success = false;
+                        foreach($salesItem->errors as $error => $value){
+                            $message = $value[0].', ';
+                        }
+                        $message = substr($message, 0, -2);
+                    }
+                }else{
+                    $success = false;
+                    foreach($salesDetail->errors as $error => $value){
+                        $message = $value[0].', ';
+                    }
+                    $message = substr($message, 0, -2);
+                    foreach($salesInv->errors as $error => $value){
+                        $message = $value[0].', ';
+                    }
+                    $message = substr($message, 0, -2);
+                }
             }else{
                 $success = false;
                 $message = 'Data Sales Item tidak ditemukan.';
             }
+
             if($success){
-                // $transaction->commit();
+                $transaction->commit();
             }else{
                 $transaction->rollBack();
             }

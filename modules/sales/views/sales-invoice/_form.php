@@ -647,7 +647,7 @@ function delete_biaya_lain(no_invoice, urutan)
         error: function(xhr, status, error) {},
         beforeSend: function(){},
         success: function(data){
-            // location.reload();
+            location.reload();
         },
         complete: function(){}
     });
