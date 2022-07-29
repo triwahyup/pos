@@ -103,13 +103,6 @@ class PurchaseOrderInvoiceDetail extends \yii\db\ActiveRecord
         return $this->hasOne(MasterSatuan::className(), ['code' => 'satuan_berat']);
     }
 
-    public function beforeSave($attribute)
-    {
-        $this->harga_beli_1 = str_replace(',', '', $this->harga_beli_1);
-        $this->qty_terima_1 = str_replace(',', '', $this->qty_terima_1);
-        return parent::beforeSave($attribute);
-    }
-
     public function getTotalInvoice()
     {
         $total_invoice=0;
@@ -135,6 +128,7 @@ class PurchaseOrderInvoiceDetail extends \yii\db\ActiveRecord
 
     public function getQtySelisih($qty_order, $qty_terima)
     {
+        print_r($qty_terima);die;
         $qty = 0;
         $konversi = 1;
         $pcs = abs($qty_terima-$qty_order);

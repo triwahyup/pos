@@ -38,6 +38,12 @@ $this->params['breadcrumbs'][] = $this->title;
                 'name',
                 'slug',
                 [
+                    'attribute' => 'type_material',
+                    'value' => function($model, $index) {
+                        return (isset($model->typeMaterial)) ? $model->typeMaterial->name : '-';
+                    }
+                ],
+                [
                     'attribute' => 'status',
                     'value'=> function ($model, $index) { 
                         return ($model->status == 1) ? 'Active' : 'Delete';

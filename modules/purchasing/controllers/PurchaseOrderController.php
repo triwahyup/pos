@@ -427,17 +427,17 @@ class PurchaseOrderController extends Controller
 
     public function actionListItem()
     {
-        if(!empty($_POST['supplier_code'])){
+        if(!empty($_POST['supplier_code']) && !empty($_POST['type_material'])){
             $model = MasterMaterial::find()
                 ->alias('a')
                 ->leftJoin('master_material_pricelist b', 'b.item_code = a.code')
-                ->where(['b.supplier_code' => $_POST['supplier_code'], 'a.status'=>1])
+                ->where(['type_code' => $_POST['type_material'], 'b.supplier_code' => $_POST['supplier_code'], 'a.status'=>1])
                 ->orderBy(['code'=>SORT_ASC])
                 ->limit(10)
                 ->all();
             return json_encode(['success'=>true, 'data'=>$this->renderPartial('_list_item', ['model'=>$model])]);
         }else{
-            return json_encode(['success'=>false, 'message'=>'Pilih Supplier dahulu.']);
+            return json_encode(['success'=>false, 'message'=>'Pilih Supplier dan Type Material dahulu.']);
         }
     }
 
@@ -452,7 +452,7 @@ class PurchaseOrderController extends Controller
                     'concat(a.code,"-", a.name) name'])
                 ->alias('a')
                 ->leftJoin('master_material_pricelist b', 'b.item_code = a.code')
-                ->where(['b.supplier_code' => $_POST['supplier_code'], 'a.status'=>1])
+                ->where(['type_code' => $_POST['type_material'], 'b.supplier_code' => $_POST['supplier_code'], 'a.status'=>1])
                 ->andWhere('concat(a.code,"-", a.name) LIKE "%'.$_POST['search'].'%"')
                 ->asArray()
                 ->limit(10)
@@ -521,7 +521,8 @@ class PurchaseOrderController extends Controller
             $dataTemp = $request->post('TempPurchaseOrderDetail');
             $temp->attributes = (array)$dataTemp;
             if(!empty($dataTemp['item_name'])){
-                if($dataTemp['qty_order_1'] > 0){
+                $temp->qty_order_1 = str_replace(',', '', $dataTemp['qty_order_1']);
+                if($temp->qty_order_1 > 0){
                     if(isset($temp->priceListActive)){
                         $temp->attributes = $temp->item->attributes;
                         $temp->attributes = $temp->satuan->attributes;
@@ -530,7 +531,7 @@ class PurchaseOrderController extends Controller
                         $temp->no_po = (!empty($dataHeader['no_po'])) ? $dataHeader['no_po'] : 'tmp';
                         $temp->urutan = $temp->count +1;
                         $temp->user_id = \Yii::$app->user->id;
-                        $temp->total_order = $temp->totalBeli;
+                        $temp->total_order = $temp->totalBeli($temp);
                         if(!$temp->save()){
                             $success = false;
                             foreach($temp->errors as $error => $value){
@@ -568,13 +569,14 @@ class PurchaseOrderController extends Controller
             $temp->attributes = (array)$dataHeader;
             $temp->attributes = (array)$dataTemp;
             if(!empty($dataTemp['item_name'])){
-                if($dataTemp['qty_order_1'] > 0){
+                $temp->qty_order_1 = str_replace(',', '', $dataTemp['qty_order_1']);
+                if($temp->qty_order_1 > 0){
                     if(isset($temp->priceListActive)){
                         $temp->attributes = $temp->item->attributes;
                         $temp->attributes = $temp->satuan->attributes;
                         $temp->attributes = $temp->priceListActive->attributes;
                         $temp->name = $temp->item->name;
-                        $temp->total_order = $temp->totalBeli;
+                        $temp->total_order = $temp->totalBeli($temp);
                         if(!$temp->save()){
                             $success = false;
                             foreach($temp->errors as $error => $value){
@@ -658,27 +660,37 @@ class PurchaseOrderController extends Controller
             try{
                 $model->status_approval = 1;
                 if($model->save()){
-                    $approvals = (new PengaturanApproval)->approval('po-material');
-                    if(isset($approvals)){
-                        $approvaln = PurchaseOrderApproval::findAll(['no_po'=>$no_po]);
-                        if(count($approvaln) > 0)
-                            PurchaseOrderApproval::deleteAll('no_po=:no_po', [':no_po'=>$no_po]);
-                        foreach($approvals as $approval){
-                            $app = new PurchaseOrderApproval();
-                            $app->attributes = $approval->attributes;
-                            $app->no_po = $no_po;
-                            $app->status = 1;
-                            if(!$app->save()){
-                                $success = false;
-                                foreach($app->errors as $error => $value){
-                                    $message .= strtoupper($value[0].', ');
+                    if(!empty($model->type_material)){
+                        if($model->typeMaterial->name == \Yii::$app->params['TYPE_KERTAS']){
+                            $approvals = (new PengaturanApproval)->approval('po-material-kertas');
+                        }else if($model->typeMaterial->name == \Yii::$app->params['TYPE_BAHAN_PB']){
+                            $approvals = (new PengaturanApproval)->approval('po-material-bahan-pembantu');
+                        }
+                        
+                        if(isset($approvals)){
+                            $approvaln = PurchaseOrderApproval::findAll(['no_po'=>$no_po]);
+                            if(count($approvaln) > 0)
+                                PurchaseOrderApproval::deleteAll('no_po=:no_po', [':no_po'=>$no_po]);
+                            foreach($approvals as $approval){
+                                $app = new PurchaseOrderApproval();
+                                $app->attributes = $approval->attributes;
+                                $app->no_po = $no_po;
+                                $app->status = 1;
+                                if(!$app->save()){
+                                    $success = false;
+                                    foreach($app->errors as $error => $value){
+                                        $message .= strtoupper($value[0].', ');
+                                    }
+                                    $message = substr($message, 0, -2);
                                 }
-                                $message = substr($message, 0, -2);
                             }
+                        }else{
+                            $success = false;
+                            $message = 'Setting approval Purchase Order belum ada. Silakan hubungi administrator utk melakukan setting approval.';
                         }
                     }else{
                         $success = false;
-                        $message = 'Setting approval Purchase Order belum ada. Silakan hubungi administrator utk melakukan setting approval.';
+                        $message = 'Pengaturan approval tidak sesuai, Type Material tidak boleh kosong, Silakan hubungi administrator utk melakukan setting approval.';
                     }
                 }else{
                     $success = false;

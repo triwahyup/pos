@@ -103,35 +103,21 @@ class TempPurchaseOrderDetail extends \yii\db\ActiveRecord
         return $this->hasOne(MasterSatuan::className(), ['code' => 'satuan_code']);
     }
 
-    public function beforeSave($attribute)
-    {
-        $this->harga_beli_1 = str_replace(',', '', $this->harga_beli_1);
-        $this->harga_beli_2 = str_replace(',', '', $this->harga_beli_2);
-        $this->harga_beli_3 = str_replace(',', '', $this->harga_beli_3);
-        $this->qty_order_1 = str_replace(',', '', $this->qty_order_1);
-        $this->qty_order_2 = str_replace(',', '', $this->qty_order_2);
-        $this->qty_order_3 = str_replace(',', '', $this->qty_order_3);
-        return parent::beforeSave($attribute);
-    }
-
-    public function getTotalBeli()
+    public function totalBeli($temp)
     {
         $total_order=0;
-        if(!empty($this->qty_order_1)){
-            $harga_beli_1 = str_replace(',', '', $this->harga_beli_1);
-            $total_order += $this->qty_order_1 * $harga_beli_1;
+        $qty_order_1 = str_replace(',', '', $temp->qty_order_1);
+        if(!empty($qty_order_1)){
+            $harga_beli_1 = str_replace(',', '', $temp->harga_beli_1);
+            $total_order += $qty_order_1 * $harga_beli_1;
         }
-        if(!empty($this->qty_order_2)){
-            $harga_beli_2 = str_replace(',', '', $this->harga_beli_2);
-            $total_order += $this->qty_order_2 * $harga_beli_2;
+        $qty_order_2 = str_replace(',', '', $temp->qty_order_2);
+        if(!empty($qty_order_2)){
+            $harga_beli_2 = str_replace(',', '', $temp->harga_beli_2);
+            $total_order += $qty_order_2 * $harga_beli_2;
         }
-        if(!empty($this->qty_order_3)){
-            $harga_beli_3 = str_replace(',', '', $this->harga_beli_3);
-            $total_order += $this->qty_order_3 * $harga_beli_3;
-        }
-
-        if(!empty($this->ppn)){
-            $ppn = $total_order / ($this->ppn*100);
+        if(!empty($temp->ppn)){
+            $ppn = $total_order / ($temp->ppn*100);
             $total_order += $ppn;
         }
         return $total_order;

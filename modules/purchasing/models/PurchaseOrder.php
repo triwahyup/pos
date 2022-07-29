@@ -3,6 +3,7 @@
 namespace app\modules\purchasing\models;
 
 use Yii;
+use app\modules\master\models\MasterKode;
 use app\modules\master\models\MasterPerson;
 use app\modules\master\models\Profile;
 use app\modules\purchasing\models\PurchaseOrderApproval;
@@ -55,7 +56,7 @@ class PurchaseOrder extends \yii\db\ActiveRecord
             [['term_in', 'user_id', 'user_request', 'status', 'status_approval', 'status_terima', 'created_at', 'updated_at', 'post'], 'integer'],
             [['keterangan'], 'string'],
             [['no_po'], 'string', 'max' => 12],
-            [['supplier_code'], 'string', 'max' => 3],
+            [['supplier_code', 'type_material'], 'string', 'max' => 3],
             [['no_po'], 'unique'],
             [['status_approval', 'status_terima', 'post'], 'default', 'value' => 0],
             [['status'], 'default', 'value' => 1],
@@ -107,6 +108,11 @@ class PurchaseOrder extends \yii\db\ActiveRecord
     public function getSupplier()
     {
         return $this->hasOne(MasterPerson::className(), ['code' => 'supplier_code']);
+    }
+
+    public function getTypeMaterial()
+    {
+        return $this->hasOne(MasterKode::className(), ['code' => 'type_material']);
     }
 
     public function getProfile()

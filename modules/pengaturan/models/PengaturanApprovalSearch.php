@@ -17,8 +17,7 @@ class PengaturanApprovalSearch extends PengaturanApproval
     public function rules()
     {
         return [
-            [['code', 'name', 'slug'], 'safe'],
-            [['status', 'created_at', 'updated_at'], 'integer'],
+            [['type_material', 'name', 'slug'], 'safe'],
         ];
     }
 
@@ -40,7 +39,9 @@ class PengaturanApprovalSearch extends PengaturanApproval
      */
     public function search($params)
     {
-        $query = PengaturanApproval::find();
+        $query = PengaturanApproval::find()
+            ->alias('a')
+            ->leftJoin('master_kode b', 'b.code = a.type_material');
 
         // add conditions that should always apply here
 
@@ -57,14 +58,11 @@ class PengaturanApprovalSearch extends PengaturanApproval
         }
 
         // grid filtering conditions
-        $query->andFilterWhere([
-            'status' => 1,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
-        ]);
-
-        $query->andFilterWhere(['like', 'code', $this->code])
-            ->andFilterWhere(['like', 'name', $this->name])
+        if(!empty($this->type_material)){
+            $query->andWhere('b.code LIKE "%'.$this->type_material.'%" OR b.name LIKE "%'.$this->type_material.'%"');
+        }
+        $query->andFilterWhere(['a.status' => 1]);
+        $query->andFilterWhere(['like', 'a.name', $this->name])
             ->andFilterWhere(['like', 'slug', $this->slug]);
 
         return $dataProvider;

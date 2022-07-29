@@ -17,8 +17,8 @@ use yii\widgets\ActiveForm;
                     <?= $form->field($model, 'code')->hiddenInput()->label(false) ?>
                 <?php endif; ?>
                 <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
-                <?= $form->field($model, 'type_code')->widget(Select2::classname(), [
-                        'data' => [],
+                <?= $form->field($model, 'type_material')->widget(Select2::classname(), [
+                        'data' => $dataList['material'],
                         'options' => ['placeholder' => 'Pilih Type Material'],
                     ]) ?>
                 <?= $form->field($model, 'type')->widget(Select2::classname(), [

@@ -3,6 +3,7 @@
 namespace app\modules\pengaturan\models;
 
 use Yii;
+use app\modules\master\models\MasterKode;
 use app\modules\pengaturan\models\PengaturanApprovalDetail;
 use app\modules\pengaturan\models\TempPengaturanApprovalDetail;
 use yii\behaviors\TimestampBehavior;
@@ -21,7 +22,6 @@ class PengaturanApproval extends \yii\db\ActiveRecord
 {
     public $type;
     public $approval;
-    public $type_code;
     
     /**
      * {@inheritdoc}
@@ -45,9 +45,9 @@ class PengaturanApproval extends \yii\db\ActiveRecord
     {
         return [
             [['name'], 'required'],
-            [['type', 'approval', 'type_code'], 'safe'],
+            [['type', 'approval'], 'safe'],
             [['status', 'created_at', 'updated_at'], 'integer'],
-            [['code'], 'string', 'max' => 3],
+            [['code', 'type_material'], 'string', 'max' => 3],
             [['name', 'slug'], 'string', 'max' => 64],
             [['code'], 'unique'],
             [['status'], 'default', 'value' => 1],
@@ -80,6 +80,11 @@ class PengaturanApproval extends \yii\db\ActiveRecord
             $total = (int)substr($model->code, -3);
         }
         return (string)sprintf('%03s', ($total+1));
+    }
+
+    public function getTypeMaterial()
+    {
+        return $this->hasOne(MasterKode::className(), ['code' => 'type_material']);
     }
 
     public function getDetails()

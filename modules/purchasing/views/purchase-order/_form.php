@@ -48,6 +48,13 @@ use yii\widgets\MaskedInput;
                 </div>
             </div>
             <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
+                <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-left-0">
+                    <?= $form->field($model, 'type_material')->widget(Select2::classname(), [
+                        'data' => $dataList['material'],
+                        'options' => ['placeholder' => 'Type Material'],
+                        ]) ?>
+                    <?= $form->field($model, 'no_po')->hiddenInput(['maxlength' => true, 'readonly' => true])->label(false) ?>
+                </div>
                 <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padding-left-0">
                     <?= $form->field($model, 'tgl_kirim')->widget(DatePicker::classname(), [
                         'type' => DatePicker::TYPE_INPUT,
@@ -59,6 +66,8 @@ use yii\widgets\MaskedInput;
                             'format' => 'dd-mm-yyyy',
                             ]]) ?>
                 </div>
+            </div>
+            <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0">
                 <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-left-0">
                     <?= $form->field($model, 'keterangan')->textarea(['rows' => 3]) ?>
                 </div>
@@ -229,13 +238,14 @@ function onInputTermIn(term_in, tgl_po)
     });
 }
 
-function load_item(supplier_code)
+function load_item(supplier_code, type_material)
 {
     $.ajax({
         url: "<?=Url::to(['purchase-order/list-item'])?>",
 		type: "POST",
         data: {
-            supplier_code: supplier_code  
+            supplier_code: supplier_code,
+            type_material: type_material
         },
 		dataType: "text",
         error: function(xhr, status, error) {},
@@ -459,7 +469,7 @@ $(document).ready(function(){
     $("body").on("keydown","#temppurchaseorderdetail-item_name", function(e){
         var key = e.charCode ? e.charCode : e.keyCode ? e.keyCode : 0;
         if(key == KEY.F4){
-            load_item($("#purchaseorder-supplier_code").val());
+            load_item($("#purchaseorder-supplier_code").val(), $("#purchaseorder-type_material").val());
         }
     });
     

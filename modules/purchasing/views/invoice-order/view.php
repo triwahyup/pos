@@ -13,46 +13,55 @@ $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="purchase-order-invoice-view">
     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-        <?= DetailView::widget([
-            'model' => $model,
-            'attributes' => [
-                'no_invoice',
-                [
-                    'attribute' => 'tgl_invoice',
-                    'value' => function($model, $value) {
-                        return (!empty($model->tgl_invoice)) ? date('d-m-Y', strtotime($model->tgl_invoice)) : null;
-                    }
+        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-left-0">
+            <?= DetailView::widget([
+                'model' => $model,
+                'attributes' => [
+                    'no_invoice',
+                    [
+                        'attribute' => 'tgl_invoice',
+                        'value' => function($model, $value) {
+                            return (!empty($model->tgl_invoice)) ? date('d-m-Y', strtotime($model->tgl_invoice)) : null;
+                        }
+                    ],
+                    'no_bukti',
                 ],
-                'no_bukti',
-                [
-                    'attribute' => 'total_ppn',
-                    'value' => function($model, $index){
-                        return number_format($model->total_ppn).'%';
-                    }
+            ]) ?>
+        </div>
+        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
+            <?= DetailView::widget([
+                'model' => $model,
+                'attributes' => [
+                    [
+                        'attribute' => 'total_ppn',
+                        'value' => function($model, $index){
+                            return number_format($model->total_ppn).'%';
+                        }
+                    ],
+                    [
+                        'attribute' => 'total_invoice',
+                        'value' => function($model, $index){
+                            return number_format($model->total_invoice);
+                        }
+                    ],
+                    'keterangan:ntext',
+                    [
+                        'attribute' => 'post',
+                        'format' => 'raw',
+                        'value' => function ($model, $index) { 
+                            return $model->statusPost;
+                        }
+                    ],
+                    [
+                        'attribute' => 'status_terima',
+                        'format' => 'raw',
+                        'value' => function ($model, $index) { 
+                            return $model->statusTerima;
+                        }
+                    ],
                 ],
-                [
-                    'attribute' => 'total_invoice',
-                    'value' => function($model, $index){
-                        return number_format($model->total_invoice);
-                    }
-                ],
-                'keterangan:ntext',
-                [
-                    'attribute' => 'post',
-                    'format' => 'raw',
-                    'value' => function ($model, $index) { 
-                        return $model->statusPost;
-                    }
-                ],
-                [
-                    'attribute' => 'status_terima',
-                    'format' => 'raw',
-                    'value' => function ($model, $index) { 
-                        return $model->statusTerima;
-                    }
-                ],
-            ],
-        ]) ?>
+            ]) ?>
+        </div>
     </div>
     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
         <div class="margin-top-20"></div>
@@ -86,6 +95,10 @@ $this->params['breadcrumbs'][] = $this->title;
                         <div class="row">
                             <label class="div-label">Supplier</label>
                             <strong><?=(isset($model->supplier)) ? $model->supplier->name : '' ?></strong>
+                        </div>
+                        <div class="row">
+                            <label class="div-label">Type Material</label>
+                            <strong><?=(isset($model->typeMaterial)) ? $model->typeMaterial->name : '' ?></strong>
                         </div>
                         <div class="row">
                             <label class="div-label">Total Order</label>

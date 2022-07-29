@@ -3,6 +3,7 @@
 namespace app\modules\purchasing\models;
 
 use Yii;
+use app\modules\master\models\MasterKode;
 use app\modules\master\models\MasterPerson;
 use app\modules\purchasing\models\PurchaseOrder;
 use app\modules\purchasing\models\PurchaseOrderInvoiceDetail;
@@ -69,7 +70,7 @@ class PurchaseOrderInvoice extends \yii\db\ActiveRecord
             [['total_ppn', 'total_order', 'ppn'], 'number'],
             [['no_invoice', 'no_po'], 'string', 'max' => 12],
             [['no_bukti'], 'string', 'max' => 32],
-            [['supplier_code', 'satuan_berat'], 'string', 'max' => 3],
+            [['supplier_code', 'type_material', 'satuan_berat'], 'string', 'max' => 3],
             [['no_invoice'], 'unique'],
             [['status_terima'], 'default', 'value' => 0],
             [['status'], 'default', 'value' => 1],
@@ -136,6 +137,11 @@ class PurchaseOrderInvoice extends \yii\db\ActiveRecord
     public function getSupplier()
     {
         return $this->hasOne(MasterPerson::className(), ['code' => 'supplier_code']);
+    }
+
+    public function getTypeMaterial()
+    {
+        return $this->hasOne(MasterKode::className(), ['code' => 'type_material']);
     }
 
     public function getDetails()

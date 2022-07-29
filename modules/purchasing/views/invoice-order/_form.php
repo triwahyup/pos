@@ -65,7 +65,7 @@ use yii\widgets\MaskedInput;
             <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
                 <label>QTY Terima:</label>
             </div>
-            <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padding-right-0">
+            <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
                 <?= $form->field($model, 'qty_terima_1')->widget(MaskedInput::className(), [
                     'clientOptions' => [
                         'alias' =>  'decimal',
@@ -79,36 +79,37 @@ use yii\widgets\MaskedInput;
                 ])->label(false) ?>
             </div>
         </div>
-        <div class="col-lg-12 col-md-12 col-xs-12">
-            <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
-                <label>Berat:</label>
+        <?php if($model->typeMaterial->name == \Yii::$app->params['TYPE_KERTAS']): ?>
+            <div class="col-lg-12 col-md-12 col-xs-12">
+                <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
+                    <label>Berat:</label>
+                </div>
+                <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
+                    <?= $form->field($model, 'weight')->widget(MaskedInput::className(), [
+                            'clientOptions' => [
+                                'alias' =>  'decimal',
+                                'groupSeparator' => ',',
+                                'autoGroup' => true
+                            ],
+                            'options' => [
+                                'data-align' => 'text-right',
+                                'data-temp' => 1,
+                            ]
+                        ])->label(false) ?>
+                </div>
+                <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
+                    <?= $form->field($model, 'satuan_berat')->widget(Select2::classname(), [
+                            'data' => $dataList['satuan_berat'],
+                            'options' => ['placeholder' => 'Satuan'],
+                        ])->label(false) ?>
+                </div>
             </div>
-            <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
-                <?= $form->field($model, 'weight')->widget(MaskedInput::className(), [
-                        'clientOptions' => [
-                            'alias' =>  'decimal',
-                            'groupSeparator' => ',',
-                            'autoGroup' => true
-                        ],
-                        'options' => [
-                            'data-align' => 'text-right',
-                            'data-temp' => 1,
-                            // 'readonly' => true,
-                        ]
-                    ])->label(false) ?>
-            </div>
-            <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
-                <?= $form->field($model, 'satuan_berat')->widget(Select2::classname(), [
-                        'data' => $dataList['satuan_berat'],
-                        'options' => ['placeholder' => 'Satuan'],
-                    ])->label(false) ?>
-            </div>
-        </div>
+        <?php endif; ?>
         <div class="col-lg-12 col-md-12 col-xs-12">
             <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
                 <label>Harga Beli:</label>
             </div>
-            <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padding-right-0">
+            <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-right-0">
                 <?= $form->field($model, 'harga_beli_1')->widget(MaskedInput::className(), [
                         'clientOptions' => [
                             'alias' =>  'decimal',
@@ -129,7 +130,7 @@ use yii\widgets\MaskedInput;
             <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
                 <label>PPN (%):</label>
             </div>
-            <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padding-right-0">
+            <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-right-0">
                 <?= $form->field($model, 'ppn')->textInput(['data-temp' => 1, 'data-align' => 'text-right'])->label(false) ?>
             </div>
             <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">

@@ -63,12 +63,6 @@ $this->params['breadcrumbs'][] = $this->title;
                         }
                     ],
                     [
-                        'attribute' => 'total_order',
-                        'value' => function($model, $value) {
-                            return number_format($model->total_order).'.-';
-                        }
-                    ],
-                    [
                         'attribute' => 'user_request',
                         'value' => function($model, $value) {
                             return (isset($model->request)) ? $model->request->name : '';
@@ -80,6 +74,12 @@ $this->params['breadcrumbs'][] = $this->title;
                             return (isset($model->profile)) ? $model->profile->name : '';
                         }
                     ],
+                    [
+                        'attribute' => 'type_material',
+                        'value' => function($model, $value) {
+                            return (isset($model->typeMaterial)) ? $model->typeMaterial->name : '';
+                        }
+                    ],
                 ],
             ]) ?>
         </div>
@@ -87,7 +87,12 @@ $this->params['breadcrumbs'][] = $this->title;
             <?= DetailView::widget([
                 'model' => $model,
                 'attributes' => [
-                    'keterangan:ntext',
+                    [
+                        'attribute' => 'total_order',
+                        'value' => function($model, $value) {
+                            return number_format($model->total_order).'.-';
+                        }
+                    ],
                     [
                         'attribute' => 'post',
                         'format' => 'raw',
@@ -115,6 +120,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             return ($model->status == 1) ? 'Active' : 'Delete';
                         }
                     ],
+                    'keterangan:ntext',
                     [
                         'attribute'=>'created_at',
                         'value' => function ($model, $index) { 
@@ -171,8 +177,8 @@ $this->params['breadcrumbs'][] = $this->title;
                                     </tr>
                                 <?php endforeach; ?>
                                 <tr>
-                                    <td class="summary" colspan="5"><strong>Total Order:</strong></td>
-                                    <td class="summary"><strong><?=number_format($totalOrder).'.-' ?></strong></td>
+                                    <td class="mark-3 text-right" colspan="5"><strong>Total Order:</strong></td>
+                                    <td class="mark-3 text-right"><strong><?=number_format($totalOrder).'.-' ?></strong></td>
                                 </tr>
                             <?php else : ?>
                                 <tr>

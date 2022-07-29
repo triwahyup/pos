@@ -25,6 +25,12 @@ $this->params['breadcrumbs'][] = $this->title;
             'name',
             'slug',
             [
+                'attribute' => 'type_material',
+                'value' => function($model, $index, $key) {
+                    return (isset($model->typeMaterial)) ? $model->typeMaterial->name : '-';
+                }
+            ],
+            [
                 'buttons' => [
                     'view' => function ($url, $model) {
                         if(((new User)->getIsDeveloper()) || \Yii::$app->user->can('setup-approval[R]'))

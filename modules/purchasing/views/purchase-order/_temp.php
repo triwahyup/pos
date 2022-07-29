@@ -20,8 +20,8 @@
         </tr>
     <?php endforeach; ?>
     <tr>
-        <td class="summary" colspan="5"><strong>Total Order:</strong></td>
-        <td class="summary"><strong><?=number_format($totalOrder).'.-' ?></strong></td>
+        <td class="mark-3 text-right" colspan="5"><strong>Total Order:</strong></td>
+        <td class="mark-3 text-right"><strong><?=number_format($totalOrder).'.-' ?></strong></td>
         <td class="last-row"></td>
     </tr>
 <?php else : ?>

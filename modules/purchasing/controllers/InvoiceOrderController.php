@@ -458,6 +458,7 @@ class InvoiceOrderController extends Controller
                 }
 
                 $qtySelisih = $temp->getQtySelisih($temp->qty_order_1, $temp->qty_terima_1);
+                print_r($qtySelisih);die;
                 $temp->qty_susulan = ($temp->qty_selisih > 0) ? $qtyOrder : 0;
                 $temp->qty_selisih = $qtySelisih['qty'];
                 $temp->total_invoice = $temp->totalInvoice;
