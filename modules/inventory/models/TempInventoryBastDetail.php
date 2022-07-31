@@ -4,6 +4,7 @@ namespace app\modules\inventory\models;
 
 use Yii;
 use app\modules\master\models\MasterBarang;
+use app\modules\master\models\MasterPerson;
 use app\modules\master\models\MasterSatuan;
 
 /**
@@ -78,6 +79,11 @@ class TempInventoryBastDetail extends \yii\db\ActiveRecord
     public function getSatuan()
     {
         return $this->hasOne(MasterSatuan::className(), ['code' => 'satuan_code']);
+    }
+
+    public function getSupplier()
+    {
+        return $this->hasOne(MasterPerson::className(), ['code' => 'supplier_code']);
     }
 
     public function getCount()

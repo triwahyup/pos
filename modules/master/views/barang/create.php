@@ -12,6 +12,7 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="master-barang-create">
     <?= $this->render('_form', [
         'model' => $model,
-        'satuan' => $satuan,
+        'dataList' => $dataList,
+        'temp' => $temp,
     ]) ?>
 </div>

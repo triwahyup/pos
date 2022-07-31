@@ -49,7 +49,7 @@ class PurchaseOrderInvoiceDetail extends \yii\db\ActiveRecord
         return [
             [['no_invoice', 'urutan'], 'required'],
             [['urutan', 'status', 'created_at', 'updated_at'], 'integer'],
-            [['konversi_1', 'konversi_2', 'konversi_3', 'qty_order_1', 'qty_order_2', 'qty_order_3', 'qty_terima_1', 'qty_terima_2', 'qty_terima_3', 'qty_selisih', 'qty_susulan', 'harga_beli_1', 'harga_beli_2', 'harga_beli_3', 'ppn', 'total_order', 'total_invoice', 'weight'], 'safe'],
+            [['konversi_1', 'konversi_2', 'konversi_3', 'qty_order_1', 'qty_order_2', 'qty_order_3', 'qty_terima_1', 'qty_terima_2', 'qty_terima_3', 'qty_selisih', 'qty_susulan', 'harga_beli_1', 'harga_beli_2', 'harga_beli_3', 'ppn', 'total_order', 'total_invoice', 'total_ppn', 'weight'], 'safe'],
             [['no_invoice'], 'string', 'max' => 12],
             [['item_code'], 'string', 'max' => 7],
             [['name'], 'string', 'max' => 128],
@@ -119,16 +119,18 @@ class PurchaseOrderInvoiceDetail extends \yii\db\ActiveRecord
             $total_invoice += $this->qty_terima_3 * $harga_beli_3;
         }
 
+        $total_ppn = 0;
         if(!empty($this->ppn)){
-            $ppn = $total_invoice / ($this->ppn*100);
-            $total_invoice += $ppn;
+            $total_ppn = $total_invoice / ($this->ppn*100);
+            $total_invoice += $total_ppn;
         }
-        return $total_invoice;
+        $this->total_ppn = $total_ppn;
+        $this->total_invoice = $total_invoice;
+        return true;
     }
 
     public function getQtySelisih($qty_order, $qty_terima)
     {
-        print_r($qty_terima);die;
         $qty = 0;
         $konversi = 1;
         $pcs = abs($qty_terima-$qty_order);

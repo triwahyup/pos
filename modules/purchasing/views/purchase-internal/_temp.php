@@ -4,10 +4,10 @@
         $totalOrder += $val->total_order; ?>
         <tr>
             <td class="text-center"><?=$index+1?></td>
-            <td><?=$val->name ?></td>
-            <td class="text-right"><?=number_format($val->qty) ?></td>
-            <td class="text-center"><?=$val->um ?></td>
-            <td class="text-right"><?=number_format($val->harga_beli).'.-' ?></td>
+            <td class="font-size-10"><?=(isset($val->barang)) ? '<span class="text-success">'.$val->barang->code .'</span><br />'. $val->barang->name : '' ?></td>
+            <td class="text-right"><?=number_format($val->qty_order_1).'<br /><span class="text-muted font-size-10">'.$val->um_1.'</span>' ?></td>
+            <td class="text-right"><?=number_format($val->harga_beli_1).'.- <br /><span class="text-muted font-size-10">Per '.$val->um_1.'</span>' ?></td>
+            <td class="text-right"><?=(!empty($val->ppn)) ? $val->ppn.'%' : '' ?></td>
             <td class="text-right"><?=number_format($val->total_order).'.-' ?></td>
             <td class="text-center">
                 <button class="btn btn-warning btn-xs btn-sm" data-id="<?=$val->id ?>" data-button="update_temp">
@@ -20,8 +20,8 @@
         </tr>
     <?php endforeach; ?>
     <tr>
-        <td class="summary" colspan="5"><strong>Total Order:</strong></td>
-        <td class="summary"><strong><?=number_format($totalOrder).'.-' ?></strong></td>
+        <td class="mark-3 text-right" colspan="5"><strong>Total Order:</strong></td>
+        <td class="mark-3 text-right"><strong><?=number_format($totalOrder).'.-' ?></strong></td>
         <td class="last-row"></td>
     </tr>
 <?php else : ?>

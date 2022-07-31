@@ -423,8 +423,18 @@ class PurchaseInternalController extends Controller
 
     public function actionListBarang()
     {
-        $model = MasterBarang::find()->where(['status'=>1])->orderBy(['code'=>SORT_ASC])->limit(10)->all();
-        return json_encode(['data'=>$this->renderPartial('_list_barang', ['model'=>$model])]);
+        if(!empty($_POST['supplier_code']) && !empty($_POST['type_barang'])){
+            $model = MasterBarang::find()
+                ->alias('a')
+                ->leftJoin('master_barang_pricelist b', 'b.barang_code = a.code')
+                ->where(['type_code' => $_POST['type_barang'], 'b.supplier_code' => $_POST['supplier_code'], 'a.status'=>1])
+                ->orderBy(['code'=>SORT_ASC])
+                ->limit(10)
+                ->all();
+            return json_encode(['success'=>true, 'data'=>$this->renderPartial('_list_barang', ['model'=>$model])]);
+        }else{
+            return json_encode(['success'=>false, 'message'=>'Pilih Supplier dan Type Barang dahulu.']);
+        }
     }
 
     public function actionAutocomplete()
@@ -432,8 +442,13 @@ class PurchaseInternalController extends Controller
         $model = [];
         if(isset($_POST['search'])){
             $model = MasterBarang::find()
-                ->select(['code', 'concat(code,"-",name) label', 'concat(code,"-",name) name'])
-                ->where(['status'=>1])
+                ->select([
+                    'a.code',
+                    'concat(a.code,"-", a.name) label',
+                    'concat(a.code,"-", a.name) name'])
+                ->alias('a')
+                ->leftJoin('master_barang_pricelist b', 'b.barang_code = a.code')
+                ->where(['type_code' => $_POST['type_barang'], 'b.supplier_code' => $_POST['supplier_code'], 'a.status'=>1])
                 ->andWhere('concat(code,"-",name) LIKE "%'.$_POST['search'].'%"')
                 ->asArray()
                 ->limit(10)
@@ -455,9 +470,9 @@ class PurchaseInternalController extends Controller
     {
         $model = MasterBarang::find()
             ->alias('a')
-            ->select(['a.*', 'a.code as barang_code', 'b.name as um'])
-            ->leftJoin('master_satuan b', 'b.code = a.satuan_code')
-            ->where(['a.code'=>$_POST['code'], 'a.status'=>1])
+            ->select(['a.*', 'b.*'])
+            ->leftJoin('master_barang_pricelist b', 'b.barang_code = a.code')
+            ->where(['barang_code'=>$_POST['code'], 'supplier_code'=>$_POST['supplier'], 'a.status'=>1, 'status_active' => 1])
             ->asArray()
             ->one();
         if(empty($model)){
@@ -495,17 +510,27 @@ class PurchaseInternalController extends Controller
             $dataTemp = $request->post('TempPurchaseInternalDetail');
             $temp->attributes = (array)$dataTemp;
             if(!empty($dataTemp['name'])){
-                if($dataTemp['qty'] > 0){
-                    $temp->no_po = (!empty($dataHeader['no_po'])) ? $dataHeader['no_po'] : 'tmp';
-                    $temp->urutan = $temp->count +1;
-                    $temp->user_id = \Yii::$app->user->id;
-                    $temp->total_order = $temp->totalBeli;
-                    if(!$temp->save()){
-                        $success = false;
-                        foreach($temp->errors as $error => $value){
-                            $message = $value[0].', ';
+                $temp->qty_order_1 = str_replace(',', '', $dataTemp['qty_order_1']);
+                if($temp->qty_order_1 > 0){
+                    if(isset($temp->priceListActive)){
+                        $temp->attributes = $temp->barang->attributes;
+                        $temp->attributes = $temp->satuan->attributes;
+                        $temp->attributes = $temp->priceListActive->attributes;
+                        $temp->name = $temp->barang->name;
+                        $temp->no_po = (!empty($dataHeader['no_po'])) ? $dataHeader['no_po'] : 'tmp';
+                        $temp->urutan = $temp->count +1;
+                        $temp->user_id = \Yii::$app->user->id;
+                        $temp->total_order = $temp->totalBeli($temp);
+                        if(!$temp->save()){
+                            $success = false;
+                            foreach($temp->errors as $error => $value){
+                                $message = $value[0].', ';
+                            }
+                            $message = substr($message, 0, -2);
                         }
-                        $message = substr($message, 0, -2);
+                    }else{
+                        $success = false;
+                        $message = 'Harga Beli / Harga Jual masih kosong. Silakan input harga terlebih dahulu di menu Master Barang.';
                     }
                 }else{
                     $success = false;
@@ -533,14 +558,24 @@ class PurchaseInternalController extends Controller
             $temp->attributes = (array)$dataHeader;
             $temp->attributes = (array)$dataTemp;
             if(!empty($dataTemp['name'])){
-                if($dataTemp['qty'] > 0){
-                    $temp->total_order = $temp->totalBeli;
-                    if(!$temp->save()){
-                        $success = false;
-                        foreach($temp->errors as $error => $value){
-                            $message = $value[0].', ';
+                $temp->qty_order_1 = str_replace(',', '', $dataTemp['qty_order_1']);
+                if($temp->qty_order_1 > 0){
+                    if(isset($temp->priceListActive)){
+                        $temp->attributes = $temp->barang->attributes;
+                        $temp->attributes = $temp->satuan->attributes;
+                        $temp->attributes = $temp->priceListActive->attributes;
+                        $temp->name = $temp->barang->name;
+                        $temp->total_order = $temp->totalBeli($temp);
+                        if(!$temp->save()){
+                            $success = false;
+                            foreach($temp->errors as $error => $value){
+                                $message = $value[0].', ';
+                            }
+                            $message = substr($message, 0, -2);
                         }
-                        $message = substr($message, 0, -2);
+                    }else{
+                        $success = false;
+                        $message = 'Harga Beli / Harga Jual masih kosong. Silakan mengisikan harga terlebih dahulu di menu Master Barang.';
                     }
                 }else{
                     $success = false;
@@ -995,7 +1030,6 @@ class PurchaseInternalController extends Controller
                             $invoiceInternalDetail = new PurchaseInternalInvoiceDetail();
                             $invoiceInternalDetail->attributes = $detail->attributes;
                             $invoiceInternalDetail->no_invoice = $invoiceInternal->no_invoice;
-                            $invoiceInternalDetail->qty_order =  $detail->qty;
                             if(!$invoiceInternalDetail->save()){
                                 $success = false;
                                 $message = (count($invoiceInternalDetail->errors) > 0) ? 'ERROR CREATE INVOICE INTERNAL DETAIL: ' : '';

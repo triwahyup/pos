@@ -50,8 +50,7 @@ class SalesOrderController extends Controller
                         ],
                         [
                             'actions' => [
-                                'index', 'view', 'invoice', 'list-proses', 'type-order',
-                                'on-change-term-in', 'on-input-term-in', 'on-change-up', 
+                                'index', 'view', 'invoice', 'list-proses', 'type-order', 'on-change-term-in', 'on-input-term-in',
                                 'temp-item', 'temp-bahan', 'temp-proses', 'get-temp',
                                 'list-item', 'autocomplete-item', 'search-item', 'select-item', 
                                 'list-order', 'autocomplete-order', 'search-order', 'select-order'
@@ -151,11 +150,9 @@ class SalesOrderController extends Controller
                             }
                         }
 
-                        $totalQtyUp = 0;
                         $totalQtyOrder = 0;
                         $totalQtyKonv = 0;
                         foreach($model->itemsMaterial as $val){
-                            $totalQtyUp += $val->qty_up;
                             if($model->type_qty == 1){
                                 $konv = $val->inventoryStock->satuanTerkecil($val->item_code, [
                                     0=>$val->qty_order_1, 1=>0]);
@@ -170,11 +167,9 @@ class SalesOrderController extends Controller
                         if($totalQtyOrder > $totalQtyKonv){
                             $success = false;
                             $message = 'Total qty order tidak boleh lebih dari '.$model->total_qty;
-                        }
-                        $model->total_qty_up = str_replace(',', '', $model->total_qty_up);
-                        if($totalQtyUp > $model->total_qty_up){
+                        }else if($totalQtyOrder < $totalQtyKonv){
                             $success = false;
-                            $message = 'Total up produksi tidak boleh lebih dari '.$model->total_qty_up;
+                            $message = 'Total qty order masih kurang.';
                         }
                     }else{
                         $success = false;
@@ -268,11 +263,8 @@ class SalesOrderController extends Controller
         }
 
         return $this->render('create', [
+            'dataList' => $dataList,
             'model' => $model,
-            'customer' => $dataList['customer'],
-            'ekspedisi' => $dataList['ekspedisi'],
-            'sales' => $dataList['sales'],
-            'typeSatuan' => $dataList['satuan'],
             'tempItem' => $tempItem,
             'tempPotong' => $tempPotong,
         ]);
@@ -306,7 +298,6 @@ class SalesOrderController extends Controller
                             $salesItem = new SalesOrderItem();
                             $salesItem->attributes = $temp->attributes;
                             $salesItem->total_order = $salesItem->totalOrder;
-                            $salesItem->qty_up = (!empty($model->up_produksi) || $model->up_produksi != 0) ? $temp->qty_up : null;
                             if(!$salesItem->save()){
                                 $success = false;
                                 $message = (count($salesItem->errors) > 0) ? 'ERROR UPDATE SALES ORDER ITEM: ' : '';
@@ -317,11 +308,9 @@ class SalesOrderController extends Controller
                             }
                         }
                         
-                        $totalQtyUp = 0;
                         $totalQtyOrder = 0;
                         $totalQtyKonv = 0;
                         foreach($model->itemsMaterial as $val){
-                            $totalQtyUp += $val->qty_up;
                             if($model->type_qty == 1){
                                 $konv = $val->inventoryStock->satuanTerkecil($val->item_code, [
                                     0=>$val->qty_order_1, 1=>0]);
@@ -339,15 +328,6 @@ class SalesOrderController extends Controller
                         }else if($totalQtyOrder < $totalQtyKonv){
                             $success = false;
                             $message = 'Total qty order masih kurang.';
-                        }
-                        
-                        $model->total_qty_up = str_replace(',', '', $model->total_qty_up);
-                        if($totalQtyUp > $model->total_qty_up){
-                            $success = false;
-                            $message = 'Total up produksi tidak boleh lebih dari '.$model->total_qty_up;
-                        }else if($totalQtyUp < $model->total_qty_up){
-                            $success = false;
-                            $message = 'Total qty up produksi masih kurang.';
                         }
                     }else{
                         $success = false;
@@ -494,11 +474,8 @@ class SalesOrderController extends Controller
         }
         
         return $this->render('update', [
+            'dataList' => $dataList,
             'model' => $model,
-            'customer' => $dataList['customer'],
-            'ekspedisi' => $dataList['ekspedisi'],
-            'sales' => $dataList['sales'],
-            'typeSatuan' => $dataList['satuan'],
             'tempItem' => $tempItem,
             'tempPotong' => $tempPotong,
         ]);
@@ -565,47 +542,6 @@ class SalesOrderController extends Controller
                                 }else{
                                     $success = false;
                                     $message = 'STOCK ITEM '.$val->item_code.' TIDAK DITEMUKAN.';
-                                }
-                            }
-                            // PROSES KEMBALIKAN STOK UP PRODUKSI (%)
-                            $stock = 0;
-                            foreach($model->itemsMaterial as $val){
-                                $stockItem = $val->inventoryStock;
-                                if(isset($stockItem)){
-                                    $stock = $stockItem->satuanTerkecil($val->item_code, [
-                                        0=>$val->qty_order_1,
-                                        1=>$val->qty_order_2
-                                    ]);
-                                }
-                            }
-                            if(!empty($model->up_produksi) || $model->up_produksi != 0){
-                                $upproduksi = $stock * ($model->up_produksi/100);
-                                $stockItem->attributes = $val->attributes;
-                                $stockItem->onhand = $stockItem->onhand + $upproduksi;
-                                $stockItem->onsales = $stockItem->onsales - $upproduksi;
-                                if(!$stockItem->save()){
-                                    $success = false;
-                                    $message = (count($stockItem->errors) > 0) ? 'ERROR UPDATE STOCK ITEM (UP PRODUKSI): ' : '';
-                                    foreach($stockItem->errors as $error => $value){
-                                        $message .= strtoupper($value[0].', ');
-                                    }
-                                    $message = substr($message, 0, -2);
-                                }
-    
-                                $stockTransaction = new InventoryStockTransaction();
-                                $stockTransaction->attributes = $stockItem->attributes;
-                                $stockTransaction->no_document = $model->code;
-                                $stockTransaction->tgl_document = $model->tgl_so;
-                                $stockTransaction->type_document = "CANCEL ORDER";
-                                $stockTransaction->status_document = "IN (UP ".$model->up_produksi." %)";
-                                $stockTransaction->qty_in = $upproduksi;
-                                if(!$stockTransaction->save()){
-                                    $success = false;
-                                    $message = (count($stockTransaction->errors) > 0) ? 'ERROR UPDATE STOCK TRANSACTION (UP PRODUKSI): ' : '';
-                                    foreach($stockTransaction->errors as $error => $value){
-                                        $message .= strtoupper($value[0].', ');
-                                    }
-                                    $message = substr($message, 0, -2);
                                 }
                             }
                         }else{
@@ -707,16 +643,6 @@ class SalesOrderController extends Controller
         $top = date('d-m-Y', strtotime('+'.$termIn.' days', strtotime($tgl_so)));
         $tgl_tempo = '<i class="text-muted font-size-10">Tgl. Jatuh Tempo Pembayaran: '.$top.'</i>';
         return json_encode(['tgl_tempo'=>$tgl_tempo]);
-    }
-
-    public function actionOnChangeUp($qty, $up)
-    {
-        $up_produksi = (new TempSalesOrderItem())->up_produksi($qty, $up);
-        $total_qty_up = 0;
-        if($up_produksi['total_up'] > 0){
-            $total_qty_up = number_format($up_produksi['total_up']);
-        }
-        return json_encode(['total_qty_up'=>$total_qty_up]);
     }
 
     public function actionTypeOrder($type)
@@ -1153,12 +1079,10 @@ class SalesOrderController extends Controller
                         $tempItem->item_code = $tempItem->bahan_item_code;
                         $tempItem->supplier_code = $tempItem->bahan_supplier_code;
                         $tempItem->qty_order_1 = $tempItem->bahan_qty;
-                        $tempItem->qty_up = null;
                         $tempItem->total_potong = 0;
                     }else{
                         $success = false;
                         $message = 'Qty bahan pembantu tidak boleh kosong.';
-                        $tempItem->qty_up = null;
                         $tempItem->qty_order_1 = null;
                     }
                 }
@@ -1181,9 +1105,7 @@ class SalesOrderController extends Controller
                             ? $tempItem->inventoryStock->satuanTerkecil($tempItem->item_code, [
                                 0=>$tempItem->qty_order_1, 1=>0])
                             : $tempItem->qty_order_2;
-                        $totalQtyUp = str_replace(',', '', $tempItem->qty_up);
                         foreach($tempItem->itemsMaterial as $val){
-                            $totalQtyUp += $val->qty_up;
                             if($isRIM){
                                 $konv = $val->inventoryStock->satuanTerkecil($val->item_code, [
                                     0=>$val->qty_order_1, 1=>0]);
@@ -1207,11 +1129,6 @@ class SalesOrderController extends Controller
                         if($totalQtyOrder > $totalQtyKonv){
                             $success = false;
                             $message = 'Total qty order tidak boleh lebih dari '.$dataHeader['total_qty'];
-                        }
-                        $totalQtyUpHeader = str_replace(',', '', $dataHeader['total_qty_up']);
-                        if($totalQtyUp > $totalQtyUpHeader){
-                            $success = false;
-                            $message = 'Total up produksi tidak boleh lebih dari '.$dataHeader['total_qty_up'];
                         }
                     }else{
                         $tempItem->supplier_code = $dataItem['bahan_supplier_code'];
@@ -1277,7 +1194,6 @@ class SalesOrderController extends Controller
                     $tempItem->inventoryStock->satuanTerkecil($tempItem->item_code, [
                         0=>$tempItem->qty_order_1, 1=>0])
                     : $tempItem->qty_order_2;
-                $qtyUp = $tempItem->qty_up;
 
                 $tempItem->attributes = (array)$dataItem;
                 $tempItem->attributes = $tempItem->item->attributes;
@@ -1296,9 +1212,7 @@ class SalesOrderController extends Controller
                             $tempItem->inventoryStock->satuanTerkecil($tempItem->item_code, [
                                 0=>$tempItem->qty_order_1, 1=>0])
                             : $tempItem->qty_order_2;
-                        $totalQtyUp = str_replace(',', '', $tempItem->qty_up);
                         foreach($tempItem->itemsMaterial as $val){
-                            $totalQtyUp += $val->qty_up;
                             if($isRIM){
                                 $konv = $val->inventoryStock->satuanTerkecil($val->item_code, [
                                     0=>$val->qty_order_1, 1=>0]);
@@ -1323,12 +1237,6 @@ class SalesOrderController extends Controller
                         if($totalQtyOrder > $totalQtyKonv){
                             $success = false;
                             $message = 'Total qty order tidak boleh lebih dari '.$dataHeader['total_qty'];
-                        }
-                        $totalQtyUpHeader = str_replace(',', '', $dataHeader['total_qty_up']);
-                        $totalQtyUp = $totalQtyUp - $qtyUp;
-                        if($totalQtyUp > $totalQtyUpHeader){
-                            $success = false;
-                            $message = 'Total up produksi tidak boleh lebih dari '.$dataHeader['total_qty_up'];
                         }
                     }
                 }else{
@@ -1537,48 +1445,6 @@ class SalesOrderController extends Controller
                                 $stockTransaction->type_document = "SALES ORDER";
                                 $stockTransaction->status_document = "OUT";
                                 $stockTransaction->qty_out = $stock;
-                                if(!$stockTransaction->save()){
-                                    $success = false;
-                                    $message = (count($stockTransaction->errors) > 0) ? 'ERROR UPDATE STOCK TRANSACTION: ' : '';
-                                    foreach($stockTransaction->errors as $error => $value){
-                                        $message .= strtoupper($value[0].', ');
-                                    }
-                                    $message = substr($message, 0, -2);
-                                }
-                            }else{
-                                $success = false;
-                                $message = 'SISA STOCK ITEM '.$val->item_code.' TIDAK MENCUKUPI. SISA '.$stockItem->onhand;
-                            }
-                        }else{
-                            $success = false;
-                            $message = 'STOCK ITEM '.$val->item_code.' TIDAK DITEMUKAN.';
-                        }
-                    }
-                    // PROSES KURANG STOK UP PRODUKSI (%)
-                    $stock = 0;
-                    foreach($model->itemsMaterial as $index=>$val){
-                        $stockItem = $val->inventoryStock;
-                        if(isset($stockItem)){
-                            if($stockItem->onhand >= $val->qty_up){
-                                $stockItem->attributes = $val->attributes;
-                                $stockItem->onhand = $stockItem->onhand - $val->qty_up;
-                                $stockItem->onsales = $stockItem->onsales + $val->qty_up;
-                                if(!$stockItem->save()){
-                                    $success = false;
-                                    $message = (count($stockItem->errors) > 0) ? 'ERROR UPDATE STOCK ITEM: ' : '';
-                                    foreach($stockItem->errors as $error => $value){
-                                        $message .= strtoupper($value[0].', ');
-                                    }
-                                    $message = substr($message, 0, -2);
-                                }
-
-                                $stockTransaction = new InventoryStockTransaction();
-                                $stockTransaction->attributes = $stockItem->attributes;
-                                $stockTransaction->no_document = $model->code;
-                                $stockTransaction->tgl_document = $model->tgl_so;
-                                $stockTransaction->type_document = "SALES ORDER";
-                                $stockTransaction->status_document = "OUT (UP ".$model->up_produksi." %)";
-                                $stockTransaction->qty_out = $val->qty_up;
                                 if(!$stockTransaction->save()){
                                     $success = false;
                                     $message = (count($stockTransaction->errors) > 0) ? 'ERROR UPDATE STOCK TRANSACTION: ' : '';

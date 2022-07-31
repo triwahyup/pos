@@ -53,6 +53,19 @@ class DataList {
             ->where(['type'=>\Yii::$app->params['TYPE_PROSES'], 'status' => 1])
             ->indexBy('code')
             ->column();
+        $model['barang'] = MasterKode::find()
+            ->select(['name'])
+            ->where(['type'=>\Yii::$app->params['TYPE_BAST'], 'status' => 1])
+            ->indexBy('code')
+            ->column();
+        $model['bast'] = MasterKode::find()
+            ->select(['name'])
+            ->where(['value'=>[
+                    \Yii::$app->params['TYPE_INVENTARIS'],
+                    \Yii::$app->params['TYPE_LAIN2']
+                ], 'status' => 1])
+            ->indexBy('code')
+            ->column();
         /** /FROM MASTER KODE */
 
         /** FROM MASTER PERSON */
@@ -137,6 +150,13 @@ class DataList {
             ->where(['b.value'=>\Yii::$app->params['TYPE_SATUAN_BERAT'], 'a.status'=>1])
             ->indexBy('a.code')
             ->column();
+        $model['satuan_barang'] = MasterSatuan::find()
+            ->alias('a')
+            ->select(['a.name'])
+            ->leftJoin('master_kode b', 'b.code = a.type_satuan')
+            ->where(['b.value'=>\Yii::$app->params['TYPE_BARANG'], 'a.status'=>1])
+            ->indexBy('a.code')
+            ->column();
         
         return $model;
     }
@@ -146,7 +166,7 @@ class DataList {
         return [
             1 => 'Ongkos Kirim',
             2 => 'Penggunaan Plat',
-            3 => 'Penggunaan Film',
+            3 => 'Penggunaan Pisau',
         ];
     }
 }

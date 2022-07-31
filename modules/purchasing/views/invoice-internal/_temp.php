@@ -7,19 +7,20 @@
         <tr>
             <td class="text-center"><?=$index+1?></td>
             <td class="font-size-10"><?=(isset($val->barang)) ? '<span class="text-success">'.$val->barang->code .'</span><br />'. $val->barang->name : '' ?></td>
-            <td class="text-right"><?=number_format($val->qty_order).'<br /><span class="text-muted font-size-10">'.$val->um.'</span>' ?></td>
+            <td class="text-right"><?=number_format($val->qty_order_1).'<br /><span class="text-muted font-size-10">'.$val->um_1.'</span>' ?></td>
             <td class="text-right">
                 <?php if($val->qty_selisih > 0): ?>
-                    <?=number_format($val->qty_terima).' <span class="text-muted font-size-12">'.$val->um.'</span>' ?>
+                    <?=number_format($val->qty_terima_1).' <span class="text-muted font-size-12">'.$val->um_1.'</span>' ?>
                     <br />
                     <strong class="text-danger">
-                        <?='<i>Kurang '.number_format($val->qty_selisih).' '.$val->um.'</i>' ?>
+                        <?='<i>Kurang '.number_format($val->qty_selisih).' '.$val->um_1.'</i>' ?>
                     </strong>
                 <?php else: ?>
-                    <?=number_format($val->qty_terima).'<br /><span class="text-muted font-size-10">'.$val->um.'</span>' ?>
+                    <?=number_format($val->qty_terima_1).'<br /><span class="text-muted font-size-10">'.$val->um_1.'</span>' ?>
                 <?php endif; ?>
             </td>
-            <td class="text-right"><?=number_format($val->harga_beli).'.- <br /><span class="text-muted font-size-10">Per '.$val->um.'</span>' ?></td>
+            <td class="text-right"><?=number_format($val->harga_beli_1).'.- <br /><span class="text-muted font-size-10">Per '.$val->um_1.'</span>' ?></td>
+            <td class="text-right"><?=(!empty($val->ppn)) ? $val->ppn.'%' : '' ?></td>
             <td class="text-right"><?=number_format($val->total_order).'.-' ?></td>
             <td class="text-right"><?=number_format($val->total_invoice).'.-' ?></td>
             <td class="text-center">
@@ -30,8 +31,8 @@
         </tr>
 <?php endforeach; ?>
 <tr>
-    <td class="text-right summary" colspan="5"></td>
-    <td class="text-right summary"><strong><?='Total Order: '.number_format($totalOrder).'.-' ?></strong></td>
-    <td class="text-right summary"><strong><?='Total Invoice: '.number_format($totalInvoice).'.-' ?></strong></td>
+    <td class="text-right mark-3" colspan="6"></td>
+    <td class="text-right mark-3"><strong><?='Total Order: '.number_format($totalOrder).'.-' ?></strong></td>
+    <td class="text-right mark-3"><strong><?='Total Invoice: '.number_format($totalInvoice).'.-' ?></strong></td>
     <td class="last-row"></td>
 </tr>

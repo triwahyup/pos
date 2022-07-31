@@ -12,9 +12,8 @@ $this->params['breadcrumbs'][] = 'Update';
 ?>
 <div class="inventory-bast-update">
     <?= $this->render('_form', [
+        'dataList' => $dataList,
         'model' => $model,
-        'profile' => $profile,
         'temp' => $temp,
-        'type' => $type,
     ]) ?>
 </div>

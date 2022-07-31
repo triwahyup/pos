@@ -476,7 +476,6 @@ class PurchaseOrderController extends Controller
             ->alias('a')
             ->select(['a.*', 'b.*', 'a.name as item_name'])
             ->leftJoin('master_material_pricelist b', 'b.item_code = a.code')
-            ->leftJoin('master_satuan c', 'c.code = a.satuan_code')
             ->where(['item_code'=>$_POST['code'], 'supplier_code'=>$_POST['supplier'], 'a.status'=>1, 'status_active' => 1])
             ->asArray()
             ->one();

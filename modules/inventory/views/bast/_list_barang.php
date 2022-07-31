@@ -30,6 +30,7 @@
 </table>
 <script>
 $(document).ready(function(){
+    var type_barang = $("#inventorybast-type_code").val();
 	$("#search").autocomplete({
         minLength: 1,
         select: function(event, value){
@@ -43,6 +44,7 @@ $(document).ready(function(){
                 error: function(xhr, status, error) {},
                 data: {
                     search: request.term,
+                    type_barang: type_barang
                 },
                 beforeSend: function (data){
                     $("#search").loader("load");

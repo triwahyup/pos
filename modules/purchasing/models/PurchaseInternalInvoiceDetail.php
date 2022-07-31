@@ -53,12 +53,12 @@ class PurchaseInternalInvoiceDetail extends \yii\db\ActiveRecord
         return [
             [['no_invoice', 'urutan'], 'required'],
             [['urutan', 'status', 'created_at', 'updated_at'], 'integer'],
-            [['qty_order', 'qty_terima', 'qty_selisih', 'qty_susulan', 'harga_beli', 'ppn', 'total_order', 'total_invoice'], 'safe'],
+            [['ppn', 'qty_order_1', 'qty_order_2', 'harga_beli_1', 'harga_beli_2', 'qty_terima_1', 'qty_terima_2', 'qty_selisih', 'qty_susulan', 'ppn', 'total_order', 'total_invoice'], 'safe'],
             [['no_invoice'], 'string', 'max' => 12],
             [['barang_code'], 'string', 'max' => 7],
             [['name'], 'string', 'max' => 128],
             [['supplier_code', 'satuan_code'], 'string', 'max' => 3],
-            [['um'], 'string', 'max' => 5],
+            [['um_1', 'um_2'], 'string', 'max' => 5],
             [['no_invoice', 'urutan'], 'unique', 'targetAttribute' => ['no_invoice', 'urutan']],
             [['status'], 'default', 'value' => 1],
         ];
@@ -76,12 +76,12 @@ class PurchaseInternalInvoiceDetail extends \yii\db\ActiveRecord
             'name' => 'Name',
             'supplier_code' => 'Supplier Code',
             'satuan_code' => 'Satuan Code',
-            'um' => 'Um',
-            'qty_order' => 'Qty Order',
-            'qty_terima' => 'Qty Terima',
+            'um_1' => 'Um',
+            'qty_order_1' => 'Qty Order',
+            'qty_terima_1' => 'Qty Terima',
             'qty_selisih' => 'Qty Selisih',
             'qty_susulan' => 'Qty Susulan',
-            'harga_beli' => 'Harga Beli',
+            'harga_beli_1' => 'Harga Beli',
             'ppn' => 'Ppn',
             'total_order' => 'Total Order',
             'total_invoice' => 'Total Invoice',
@@ -96,26 +96,26 @@ class PurchaseInternalInvoiceDetail extends \yii\db\ActiveRecord
         return $this->hasOne(MasterBarang::className(), ['code' => 'barang_code']);
     }
 
-    public function beforeSave($attribute)
-    {
-        $this->harga_beli = str_replace(',', '', $this->harga_beli);
-        $this->qty_terima = str_replace(',', '', $this->qty_terima);
-        return parent::beforeSave($attribute);
-    }
-
     public function getTotalInvoice()
     {
         $total_invoice=0;
-        if(!empty($this->qty_terima)){
-            $harga_beli = str_replace(',', '', $this->harga_beli);
-            $total_invoice += $this->qty_terima * $harga_beli;
+        if(!empty($this->qty_terima_1)){
+            $harga_beli_1 = str_replace(',', '', $this->harga_beli_1);
+            $total_invoice += $this->qty_terima_1 * $harga_beli_1;
+        }
+        if(!empty($this->qty_terima_2)){
+            $harga_beli_2 = str_replace(',', '', $this->harga_beli_2);
+            $total_invoice += $this->qty_terima_2 * $harga_beli_2;
         }
         
+        $total_ppn = 0;
         if(!empty($this->ppn)){
-            $ppn = $total_invoice / ($this->ppn*100);
-            $total_invoice += $ppn;
+            $total_ppn = $total_invoice / ($this->ppn*100);
+            $total_invoice += $total_ppn;
         }
-        return $total_invoice;
+        $this->total_ppn = $total_ppn;
+        $this->total_invoice = $total_invoice;
+        return true;
     }
 
     public function getQtySelisih($qty_order, $qty_terima)

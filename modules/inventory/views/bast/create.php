@@ -11,9 +11,8 @@ $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="inventory-bast-create">
     <?= $this->render('_form', [
+        'dataList' => $dataList,
         'model' => $model,
-        'profile' => $profile,
         'temp' => $temp,
-        'type' => $type,
     ]) ?>
 </div>

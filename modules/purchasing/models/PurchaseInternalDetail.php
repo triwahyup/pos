@@ -4,7 +4,6 @@ namespace app\modules\purchasing\models;
 
 use Yii;
 use app\modules\master\models\MasterBarang;
-use app\modules\master\models\MasterSatuan;
 use yii\behaviors\TimestampBehavior;
 
 /**
@@ -13,8 +12,6 @@ use yii\behaviors\TimestampBehavior;
  * @property string $no_po
  * @property int $urutan
  * @property string|null $item_name
- * @property float|null $qty
- * @property float|null $harga_beli
  * @property float|null $total_order
  * @property int|null $status
  * @property int|null $created_at
@@ -45,9 +42,9 @@ class PurchaseInternalDetail extends \yii\db\ActiveRecord
         return [
             [['no_po', 'urutan'], 'required'],
             [['urutan', 'status', 'created_at', 'updated_at'], 'integer'],
-            [['qty', 'harga_beli', 'total_order'], 'number'],
+            [['ppn', 'qty_order_1', 'qty_order_2', 'harga_beli_1', 'harga_beli_2', 'total_ppn', 'total_order'], 'number'],
             [['supplier_code', 'satuan_code'], 'string', 'max' => 3],
-            [['um'], 'string', 'max' => 5],
+            [['um_1', 'um_2'], 'string', 'max' => 5],
             [['barang_code'], 'string', 'max' => 7],
             [['no_po'], 'string', 'max' => 12],
             [['name'], 'string', 'max' => 128],
@@ -64,8 +61,8 @@ class PurchaseInternalDetail extends \yii\db\ActiveRecord
             'no_po' => 'No Po',
             'urutan' => 'Urutan',
             'item_name' => 'Item Name',
-            'qty' => 'Qty',
-            'harga_beli' => 'Harga Beli',
+            'qty_order_1' => 'Qty',
+            'harga_beli_1' => 'Harga Beli',
             'total_order' => 'Total Order',
             'status' => 'Status',
             'created_at' => 'Created At',
@@ -76,10 +73,5 @@ class PurchaseInternalDetail extends \yii\db\ActiveRecord
     public function getBarang()
     {
         return $this->hasOne(MasterBarang::className(), ['code' => 'barang_code']);
-    }
-    
-    public function getSatuan()
-    {
-        return $this->hasOne(MasterSatuan::className(), ['code' => 'satuan_code']);
     }
 }

@@ -53,7 +53,6 @@ use yii\widgets\MaskedInput;
                         'data' => $dataList['material'],
                         'options' => ['placeholder' => 'Type Material'],
                         ]) ?>
-                    <?= $form->field($model, 'no_po')->hiddenInput(['maxlength' => true, 'readonly' => true])->label(false) ?>
                 </div>
                 <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padding-left-0">
                     <?= $form->field($model, 'tgl_kirim')->widget(DatePicker::classname(), [
@@ -140,9 +139,6 @@ use yii\widgets\MaskedInput;
                             'readonly' => true,
                         ]
                     ])->label(false) ?>
-                </div>
-                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 padding-left-0 padding-right-0">
-                    <?= $form->field($temp, 'um_1')->textInput(['readonly' => true, 'data-align' => 'text-right', 'data-temp' => true])->label(false) ?>
                 </div>
             </div>
         </div>
@@ -311,15 +307,10 @@ function select_item(code, supplier)
 		beforeSend: function(){},
         success: function(data){
             var o = $.parseJSON(data);
-            if(o.length !=0){
-                $.each(o, function(index, value){
-                    $("[id=\"temppurchaseorderdetail-"+index+"\"]").val(value);
-                });
-                $("#temppurchaseorderdetail-qty_order_1").attr("readonly", false);
-            }else{
-                notification.open("danger", "Pricelist tidak ditemukan / belum aktif. Silakan isi pricelist / aktifkan pricelist yang akan digunakan di menu Material.");
-                temp.destroy();
-            }
+            $.each(o, function(index, value){
+                $("#temppurchaseorderdetail-"+index).val(value);
+            });
+            $("#temppurchaseorderdetail-qty_order_1").attr("readonly", false);
         },
         complete: function(){
             popup.close();
@@ -360,7 +351,7 @@ function get_temp(id)
         success: function(data){
             var o = $.parseJSON(data);
             $.each(o, function(index, value){
-                $("[id=\"temppurchaseorderdetail-"+index+"\"").val(value);
+                $("#temppurchaseorderdetail-"+index).val(value);
             });
             if(o.um_1 != "") $("#temppurchaseorderdetail-qty_order_1").attr("readonly", false);
         },

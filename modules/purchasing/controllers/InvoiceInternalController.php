@@ -101,11 +101,11 @@ class InvoiceInternalController extends Controller
                     if($model->no_bukti!="" && $model->tgl_invoice!=""){
                         $total_ppn=0;
                         foreach($model->details as $val){
-                            if($val->qty_terima==0){
+                            if($val->qty_terima_1 == 0){
                                 $success = false;
                                 $message = 'QTY Terima Barang '.$val->barang_code.'-'.$val->name.' masih 0.';
                             }
-                            $total_ppn += $val->ppn;
+                            $total_ppn += $val->total_ppn;
                         }
                         if($success){
                             $model->total_ppn = $total_ppn;
@@ -188,7 +188,7 @@ class InvoiceInternalController extends Controller
                     $selisih = false;
                     foreach($model->details as $val){
                         // TERIMA SEBAGIAN
-                        $qtySelisih = $val->getQtySelisih($val->qty_order, $val->qty_terima);
+                        $qtySelisih = $val->getQtySelisih($val->qty_order_1, $val->qty_terima_1);
                         if(!$qtySelisih['isEmptyQty']){
                             if($qtySelisih['selisih'] == -1){
                                 $selisih = true;
@@ -212,7 +212,7 @@ class InvoiceInternalController extends Controller
                                     $stockBarang = new InventoryStockBarang();
                                 }
                                 $stockBarang->attributes = $val->attributes;
-                                $stockBarang->stock = $stockBarang->stock+$val->qty_terima;
+                                $stockBarang->stock = $stockBarang->stock+$val->qty_terima_1;
                                 if(!$stockBarang->save()){
                                     $success = false;
                                     $message = (count($stockBarang->errors) > 0) ? 'ERROR UPDATE STOCK ITEM: ' : '';
@@ -228,8 +228,8 @@ class InvoiceInternalController extends Controller
                                 $stockBast->tgl_document = $model->tgl_invoice;
                                 $stockBast->type_document = "INVOICE INTERNAL";
                                 $stockBast->status_document = "IN";
-                                $stockBast->qty_in = $val->qty_terima;
-                                $stockBast->stock = (isset($stockBast->onHand)) ? $stockBast->onHand->stock+$val->qty_terima : $val->qty_terima;
+                                $stockBast->qty_in = $val->qty_terima_1;
+                                $stockBast->stock = (isset($stockBast->onHand)) ? $stockBast->onHand->stock+$val->qty_terima_1 : $val->qty_terima_1;
                                 if(!$stockBast->save()){
                                     $success = false;
                                     $message = (count($stockBast->errors) > 0) ? 'ERROR UPDATE STOCK TRANSACTION: ' : '';
@@ -297,7 +297,7 @@ class InvoiceInternalController extends Controller
             try{
                 $selisih = false;
                 foreach($model->details as $val){
-                    $qtySelisih = $val->getQtySelisih($val->qty_order, $val->qty_terima);
+                    $qtySelisih = $val->getQtySelisih($val->qty_order_1, $val->qty_terima_1);
                     if($qtySelisih['selisih'] == -1){
                         $selisih = true;
                     }
@@ -408,14 +408,14 @@ class InvoiceInternalController extends Controller
         $message = '';
         $model = PurchaseInternalInvoice::findOne(['no_invoice'=>$no_invoice]); 
         if($model->post == 1){
-            if(($temp['qty_order'] - $temp['qty_terima']) == 0){
+            if(($temp['qty_order_1'] - $temp['qty_terima_1']) == 0){
                 $success = false;
                 $message = 'Item ini sudah balance. Dokumen sudah di post, tidak bisa edit data ini.';
             }else{
-                $temp['qty_terima'] = ($temp['qty_selisih'] > 0) ? $temp['qty_selisih'] : $temp['qty_terima'];
+                $temp['qty_terima_1'] = ($temp['qty_selisih'] > 0) ? $temp['qty_selisih'] : $temp['qty_terima_1'];
             }
         }else{
-            $temp['qty_terima'] = ($temp['qty_terima'] > 0) ? $temp['qty_terima'] : $temp['qty_order'];
+            $temp['qty_terima_1'] = ($temp['qty_terima_1'] > 0) ? $temp['qty_terima_1'] : $temp['qty_order_1'];
         }
         return json_encode(['temp'=>$temp, 'success'=>$success, 'message'=>$message]);
     }
@@ -429,29 +429,31 @@ class InvoiceInternalController extends Controller
         $model = PurchaseInternalInvoice::findOne(['no_invoice'=>$invoiceInternal]);
         if($request->isPost){
             $temp = PurchaseInternalInvoiceDetail::findOne(['no_invoice'=>$invoiceInternal['no_invoice'], 'urutan'=>$invoiceInternal['urutan']]);
-            $qtyTerima = $temp->qty_terima;
+            $qtyTerima = $temp->qty_terima_1;
             $temp->attributes = (array)$invoiceInternal;
             if($model->post == 1){
-                $qtyOrder = ($temp->qty_selisih > 0) ? $temp->qty_selisih : $temp->qty_order;
+                $qtyOrder = ($temp->qty_selisih > 0) ? $temp->qty_selisih : $temp->qty_order_1;
             }else{
-                $qtyOrder = $temp->qty_order;
+                $qtyOrder = $temp->qty_order_1;
             }
             
-            if($temp->qty_terima <= $qtyOrder){
+            $temp->qty_terima_1 = str_replace(',', '', $temp->qty_terima_1);
+            if($temp->qty_terima_1 <= $qtyOrder){
                 if($temp->qty_selisih > 0){
                     if($model->post == 1){
-                        $temp->qty_terima = $qtyTerima+$temp->qty_terima;
+                        $temp->qty_terima_1 = $qtyTerima+$temp->qty_terima_1;
                     }else{
-                        $temp->qty_terima = $temp->qty_terima;
+                        $temp->qty_terima_1 = $temp->qty_terima_1;
                     }
                 }else{
-                    $temp->qty_terima = $temp->qty_terima;
+                    $temp->qty_terima_1 = $temp->qty_terima_1;
                 }
 
-                $qtySelisih = $temp->getQtySelisih($temp->qty_order, $temp->qty_terima);
+                $qtySelisih = $temp->getQtySelisih($temp->qty_order_1, $temp->qty_terima_1);
                 $temp->qty_susulan = ($temp->qty_selisih > 0) ? $qtyOrder : 0;
                 $temp->qty_selisih = $qtySelisih['qty'];
-                $temp->total_invoice = $temp->totalInvoice;
+                $temp->harga_beli_1 = str_replace(',', '', $temp->harga_beli_1);
+                $totalInvPpn = $temp->totalInvoice;
                 if(!$temp->save()){
                     $success = false;
                     foreach($temp->errors as $error => $value){

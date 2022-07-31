@@ -59,7 +59,7 @@ class SalesOrder extends \yii\db\ActiveRecord
     {
         return [
             [['name', 'type_order', 'customer_code', 'no_po', 'ekspedisi_flag', 'total_qty', 'satuan_ikat_code', 'total_warna'], 'required'],
-            [['tgl_so', 'tgl_po', 'deadline', 'total_qty', 'total_qty_up'], 'safe'],
+            [['tgl_so', 'tgl_po', 'deadline', 'total_qty'], 'safe'],
             [['sales_code', 'ekspedisi_flag', 'term_in', 'type_order', 'type_qty', 'lembar_ikat_1', 'lembar_ikat_2', 'lembar_ikat_3', 'up_produksi', 'total_warna', 'post', 'status', 'created_at', 'updated_at'], 'integer'],
             [['ppn', 'total_order_material', 'total_order_bahan', 'total_biaya_produksi', 'total_ppn', 'grand_total'], 'number'],
             [['nick_name'], 'string', 'max' => 4],

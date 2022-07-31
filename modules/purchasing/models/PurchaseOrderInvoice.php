@@ -34,10 +34,8 @@ class PurchaseOrderInvoice extends \yii\db\ActiveRecord
 {
     public $qty_terima_1;
     public $qty_terima_2;
-    public $qty_terima_3;
     public $harga_beli_1;
     public $harga_beli_2;
-    public $harga_beli_3;
     public $weight;
     public $ppn;
     public $urutan;

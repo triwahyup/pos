@@ -185,14 +185,6 @@ $this->params['breadcrumbs'][] = $this->title;
             </div>
             <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
                 <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                    <label>Total Qty Up</label>
-                </div>
-                <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                    <span><?=($model->type_qty == 1) ? $model->total_qty_up .' LEMBAR' : ''  ?></span>
-                </div>
-            </div>
-            <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
-                <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
                     <label>Up Produksi</label>
                 </div>
                 <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
@@ -248,24 +240,26 @@ $this->params['breadcrumbs'][] = $this->title;
                         <th class="text-center">Name</th>
                         <th class="text-center">Supplier</th>
                         <th class="text-center">Qty</th>
+                        <th class="text-center">Harga</th>
+                        <th class="text-center">Total Order</th>
                         <th class="text-center">Potong</th>
                         <th class="text-center">PxL</th>
                         <th class="text-center">Objek</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php if(count($model->itemsMaterial) > 0): ?>
-                        <?php foreach($model->itemsMaterial as $no=>$val): ?>
+                    <?php if(count($model->itemsMaterial) > 0):
+                        $totalOrder=0; ?>
+                        <?php foreach($model->itemsMaterial as $no=>$val):
+                            $totalOrder += $val->total_order; ?>
                             <tr>
                                 <td class="text-center"><?=$no+1 ?></td>
                                 <td class="text-center"><?=$val->item_code ?></td>
                                 <td><?=(isset($val->item)) ? $val->item->name : '-' ?></td>
                                 <td><?=(isset($val->supplier)) ? $val->supplier->name : '-' ?></td>
-                                <td class="text-right">
-                                    <?=$val->qty_order_1 .' '. $val->um_1 ?>
-                                    <br />
-                                    <?=(!empty($val->qty_up)) ? '<i class="font-size-10 text-muted">Up '.$val->qty_up .' Lembar</i>': '' ?>
-                                </td>
+                                <td class="text-right"><?=$val->qty_order_1 .' '. $val->um_1 ?></td>
+                                <td class="text-right"><?=number_format($val->harga_jual_1).'.-' ?></td>
+                                <td class="text-right"><?=number_format($val->total_order).'.-' ?></td>
                                 <td class="text-center"><?=$val->total_potong ?></td>
                                 <td class="text-center">
                                     <?php foreach($val->potongs as $pt): ?>
@@ -283,6 +277,11 @@ $this->params['breadcrumbs'][] = $this->title;
                                 </td>
                             </tr>
                         <?php endforeach; ?>
+                        <tr>
+                            <td class="text-right mark-3" colspan="6"><strong>Total</strong></td>
+                            <td class="text-right mark-3"><strong><?=number_format($totalOrder).'.-' ?></strong></td>
+                            <td class="last-row" colspan="3"></td>
+                        </tr>
                     <?php else : ?>
                         <tr>
                             <td class="text-center text-danger" colspan="15"><i>Data is empty ...</i></td>
@@ -301,22 +300,31 @@ $this->params['breadcrumbs'][] = $this->title;
                     <tr>
                         <th class="text-center">No.</th>
                         <th class="text-center">Proses Produksi</th>
+                        <th class="text-center">Biaya Produksi</th>
                         <th class="text-center">Keterangan</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php if(count($model->proses) > 0): ?>
-                        <?php foreach($model->proses as $no=>$val): ?>
+                    <?php if(count($model->proses) > 0):
+                        $totalHarga=0; ?>
+                        <?php foreach($model->proses as $no=>$val):
+                            $totalHarga += $val->harga; ?>
                             <tr>
                                 <td class="text-center"><?=$no+1 ?></td>
                                 <td class="text-muted text-left">
                                     <?='<i>'.$val->prosesProduksi->name.'</i>' ?>
                                 </td>
+                                <td class="text-right"><?=number_format($val->harga).'.-' ?></td>
                                 <td class="text-muted text-left">
                                     <?='<i>'.$val->keterangan.'</i>' ?>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
+                        <tr>
+                            <td class="text-right mark-3" colspan="2"><strong>Total</strong></td>
+                            <td class="text-right mark-3"><strong><?=number_format($totalHarga).'.-' ?></strong></td>
+                            <td class="last-row"></td>
+                        </tr>
                     <?php else: ?>
                         <tr>
                             <td class="text-danger" colspan="5">Data masih kosong.</td>
@@ -340,21 +348,32 @@ $this->params['breadcrumbs'][] = $this->title;
                         <th class="text-center">Name</th>
                         <th class="text-center">Supplier</th>
                         <th class="text-center">Qty</th>
+                        <th class="text-center">Harga</th>
+                        <th class="text-center">Total Order</th>
                         <th class="text-center">Jenis</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php if(count($model->itemsNonMaterial) > 0): ?>
-                        <?php foreach($model->itemsNonMaterial as $no=>$val): ?>
+                    <?php if(count($model->itemsNonMaterial) > 0):
+                        $totalOrder=0; ?>
+                        <?php foreach($model->itemsNonMaterial as $no=>$val):
+                            $totalOrder += $val->total_order; ?>
                             <tr>
                                 <td class="text-center"><?=$no+1 ?></td>
                                 <td class="text-center"><?=$val->item_code ?></td>
                                 <td><?=(isset($val->item)) ? $val->item->name : '-' ?></td>
                                 <td><?=(isset($val->supplier)) ? $val->supplier->name : '-' ?></td>
                                 <td class="text-center"><?=$val->qty_order_1 .' '.$val->um_1 ?></td>
+                                <td class="text-right"><?=number_format($val->harga_jual_1).'.-' ?></td>
+                                <td class="text-right"><?=number_format($val->total_order).'.-' ?></td>
                                 <td class="text-center"><?=$val->item->material->name ?></td>
                             </tr>
                         <?php endforeach; ?>
+                        <tr>
+                            <td class="text-right mark-3" colspan="6"><strong>Total</strong></td>
+                            <td class="text-right mark-3"><strong><?=number_format($totalOrder).'.-' ?></strong></td>
+                            <td class="last-row" colspan="3"></td>
+                        </tr>
                     <?php else: ?>
                         <tr>
                             <td class="text-danger" colspan="8">Data tidak ditemukan</td>

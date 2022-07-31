@@ -19,7 +19,7 @@ use yii\widgets\MaskedInput;
             </div>
             <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padding-left-0">
                 <?= $form->field($model, 'user_id')->widget(Select2::classname(), [
-                    'data' => $profile,
+                    'data' => $dataList['user'],
                     'options' => ['placeholder' => 'User'],
                     ]) ?>
 
@@ -35,7 +35,7 @@ use yii\widgets\MaskedInput;
                     ]]) ?>
 
                 <?= $form->field($model, 'type_code')->widget(Select2::classname(), [
-                    'data' => $type,
+                    'data' => $dataList['bast'],
                     'options' => ['placeholder' => 'Type'],
                     ]) ?>
                 <?= $form->field($model, 'keterangan')->textarea(['maxlength' => true]) ?>
@@ -148,24 +148,31 @@ use yii\widgets\MaskedInput;
 </div>
 <div data-popup="popup"></div>
 <script>
-function load_barang()
+function load_barang(type_barang)
 {
     $.ajax({
         url: "<?=Url::to(['bast/list-barang'])?>",
-		type: "GET",
+		type: "POST",
+        data: {
+            type_barang: type_barang
+        },
 		dataType: "text",
         error: function(xhr, status, error) {},
 		beforeSend: function (data){},
         success: function(data){
             var o = $.parseJSON(data);
-            $("[data-popup=\"popup\"]").html(o.data);
-            $("[data-popup=\"popup\"]").popup("open", {
-				container: "popup",
-				title: 'List Data Barang',
-				styleOptions: {
-					width: 600
-				}
-			});
+            if(o.success == true){
+                $("[data-popup=\"popup\"]").html(o.data);
+                $("[data-popup=\"popup\"]").popup("open", {
+                    container: "popup",
+                    title: 'List Data Barang',
+                    styleOptions: {
+                        width: 600
+                    }
+                });
+            }else{
+                notification.open("danger", o.message, timeOut);
+            }
         },
         complete: function(){}
     });
@@ -350,7 +357,7 @@ $(document).ready(function(){
     $("body").on("keydown","#tempinventorybastdetail-name", function(e){
         var key = e.charCode ? e.charCode : e.keyCode ? e.keyCode : 0;
         if(key == KEY.F4){
-            load_barang();
+            load_barang($("#inventorybast-type_code").val());
         }
     });
     

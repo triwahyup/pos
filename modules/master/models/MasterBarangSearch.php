@@ -17,7 +17,7 @@ class MasterBarangSearch extends MasterBarang
     public function rules()
     {
         return [
-            [['code', 'name', 'satuan_code', 'created_at', 'updated_at'], 'safe'],
+            [['code', 'name', 'type_code', 'satuan_code', 'created_at', 'updated_at'], 'safe'],
         ];
     }
 
@@ -41,7 +41,8 @@ class MasterBarangSearch extends MasterBarang
     {
         $query = MasterBarang::find()
             ->alias('a')
-            ->leftJoin('master_satuan b', 'b.code = a.satuan_code');
+            ->leftJoin('master_satuan b', 'b.code = a.satuan_code')
+            ->leftJoin('master_kode c', 'c.code = a.type_code');
 
         // add conditions that should always apply here
 
@@ -70,6 +71,9 @@ class MasterBarangSearch extends MasterBarang
         }
         if(!empty($this->satuan_code)){
             $query->andWhere('b.name LIKE "%'.$this->satuan_code.'%"');
+        }
+        if(!empty($this->type_code)){
+            $query->andWhere('c.name LIKE "%'.$this->type_code.'%"');
         }
         $query->andFilterWhere(['a.status' => 1]);
         $query->andFilterWhere(['like', 'a.code', $this->code])

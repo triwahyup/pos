@@ -31,7 +31,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
                 'format' => 'raw',
                 'value' => function($model, $value) {
-                    return $model->stock;
+                    return '<strong>'.number_format($model->stock) .'</strong><br />'. $model->barang->satuan->name;
                 }
             ],
         ],

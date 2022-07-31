@@ -69,8 +69,8 @@ use yii\widgets\MaskedInput;
                 </div>
             </div>
         </div>
-        <!-- Price List -->
         <div class="col-lg-12 col-md-12 col-xs-12 margin-top-20">
+        <!-- Price List -->
             <h4>Price List</h4>
             <hr />
         </div>
@@ -79,10 +79,13 @@ use yii\widgets\MaskedInput;
                 <label>Name:</label>
             </div>
             <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0">
-                <?= $form->field($temp, 'name')->textInput(['readonly' => true, 'placeholder' => 'Nama Pricelist', 'data-temp' => true])->label(false) ?>
+                <?= $form->field($temp, 'name')->textInput([
+                    'readonly' => true, 'placeholder' => 'Nama Pricelist', 'data-temp' => true, 'aria-required' => true])->label(false) ?>
                 <?= $form->field($temp, 'id')->hiddenInput(['readonly' => true, 'data-temp' => true])->label(false) ?>
                 <?= $form->field($temp, 'item_code')->hiddenInput(['readonly' => true, 'data-temp' => true])->label(false) ?>
             </div>
+        </div>
+        <div class="col-lg-12 col-md-12 col-xs-12">
             <div class="col-lg-1 col-md-1 col-sm-12 col-xs-12 padding-right-0">
                 <label>Supplier:</label>
             </div>
@@ -92,7 +95,8 @@ use yii\widgets\MaskedInput;
                         'options' => [
                             'placeholder' => 'Pilih Supplier',
                             'class' => 'select2',
-                            'data-temp' => true
+                            'data-temp' => true,
+                            'aria-required' => true
                         ],
                     ])->label(false) ?>
             </div>
@@ -103,7 +107,8 @@ use yii\widgets\MaskedInput;
                 <label>UM 1:</label>
             </div>
             <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-left-0">
-                <?= $form->field($temp, 'um_1')->textInput(['readonly' => true, 'placeholder' => 'UM 1', 'data-temp' => (!$model->isNewRecord) ? false : true])->label(false) ?>
+                <?= $form->field($temp, 'um_1')->textInput([
+                    'readonly' => true, 'placeholder' => 'UM 1', 'data-temp' => (!$model->isNewRecord) ? false : true, 'aria-required' => true])->label(false) ?>
             </div>
             <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0">
                 <?= $form->field($temp, 'harga_beli_1')->widget(MaskedInput::className(), [
@@ -119,6 +124,7 @@ use yii\widgets\MaskedInput;
                         'data-icons' => 'rupiah',
                         'placeholder' => 'Harga Beli 1',
                         'readonly' => true,
+                        'aria-required' => true
                     ]
                 ])->label(false) ?>
             </div>
@@ -147,7 +153,8 @@ use yii\widgets\MaskedInput;
                 <label>UM 2:</label>
             </div>
             <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-left-0">
-                <?= $form->field($temp, 'um_2')->textInput(['readonly' => true, 'placeholder' => 'UM 2', 'data-temp' => (!$model->isNewRecord) ? false : true])->label(false) ?>
+                <?= $form->field($temp, 'um_2')->textInput([
+                    'readonly' => true, 'placeholder' => 'UM 2', 'data-temp' => (!$model->isNewRecord) ? false : true, 'aria-required' => true])->label(false) ?>
             </div>
             <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0">
                 <?= $form->field($temp, 'harga_beli_2')->widget(MaskedInput::className(), [
@@ -163,6 +170,7 @@ use yii\widgets\MaskedInput;
                         'data-icons' => 'rupiah',
                         'placeholder' => 'Harga Beli 2',
                         'readonly' => true,
+                        'aria-required' => true
                     ]
                 ])->label(false) ?>
             </div>
@@ -191,7 +199,8 @@ use yii\widgets\MaskedInput;
                 <label>UM 3:</label>
             </div>
             <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-left-0">
-                <?= $form->field($temp, 'um_3')->textInput(['readonly' => true, 'placeholder' => 'UM 3', 'data-temp' => (!$model->isNewRecord) ? false : true])->label(false) ?>
+                <?= $form->field($temp, 'um_3')->textInput([
+                    'readonly' => true, 'placeholder' => 'UM 3', 'data-temp' => (!$model->isNewRecord) ? false : true, 'aria-required' => true])->label(false) ?>
             </div>
             <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0">
                 <?= $form->field($temp, 'harga_beli_3')->widget(MaskedInput::className(), [
@@ -207,6 +216,7 @@ use yii\widgets\MaskedInput;
                         'data-icons' => 'rupiah',
                         'placeholder' => 'Harga Beli 3',
                         'readonly' => true,
+                        'aria-required' => true
                     ]
                 ])->label(false) ?>
             </div>
@@ -498,23 +508,24 @@ $(document).ready(function(){
 
     $("body").off("click","[data-button=\"create_temp\"]").on("click","[data-button=\"create_temp\"]", function(e){
         e.preventDefault();
-        var success = true,
-            message = '';
-        $.each($("[id^=\"tempmastermaterialpricelist-\"]"), function(index, element){
-            var id = $(element).attr("id"),
-                readOnly = $(element).prop("readonly");
-            if(!readOnly){
-                if(!$("#"+id).val()){
-                    success = false;
-                    var placeHolder = $(element).attr("placeholder");
-                    message += placeHolder+',';
+        success = true;
+        $.each($("[aria-required]:not([readonly])"), function(index, element){
+            var a = $(element).attr("id").split("-"),
+                b = a[1].replace("_", " ");
+            if(!$(element).val()){
+                success = false;
+                errorMsg = parsing.toUpper(b, 2) +' cannot be blank.';
+                if($(element).parent().hasClass("input-container")){
+                    $(element).parent(".input-container").parent().removeClass("has-error").addClass("has-error");
+                    $(element).parent(".input-container").siblings("[class=\"help-block\"]").text(errorMsg);
+                }else{
+                    $(element).parent().removeClass("has-error").addClass("has-error");
+                    $(element).siblings("[class=\"help-block\"]").text(errorMsg);
                 }
             }
         });
         if(success){
             create_temp($(this));
-        }else{
-            notification.open("danger", message + ' tidak boleh kosong!', timeOut);
         }
     });
 

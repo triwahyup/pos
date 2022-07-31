@@ -35,7 +35,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     [
                         'attribute' => 'total_ppn',
                         'value' => function($model, $index){
-                            return number_format($model->total_ppn).'%';
+                            return number_format($model->total_ppn);
                         }
                     ],
                     [
@@ -152,9 +152,9 @@ $this->params['breadcrumbs'][] = $this->title;
                                     </tr>
                                 <?php endforeach; ?>
                                 <tr>
-                                    <td class="text-right summary" colspan="7"></td>
-                                    <td class="text-right summary"><strong><?='Total Order: '.number_format($totalOrder).'.-' ?></strong></td>
-                                    <td class="text-right summary"><strong><?='Total Invoice: '.number_format($totalInvoice).'.-' ?></strong></td>
+                                    <td class="text-right mark-3" colspan="7"></td>
+                                    <td class="text-right mark-3"><strong><?='Total Order: '.number_format($totalOrder).'.-' ?></strong></td>
+                                    <td class="text-right mark-3"><strong><?='Total Invoice: '.number_format($totalInvoice).'.-' ?></strong></td>
                                 </tr>
                             <?php else : ?>
                                 <tr>

@@ -31,6 +31,15 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             'name',
             [
+                'attribute' => 'type_code',
+                'contentOptions' => [
+                    'class' => 'text-center',
+                ],
+                'value' => function($model, $index, $key){
+                    return (isset($model->typeCode)) ? $model->typeCode->name : '';
+                }
+            ],
+            [
                 'attribute' => 'satuan_code',
                 'contentOptions' => [
                     'class' => 'text-center',

@@ -65,8 +65,8 @@ use yii\widgets\MaskedInput;
             <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
                 <label>QTY Terima:</label>
             </div>
-            <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padding-right-0">
-                <?= $form->field($model, 'qty_terima')->widget(MaskedInput::className(), [
+            <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-right-0">
+                <?= $form->field($model, 'qty_terima_1')->widget(MaskedInput::className(), [
                     'clientOptions' => [
                         'alias' =>  'decimal',
                         'groupSeparator' => ',',
@@ -83,8 +83,8 @@ use yii\widgets\MaskedInput;
             <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
                 <label>Harga Beli:</label>
             </div>
-            <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 padding-right-0">
-                <?= $form->field($model, 'harga_beli')->widget(MaskedInput::className(), [
+            <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-right-0">
+                <?= $form->field($model, 'harga_beli_1')->widget(MaskedInput::className(), [
                         'clientOptions' => [
                             'alias' =>  'decimal',
                             'groupSeparator' => ',',
@@ -101,6 +101,12 @@ use yii\widgets\MaskedInput;
             </div>
         </div>
         <div class="col-lg-12 col-md-12 col-xs-12">
+            <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
+                <label>PPN (%):</label>
+            </div>
+            <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-right-0">
+                <?= $form->field($model, 'ppn')->textInput(['data-temp' => 1, 'data-align' => 'text-right'])->label(false) ?>
+            </div>
             <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12 padding-right-0">
                 <?= $form->field($model, 'no_invoice')->hiddenInput()->label(false) ?>
                 <?= $form->field($model, 'urutan')->hiddenInput(['data-temp' => 1])->label(false) ?>
@@ -124,6 +130,7 @@ use yii\widgets\MaskedInput;
                             <th class="text-center">QTY Order</th>
                             <th class="text-center">QTY Terima</th>
                             <th class="text-center">Harga Beli</th>
+                            <th class="text-center">Ppn (%)</th>
                             <th class="text-center">Total Order</th>
                             <th class="text-center">Total Invoice</th>
                             <th class="text-center">Action</th>

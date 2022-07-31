@@ -151,14 +151,6 @@ $this->params['breadcrumbs'][] = $this->title;
             </div>
             <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
                 <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
-                    <label>Total Qty Up</label>
-                </div>
-                <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
-                    <span><?=($model->type_qty == 1) ? $model->total_qty_up .' LEMBAR' : ''  ?></span>
-                </div>
-            </div>
-            <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 padding-right-0">
-                <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 padding-left-0 padding-right-0">
                     <label>Up Produksi</label>
                 </div>
                 <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 padding-right-0">
@@ -227,11 +219,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                 <td class="text-center"><?=$val->item_code ?></td>
                                 <td><?=(isset($val->item)) ? $val->item->name : '-' ?></td>
                                 <td><?=(isset($val->supplier)) ? $val->supplier->name : '-' ?></td>
-                                <td class="text-right">
-                                    <?=$val->qty_order_1 .' '. $val->um_1 ?>
-                                    <br />
-                                    <?=(!empty($val->qty_up)) ? '<i class="font-size-10 text-muted">Up '.$val->qty_up .' Lembar</i>': '' ?>
-                                </td>
+                                <td class="text-right"><?=$val->qty_order_1 .' '. $val->um_1 ?></td>
                                 <td class="text-center"><?=$val->total_potong ?></td>
                                 <td class="text-center">
                                     <?php foreach($val->potongs as $pt): ?>

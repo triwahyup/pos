@@ -28,6 +28,8 @@
 </table>
 <script>
 $(document).ready(function(){
+    var supplier_code = $("#purchaseinternal-supplier_code").val(),
+        type_barang = $("#purchaseinternal-type_barang").val()
 	$("#search").autocomplete({
         minLength: 1,
         select: function(event, value){
@@ -41,6 +43,8 @@ $(document).ready(function(){
                 error: function(xhr, status, error) {},
                 data: {
                     search: request.term,
+                    supplier_code: supplier_code,
+                    type_barang: type_barang
                 },
                 beforeSend: function (data){
                     $("#search").loader("load");

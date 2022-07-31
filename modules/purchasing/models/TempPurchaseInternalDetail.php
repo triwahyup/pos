@@ -4,6 +4,7 @@ namespace app\modules\purchasing\models;
 
 use Yii;
 use app\modules\master\models\MasterBarang;
+use app\modules\master\models\MasterBarangPricelist;
 use app\modules\master\models\MasterSatuan;
 
 
@@ -36,9 +37,9 @@ class TempPurchaseInternalDetail extends \yii\db\ActiveRecord
     {
         return [
             [['id', 'urutan', 'user_id'], 'integer'],
-            [['qty', 'harga_beli', 'total_order'], 'safe'],
+            [['ppn', 'qty_order_1', 'qty_order_2', 'harga_beli_1', 'harga_beli_2', 'total_order'], 'safe'],
             [['supplier_code', 'satuan_code'], 'string', 'max' => 3],
-            [['um'], 'string', 'max' => 5],
+            [['um_1', 'um_2'], 'string', 'max' => 5],
             [['barang_code'], 'string', 'max' => 7],
             [['no_po'], 'string', 'max' => 12],
             [['name'], 'string', 'max' => 128],
@@ -55,8 +56,8 @@ class TempPurchaseInternalDetail extends \yii\db\ActiveRecord
             'no_po' => 'No Pi',
             'urutan' => 'Urutan',
             'item_name' => 'Item Name',
-            'qty' => 'Qty',
-            'harga_beli' => 'Harga Beli',
+            'qty_order_1' => 'Qty',
+            'harga_beli_1' => 'Harga Beli',
             'total_order' => 'Total Order',
             'user_id' => 'User ID',
         ];
@@ -65,6 +66,12 @@ class TempPurchaseInternalDetail extends \yii\db\ActiveRecord
     public function getBarang()
     {
         return $this->hasOne(MasterBarang::className(), ['code' => 'barang_code']);
+    }
+
+    public $status_active=1;
+    public function getPriceListActive()
+    {
+        return $this->hasOne(MasterBarangPricelist::className(), ['barang_code' => 'barang_code', 'supplier_code' => 'supplier_code', 'status_active' => 'status_active']);
     }
     
     public function getSatuan()
@@ -82,20 +89,23 @@ class TempPurchaseInternalDetail extends \yii\db\ActiveRecord
         return TempPurchaseInternalDetail::find()->where(['user_id'=> \Yii::$app->user->id])->all();
     }
 
-    public function getTotalBeli()
+    public function totalBeli($temp)
     {
         $total_order=0;
-        if(!empty($this->qty)){
-            $harga_beli = str_replace(',', '', $this->harga_beli);
-            $total_order += $this->qty * $harga_beli;
+        $qty_order_1 = str_replace(',', '', $temp->qty_order_1);
+        if(!empty($qty_order_1)){
+            $harga_beli_1 = str_replace(',', '', $temp->harga_beli_1);
+            $total_order += $qty_order_1 * $harga_beli_1;
+        }
+        $qty_order_2 = str_replace(',', '', $temp->qty_order_2);
+        if(!empty($qty_order_2)){
+            $harga_beli_2 = str_replace(',', '', $temp->harga_beli_2);
+            $total_order += $qty_order_2 * $harga_beli_2;
+        }
+        if(!empty($temp->ppn)){
+            $ppn = $total_order / ($temp->ppn*100);
+            $total_order += $ppn;
         }
         return $total_order;
-    }
-
-    public function beforeSave($attribute)
-    {
-        $this->harga_beli = str_replace(',', '', $this->harga_beli);
-        $this->qty = str_replace(',', '', $this->qty);
-        return parent::beforeSave($attribute);
     }
 }

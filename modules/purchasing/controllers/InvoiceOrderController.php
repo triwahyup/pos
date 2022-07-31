@@ -107,7 +107,7 @@ class InvoiceOrderController extends Controller
                                 $success = false;
                                 $message = 'QTY Terima item '.$val->item_code.'-'.$val->name.' masih 0.';
                             }
-                            $total_ppn += $val->ppn;
+                            $total_ppn += $val->total_ppn;
                         }
                         if($success){
                             $model->total_ppn = $total_ppn;
@@ -446,6 +446,7 @@ class InvoiceOrderController extends Controller
                 $qtyOrder = $temp->qty_order_1;
             }
             
+            $temp->qty_terima_1 = str_replace(',', '', $temp->qty_terima_1);
             if($temp->qty_terima_1 <= $qtyOrder){
                 if($temp->qty_selisih > 0){
                     if($model->post == 1){
@@ -458,10 +459,10 @@ class InvoiceOrderController extends Controller
                 }
 
                 $qtySelisih = $temp->getQtySelisih($temp->qty_order_1, $temp->qty_terima_1);
-                print_r($qtySelisih);die;
                 $temp->qty_susulan = ($temp->qty_selisih > 0) ? $qtyOrder : 0;
                 $temp->qty_selisih = $qtySelisih['qty'];
-                $temp->total_invoice = $temp->totalInvoice;
+                $temp->harga_beli_1 = str_replace(',', '', $temp->harga_beli_1);
+                $totalInvPpn = $temp->totalInvoice;
                 if(!$temp->save()){
                     $success = false;
                     foreach($temp->errors as $error => $value){

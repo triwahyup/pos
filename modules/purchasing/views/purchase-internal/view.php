@@ -33,7 +33,7 @@ $this->params['breadcrumbs'][] = $this->title;
     </p>
 
     <div class="col-lg-12 col-md-12 col-xs-12 padding-left-0 pading-right-0">
-    <div class="col-lg-6 col-md-6 col-xs-12 padding-left-0">
+        <div class="col-lg-6 col-md-6 col-xs-12 padding-left-0">
             <?= DetailView::widget([
                 'model' => $model,
                 'attributes' => [
@@ -63,12 +63,6 @@ $this->params['breadcrumbs'][] = $this->title;
                         }
                     ],
                     [
-                        'attribute' => 'total_order',
-                        'value' => function($model, $value) {
-                            return number_format($model->total_order).'.-';
-                        }
-                    ],
-                    [
                         'attribute' => 'user_request',
                         'value' => function($model, $value) {
                             return (isset($model->request)) ? $model->request->name : '';
@@ -80,6 +74,12 @@ $this->params['breadcrumbs'][] = $this->title;
                             return (isset($model->profile)) ? $model->profile->name : '';
                         }
                     ],
+                    [
+                        'attribute' => 'type_barang',
+                        'value' => function($model, $value) {
+                            return (isset($model->typeBarang)) ? $model->typeBarang->name : '';
+                        }
+                    ],
                 ],
             ]) ?>
         </div>
@@ -87,7 +87,12 @@ $this->params['breadcrumbs'][] = $this->title;
             <?= DetailView::widget([
                 'model' => $model,
                 'attributes' => [
-                    'keterangan:ntext',
+                    [
+                        'attribute' => 'total_order',
+                        'value' => function($model, $value) {
+                            return number_format($model->total_order).'.-';
+                        }
+                    ],
                     [
                         'attribute' => 'post',
                         'format' => 'raw',
@@ -115,6 +120,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             return ($model->status == 1) ? 'Active' : 'Delete';
                         }
                     ],
+                    'keterangan:ntext',
                     [
                         'attribute'=>'created_at',
                         'value' => function ($model, $index) { 
@@ -149,10 +155,10 @@ $this->params['breadcrumbs'][] = $this->title;
                         <thead>
                             <tr>
                                 <th class="text-center">No.</th>
-                                <th class="text-center">Name</th>
+                                <th class="text-center">Item</th>
                                 <th class="text-center">QTY</th>
-                                <th class="text-center">Satuan</th>
                                 <th class="text-center">Harga Beli</th>
+                                <th class="text-center">Ppn (%)</th>
                                 <th class="text-center">Total (Rp)</th>
                             </tr>
                         </thead>
@@ -163,16 +169,16 @@ $this->params['breadcrumbs'][] = $this->title;
                                     $totalOrder += $val->total_order; ?>
                                     <tr>
                                         <td class="text-center"><?=$index+1?></td>
-                                        <td><?=$val->name ?></td>
-                                        <td class="text-right"><?=number_format($val->qty) ?></td>
-                                        <td class="text-center"><?=$val->um ?></td>
-                                        <td class="text-right"><?=number_format($val->harga_beli).'.-' ?></td>
+                                        <td class="font-size-10"><?=(isset($val->barang)) ? '<span class="text-success">'.$val->barang->code .'</span><br />'. $val->barang->name : '' ?></td>
+                                        <td class="text-right"><?=number_format($val->qty_order_1).'<br /><span class="text-muted font-size-10">'.$val->um_1.'</span>' ?></td>
+                                        <td class="text-right"><?=number_format($val->harga_beli_1).'.- <br /><span class="text-muted font-size-10">Per '.$val->um_1.'</span>' ?></td>
+                                        <td class="text-right"><?=(!empty($val->ppn)) ? $val->ppn.'%' : '' ?></td>
                                         <td class="text-right"><?=number_format($val->total_order).'.-' ?></td>
                                     </tr>
                                 <?php endforeach; ?>
                                 <tr>
-                                    <td class="summary" colspan="5"><strong>Total Order:</strong></td>
-                                    <td class="summary"><strong><?=number_format($totalOrder).'.-' ?></strong></td>
+                                    <td class="mark-3 text-right" colspan="5"><strong>Total Order:</strong></td>
+                                    <td class="mark-3 text-right"><strong><?=number_format($totalOrder).'.-' ?></strong></td>
                                 </tr>
                             <?php else : ?>
                                 <tr>

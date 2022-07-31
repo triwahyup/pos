@@ -27,6 +27,10 @@ $data = [
     'TYPE_ROLL' => 'ROLL',
     'TYPE_BARANG' => 'BARANG',
     'TYPE_SUP' => 'ADMINISTRATOR',
+    'TYPE_PLATE' => 'PLATE',
+    'TYPE_PISAU' => 'PISAU',
+    'TYPE_INVENTARIS' => 'INVENTARIS',
+    'TYPE_LAIN2' => 'LAIN2',
     
     // MASTER PERSON TYPE
     'TYPE_CUSTOMER' => 1,
@@ -36,7 +40,7 @@ $data = [
     'TYPE_SUPPLIER_BARANG' => 5,
     
     // MASTER SATUAN
-    'TYPE_RIM_PLANO' => 'RIM-PLANO',
+    'TYPE_RIM_LB' => 'RIM-LB',
     
     // TYPE STATUS
     'IN_PROGRESS' => 'IN_PROGRESS',

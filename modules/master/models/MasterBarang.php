@@ -3,7 +3,10 @@
 namespace app\modules\master\models;
 
 use Yii;
+use app\modules\master\models\MasterKode;
+use app\modules\master\models\MasterBarangPricelist;
 use app\modules\master\models\MasterSatuan;
+use app\modules\master\models\TempMasterBarangPricelist;
 use yii\behaviors\TimestampBehavior;
 
 /**
@@ -45,7 +48,7 @@ class MasterBarang extends \yii\db\ActiveRecord
             [['status', 'created_at', 'updated_at'], 'integer'],
             [['code'], 'string', 'max' => 7],
             [['name'], 'string', 'max' => 128],
-            [['satuan_code'], 'string', 'max' => 3],
+            [['satuan_code', 'type_code'], 'string', 'max' => 3],
             [['code'], 'unique'],
             [['status'], 'default', 'value' => 1],
         ];
@@ -59,7 +62,8 @@ class MasterBarang extends \yii\db\ActiveRecord
         return [
             'code' => 'Code',
             'name' => 'Name',
-            'satuan_code' => 'Satuan Code',
+            'satuan_code' => 'Satuan',
+            'type_code' => 'Type',
             'keterangan' => 'Keterangan',
             'status' => 'Status',
             'created_at' => 'Created At',
@@ -67,19 +71,54 @@ class MasterBarang extends \yii\db\ActiveRecord
         ];
     }
 
-    public static function generateCode()
+    public static function generateCode($type)
     {
-        $model = MasterBarang::find()->count();
+        $model = MasterBarang::find()->where(['type_code'=>$type])->count();
         $total=0;
         if($model > 0){
-            $model = MasterBarang::find()->orderBy(['code'=>SORT_DESC])->one();
+            $model = MasterBarang::find()->where(['type_code'=>$type])->orderBy(['code'=>SORT_DESC])->one();
             $total = (int)substr($model->code, -5);
         }
-        return 'BR'.(string)sprintf('%05s', ($total+1));
+        $kode = MasterKode::findOne(['code'=>$type]);
+        if($kode->value == \Yii::$app->params['TYPE_PLATE']){
+            return (string)'PL'.sprintf('%05s', ($total+1));
+        }else if($kode->value == \Yii::$app->params['TYPE_PISAU']){
+            return (string)'PS'.sprintf('%05s', ($total+1));
+        }else if($kode->value == \Yii::$app->params['TYPE_INVENTARIS']){
+            return (string)'IN'.sprintf('%05s', ($total+1));
+        }else{
+            return 'LN'.(string)sprintf('%05s', ($total+1));
+        }
+    }
+
+    public function getTypeCode()
+    {
+        return $this->hasOne(MasterKode::className(), ['code' => 'type_code']);
     }
 
     public function getSatuan()
     {
         return $this->hasOne(MasterSatuan::className(), ['code' => 'satuan_code']);
+    }
+
+    public $status_active=1;
+    public function getPricelist()
+    {
+        return $this->hasOne(MasterBarangPricelist::className(), ['barang_code' => 'code', 'status_active' => 'status_active']);
+    }
+
+    public function getPricelists()
+    {
+        return $this->hasMany(MasterBarangPricelist::className(), ['barang_code' => 'code']);
+    }
+
+    public function getTemps()
+    {
+        return $this->hasMany(TempMasterBarangPricelist::className(), ['barang_code' => 'code']);
+    }
+
+    public function temps()
+    {
+        return TempMasterBarangPricelist::find()->where(['user_id' => \Yii::$app->user->id])->all();
     }
 }

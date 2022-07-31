@@ -3,6 +3,7 @@
 namespace app\modules\purchasing\models;
 
 use Yii;
+use app\modules\master\models\MasterKode;
 use app\modules\master\models\MasterPerson;
 use app\modules\purchasing\models\PurchaseInternal;
 use app\modules\purchasing\models\PurchaseInternalInvoice;
@@ -32,8 +33,10 @@ use yii\behaviors\TimestampBehavior;
  */
 class PurchaseInternalInvoice extends \yii\db\ActiveRecord
 {
-    public $qty_terima;
-    public $harga_beli;
+    public $qty_terima_1;
+    public $qty_terima_2;
+    public $harga_beli_1;
+    public $harga_beli_2;
     public $ppn;
     public $urutan;
     
@@ -64,7 +67,7 @@ class PurchaseInternalInvoice extends \yii\db\ActiveRecord
             [['total_ppn', 'total_order', 'ppn'], 'number'],
             [['no_invoice', 'no_po'], 'string', 'max' => 12],
             [['no_bukti'], 'string', 'max' => 32],
-            [['supplier_code'], 'string', 'max' => 3],
+            [['supplier_code', 'type_barang'], 'string', 'max' => 3],
             [['no_invoice'], 'unique'],
             [['status_terima'], 'default', 'value' => 0],
             [['status'], 'default', 'value' => 1],
@@ -128,6 +131,11 @@ class PurchaseInternalInvoice extends \yii\db\ActiveRecord
     public function getSupplier()
     {
         return $this->hasOne(MasterPerson::className(), ['code' => 'supplier_code']);
+    }
+
+    public function getTypeBarang()
+    {
+        return $this->hasOne(MasterKode::className(), ['code' => 'type_barang']);
     }
 
     public function getDetails()

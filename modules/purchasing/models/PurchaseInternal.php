@@ -3,6 +3,7 @@
 namespace app\modules\purchasing\models;
 
 use Yii;
+use app\modules\master\models\MasterKode;
 use app\modules\master\models\MasterPerson;
 use app\modules\master\models\Profile;
 use app\modules\purchasing\models\PurchaseInternalApproval;
@@ -47,11 +48,11 @@ class PurchaseInternal extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['tgl_po', 'user_request', 'tgl_kirim', 'term_in'], 'required'],
+            [['supplier_code', 'tgl_po', 'user_request', 'tgl_kirim', 'term_in'], 'required'],
             [['tgl_po', 'tgl_kirim', 'total_order'], 'safe'],
             [['keterangan'], 'string'],
             [['term_in', 'user_id', 'user_request', 'post', 'status', 'status_approval', 'status_terima', 'created_at', 'updated_at'], 'integer'],
-            [['supplier_code'], 'string', 'max' => 3],
+            [['supplier_code', 'type_barang'], 'string', 'max' => 3],
             [['no_po'], 'string', 'max' => 12],
             [['no_po'], 'unique'],
             [['status_approval'], 'default', 'value' => 0],
@@ -65,8 +66,8 @@ class PurchaseInternal extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'no_po' => 'No PO',
-            'tgl_po' => 'Tgl PO',
+            'no_po' => 'No. PO',
+            'tgl_po' => 'Tgl. PO',
             'tgl_kirim' => 'Tgl. Kirim',
             'term_in' => 'Term In',
             'supplier_code' => 'Supplier',
@@ -103,6 +104,11 @@ class PurchaseInternal extends \yii\db\ActiveRecord
     public function getSupplier()
     {
         return $this->hasOne(MasterPerson::className(), ['code' => 'supplier_code']);
+    }
+
+    public function getTypeBarang()
+    {
+        return $this->hasOne(MasterKode::className(), ['code' => 'type_barang']);
     }
 
     public function getProfile()

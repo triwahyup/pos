@@ -2,6 +2,7 @@
 
 namespace app\modules\inventory\controllers;
 
+use app\models\DataList;
 use app\models\Logs;
 use app\models\User;
 use app\modules\inventory\models\InventoryBast;
@@ -100,23 +101,11 @@ class BastController extends Controller
      */
     public function actionCreate()
     {
-        $profile = Profile::find()
-            ->select(['profile.name'])
-            ->leftJoin('master_kode b', 'b.code = profile.typeuser_code')
-            ->where(['profile.status' => 1])
-            ->andWhere('value <> "'.\Yii::$app->params['TYPE_SUP'].'"')
-            ->indexBy('user_id')
-            ->column();
-        $type = MasterKode::find()
-            ->select(['name'])
-            ->where(['type'=>\Yii::$app->params['TYPE_BAST'], 'status'=>1])
-            ->indexBy('code')
-            ->column();
-
         $success = true;
         $message = '';
         $model = new InventoryBast();
         $temp = new TempInventoryBastDetail();
+        $dataList = DataList::setListColumn();
         if ($this->request->isPost) {
             if ($model->load($this->request->post())) {
                 $connection = \Yii::$app->db;
@@ -184,10 +173,9 @@ class BastController extends Controller
         }
 
         return $this->render('create', [
+            'dataList' => $dataList,
             'model' => $model,
-            'profile' => $profile,
             'temp' => $temp,
-            'type' => $type,
         ]);
     }
 
@@ -200,23 +188,11 @@ class BastController extends Controller
      */
     public function actionUpdate($code)
     {
-        $profile = Profile::find()
-            ->select(['profile.name'])
-            ->leftJoin('master_kode b', 'b.code = profile.typeuser_code')
-            ->where(['profile.status' => 1])
-            ->andWhere('value <> "'.\Yii::$app->params['TYPE_SUP'].'"')
-            ->indexBy('user_id')
-            ->column();
-        $type = MasterKode::find()
-            ->select(['name'])
-            ->where(['type'=>\Yii::$app->params['TYPE_BAST'], 'status'=>1])
-            ->indexBy('code')
-            ->column();
-
         $success = true;
         $message = '';
         $model = $this->findModel($code);
         $temp = new TempInventoryBastDetail();
+        $dataList = DataList::setListColumn();
         if ($this->request->isPost && $model->load($this->request->post())) {
             $connection = \Yii::$app->db;
             $transaction = $connection->beginTransaction();
@@ -299,10 +275,9 @@ class BastController extends Controller
         }
 
         return $this->render('update', [
+            'dataList' => $dataList,
             'model' => $model,
-            'profile' => $profile,
             'temp' => $temp,
-            'type' => $type,
         ]);
     }
 
@@ -389,12 +364,18 @@ class BastController extends Controller
 
     public function actionListBarang()
     {
-        $model = InventoryStockBarang::find()
-            ->where(['status'=>1])
-            ->orderBy(['barang_code'=>SORT_ASC])
-            ->limit(10)
-            ->all();
-        return json_encode(['data'=>$this->renderPartial('_list_barang', ['model'=>$model])]);
+        if(!empty($_POST['type_barang'])){
+            $model = InventoryStockBarang::find()
+                ->alias('a')
+                ->leftJoin('master_barang b', 'b.code = a.barang_code')
+                ->where(['type_code' => $_POST['type_barang'], 'a.status'=>1])
+                ->orderBy(['code'=>SORT_ASC])
+                ->limit(10)
+                ->all();
+            return json_encode(['success'=>true, 'data'=>$this->renderPartial('_list_barang', ['model'=>$model])]);
+        }else{
+            return json_encode(['success'=>false, 'message'=>'Pilih Type Barang dahulu.']);
+        }
     }
 
     public function actionAutocomplete()
@@ -402,12 +383,15 @@ class BastController extends Controller
         $model = [];
         if(isset($_POST['search'])){
             $model = InventoryStockBarang::find()
+                ->select([
+                    'b.code',
+                    'concat(code,"-", name) label',
+                    'concat(code,"-", name) name'])
                 ->alias('a')
-                ->select(['b.code', 'concat(b.code,"-",b.name) label', 'concat(b.code,"-",b.name) name'])
-                ->leftJoin('master_barang b', 'b.code = barang_code')
-                ->where(['b.status'=>1])
-                ->andWhere('concat(b.code,"-",b.name) LIKE "%'.$_POST['search'].'%"')
-                ->orderBy(['b.code'=>SORT_ASC])
+                ->leftJoin('master_barang b', 'b.code = a.barang_code')
+                ->where(['type_code' => $_POST['type_barang'], 'b.status'=>1])
+                ->andWhere('concat(code,"-", name) LIKE "%'.$_POST['search'].'%"')
+                ->orderBy(['code'=>SORT_ASC])
                 ->asArray()
                 ->limit(10)
                 ->all();
@@ -432,7 +416,7 @@ class BastController extends Controller
     {
         $model = InventoryStockBarang::find()
             ->alias('a')
-            ->select(['a.*', 'b.name as name', 'b.satuan_code', 'c.name as um'])
+            ->select(['a.barang_code', 'b.name', 'c.um_1 as um'])
             ->leftJoin('master_barang b', 'b.code = a.barang_code')
             ->leftJoin('master_satuan c', 'c.code = b.satuan_code')
             ->where(['b.code'=>$_POST['code'], 'a.status'=>1])

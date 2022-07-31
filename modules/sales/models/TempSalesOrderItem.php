@@ -65,7 +65,7 @@ class TempSalesOrderItem extends \yii\db\ActiveRecord
     {
         return [
             [['urutan', 'total_potong', 'user_id'], 'integer'],
-            [['qty_order_1', 'qty_order_2', 'qty_order_3', 'qty_up', 'konversi_1', 'konversi_2', 'konversi_3', 'harga_beli_1', 'harga_beli_2', 'harga_beli_3', 'harga_jual_1', 'harga_jual_2', 'harga_jual_3', 'total_order', 'bahan_qty'], 'safe'],
+            [['qty_order_1', 'qty_order_2', 'qty_order_3', 'konversi_1', 'konversi_2', 'konversi_3', 'harga_beli_1', 'harga_beli_2', 'harga_beli_3', 'harga_jual_1', 'harga_jual_2', 'harga_jual_3', 'total_order', 'bahan_qty'], 'safe'],
             [['code'], 'string', 'max' => 12],
             [['item_code', 'bahan_item_code'], 'string', 'max' => 7],
             [['supplier_code', 'satuan_code', 'material_code', 'type_code', 'bahan_supplier_code'], 'string', 'max' => 3],
@@ -115,7 +115,6 @@ class TempSalesOrderItem extends \yii\db\ActiveRecord
         $this->qty_order_1 = str_replace(',', '', $this->qty_order_1);
         $this->qty_order_2 = str_replace(',', '', $this->qty_order_2);
         $this->qty_order_3 = str_replace(',', '', $this->qty_order_3);
-        $this->qty_up = str_replace(',', '', $this->qty_up);
         $this->total_potong = str_replace(',', '', $this->total_potong);
         return parent::beforeSave($attribute);
     }
